@@ -1,0 +1,118 @@
+import { BadRequestException, Controller, Get, Param, Query, Request, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { RequireRoles } from '../common/decorators/roles.decorator';
+import { RoleLevel } from '@prisma/client';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { InsightsService } from './insights.service';
+
+@Controller('insights')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class InsightsController {
+  constructor(private readonly insightsService: InsightsService) {}
+
+  /**
+   * GET /insights/teacher/today
+   * Resumo do dia para o professor autenticado.
+   */
+  @Get('teacher/today')
+  @RequireRoles(RoleLevel.PROFESSOR, RoleLevel.UNIDADE, RoleLevel.DEVELOPER)
+  getTeacherToday(@CurrentUser() user: JwtPayload) {
+    return this.insightsService.getTeacherToday(user);
+  }
+
+
+
+  /**
+   * GET /insights/child/:childId/summary
+   * Resumo somente leitura da criança para Timeline/Painel.
+   * Não altera matriz, planejamento, diário, RDIC ou dados históricos.
+   */
+  @Get('child/:childId/summary')
+  @RequireRoles(
+    RoleLevel.PROFESSOR,
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  getChildSummary(
+    @Param('childId') childId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.insightsService.getChildSummary(childId, user);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // GOVERNANÇA PEDAGÓGICA
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * GET /insights/governance/funnel?unitId=&startDate=&endDate=
+   *
+   * Funil pedagógico: planejamentos por etapa do fluxo de revisão.
+   * STAFF_CENTRAL/MANTENEDORA/DEVELOPER: unitId opcional (null = rede inteira)
+   * UNIDADE: sempre usa token.unitId
+   */
+  @Get('governance/funnel')
+  @RequireRoles(
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  getGovernanceFunnel(
+    @CurrentUser() user: JwtPayload,
+    @Query('unitId') unitId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.insightsService.getGovernanceFunnel(user, { unitId, startDate, endDate });
+  }
+
+  /**
+   * GET /insights/governance/coverage?unitId=&startDate=&endDate=
+   *
+   * Cobertura BNCC por campo de experiência (heatmap multiunidade).
+   * STAFF_CENTRAL/MANTENEDORA/DEVELOPER: unitId opcional (null = rede inteira)
+   * UNIDADE: sempre usa token.unitId
+   */
+  @Get('governance/coverage')
+  @RequireRoles(
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  getGovernanceCoverage(
+    @CurrentUser() user: JwtPayload,
+    @Query('unitId') unitId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.insightsService.getGovernanceCoverage(user, { unitId, startDate, endDate });
+  }
+
+  @Get('unit/alerts')
+  @UseGuards(JwtAuthGuard)
+  getUnitAlerts(
+    @Query('unitId') unitId: string,
+    @Request() req: any,
+  ) {
+    return this.insightsService.getUnitAlerts(req.user, unitId);
+  }
+
+  @Get('classroom/score')
+  @UseGuards(JwtAuthGuard)
+  async getClassroomScore(
+    @Query('classroomId') classroomId: string,
+    @Query('mes') mes: string,
+    @Request() req: any,
+  ) {
+    if (!classroomId || !mes) {
+      throw new BadRequestException('classroomId e mes (YYYY-MM) são obrigatórios');
+    }
+    return this.insightsService.getClassroomScore(classroomId, mes, req.user);
+  }
+}

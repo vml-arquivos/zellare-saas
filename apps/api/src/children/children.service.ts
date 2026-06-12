@@ -1,0 +1,918 @@
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Prisma, EnrollmentStatus } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateChildDto } from './dto/create-child.dto';
+import { UpdateChildDto } from './dto/update-child.dto';
+import { FilterChildDto } from './dto/filter-child.dto';
+import { canAccessUnit } from '../common/utils/can-access-unit';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as crypto from 'crypto';
+
+const UPLOADS_ROOT_DIR = path.resolve(process.env.UPLOADS_DIR ?? 'uploads');
+const CHILDREN_UPLOADS_DIR = path.join(UPLOADS_ROOT_DIR, 'children');
+
+
+type ChildAdministrativeJsonFieldName =
+  | 'dadosResponsaveis'
+  | 'documentosMatricula'
+  | 'autorizadosRetirada'
+  | 'transporteEscolar'
+  | 'fichaAdministrativa';
+
+type PrismaJsonWriteValue =
+  | Prisma.InputJsonValue
+  | Prisma.NullableJsonNullValueInput
+  | undefined;
+
+function toPrismaJson(value: unknown): PrismaJsonWriteValue {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null) {
+    return Prisma.JsonNull;
+  }
+
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+
+function normalizeChildJsonFields(
+  dto: Partial<Record<ChildAdministrativeJsonFieldName, unknown>>,
+): Partial<Prisma.ChildUncheckedCreateInput & Prisma.ChildUncheckedUpdateInput> {
+  return {
+    dadosResponsaveis: toPrismaJson(dto.dadosResponsaveis),
+    documentosMatricula: toPrismaJson(dto.documentosMatricula),
+    autorizadosRetirada: toPrismaJson(dto.autorizadosRetirada),
+    transporteEscolar: toPrismaJson(dto.transporteEscolar),
+    fichaAdministrativa: toPrismaJson(dto.fichaAdministrativa),
+  } as Partial<Prisma.ChildUncheckedCreateInput & Prisma.ChildUncheckedUpdateInput>;
+}
+
+@Injectable()
+export class ChildrenService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Criar nova criança
+   */
+  async create(createChildDto: CreateChildDto, user: any) {
+    // Verificar acesso à unidade
+    if (!canAccessUnit(user, createChildDto.unitId)) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+
+    const {
+      dadosResponsaveis,
+      documentosMatricula,
+      autorizadosRetirada,
+      transporteEscolar,
+      fichaAdministrativa,
+      ...childBaseDto
+    } = createChildDto;
+
+    const data: Prisma.ChildUncheckedCreateInput = {
+      ...childBaseDto,
+      mantenedoraId: user.mantenedoraId,
+      ...normalizeChildJsonFields({
+        dadosResponsaveis,
+        documentosMatricula,
+        autorizadosRetirada,
+        transporteEscolar,
+        fichaAdministrativa,
+      }),
+    };
+
+    const child = await this.prisma.child.create({
+      data,
+      include: {
+        unit: true,
+      },
+    });
+
+    return child;
+  }
+
+  /**
+   * Listar crianças com filtros
+   */
+  async findAll(filters: FilterChildDto, user: any) {
+    const where: any = {
+      mantenedoraId: user.mantenedoraId,
+    };
+
+    // Filtro por unidade
+    if (filters.unitId) {
+      if (!canAccessUnit(user, filters.unitId)) {
+        throw new ForbiddenException('Você não tem acesso a esta unidade');
+      }
+      where.unitId = filters.unitId;
+    } else {
+      // UNIDADE e PROFESSOR: restringir à própria unidade
+      const isUnitOrProfessor = user.roles?.some(
+        (r: any) => r.level === 'UNIDADE' || r.level === 'PROFESSOR'
+      );
+      if (isUnitOrProfessor && user.unitId) {
+        where.unitId = user.unitId;
+      }
+      // STAFF_CENTRAL: filtrar por unitScopes se definido
+      const isStaffCentral = user.roles?.some((r: any) => r.level === 'STAFF_CENTRAL');
+      if (isStaffCentral) {
+        const scopes = user.roles?.find((r: any) => r.level === 'STAFF_CENTRAL')?.unitScopes ?? [];
+        if (scopes.length > 0) {
+          where.unitId = { in: scopes };
+        }
+        // sem scopes: acessa todos da mantenedora — where.mantenedoraId já filtra
+      }
+      // MANTENEDORA/DEVELOPER: where.mantenedoraId já é suficiente
+    }
+
+    // Filtro por status
+    if (filters.status) {
+      where.enrollments = {
+        some: {
+          status: filters.status,
+        },
+      };
+    }
+
+    // Filtro por busca (nome ou CPF)
+    if (filters.search) {
+      where.OR = [
+        { firstName: { contains: filters.search, mode: 'insensitive' } },
+        { lastName: { contains: filters.search, mode: 'insensitive' } },
+        { cpf: { contains: filters.search } },
+      ];
+    }
+
+    const children = await this.prisma.child.findMany({
+      where,
+      include: {
+        unit: true,
+        enrollments: {
+          where: { status: 'ATIVA' },
+          include: {
+            classroom: true,
+          },
+        },
+      },
+      orderBy: { firstName: 'asc' },
+    });
+
+    return children;
+  }
+
+  /**
+   * Buscar criança por ID
+   */
+  async findOne(id: string, user: any) {
+    const child = await this.prisma.child.findUnique({
+      where: { id },
+      include: {
+        unit: true,
+        enrollments: {
+          where: { status: EnrollmentStatus.ATIVA },
+          orderBy: { enrollmentDate: 'desc' },
+          take: 1,
+          include: {
+            classroom: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        dietaryRestrictions: true,
+      },
+    });
+
+    if (!child) {
+      throw new NotFoundException('Criança não encontrada');
+    }
+
+    if (child.mantenedoraId !== user.mantenedoraId) {
+      throw new ForbiddenException('Você não tem acesso a esta criança');
+    }
+
+    if (!canAccessUnit(user, child.unitId)) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+
+    return child;
+  }
+
+  /**
+   * Atualizar criança
+   */
+  async update(id: string, updateChildDto: UpdateChildDto, user: any) {
+    const child = await this.findOne(id, user);
+
+    const {
+      dadosResponsaveis,
+      documentosMatricula,
+      autorizadosRetirada,
+      transporteEscolar,
+      fichaAdministrativa,
+      ...childBaseUpdateDto
+    } = updateChildDto;
+
+    // FIX: Prisma rejeita string vazia em campos DateTime com "premature end of input".
+    // Se dateOfBirth vier vazio ou inválido, remover do payload — mantém o valor atual no banco.
+    const sanitizedBase = { ...childBaseUpdateDto } as Record<string, unknown>;
+    const dateFields: string[] = ['dateOfBirth'];
+    for (const field of dateFields) {
+      const val = sanitizedBase[field];
+      if (val === '' || val === null || val === undefined) {
+        delete sanitizedBase[field];
+      } else if (typeof val === 'string' && val.length === 10) {
+        // Converter "YYYY-MM-DD" → "YYYY-MM-DDT00:00:00.000Z" para o Prisma aceitar
+        sanitizedBase[field] = new Date(val + 'T00:00:00.000Z');
+      }
+    }
+
+    const data: Prisma.ChildUncheckedUpdateInput = {
+      ...(sanitizedBase as Prisma.ChildUncheckedUpdateInput),
+      ...normalizeChildJsonFields({
+        dadosResponsaveis,
+        documentosMatricula,
+        autorizadosRetirada,
+        transporteEscolar,
+        fichaAdministrativa,
+      }),
+    };
+
+    const updated = await this.prisma.child.update({
+      where: { id },
+      data,
+      include: {
+        unit: true,
+        enrollments: {
+          where: { status: EnrollmentStatus.ATIVA },
+          orderBy: { enrollmentDate: 'desc' },
+          take: 1,
+          include: {
+            classroom: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Deletar criança (soft delete)
+   */
+  async remove(id: string, user: any) {
+    const child = await this.findOne(id, user);
+
+    // Inativar todas as matrículas
+    await this.prisma.enrollment.updateMany({
+      where: { childId: id },
+      data: { status: 'CANCELADA' },
+    });
+
+    return { message: 'Criança removida com sucesso' };
+  }
+
+  /**
+   * Upload de foto da criança
+   */
+  async uploadPhoto(id: string, file: Express.Multer.File, user: any) {
+    const child = await this.prisma.child.findFirst({
+      where: {
+        id,
+        mantenedoraId: user.mantenedoraId,
+      },
+      select: {
+        id: true,
+        unitId: true,
+        photoUrl: true,
+      },
+    });
+
+    if (!child) {
+      throw new NotFoundException('Criança não encontrada');
+    }
+
+    if (!canAccessUnit(user, child.unitId)) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+
+    if (!file?.buffer) {
+      throw new BadRequestException('Arquivo não recebido');
+    }
+
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedMimes.includes(file.mimetype)) {
+      throw new BadRequestException('Tipo de arquivo não permitido. Use JPEG, PNG, WebP ou GIF.');
+    }
+
+    fs.mkdirSync(CHILDREN_UPLOADS_DIR, { recursive: true });
+
+    if (child.photoUrl?.startsWith('/uploads/children/')) {
+      const oldRelativePath = child.photoUrl.replace(/^\/uploads\//, '');
+      const oldFilePath = path.join(UPLOADS_ROOT_DIR, oldRelativePath);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+
+    const ext = file.mimetype.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+    const filename = `${id}-${crypto.randomBytes(8).toString('hex')}.${ext}`;
+    const filepath = path.join(CHILDREN_UPLOADS_DIR, filename);
+    const photoUrl = `/uploads/children/${filename}`;
+
+    fs.writeFileSync(filepath, file.buffer);
+
+    try {
+      await this.prisma.child.update({
+        where: { id },
+        data: { photoUrl },
+      });
+    } catch (error: any) {
+      const message = String(error?.message ?? '');
+      const missingPhotoUrlColumn =
+        message.includes('photoUrl')
+        && (
+          message.toLowerCase().includes('column')
+          || message.toLowerCase().includes('does not exist')
+          || message.toLowerCase().includes('unknown arg')
+        );
+
+      if (!missingPhotoUrlColumn) {
+        if (fs.existsSync(filepath)) {
+          fs.unlinkSync(filepath);
+        }
+        throw new InternalServerErrorException('Não foi possível salvar a foto da criança');
+      }
+
+      await this.prisma.$executeRawUnsafe(
+        'ALTER TABLE "Child" ADD COLUMN IF NOT EXISTS "photoUrl" TEXT',
+      );
+
+      await this.prisma.child.update({
+        where: { id },
+        data: { photoUrl },
+      });
+    }
+
+    return { photoUrl, message: 'Foto atualizada com sucesso' };
+  }
+
+  /**
+   * Criar matrícula para criança
+   */
+  async createEnrollment(id: string, enrollmentData: any, user: any) {
+    const child = await this.findOne(id, user);
+
+    const enrollment = await this.prisma.enrollment.create({
+      data: {
+        childId: id,
+        classroomId: enrollmentData.classroomId,
+        status: 'ATIVA',
+        enrollmentDate: new Date(enrollmentData.enrollmentDate),
+        withdrawalDate: enrollmentData.withdrawalDate ? new Date(enrollmentData.withdrawalDate) : null,
+      },
+      include: {
+        classroom: true,
+      },
+    });
+
+    return enrollment;
+  }
+
+  /**
+   * Atualizar matrícula ativa da criança (trocar turma ou data)
+   * Chamado pelo frontend após salvar os dados do aluno em modo edição.
+   *
+   * Lógica:
+   * 1. Se vier enrollmentId específico → atualiza esse enrollment
+   * 2. Senão → busca o enrollment ATIVA mais recente e atualiza
+   * 3. Se não existir nenhum ATIVO e vier classroomId → cria novo enrollment
+   */
+  async updateActiveEnrollment(
+    id: string,
+    data: { classroomId?: string; enrollmentDate?: string; enrollmentId?: string },
+    user: any,
+  ) {
+    await this.findOne(id, user); // valida acesso
+
+    // Sanitizar data
+    const enrollmentDate = data.enrollmentDate && data.enrollmentDate.length >= 10
+      ? new Date(data.enrollmentDate.length === 10
+          ? data.enrollmentDate + 'T00:00:00.000Z'
+          : data.enrollmentDate)
+      : undefined;
+
+    // Buscar enrollment para atualizar
+    let enrollment = data.enrollmentId
+      ? await this.prisma.enrollment.findFirst({ where: { id: data.enrollmentId, childId: id } })
+      : await this.prisma.enrollment.findFirst({
+          where: { childId: id, status: EnrollmentStatus.ATIVA },
+          orderBy: { enrollmentDate: 'desc' },
+        });
+
+    if (enrollment) {
+      // Atualizar enrollment existente
+      const updateData: any = {};
+      if (data.classroomId) updateData.classroomId = data.classroomId;
+      if (enrollmentDate) updateData.enrollmentDate = enrollmentDate;
+
+      return this.prisma.enrollment.update({
+        where: { id: enrollment.id },
+        data: updateData,
+        include: { classroom: { select: { id: true, name: true } } },
+      });
+    } else if (data.classroomId) {
+      // Criar novo enrollment se não existe ativo
+      return this.prisma.enrollment.create({
+        data: {
+          childId: id,
+          classroomId: data.classroomId,
+          status: 'ATIVA',
+          enrollmentDate: enrollmentDate ?? new Date(),
+        },
+        include: { classroom: { select: { id: true, name: true } } },
+      });
+    }
+
+    return { message: 'Nenhuma alteração realizada.' };
+  }
+
+  /**
+   * Listar matrículas da criança
+   */
+  async getEnrollments(id: string, user: any) {
+    const child = await this.findOne(id, user);
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { childId: id },
+      include: {
+        classroom: true,
+      },
+      orderBy: { enrollmentDate: 'desc' },
+    });
+
+    return enrollments;
+  }
+
+  /**
+   * Adicionar restrição alimentar
+   * Após criar, gera AlertaOperacional + Notificações para nutricionista e coordenação
+   */
+  async addDietaryRestriction(id: string, restrictionData: any, user: any) {
+    const child = await this.findOne(id, user);
+
+    const restriction = await this.prisma.dietaryRestriction.create({
+      data: {
+        childId: id,
+        type: restrictionData.type,
+        name: restrictionData.name,
+        description: restrictionData.description ?? null,
+        severity: restrictionData.severity || 'leve',
+        allowedFoods: restrictionData.allowedFoods ?? null,
+        forbiddenFoods: restrictionData.forbiddenFoods ?? null,
+        createdBy: user.sub,
+      },
+    });
+
+    // ─── Gerar alerta operacional + notificações para nutricionista e coordenação ───
+    try {
+      const nomeCompleto = `${child.firstName} ${child.lastName}`;
+      const severidade =
+        restrictionData.severity === 'severa' ? 'ALTA'
+        : restrictionData.severity === 'moderada' ? 'MEDIA'
+        : 'BAIXA';
+
+      const alerta = await this.prisma.alertaOperacional.create({
+        data: {
+          mantenedoraId: child.mantenedoraId,
+          unitId: child.unitId,
+          childId: id,
+          tipo: 'OUTRO',
+          severidade: severidade as any,
+          titulo: `Restrição alimentar registrada: ${nomeCompleto}`,
+          descricao:
+            `Tipo: ${restrictionData.type} | Restrição: ${restrictionData.name}` +
+            (restrictionData.description ? ` | Obs: ${restrictionData.description}` : '') +
+            (restrictionData.forbiddenFoods ? ` | Proibidos: ${restrictionData.forbiddenFoods}` : ''),
+          metadados: {
+            childId: id,
+            childName: nomeCompleto,
+            restrictionType: restrictionData.type,
+            restrictionName: restrictionData.name,
+            severity: restrictionData.severity || 'leve',
+            forbiddenFoods: restrictionData.forbiddenFoods ?? null,
+            allowedFoods: restrictionData.allowedFoods ?? null,
+          },
+        },
+      });
+
+      // Buscar nutricionistas e coordenadores da unidade para notificar
+      const destinatarios = await this.prisma.user.findMany({
+        where: {
+          unitId: child.unitId,
+          roles: {
+            some: {
+              role: {
+                type: {
+                  in: [
+                    'UNIDADE_NUTRICIONISTA',
+                    'UNIDADE_COORDENADOR_PEDAGOGICO',
+                    'UNIDADE_DIRETOR',
+                  ] as any,
+                },
+              },
+            },
+          },
+        },
+        select: { id: true },
+      });
+
+      if (destinatarios.length > 0) {
+        await this.prisma.notificacao.createMany({
+          data: destinatarios.map((u) => ({
+            usuarioId: u.id,
+            alertaId: alerta.id,
+            titulo: `⚠️ Restrição alimentar: ${nomeCompleto}`,
+            mensagem:
+              `${restrictionData.type === 'ALERGIA' ? 'ALERGIA' : 'Restrição'} registrada para ${nomeCompleto}: ${restrictionData.name}.` +
+              (restrictionData.forbiddenFoods
+                ? ` Alimentos proibidos: ${restrictionData.forbiddenFoods}.`
+                : '') +
+              ' Verifique o cardápio e tome as providências necessárias.',
+            link: `/app/coordenacao-pedagogica`,
+          })),
+        });
+      }
+    } catch (e) {
+      // Não bloqueia o fluxo principal se a notificação falhar
+      console.warn('[DietaryRestriction] Falha ao criar alerta/notificação:', e);
+    }
+
+    return restriction;
+  }
+
+  /**
+   * Listar restrições alimentares da criança
+   */
+  async getDietaryRestrictions(id: string, user: any) {
+    const child = await this.findOne(id, user);
+
+    const restrictions = await this.prisma.dietaryRestriction.findMany({
+      where: { childId: id },
+    });
+
+    return restrictions;
+  }
+
+  /**
+   * Buscar todas as restrições alimentares ativas de uma unidade (para nutricionista)
+   */
+  async getAllDietaryRestrictionsByUnit(user: any, unitId?: string) {
+    let targetUnitId = unitId || user.unitId;
+
+    // Professores podem não ter unitId no token — resolver via classroomTeacher ou primeira unidade da mantenedora
+    if (!targetUnitId) {
+      const isProfessor = user.roles?.some(
+        (r: any) => r.level === 'PROFESSOR'
+      );
+      if (isProfessor) {
+        // Tentativa 1: classroomTeacher ativo
+        const ct = await this.prisma.classroomTeacher.findFirst({
+          where: { teacherId: user.sub, isActive: true },
+          include: { classroom: { select: { unitId: true } } },
+        });
+        if (ct?.classroom?.unitId) {
+          targetUnitId = ct.classroom.unitId;
+        } else {
+          // Tentativa 2: primeira unidade ativa da mantenedora (professor sem vínculo formal)
+          const firstUnit = await this.prisma.unit.findFirst({
+            where: { mantenedoraId: user.mantenedoraId, isActive: true },
+            select: { id: true },
+            orderBy: { name: 'asc' },
+          });
+          if (firstUnit) targetUnitId = firstUnit.id;
+        }
+      }
+    }
+
+    // Se ainda não resolveu, retornar lista vazia em vez de erro (professor sem unidade)
+    if (!targetUnitId) {
+      return [];
+    }
+    const restrictions = await this.prisma.dietaryRestriction.findMany({
+      where: {
+        isActive: true,
+        child: {
+          mantenedoraId: user.mantenedoraId,
+          unitId: targetUnitId,
+        },
+      },
+      include: {
+        child: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            dateOfBirth: true,
+            enrollments: {
+              where: { status: 'ATIVA' },
+              include: { classroom: { select: { id: true, name: true } } },
+              take: 1,
+            },
+          },
+        },
+      },
+      orderBy: [
+        { child: { firstName: 'asc' } },
+      ],
+    });
+    return restrictions;
+  }
+
+  /**
+   * Dashboard consolidado de saúde: alergias, dietas, condições médicas, medicamentos
+   * Retorna crianças com qualquer informação de saúde relevante em 1 query (sem N+1)
+   */
+  async getHealthDashboard(user: any, unitId?: string, classroomId?: string) {
+    let targetUnitId = unitId || user.unitId;
+
+    // Professores podem não ter unitId no token — resolver via classroomTeacher
+    if (!targetUnitId) {
+      const isProfessor = user.roles?.some((r: any) => r.level === 'PROFESSOR');
+      if (isProfessor) {
+        const ct = await this.prisma.classroomTeacher.findFirst({
+          where: { teacherId: user.sub, isActive: true },
+          include: { classroom: { select: { unitId: true } } },
+        });
+        if (ct?.classroom?.unitId) {
+          targetUnitId = ct.classroom.unitId;
+        } else {
+          const firstUnit = await this.prisma.unit.findFirst({
+            where: { mantenedoraId: user.mantenedoraId, isActive: true },
+            select: { id: true },
+            orderBy: { name: 'asc' },
+          });
+          if (firstUnit) targetUnitId = firstUnit.id;
+        }
+      }
+    }
+
+    if (!targetUnitId) {
+      return { children: [], stats: { total: 0, comAlergia: 0, comDieta: 0, comCondicaoMedica: 0, comMedicamento: 0, casosCriticos: 0 } };
+    }
+
+    // Filtro de turma opcional
+    const enrollmentFilter: any = { status: 'ATIVA' };
+    if (classroomId) enrollmentFilter.classroomId = classroomId;
+
+    // FIX: retornar TODAS as crianças matriculadas (não só as com restrição)
+    // Isso garante que o painel da nutricionista mostre total correto de alunos
+    const children = await this.prisma.child.findMany({
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        unitId: targetUnitId,
+        isActive: true,
+        // Filtro de turma via enrollment (obrigatório quando classroomId fornecido)
+        ...(classroomId ? {
+          enrollments: { some: { classroomId, status: 'ATIVA' } },
+        } : {
+          // Sem turma: retornar apenas crianças com informação de saúde (visão geral)
+          OR: [
+            { allergies: { not: null } },
+            { medicalConditions: { not: null } },
+            { medicationNeeds: { not: null } },
+            { dietaryRestrictions: { some: { isActive: true } } },
+          ],
+        }),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        photoUrl: true,
+        bloodType: true,
+        allergies: true,
+        medicalConditions: true,
+        medicationNeeds: true,
+        emergencyContactName: true,
+        emergencyContactPhone: true,
+        enrollments: {
+          where: enrollmentFilter,
+          select: {
+            classroom: { select: { id: true, name: true } },
+          },
+          take: 1,
+        },
+        dietaryRestrictions: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            type: true,
+            name: true,
+            description: true,
+            severity: true,
+            allowedFoods: true,
+            forbiddenFoods: true,
+          },
+          orderBy: { severity: 'asc' },
+        },
+      },
+      orderBy: { firstName: 'asc' },
+    });
+
+    // Calcular estatísticas
+    const comRestricao = children.filter(c =>
+      c.dietaryRestrictions.length > 0 || !!c.allergies || !!c.medicalConditions
+    ).length;
+    const stats = {
+      total: children.length,
+      totalMatriculados: children.length,
+      comRestricao,
+      comAlergia: children.filter(c => c.allergies || c.dietaryRestrictions.some(r => r.type === 'ALERGIA')).length,
+      comDieta: children.filter(c => c.dietaryRestrictions.some(r => r.type !== 'ALERGIA')).length,
+      comCondicaoMedica: children.filter(c => !!c.medicalConditions).length,
+      comMedicamento: children.filter(c => !!c.medicationNeeds).length,
+      casosCriticos: children.filter(c =>
+        c.dietaryRestrictions.some(r => r.severity === 'severa') ||
+        (c.allergies && c.allergies.toLowerCase().includes('severa'))
+      ).length,
+    };
+
+    return { children, stats };
+  }
+
+  /**
+   * Buscar histórico de saúde da criança
+   */
+  async getHealthHistory(id: string, user: any) {
+    const child = await this.findOne(id, user);
+
+    // Buscar eventos de diário relacionados à saúde
+    const healthEvents = await this.prisma.diaryEvent.findMany({
+      where: {
+        childId: id,
+        type: 'SAUDE',
+      },
+      orderBy: { eventDate: 'desc' },
+      take: 50,
+    });
+
+    return healthEvents;
+  }
+
+  /**
+   * Atualizar campos administrativos da Secretaria (PATCH /children/:id/secretaria)
+   *
+   * Atualiza apenas campos JSONB administrativos, sem tocar em dados pedagógicos,
+   * matrículas, diário, planos ou RDIC.
+   */
+  async updateSecretariaFields(
+    id: string,
+    updateData: Record<string, unknown>,
+    user: any,
+  ) {
+    // Verificar se a criança existe e o usuário tem acesso a ela
+    const child = await this.findOne(id, user);
+
+    const updated = await this.prisma.child.update({
+      where: { id },
+      data: {
+        ...(updateData.transporte_escolar !== undefined && {
+          transporte_escolar: updateData.transporte_escolar as any,
+        }),
+        ...(updateData.autorizados_retirada !== undefined && {
+          autorizados_retirada: updateData.autorizados_retirada as any,
+        }),
+        ...(updateData.documentos_matricula !== undefined && {
+          documentos_matricula: updateData.documentos_matricula as any,
+        }),
+        ...(updateData.ficha_administrativa !== undefined && {
+          ficha_administrativa: updateData.ficha_administrativa as any,
+        }),
+        ...(updateData.dados_responsaveis !== undefined && {
+          dados_responsaveis: updateData.dados_responsaveis as any,
+        }),
+        ...(updateData.nacionalidade !== undefined && {
+          nacionalidade: updateData.nacionalidade as string,
+        }),
+        ...(updateData.naturalidade !== undefined && {
+          naturalidade: updateData.naturalidade as string,
+        }),
+        ...(updateData.uf_nascimento !== undefined && {
+          uf_nascimento: updateData.uf_nascimento as string,
+        }),
+        ...(updateData.endereco !== undefined && {
+          endereco: updateData.endereco as string,
+        }),
+        ...(updateData.cep !== undefined && {
+          cep: updateData.cep as string,
+        }),
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        updatedAt: true,
+      },
+    });
+
+    return { success: true, child: updated };
+  }
+
+  /**
+   * Retorna ficha administrativa completa da criança para a Secretaria
+   * (GET /children/:id/ficha-completa)
+   */
+  async getFichaCompleta(id: string, user: any) {
+    const child = await this.prisma.child.findUnique({
+      where: { id },
+      include: {
+        enrollments: {
+          where: { status: EnrollmentStatus.ATIVA },
+          orderBy: { enrollmentDate: 'desc' },
+          take: 1,
+          include: {
+            classroom: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        unit: { select: { id: true, name: true, code: true } },
+      },
+    });
+
+    if (!child) {
+      throw new NotFoundException('Criança não encontrada');
+    }
+
+    // Escopo de acesso: mesma mantenedora e unidade permitida (igual ao findOne)
+    if ((child as any).mantenedoraId !== user.mantenedoraId) {
+      throw new ForbiddenException('Você não tem acesso a esta criança');
+    }
+    if (!canAccessUnit(user, child.unitId)) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+
+    // Buscar atendimentos aos pais
+    const atendimentos = await this.prisma.atendimentoPais.findMany({
+      where: { childId: id },
+      orderBy: { dataAtendimento: 'desc' },
+      take: 20,
+    }).catch(() => []);
+
+    // Buscar ocorrências de saúde no diário
+    const ocorrencias = await this.prisma.diaryEvent.findMany({
+      where: { childId: id, type: 'SAUDE' },
+      orderBy: { eventDate: 'desc' },
+      take: 20,
+    }).catch(() => []);
+
+    // Montar ficha completa
+    return {
+      id: child.id,
+      firstName: child.firstName,
+      lastName: child.lastName,
+      dataNascimento: (child as any).dateOfBirth ?? null,
+      genero: (child as any).gender ?? null,
+      foto: (child as any).photoUrl ?? null,
+      // Dados pessoais (migration 20260603)
+      nacionalidade: (child as any).nacionalidade ?? null,
+      naturalidade: (child as any).naturalidade ?? null,
+      uf_nascimento: (child as any).uf_nascimento ?? null,
+      endereco: (child as any).endereco ?? null,
+      cep: (child as any).cep ?? null,
+      // Saúde
+      alergias: (child as any).allergies ?? null,
+      condicoesMedicas: (child as any).medicalConditions ?? null,
+      necessidadeMedicacao: (child as any).medicationNeeds ?? null,
+      laudado: (child as any).laudado ?? false,
+      // Dados JSONB administrativos
+      dadosResponsaveis: (child as any).dados_responsaveis ?? null,
+      documentosMatricula: (child as any).documentos_matricula ?? null,
+      autorizadosRetirada: (child as any).autorizados_retirada ?? null,
+      transporteEscolar: (child as any).transporte_escolar ?? null,
+      fichaAdministrativa: (child as any).ficha_administrativa ?? null,
+      // Turma ativa
+      turma: child.enrollments[0]?.classroom ?? null,
+      // Unidade
+      unidade: child.unit,
+      // Histórico
+      atendimentos,
+      ocorrenciasSaude: ocorrencias,
+    };
+  }
+}
