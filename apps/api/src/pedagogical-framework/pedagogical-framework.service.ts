@@ -56,30 +56,45 @@ export class PedagogicalFrameworkService {
         sourceUrl: createDto.sourceUrl,
         mantenedoraId: isGlobal ? null : user.mantenedoraId,
         createdBy: user.sub,
-        dimensions: createDto.dimensions?.length
-          ? {
-              create: createDto.dimensions.map((dim, dimIndex) => ({
-                code: dim.code,
-                name: dim.name,
-                description: dim.description,
-                order: dim.order ?? dimIndex,
-                objectives: dim.objectives?.length
-                  ? {
-                      create: dim.objectives.map((obj) => ({
-                        code: obj.code,
-                        ageRangeMin: obj.ageRangeMin,
-                        ageRangeMax: obj.ageRangeMax,
-                        text: obj.text,
-                      })),
-                    }
-                  : undefined,
-              })),
-            }
-          : undefined,
       },
-      include: {
-        dimensions: { include: { objectives: true } },
-      },
+    });
+
+    // Dimensões e objetivos são criados em etapas (não em nested-create profundo)
+    // — mais simples de tipar corretamente e mais fácil de depurar se algo falhar
+    // no meio do caminho (um objetivo com dado inválido não derruba a dimensão inteira).
+    if (createDto.dimensions?.length) {
+      for (let dimIndex = 0; dimIndex < createDto.dimensions.length; dimIndex++) {
+        const dim = createDto.dimensions[dimIndex];
+        const createdDim = await this.prisma.frameworkDimension.create({
+          data: {
+            frameworkId: framework.id,
+            code: dim.code,
+            name: dim.name,
+            description: dim.description,
+            order: dim.order ?? dimIndex,
+          },
+        });
+
+        if (dim.objectives?.length) {
+          for (const obj of dim.objectives) {
+            await this.prisma.frameworkObjective.create({
+              data: {
+                frameworkId: framework.id,
+                dimensionId: createdDim.id,
+                code: obj.code,
+                ageRangeMin: obj.ageRangeMin,
+                ageRangeMax: obj.ageRangeMax,
+                text: obj.text,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    const frameworkCompleto = await this.prisma.pedagogicalFramework.findUnique({
+      where: { id: framework.id },
+      include: { dimensions: { include: { objectives: true } } },
     });
 
     await this.auditService.log({
@@ -91,7 +106,7 @@ export class PedagogicalFrameworkService {
       changes: { name: framework.name, isGlobal, dimensionsCount: createDto.dimensions?.length ?? 0 },
     });
 
-    return framework;
+    return frameworkCompleto;
   }
 
   /**
@@ -199,23 +214,36 @@ export class PedagogicalFrameworkService {
         sourceUrl: source.sourceUrl,
         mantenedoraId: user.mantenedoraId,
         createdBy: user.sub,
-        dimensions: {
-          create: source.dimensions.map((dim) => ({
-            code: dim.code,
-            name: dim.name,
-            description: dim.description,
-            order: dim.order,
-            objectives: {
-              create: dim.objectives.map((obj) => ({
-                code: obj.code,
-                ageRangeMin: obj.ageRangeMin,
-                ageRangeMax: obj.ageRangeMax,
-                text: obj.text,
-              })),
-            },
-          })),
-        },
       },
+    });
+
+    for (const dim of source.dimensions) {
+      const clonedDim = await this.prisma.frameworkDimension.create({
+        data: {
+          frameworkId: clone.id,
+          code: dim.code,
+          name: dim.name,
+          description: dim.description,
+          order: dim.order,
+        },
+      });
+
+      for (const obj of dim.objectives) {
+        await this.prisma.frameworkObjective.create({
+          data: {
+            frameworkId: clone.id,
+            dimensionId: clonedDim.id,
+            code: obj.code,
+            ageRangeMin: obj.ageRangeMin,
+            ageRangeMax: obj.ageRangeMax,
+            text: obj.text,
+          },
+        });
+      }
+    }
+
+    const cloneCompleto = await this.prisma.pedagogicalFramework.findUnique({
+      where: { id: clone.id },
       include: { dimensions: { include: { objectives: true } } },
     });
 
@@ -228,7 +256,7 @@ export class PedagogicalFrameworkService {
       changes: { clonedFrom: source.id, clonedFromName: source.name },
     });
 
-    return clone;
+    return cloneCompleto;
   }
 
   async remove(id: string, user: JwtPayload) {
@@ -277,24 +305,33 @@ export class PedagogicalFrameworkService {
       throw new ForbiddenException('Sem permissão para editar este framework');
     }
 
-    return this.prisma.frameworkDimension.create({
+    const createdDim = await this.prisma.frameworkDimension.create({
       data: {
         frameworkId,
         code: dto.code,
         name: dto.name,
         description: dto.description,
         order: dto.order ?? 0,
-        objectives: dto.objectives?.length
-          ? {
-              create: dto.objectives.map((obj) => ({
-                code: obj.code,
-                ageRangeMin: obj.ageRangeMin,
-                ageRangeMax: obj.ageRangeMax,
-                text: obj.text,
-              })),
-            }
-          : undefined,
       },
+    });
+
+    if (dto.objectives?.length) {
+      for (const obj of dto.objectives) {
+        await this.prisma.frameworkObjective.create({
+          data: {
+            frameworkId,
+            dimensionId: createdDim.id,
+            code: obj.code,
+            ageRangeMin: obj.ageRangeMin,
+            ageRangeMax: obj.ageRangeMax,
+            text: obj.text,
+          },
+        });
+      }
+    }
+
+    return this.prisma.frameworkDimension.findUnique({
+      where: { id: createdDim.id },
       include: { objectives: true },
     });
   }

@@ -190,7 +190,7 @@ export class InstitutionContentService {
       data: {
         status: approve ? 'APROVADO' : 'REJEITADO',
         reviewNotes: dto.reviewNotes,
-        extractedData: dto.extractedDataOverride ?? upload.extractedData,
+        ...(dto.extractedDataOverride ? { extractedData: dto.extractedDataOverride } : {}),
         reviewedAt: new Date(),
         reviewedBy: user.sub,
       },

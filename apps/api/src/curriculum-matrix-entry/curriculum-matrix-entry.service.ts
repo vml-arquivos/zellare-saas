@@ -465,10 +465,10 @@ export class CurriculumMatrixEntryService {
         intencionalidadePedagogica: string | null;
         exemploAtividade?: string | null;
       } = {
-        campoExperiencia: e.campoDeExperiencia as string,
+        campoExperiencia: (e.campoDeExperiencia as string) ?? '',
         codigoBNCC: e.objetivoBNCCCode ?? null,
-        objetivoBNCC: e.objetivoBNCC,
-        objetivoCurriculoDF: e.objetivoCurriculo,
+        objetivoBNCC: e.objetivoBNCC ?? '',
+        objetivoCurriculoDF: e.objetivoCurriculo ?? '',
         intencionalidadePedagogica: e.intencionalidade ?? null,
       };
       if (!isProfessorOnly && 'exemploAtividade' in e) {
