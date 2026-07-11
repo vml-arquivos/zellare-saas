@@ -140,7 +140,7 @@ export default function TrabalheConosco() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <SEO
         title="Trabalhe Conosco - Faça Parte da Nossa Equipe"
-        description="Venha fazer parte da equipe COCRIS e transformar vidas através da educação infantil. Confira nossas oportunidades de trabalho."
+        description="Venha fazer parte da equipe Zelare e transformar vidas através da educação infantil. Confira nossas oportunidades de trabalho."
       />
       
       {/* Hero Section */}
@@ -441,7 +441,7 @@ export default function TrabalheConosco() {
                       id="coverLetter"
                       value={formData.coverLetter}
                       onChange={(e) => handleInputChange('coverLetter', e.target.value)}
-                      placeholder="Conte-nos por que você deseja fazer parte da equipe COCRIS..."
+                      placeholder="Conte-nos por que você deseja fazer parte da equipe Zelare..."
                       rows={5}
                     />
                   </div>

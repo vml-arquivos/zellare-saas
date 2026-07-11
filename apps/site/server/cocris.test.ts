@@ -15,7 +15,7 @@ function createMockContext(): TrpcContext {
   };
 }
 
-describe("COCRIS API Tests", () => {
+describe("Zelare API Tests", () => {
   describe("Units API", () => {
     it("should fetch all units successfully", async () => {
       const ctx = createMockContext();

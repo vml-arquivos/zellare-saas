@@ -1,6 +1,6 @@
-# Guia de Início Rápido - Conexa V3.0
+# Guia de Início Rápido - Zelare
 
-Este guia vai te ajudar a ter o Conexa V3.0 rodando em **menos de 10 minutos**! ⚡
+Este guia vai te ajudar a ter o Zelare rodando em **menos de 10 minutos**! ⚡
 
 ---
 
@@ -18,8 +18,8 @@ Antes de começar, certifique-se de ter instalado:
 ## Passo 1: Clonar o Repositório
 
 ```bash
-git clone https://github.com/vml-arquivos/conexa-v3.0.git
-cd conexa-v3.0
+git clone https://github.com/vml-arquivos/zelare-saas.git
+cd zelare-saas
 ```
 
 ---
@@ -103,13 +103,13 @@ pnpm db:seed
 ```
 
 Isso vai criar:
-- 1 Mantenedora (COCRIS)
+- 1 Mantenedora (Zelare)
 - 2 Unidades (Arara Canindé, Arara Azul)
 - Usuários de teste
 - Matriz Curricular 2026
 
 **Credenciais de teste**:
-- Email: `dev@cocris.org`
+- Email: `dev@zelare.org`
 - Senha: `dev123`
 
 ---
@@ -165,7 +165,7 @@ Abra seu navegador em:
 - **Site Institucional**: http://localhost:5174
 
 Faça login com:
-- **Email**: `dev@cocris.org`
+- **Email**: `dev@zelare.org`
 - **Senha**: `dev123`
 
 ---
@@ -288,7 +288,7 @@ npm install -g pnpm
 
 ## Próximos Passos
 
-Agora que você tem o Conexa rodando, explore:
+Agora que você tem o Zelare rodando, explore:
 
 1. 📚 [README Principal](./README.md) - Visão geral completa
 2. 🚀 [Guia de Deploy](./docs/DEPLOY.md) - Como fazer deploy
@@ -300,12 +300,12 @@ Agora que você tem o Conexa rodando, explore:
 
 ## Precisa de Ajuda?
 
-- 📧 Email: contato@cocris.org
-- 🐛 [Reportar Bug](https://github.com/vml-arquivos/conexa-v3.0/issues)
-- 💬 [Discussões](https://github.com/vml-arquivos/conexa-v3.0/discussions)
+- 📧 Email: contato@zelare.org
+- 🐛 [Reportar Bug](https://github.com/vml-arquivos/zelare-saas/issues)
+- 💬 [Discussões](https://github.com/vml-arquivos/zelare-saas/discussions)
 
 ---
 
-**Pronto! Você está rodando o Conexa V3.0! 🎉**
+**Pronto! Você está rodando o Zelare! 🎉**
 
 *Feito com ❤️ para a Educação Infantil*

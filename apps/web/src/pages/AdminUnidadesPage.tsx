@@ -132,7 +132,7 @@ function ModalUnidade({ unidade, onClose, onSave }: { unidade?: Unidade | null; 
               <Label className="text-sm font-semibold text-gray-700">E-mail</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input className="pl-9" type="email" placeholder="unidade@cocris.org.br" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                <Input className="pl-9" type="email" placeholder="unidade@zelare.org.br" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
             <div>

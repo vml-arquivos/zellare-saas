@@ -13,8 +13,8 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img 
-                src="/images/logo-cocris.png" 
-                alt="Logo COCRIS - Associação Beneficente Coração de Cristo" 
+                src="/images/zelare-logo-square.png" 
+                alt="Logo Zelare - Associação Beneficente Coração de Cristo" 
                 className="h-10 w-auto"
               />
             </div>
@@ -22,10 +22,10 @@ export default function Footer() {
               Associação Beneficente Coração de Cristo. Transformando vidas através da educação infantil de qualidade e assistência social.
             </p>
             <div className="flex gap-4 mt-4">
-              <a href="#" className="text-primary hover:text-secondary transition-colors" aria-label="Facebook COCRIS">
+              <a href="#" className="text-primary hover:text-secondary transition-colors" aria-label="Facebook Zelare">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-primary hover:text-secondary transition-colors" aria-label="Instagram COCRIS">
+              <a href="#" className="text-primary hover:text-secondary transition-colors" aria-label="Instagram Zelare">
                 <Instagram className="w-5 h-5" />
               </a>
             </div>
@@ -108,8 +108,8 @@ export default function Footer() {
               </li>
               <li className="flex gap-2 items-start">
                 <Mail className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <a href="mailto:contato@cocris.org" className="text-foreground/70 hover:text-primary transition-colors">
-                  contato@cocris.org
+                <a href="mailto:contato@zelare.com.br" className="text-foreground/70 hover:text-primary transition-colors">
+                  contato@zelare.com.br
                 </a>
               </li>
               <li className="flex gap-2 items-start">
@@ -129,7 +129,7 @@ export default function Footer() {
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-foreground/60">
-          <p>&copy; {currentYear} COCRIS - Associação Beneficente Coração de Cristo. Todos os direitos reservados.</p>
+          <p>&copy; {currentYear} Zelare - Associação Beneficente Coração de Cristo. Todos os direitos reservados.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
             <a href="#" className="hover:text-primary transition-colors">Termos de Uso</a>

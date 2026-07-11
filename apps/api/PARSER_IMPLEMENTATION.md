@@ -71,7 +71,7 @@ npx ts-node scripts/test-parser.ts [caminho-do-pdf]
 
 ```bash
 # Executar teste
-cd /home/ubuntu/Conexa-V2
+cd /home/ubuntu/Zelare-V2
 npx ts-node scripts/test-parser.ts
 
 # Saída esperada:

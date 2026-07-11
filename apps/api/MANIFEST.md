@@ -1,8 +1,8 @@
-# MANIFEST - CONEXA V2 SNAPSHOT
+# MANIFEST - ZELARE V2 SNAPSHOT
 
 ## Informações do Snapshot
 
-**Arquivo:** Conexa-V2-snapshot.zip  
+**Arquivo:** Zelare-V2-snapshot.zip  
 **SHA256:** d60d64eb40979755ef9d2e01ae66591e1023f77dc98dfe120efbae53332b741d  
 **Tamanho:** 209KB  
 **Data de Geração:** 2026-02-03 20:28 UTC  
@@ -80,7 +80,7 @@
 ## Estrutura do Repositório
 
 ```
-Conexa-V2/
+Zelare-V2/
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
@@ -128,30 +128,30 @@ Conexa-V2/
 
 ### Verificar SHA256
 ```bash
-sha256sum Conexa-V2-snapshot.zip
+sha256sum Zelare-V2-snapshot.zip
 # Esperado: 25e1fb9c2761995fed8bf7249b83bd6dcd7b5a606b76cb944db80497821f955d
 ```
 
 ### Listar conteúdo
 ```bash
-unzip -l Conexa-V2-snapshot.zip | grep -E "(prisma|src|package.json|README)"
+unzip -l Zelare-V2-snapshot.zip | grep -E "(prisma|src|package.json|README)"
 ```
 
 ### Verificar arquivos mínimos
 ```bash
-unzip -l Conexa-V2-snapshot.zip | grep "prisma/schema.prisma"
-unzip -l Conexa-V2-snapshot.zip | grep "prisma/migrations/migration_lock.toml"
-unzip -l Conexa-V2-snapshot.zip | grep "package.json"
-unzip -l Conexa-V2-snapshot.zip | grep "README.md"
-unzip -l Conexa-V2-snapshot.zip | grep "src/main.ts"
-unzip -l Conexa-V2-snapshot.zip | grep "scripts/test-parser.ts"
-unzip -l Conexa-V2-snapshot.zip | grep "PARSER_IMPLEMENTATION.md"
-unzip -l Conexa-V2-snapshot.zip | grep ".env.example"
+unzip -l Zelare-V2-snapshot.zip | grep "prisma/schema.prisma"
+unzip -l Zelare-V2-snapshot.zip | grep "prisma/migrations/migration_lock.toml"
+unzip -l Zelare-V2-snapshot.zip | grep "package.json"
+unzip -l Zelare-V2-snapshot.zip | grep "README.md"
+unzip -l Zelare-V2-snapshot.zip | grep "src/main.ts"
+unzip -l Zelare-V2-snapshot.zip | grep "scripts/test-parser.ts"
+unzip -l Zelare-V2-snapshot.zip | grep "PARSER_IMPLEMENTATION.md"
+unzip -l Zelare-V2-snapshot.zip | grep ".env.example"
 ```
 
 ### Verificar ausência de credenciais
 ```bash
-unzip -l Conexa-V2-snapshot.zip | grep -E "\.env$"
+unzip -l Zelare-V2-snapshot.zip | grep -E "\.env$"
 # Não deve retornar nada
 ```
 
@@ -161,8 +161,8 @@ unzip -l Conexa-V2-snapshot.zip | grep -E "\.env$"
 
 ### Extrair
 ```bash
-unzip Conexa-V2-snapshot.zip
-cd Conexa-V2
+unzip Zelare-V2-snapshot.zip
+cd Zelare-V2
 ```
 
 ### Instalar dependências

@@ -50,7 +50,7 @@ export interface MicroGesturePayload {
 
 // ─── Fila IndexedDB (offline queue) ──────────────────────────────────────────
 
-const IDB_NAME = 'conexa_offline';
+const IDB_NAME = 'zelare_offline';
 const IDB_STORE = 'diary_queue';
 const IDB_VERSION = 1;
 

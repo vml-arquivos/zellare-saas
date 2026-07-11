@@ -1,19 +1,19 @@
-# 🚀 Deploy Frontend no Coolify - Conexa V3.0
+# 🚀 Deploy Frontend no Coolify - Zelare
 
 ## 📋 Pré-requisitos
 
-- ✅ Backend API deployado e funcionando em `https://api.conexa3.casadf.com.br`
+- ✅ Backend API deployado e funcionando em `https://api.zelare.seu-dominio.com.br`
 - ✅ Banco de dados populado com seed
-- ✅ Domínio configurado: `app.conexa3.casadf.com.br`
+- ✅ Domínio configurado: `app.zelare.seu-dominio.com.br`
 
 ---
 
 ## 🔧 Passo 1: Criar Aplicação no Coolify
 
 1. Acesse Coolify → **+ New Resource** → **Application**
-2. Selecione o repositório: `vml-arquivos/conexa-v3.0`
+2. Selecione o repositório: `vml-arquivos/zelare-saas`
 3. Configurações:
-   - **Name**: `Conexa V3 - Frontend`
+   - **Name**: `Zelare - Frontend`
    - **Branch**: `main`
    - **Build Pack**: `Dockerfile`
    - **Dockerfile Location**: `apps/web/Dockerfile`
@@ -25,7 +25,7 @@
 ## 🌐 Passo 2: Configurar Domínio
 
 1. Na aplicação criada → **Domains**
-2. Adicionar domínio: `app.conexa3.casadf.com.br`
+2. Adicionar domínio: `app.zelare.seu-dominio.com.br`
 3. Habilitar **HTTPS** (Let's Encrypt)
 
 ---
@@ -36,10 +36,10 @@ Na aba **Environment Variables**, adicionar:
 
 ```bash
 # API Backend
-VITE_API_URL=https://api.conexa3.casadf.com.br
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
 
 # App Configuration
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 VITE_APP_ENV=production
 
@@ -54,7 +54,7 @@ VITE_DEFAULT_THEME=dark
 VITE_DEFAULT_LANGUAGE=pt-BR
 
 # Storage
-VITE_STORAGE_PREFIX=conexa_
+VITE_STORAGE_PREFIX=zelare_
 
 # API Timeout
 VITE_API_TIMEOUT=30000
@@ -74,10 +74,10 @@ VITE_API_TIMEOUT=30000
 
 ## ✅ Passo 5: Testar Acesso
 
-1. Acesse: `https://app.conexa3.casadf.com.br`
+1. Acesse: `https://app.zelare.seu-dominio.com.br`
 2. Tela de login deve aparecer
 3. Testar login com:
-   - **Email**: `developer@conexa.com`
+   - **Email**: `developer@zelare.com.br`
    - **Senha**: `Teste@123`
 
 ---
@@ -116,7 +116,7 @@ docker logs [CONTAINER_ID]
 - Deve ter `try_files $uri $uri/ /index.html;`
 
 ### Erro de CORS
-- Verificar se backend permite origem `app.conexa3.casadf.com.br`
+- Verificar se backend permite origem `app.zelare.seu-dominio.com.br`
 - Verificar configuração de CORS no NestJS
 
 ---
@@ -127,9 +127,9 @@ Após deploy, testar com estes usuários:
 
 | Email | Senha | Nível |
 |-------|-------|-------|
-| developer@conexa.com | Teste@123 | Developer |
-| admin@cocris.org.br | Teste@123 | Admin Mantenedora |
-| pedagogico@cocris.org.br | Teste@123 | Staff Central |
+| developer@zelare.com.br | Teste@123 | Developer |
+| admin@zelare.org.br | Teste@123 | Admin Mantenedora |
+| pedagogico@zelare.org.br | Teste@123 | Staff Central |
 | coordenador@cepi.com.br | Teste@123 | Coordenador |
 | nonata@cepi.com.br | Teste@123 | Professora |
 | elisangela@cepi.com.br | Teste@123 | Professora |

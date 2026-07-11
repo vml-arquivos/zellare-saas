@@ -42,7 +42,7 @@ export async function getAccessibleTeachers(
 }
 
 /**
- * Busca templates padrão COCRIS
+ * Busca templates padrão Zelare
  */
 export async function getPlanningTemplatesCocris(): Promise<
   PlanningTemplateCocris[]

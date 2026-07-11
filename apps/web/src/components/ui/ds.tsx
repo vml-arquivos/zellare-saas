@@ -1,5 +1,5 @@
 /**
- * ds.tsx — Design System Unificado do Conexa
+ * ds.tsx — Design System Unificado do Zelare
  *
  * Componentes premium reutilizáveis para todos os painéis.
  * Identidade visual única: limpa, precisa, sem ornamento desnecessário.

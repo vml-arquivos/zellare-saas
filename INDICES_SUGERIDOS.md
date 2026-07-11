@@ -44,4 +44,4 @@ ON "MaterialRequest" ("unitId", "status");
 
 Aplicar com `CREATE INDEX CONCURRENTLY` para zero downtime — não bloqueia leituras nem escritas durante a criação.
 
-*Gerado automaticamente — Conexa v3.0 Super Ecossistema — 02/03/2026*
+*Gerado automaticamente — Zelare v3.0 Super Ecossistema — 02/03/2026*

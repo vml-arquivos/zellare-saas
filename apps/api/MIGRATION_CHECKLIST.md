@@ -79,4 +79,4 @@ Após a migração ser aplicada com sucesso, o banco de dados está sincronizado
 
 ### Conclusão
 
-Após seguir estes três passos, seu banco de dados Supabase estará perfeitamente sincronizado com o schema `v1.1` do Conexa, e seu ambiente de desenvolvimento estará pronto para começar a construir a lógica de negócio com o Prisma Client. O schema está oficialmente **congelado e migrado**.
+Após seguir estes três passos, seu banco de dados Supabase estará perfeitamente sincronizado com o schema `v1.1` do Zelare, e seu ambiente de desenvolvimento estará pronto para começar a construir a lógica de negócio com o Prisma Client. O schema está oficialmente **congelado e migrado**.

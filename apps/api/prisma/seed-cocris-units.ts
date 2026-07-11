@@ -1,10 +1,10 @@
 /**
  * seed-cocris-units.ts
- * Script idempotente para popular as unidades COCRIS a partir de units.json.
+ * Script idempotente para popular as unidades Zelare a partir de units.json.
  *
  * Estratégia:
  * 1. Ler units.json do mesmo diretório
- * 2. Descobrir mantenedoraId da COCRIS (por nome ou fallback por usuário)
+ * 2. Descobrir mantenedoraId da Zelare (por nome ou fallback por usuário)
  * 3. Upsert por (mantenedoraId, code) — idempotente, pode rodar N vezes
  * 4. Só atualiza campos vazios no banco (preserva edições manuais)
  *
@@ -46,9 +46,9 @@ async function main() {
   // 2. Descobrir mantenedoraId
   let mantenedoraId: string | null = null;
 
-  // Preferência: buscar mantenedora com nome contendo "COCRIS"
+  // Preferência: buscar mantenedora com nome contendo "Zelare"
   const mantenedoras = await prisma.mantenedora.findMany({
-    where: { name: { contains: 'COCRIS', mode: 'insensitive' } },
+    where: { name: { contains: 'Zelare', mode: 'insensitive' } },
     select: { id: true, name: true },
   });
 
@@ -56,7 +56,7 @@ async function main() {
     mantenedoraId = mantenedoras[0].id;
     console.log(`\n✅ Mantenedora encontrada: ${mantenedoras[0].name} (${mantenedoraId})`);
   } else {
-    console.log('\n⚠️  Mantenedora "COCRIS" não encontrada por nome. Tentando fallback...');
+    console.log('\n⚠️  Mantenedora "Zelare" não encontrada por nome. Tentando fallback...');
 
     // Fallback: usar mantenedoraId do usuário pedagogico@cocris.org.br
     const user = await prisma.user.findUnique({

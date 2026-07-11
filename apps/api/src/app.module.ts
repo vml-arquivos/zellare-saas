@@ -13,6 +13,9 @@ import { DiaryEventModule } from './diary-event/diary-event.module';
 import { PlanningTemplateModule } from './planning-template/planning-template.module';
 import { PlanningModule } from './planning/planning.module';
 import { CurriculumMatrixModule } from './curriculum-matrix/curriculum-matrix.module';
+import { PedagogicalFrameworkModule } from './pedagogical-framework/pedagogical-framework.module';
+import { TenantConfigModule } from './tenant-config/tenant-config.module';
+import { InstitutionContentModule } from './institution-content/institution-content.module';
 import { CurriculumMatrixEntryModule } from './curriculum-matrix-entry/curriculum-matrix-entry.module';
 import { CurriculumImportModule } from './curriculum-import/curriculum-import.module';
 import { HealthModule } from './health/health.module';
@@ -66,6 +69,9 @@ import { EmpresasTransporteModule } from './empresas-transporte/empresas-transpo
     PlanningTemplateModule,
     PlanningModule,
     CurriculumMatrixModule,
+    PedagogicalFrameworkModule,
+    TenantConfigModule,
+    InstitutionContentModule,
     CurriculumMatrixEntryModule,
     CurriculumImportModule,
     HealthModule,

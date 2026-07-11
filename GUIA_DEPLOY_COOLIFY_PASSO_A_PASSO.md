@@ -1,4 +1,4 @@
-# 🚀 Guia Completo de Deploy - Conexa V3.0 no Coolify
+# 🚀 Guia Completo de Deploy - Zelare no Coolify
 
 **Data**: 19 de Fevereiro de 2026  
 **Versão**: 3.0.0  
@@ -12,7 +12,7 @@ Antes de começar, certifique-se de ter:
 
 - ✅ Acesso ao painel do Coolify (URL e credenciais)
 - ✅ VPS configurada e conectada ao Coolify
-- ✅ Repositório GitHub: `vml-arquivos/conexa-v3.0`
+- ✅ Repositório GitHub: `vml-arquivos/zelare-saas`
 - ✅ Credenciais do GitHub configuradas no Coolify
 - ✅ Domínio (opcional, mas recomendado)
 
@@ -51,10 +51,10 @@ E **1 banco de dados**:
 Preencha os campos:
 
 ```
-Name: conexa-v3-db
+Name: zelare-saas-db
 PostgreSQL Version: 16 (ou mais recente)
 Database Name: conexa
-Username: conexa_user
+Username: zelare_user
 Password: [GERE UMA SENHA FORTE - ANOTE!]
 ```
 
@@ -82,7 +82,7 @@ Shared Buffers: 256MB
 Após criado, copie a **Connection String**:
 
 ```
-postgresql://conexa_user:[SENHA]@conexa-v3-db:5432/conexa
+postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
 ```
 
 **⚠️ ANOTE**: Você vai usar essa string nas variáveis de ambiente!
@@ -100,7 +100,7 @@ postgresql://conexa_user:[SENHA]@conexa-v3-db:5432/conexa
 ### Passo 2.2: Conectar Repositório
 
 1. Selecione a organização: **"vml-arquivos"**
-2. Selecione o repositório: **"conexa-v3.0"**
+2. Selecione o repositório: **"zelare-saas"**
 3. Branch: **"main"**
 4. Clique em **"Continue"**
 
@@ -109,10 +109,10 @@ postgresql://conexa_user:[SENHA]@conexa-v3-db:5432/conexa
 Preencha os campos:
 
 ```
-Name: conexa-v3-api
+Name: zelare-saas-api
 Type: Node.js
-Build Command: pnpm install && pnpm --filter @conexa/api build
-Start Command: pnpm --filter @conexa/api start:prod
+Build Command: pnpm install && pnpm --filter @zelare/api build
+Start Command: pnpm --filter @zelare/api start:prod
 Port: 3000
 Root Directory: /
 ```
@@ -123,7 +123,7 @@ Clique em **"Environment Variables"** e adicione:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://conexa_user:[SUA_SENHA]@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:[SUA_SENHA]@zelare-saas-db:5432/conexa
 
 # JWT
 JWT_SECRET=sua-chave-secreta-super-segura-aqui-min-32-caracteres
@@ -162,7 +162,7 @@ Clique em **"Build Settings"**:
 
 ```
 Install Command: pnpm install
-Build Command: pnpm --filter @conexa/api build
+Build Command: pnpm --filter @zelare/api build
 Output Directory: apps/api/dist
 ```
 
@@ -217,9 +217,9 @@ cd apps/api && npx prisma migrate deploy
 Preencha os campos:
 
 ```
-Name: conexa-v3-web
+Name: zelare-saas-web
 Type: Static Site (Vite)
-Build Command: pnpm install && pnpm --filter @conexa/web build
+Build Command: pnpm install && pnpm --filter @zelare/web build
 Output Directory: apps/web/dist
 Port: 5173
 Root Directory: /
@@ -235,7 +235,7 @@ VITE_API_URL=https://api.conexa.seu-dominio.com
 VITE_API_TIMEOUT=30000
 
 # App
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 
 # Features
@@ -249,7 +249,7 @@ Clique em **"Build Settings"**:
 
 ```
 Install Command: pnpm install
-Build Command: pnpm --filter @conexa/web build
+Build Command: pnpm --filter @zelare/web build
 Output Directory: apps/web/dist
 ```
 
@@ -279,10 +279,10 @@ Output Directory: apps/web/dist
 Preencha os campos:
 
 ```
-Name: conexa-v3-site
+Name: zelare-saas-site
 Type: Node.js
-Build Command: pnpm install && pnpm --filter @conexa/site build
-Start Command: pnpm --filter @conexa/site start
+Build Command: pnpm install && pnpm --filter @zelare/site build
+Start Command: pnpm --filter @zelare/site start
 Port: 5174
 Root Directory: /
 ```
@@ -293,7 +293,7 @@ Clique em **"Environment Variables"** e adicione:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://conexa_user:[SUA_SENHA]@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:[SUA_SENHA]@zelare-saas-db:5432/conexa
 
 # API
 API_URL=https://api.conexa.seu-dominio.com
@@ -321,7 +321,7 @@ PORT=5174
 
 ### Passo 5.1: Configurar Domínio do Backend
 
-1. Na aplicação **conexa-v3-api**, clique em **"Domains"**
+1. Na aplicação **zelare-saas-api**, clique em **"Domains"**
 2. Adicione o domínio: `api.conexa.seu-dominio.com`
 3. Clique em **"Add Domain"**
 4. Aguarde a configuração do SSL (1-2 minutos)
@@ -329,7 +329,7 @@ PORT=5174
 
 ### Passo 5.2: Configurar Domínio do Frontend
 
-1. Na aplicação **conexa-v3-web**, clique em **"Domains"**
+1. Na aplicação **zelare-saas-web**, clique em **"Domains"**
 2. Adicione o domínio: `app.conexa.seu-dominio.com`
 3. Clique em **"Add Domain"**
 4. Aguarde a configuração do SSL (1-2 minutos)
@@ -337,7 +337,7 @@ PORT=5174
 
 ### Passo 5.3: Configurar Domínio do Site
 
-1. Na aplicação **conexa-v3-site**, clique em **"Domains"**
+1. Na aplicação **zelare-saas-site**, clique em **"Domains"**
 2. Adicione o domínio: `conexa.seu-dominio.com`
 3. Clique em **"Add Domain"**
 4. Aguarde a configuração do SSL (1-2 minutos)
@@ -412,7 +412,7 @@ async function createAdmin() {
   const hashedPassword = await bcrypt.hash('Admin@123', 10);
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@conexa.com',
+      email: 'admin@zelare.com.br',
       password: hashedPassword,
       firstName: 'Admin',
       lastName: 'Sistema',
@@ -429,7 +429,7 @@ createAdmin().catch(console.error).finally(() => prisma.\$disconnect());
 
 2. **Testar Login**:
    - Acesse: `https://app.conexa.seu-dominio.com`
-   - Email: `admin@conexa.com`
+   - Email: `admin@zelare.com.br`
    - Senha: `Admin@123`
    - Deve fazer login com sucesso
 
@@ -618,7 +618,7 @@ Antes de considerar o deploy concluído:
 
 Se você chegou até aqui e todos os checkboxes estão marcados, **seu deploy está completo e funcionando!** 🚀
 
-O Conexa V3.0 está pronto para revolucionar a educação infantil!
+O Zelare está pronto para revolucionar a educação infantil!
 
 ---
 

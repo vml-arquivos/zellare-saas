@@ -1,5 +1,5 @@
 /**
- * PageShell — Layout base padronizado de todas as páginas do Conexa
+ * PageShell — Layout base padronizado de todas as páginas do Zelare
  *
  * Uso:
  *   <PageShell title="Título" subtitle="Descrição" headerActions={<button>...</button>}>

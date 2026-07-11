@@ -2,7 +2,7 @@
 
 **Data:** 2026-03-23  
 **Branch:** `fix/allergias-dietas-painel`  
-**PR:** https://github.com/vml-arquivos/conexa-v3.0/pull/17
+**PR:** https://github.com/vml-arquivos/zelare-saas/pull/17
 
 ---
 
@@ -29,7 +29,7 @@ eea3e4e fix(ts): remover PROFESSOR_AUXILIAR de comparações role.level
 
 ### API (`pnpm run build`)
 ```
-> @conexa/api@1.0.0 build
+> @zelare/api@1.0.0 build
 > nest build && node scripts/copy-data-to-dist.js
 ✅ Datasets copied: /apps/api/data -> /apps/api/dist/data
 ```
@@ -37,7 +37,7 @@ eea3e4e fix(ts): remover PROFESSOR_AUXILIAR de comparações role.level
 
 ### Web (`pnpm run build`)
 ```
-> @conexa/web@0.0.0 build
+> @zelare/web@0.0.0 build
 > tsc -b && vite build
 ✓ 2526 modules transformed.
 dist/assets/index-STdACiTr.js   3,223.42 kB │ gzip: 745.72 kB

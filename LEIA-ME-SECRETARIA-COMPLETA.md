@@ -1,4 +1,4 @@
-# CONEXA — Atualização Secretaria Completa
+# ZELARE — Atualização Secretaria Completa
 
 Este repositório ZIP já está com as alterações aplicadas nos caminhos originais.
 

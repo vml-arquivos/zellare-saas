@@ -53,10 +53,10 @@ async function main() {
     // Criar matriz e entrada placeholder
     const matrix = await prisma.curriculumMatrix.create({
       data: {
-        name: 'Matriz COCRIS 2026',
+        name: 'Matriz Zelare 2026',
         year: 2026,
         segment: 'EI01',
-        description: 'Matriz curricular COCRIS',
+        description: 'Matriz curricular Zelare',
         mantenedoraId: unit.mantenedoraId,
         isActive: true,
       },

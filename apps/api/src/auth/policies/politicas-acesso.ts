@@ -1,5 +1,5 @@
 /**
- * Políticas de Acesso Unificadas — Conexa V2
+ * Políticas de Acesso Unificadas — Zelare
  * PR-UNICO-SUPER-SAAS-2026-014 / Etapa 2
  *
  * Este módulo centraliza todas as regras de autorização do sistema,

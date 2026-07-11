@@ -38,15 +38,15 @@ export default function Header() {
         <Link href="/">
           <div className="flex items-center gap-3 hover:opacity-90 transition-opacity cursor-pointer">
             <img
-              src="/images/logo-cocris.png"
-              alt="COCRIS - Associação Beneficente Coração de Cristo"
+              src="/images/zelare-logo-square.png"
+              alt="Zelare - Associação Beneficente Coração de Cristo"
               className="h-12 w-auto"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
             <div className="flex flex-col">
-              <span className="text-primary font-bold text-base leading-tight">COCRIS</span>
+              <span className="text-primary font-bold text-base leading-tight">Zelare</span>
               <span className="text-xs text-muted-foreground font-medium">Educação Infantil</span>
             </div>
           </div>

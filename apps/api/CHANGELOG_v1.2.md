@@ -63,4 +63,4 @@ Esta atualização do schema implementa a **Arquitetura Pedagógica Orientada po
 -   **Retrocompatibilidade:** Os campos antigos em `Planning` foram mantidos, garantindo que a API v1 continue funcionando com dados legados.
 -   **Estratégia de Migração:** Uma migração de dados futura poderá ser executada para preencher os novos campos em registros antigos, se necessário, mas o sistema pode operar em um modo de compatibilidade.
 
-Esta atualização representa um grande avanço na maturidade pedagógica e técnica do Conexa, transformando o planejamento em um processo mais estruturado, auditável e inteligente.
+Esta atualização representa um grande avanço na maturidade pedagógica e técnica do Zelare, transformando o planejamento em um processo mais estruturado, auditável e inteligente.

@@ -28,7 +28,7 @@ O packet `V3-OPS-PRP-001` foi executado com sucesso, abordando três missões cr
   - `drizzle.config.ts` e `server/db.ts` reconfigurados para usar o driver `pg` e a variável `SITE_DATABASE_URL`.
   - O schema Drizzle (`drizzle/schema.ts`) foi convertido de sintaxe MySQL para PostgreSQL, incluindo a criação de novas tabelas `projects` e `blogPosts`.
   - Queries de inserção foram ajustadas para usar a sintaxe `ON CONFLICT DO NOTHING` do Postgres, eliminando a necessidade de checagens prévias de existência.
-- **Resultado:** `apps/site` agora opera sobre Postgres 17, alinhado com o resto do ecossistema Conexa. A complexidade de manter duas stacks de banco de dados foi eliminada.
+- **Resultado:** `apps/site` agora opera sobre Postgres 17, alinhado com o resto do ecossistema Zelare. A complexidade de manter duas stacks de banco de dados foi eliminada.
 
 ### Missão 03: UX 2 Segundos — Performance no Lançamento de Micro-Gestos
 - **Objetivo:** Garantir que o professor possa registrar micro-gestos em menos de 2 segundos, mesmo em condições de rede ruins ou offline.
@@ -53,4 +53,4 @@ O packet `V3-OPS-PRP-001` foi executado com sucesso, abordando três missões cr
 
 ## Conclusão
 
-O sistema Conexa V3.0 está agora mais estável, seguro e performático. As missões do `PACKET V3-OPS-PRP-001` foram concluídas com sucesso e o sistema está pronto para o próximo ciclo de desenvolvimento ou para deploy em produção, seguindo as instruções do `RUNBOOK.md`.
+O sistema Zelare está agora mais estável, seguro e performático. As missões do `PACKET V3-OPS-PRP-001` foram concluídas com sucesso e o sistema está pronto para o próximo ciclo de desenvolvimento ou para deploy em produção, seguindo as instruções do `RUNBOOK.md`.

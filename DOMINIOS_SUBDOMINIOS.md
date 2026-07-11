@@ -1,4 +1,4 @@
-# 🌐 Domínios e Subdomínios - Conexa V3.0
+# 🌐 Domínios e Subdomínios - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Status**: ✅ PRONTO PARA CONFIGURAÇÃO
@@ -7,13 +7,13 @@
 
 ## 📋 Resumo Executivo
 
-Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Conexa V3.0 funcionar completamente:
+Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Zelare funcionar completamente:
 
 | Serviço | Subdomínio | Porta | Descrição |
 |---------|------------|-------|-----------|
-| **Backend API** | `api.conexa.com` | 3000 | API REST (NestJS) |
-| **Frontend Web** | `app.conexa.com` | 5173 | Aplicação web (React) |
-| **Site Institucional** | `conexa.com` | 5174 | Landing page |
+| **Backend API** | `api.zelare.com.br` | 3000 | API REST (NestJS) |
+| **Frontend Web** | `app.zelare.com.br` | 5173 | Aplicação web (React) |
+| **Site Institucional** | `zelare.com.br` | 5174 | Landing page |
 
 **Total**: 3 subdomínios (ou 2 subdomínios + 1 domínio raiz)
 
@@ -23,12 +23,12 @@ Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Co
 
 ### Opção 1: Usar Subdomínios (Recomendado)
 
-**Domínio principal**: `conexa.com` (ou `conexa.com.br`, `conexa.org`, etc.)
+**Domínio principal**: `zelare.com.br` (ou `zelare.com.br.br`, `conexa.org`, etc.)
 
 **Subdomínios necessários**:
-1. `api.conexa.com` → Backend API
-2. `app.conexa.com` → Frontend Web (área de login e autenticação)
-3. `conexa.com` → Site Institucional (landing page)
+1. `api.zelare.com.br` → Backend API
+2. `app.zelare.com.br` → Frontend Web (área de login e autenticação)
+3. `zelare.com.br` → Site Institucional (landing page)
 
 **Vantagens**:
 - ✅ Organização clara
@@ -37,18 +37,18 @@ Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Co
 - ✅ SSL único para todos (wildcard)
 
 **Exemplo**:
-- Site: `https://conexa.com`
-- Login: `https://app.conexa.com`
-- API: `https://api.conexa.com`
+- Site: `https://zelare.com.br`
+- Login: `https://app.zelare.com.br`
+- API: `https://api.zelare.com.br`
 
 ---
 
 ### Opção 2: Usar Domínios Separados
 
 **Domínios necessários**:
-1. `api-conexa.com` → Backend API
-2. `app-conexa.com` → Frontend Web
-3. `conexa.com` → Site Institucional
+1. `api-zelare.com.br` → Backend API
+2. `app-zelare.com.br` → Frontend Web
+3. `zelare.com.br` → Site Institucional
 
 **Vantagens**:
 - ✅ Isolamento total
@@ -64,9 +64,9 @@ Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Co
 ### Opção 3: Usar URLs do Coolify (Sem Domínio Próprio)
 
 **URLs geradas automaticamente**:
-1. `https://conexa-v3-api-abc123.coolify.io` → Backend API
-2. `https://conexa-v3-web-def456.coolify.io` → Frontend Web
-3. `https://conexa-v3-site-ghi789.coolify.io` → Site Institucional
+1. `https://zelare-saas-api-abc123.coolify.io` → Backend API
+2. `https://zelare-saas-web-def456.coolify.io` → Frontend Web
+3. `https://zelare-saas-site-ghi789.coolify.io` → Site Institucional
 
 **Vantagens**:
 - ✅ Grátis
@@ -86,7 +86,7 @@ Você precisa de **3 subdomínios** (ou 3 domínios separados) para o sistema Co
 
 ### 1. Backend API
 
-**Subdomínio**: `api.conexa.com`
+**Subdomínio**: `api.zelare.com.br`
 
 **O que faz**:
 - API REST para autenticação
@@ -111,7 +111,7 @@ TTL: 3600
 
 **Teste**:
 ```bash
-curl https://api.conexa.com/health
+curl https://api.zelare.com.br/health
 # Deve retornar: {"status":"ok"}
 ```
 
@@ -119,7 +119,7 @@ curl https://api.conexa.com/health
 
 ### 2. Frontend Web (Área de Login e Autenticação)
 
-**Subdomínio**: `app.conexa.com`
+**Subdomínio**: `app.zelare.com.br`
 
 **O que faz**:
 - Tela de login
@@ -146,7 +146,7 @@ TTL: 3600
 
 **Teste**:
 ```bash
-curl https://app.conexa.com
+curl https://app.zelare.com.br
 # Deve retornar HTML da página de login
 ```
 
@@ -154,7 +154,7 @@ curl https://app.conexa.com
 
 ### 3. Site Institucional (Landing Page)
 
-**Domínio/Subdomínio**: `conexa.com` (raiz) ou `www.conexa.com`
+**Domínio/Subdomínio**: `zelare.com.br` (raiz) ou `www.zelare.com.br`
 
 **O que faz**:
 - Landing page
@@ -183,7 +183,7 @@ TTL: 3600
 
 **Teste**:
 ```bash
-curl https://conexa.com
+curl https://zelare.com.br
 # Deve retornar HTML do site institucional
 ```
 
@@ -232,9 +232,9 @@ curl https://conexa.com
 
 5. **Teste**:
    ```bash
-   nslookup api.conexa.com
-   nslookup app.conexa.com
-   nslookup conexa.com
+   nslookup api.zelare.com.br
+   nslookup app.zelare.com.br
+   nslookup zelare.com.br
    ```
 
 ---
@@ -321,7 +321,7 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 1. **Configure o domínio no Coolify**:
    - Vá na aplicação (Backend, Frontend ou Site)
    - Clique em "Domains"
-   - Adicione o domínio (ex: `api.conexa.com`)
+   - Adicione o domínio (ex: `api.zelare.com.br`)
    - Clique em "Save"
 
 2. **Aguarde SSL**:
@@ -330,7 +330,7 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
    - Pode levar 1-5 minutos
 
 3. **Verifique**:
-   - Acesse `https://api.conexa.com`
+   - Acesse `https://api.zelare.com.br`
    - Deve aparecer o cadeado verde 🔒
 
 **Importante**:
@@ -344,38 +344,38 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 
 ### Antes de Configurar
 
-- [ ] Domínio registrado (ex: `conexa.com`)
+- [ ] Domínio registrado (ex: `zelare.com.br`)
 - [ ] Acesso ao painel DNS (Cloudflare, GoDaddy, Registro.br, etc.)
 - [ ] IP da VPS anotado
 - [ ] Acesso ao Coolify
 
 ### Configuração DNS
 
-- [ ] Registro A para `api.conexa.com` → IP da VPS
-- [ ] Registro A para `app.conexa.com` → IP da VPS
-- [ ] Registro A para `conexa.com` (raiz) → IP da VPS
+- [ ] Registro A para `api.zelare.com.br` → IP da VPS
+- [ ] Registro A para `app.zelare.com.br` → IP da VPS
+- [ ] Registro A para `zelare.com.br` (raiz) → IP da VPS
 - [ ] DNS propagado (teste com `nslookup`)
 
 ### Configuração no Coolify
 
-- [ ] Backend API: domínio `api.conexa.com` configurado
-- [ ] Frontend Web: domínio `app.conexa.com` configurado
-- [ ] Site: domínio `conexa.com` configurado
+- [ ] Backend API: domínio `api.zelare.com.br` configurado
+- [ ] Frontend Web: domínio `app.zelare.com.br` configurado
+- [ ] Site: domínio `zelare.com.br` configurado
 - [ ] SSL gerado para os 3 domínios (cadeado verde)
 
 ### Variáveis de Ambiente Atualizadas
 
-- [ ] Backend: `API_URL=https://api.conexa.com`
-- [ ] Backend: `CORS_ORIGIN=https://app.conexa.com,https://conexa.com`
-- [ ] Frontend: `VITE_API_URL=https://api.conexa.com`
-- [ ] Site: `API_URL=https://api.conexa.com`
+- [ ] Backend: `API_URL=https://api.zelare.com.br`
+- [ ] Backend: `CORS_ORIGIN=https://app.zelare.com.br,https://zelare.com.br`
+- [ ] Frontend: `VITE_API_URL=https://api.zelare.com.br`
+- [ ] Site: `API_URL=https://api.zelare.com.br`
 
 ### Testes
 
-- [ ] `https://api.conexa.com/health` retorna `{"status":"ok"}`
-- [ ] `https://app.conexa.com` mostra tela de login
-- [ ] `https://conexa.com` mostra site institucional
-- [ ] Login funciona (teste com `admin@conexa.com`)
+- [ ] `https://api.zelare.com.br/health` retorna `{"status":"ok"}`
+- [ ] `https://app.zelare.com.br` mostra tela de login
+- [ ] `https://zelare.com.br` mostra site institucional
+- [ ] Login funciona (teste com `admin@zelare.com.br`)
 - [ ] Dashboard carrega após login
 
 ---
@@ -385,9 +385,9 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 ### Você Precisa de:
 
 **3 subdomínios**:
-1. `api.conexa.com` → Backend API (porta 3000)
-2. `app.conexa.com` → Frontend Web (porta 5173)
-3. `conexa.com` → Site Institucional (porta 5174)
+1. `api.zelare.com.br` → Backend API (porta 3000)
+2. `app.zelare.com.br` → Frontend Web (porta 5173)
+3. `zelare.com.br` → Site Institucional (porta 5174)
 
 ### Configuração:
 
@@ -419,15 +419,15 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 
 3. **Wildcard SSL** (Opcional)
    - Se tiver muitos subdomínios, use certificado wildcard
-   - `*.conexa.com` cobre todos os subdomínios
+   - `*.zelare.com.br` cobre todos os subdomínios
 
 4. **Redirecionamento www**
-   - Configure `www.conexa.com` para redirecionar para `conexa.com`
+   - Configure `www.zelare.com.br` para redirecionar para `zelare.com.br`
    - Ou vice-versa (escolha um padrão)
 
 5. **Teste antes de ir ao ar**
    - Use `/etc/hosts` para testar localmente
-   - Adicione: `123.456.789.10 api.conexa.com`
+   - Adicione: `123.456.789.10 api.zelare.com.br`
 
 ---
 
@@ -453,7 +453,7 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 
 **Solução**:
 1. Verifique `CORS_ORIGIN` no backend
-2. Deve incluir `https://app.conexa.com`
+2. Deve incluir `https://app.zelare.com.br`
 3. Sem espaços após vírgula
 4. Redeploy do backend
 

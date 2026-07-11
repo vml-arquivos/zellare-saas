@@ -69,7 +69,7 @@ Documentação completa com:
 
 ```bash
 # 1. Testar parser standalone
-cd /home/ubuntu/Conexa-V2
+cd /home/ubuntu/Zelare-V2
 npx ts-node scripts/test-parser.ts
 
 # 2. Executar importação via API (após subir servidor)

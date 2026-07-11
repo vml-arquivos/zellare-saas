@@ -1,15 +1,15 @@
-# ✅ CONFIGURAÇÃO FINAL - Conexa V3.0
+# ✅ CONFIGURAÇÃO FINAL - Zelare
 
 **DNS Configurado**: ✅ Todos apontando para `34.26.204.248`
 
 ---
 
-## 🌐 SEUS SUBDOMÍNIOS (TODOS USAM CONEXA3)
+## 🌐 SEUS SUBDOMÍNIOS (TODOS USAM ZELARE3)
 
 | Serviço | Subdomínio | IP | Porta |
 |---------|------------|-----|-------|
-| **Backend API** | `api.conexa3.casadf.com.br` | 34.26.204.248 | 3000 |
-| **Frontend Web** | `app.conexa3.casadf.com.br` | 34.26.204.248 | 5173 |
+| **Backend API** | `api.zelare.seu-dominio.com.br` | 34.26.204.248 | 3000 |
+| **Frontend Web** | `app.zelare.seu-dominio.com.br` | 34.26.204.248 | 5173 |
 | **Site** | `conexa3.casadf.com.br` | 34.26.204.248 | 5174 |
 
 ✅ **DNS já configurado e apontando para o IP correto!**
@@ -20,7 +20,7 @@
 
 ### 🚀 BACKEND API
 
-**Domínio no Coolify**: `api.conexa3.casadf.com.br`
+**Domínio no Coolify**: `api.zelare.seu-dominio.com.br`
 
 **Variáveis** (14):
 
@@ -32,8 +32,8 @@ JWT_SECRET=[gere com: openssl rand -base64 32]
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.conexa3.casadf.com.br
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 GEMINI_API_KEY=[obtenha em: https://makersuite.google.com/app/apikey]
 GEMINI_MODEL=gemini-1.5-flash
 ENABLE_AI_ASSISTANT=true
@@ -47,13 +47,13 @@ LOG_FORMAT=json
 
 ### 🎨 FRONTEND WEB
 
-**Domínio no Coolify**: `app.conexa3.casadf.com.br`
+**Domínio no Coolify**: `app.zelare.seu-dominio.com.br`
 
 **Variáveis** (3):
 
 ```bash
-VITE_API_URL=https://api.conexa3.casadf.com.br
-VITE_APP_NAME=Conexa V3.0
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -67,7 +67,7 @@ VITE_APP_VERSION=3.0.0
 
 ```bash
 DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
 ```
@@ -116,7 +116,7 @@ node scripts/create-admin.js
 ```
 
 **Credenciais**:
-- Email: `admin@conexa.com`
+- Email: `admin@zelare.com.br`
 - Senha: `Admin@123`
 
 ---
@@ -137,10 +137,10 @@ node scripts/seed-test-users.js
 ### 5. Configure Frontend (5 min)
 
 1. Crie nova aplicação no Coolify
-2. **GitHub**: `vml-arquivos/conexa-v3.0`
+2. **GitHub**: `vml-arquivos/zelare-saas`
 3. **Branch**: `main`
-4. **Name**: `conexa-v3-web`
-5. **Domínio**: `app.conexa3.casadf.com.br`
+4. **Name**: `zelare-saas-web`
+5. **Domínio**: `app.zelare.seu-dominio.com.br`
 6. **Environment Variables**: Adicione as 3 variáveis acima
 7. **Deploy**
 
@@ -149,9 +149,9 @@ node scripts/seed-test-users.js
 ### 6. Configure Site (5 min)
 
 1. Crie nova aplicação no Coolify
-2. **GitHub**: `vml-arquivos/conexa-v3.0`
+2. **GitHub**: `vml-arquivos/zelare-saas`
 3. **Branch**: `main`
-4. **Name**: `conexa-v3-site`
+4. **Name**: `zelare-saas-site`
 5. **Domínio**: `conexa3.casadf.com.br`
 6. **Environment Variables**: Adicione as 4 variáveis acima
 7. **Deploy**
@@ -162,11 +162,11 @@ node scripts/seed-test-users.js
 
 ```bash
 # 1. Backend
-curl https://api.conexa3.casadf.com.br/health
+curl https://api.zelare.seu-dominio.com.br/health
 # Deve retornar: {"status":"ok"}
 
 # 2. Frontend
-curl https://app.conexa3.casadf.com.br
+curl https://app.zelare.seu-dominio.com.br
 # Deve retornar HTML
 
 # 3. Site
@@ -241,29 +241,29 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ## ✅ CHECKLIST COMPLETO
 
-### Backend API (`api.conexa3.casadf.com.br`)
+### Backend API (`api.zelare.seu-dominio.com.br`)
 
 - [ ] Domínio configurado no Coolify
 - [ ] 14 variáveis de ambiente adicionadas
 - [ ] `DATABASE_URL` copiada do PostgreSQL
 - [ ] `REDIS_URL` copiada do Redis
 - [ ] `JWT_SECRET` gerada com openssl
-- [ ] `API_URL=https://api.conexa3.casadf.com.br`
-- [ ] `CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br`
+- [ ] `API_URL=https://api.zelare.seu-dominio.com.br`
+- [ ] `CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br`
 - [ ] `GEMINI_API_KEY` obtida no Google
 - [ ] Redeploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] Migrations executadas
-- [ ] Admin criado (`admin@conexa.com`)
+- [ ] Admin criado (`admin@zelare.com.br`)
 - [ ] Usuários de teste criados (13 usuários)
-- [ ] Health check funciona: `curl https://api.conexa3.casadf.com.br/health`
+- [ ] Health check funciona: `curl https://api.zelare.seu-dominio.com.br/health`
 
-### Frontend Web (`app.conexa3.casadf.com.br`)
+### Frontend Web (`app.zelare.seu-dominio.com.br`)
 
 - [ ] Aplicação criada no Coolify
-- [ ] Domínio configurado: `app.conexa3.casadf.com.br`
+- [ ] Domínio configurado: `app.zelare.seu-dominio.com.br`
 - [ ] 3 variáveis de ambiente adicionadas
-- [ ] `VITE_API_URL=https://api.conexa3.casadf.com.br`
+- [ ] `VITE_API_URL=https://api.zelare.seu-dominio.com.br`
 - [ ] Deploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] SSL ativo (cadeado verde)
@@ -275,7 +275,7 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 - [ ] Domínio configurado: `conexa3.casadf.com.br`
 - [ ] 4 variáveis de ambiente adicionadas
 - [ ] `DATABASE_URL` (mesma do backend)
-- [ ] `API_URL=https://api.conexa3.casadf.com.br`
+- [ ] `API_URL=https://api.zelare.seu-dominio.com.br`
 - [ ] Deploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] SSL ativo (cadeado verde)
@@ -283,7 +283,7 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ### Testes Finais
 
-- [ ] Login funciona: `https://app.conexa3.casadf.com.br` → `admin@conexa.com` / `Admin@123`
+- [ ] Login funciona: `https://app.zelare.seu-dominio.com.br` → `admin@zelare.com.br` / `Admin@123`
 - [ ] Dashboard carrega após login
 - [ ] IA funciona: Teste "Gerar com IA" em Planejamentos
 - [ ] Site institucional carrega: `https://conexa3.casadf.com.br`
@@ -298,20 +298,20 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ✅ **CORRETO**:
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 ```
 
 ❌ **ERRADO**:
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br, https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br, https://conexa3.casadf.com.br
 ```
 
 ---
 
-### 2. Todos os Subdomínios Usam CONEXA3
+### 2. Todos os Subdomínios Usam ZELARE3
 
-✅ `api.conexa3.casadf.com.br`  
-✅ `app.conexa3.casadf.com.br`  
+✅ `api.zelare.seu-dominio.com.br`  
+✅ `app.zelare.seu-dominio.com.br`  
 ✅ `conexa3.casadf.com.br`
 
 ❌ ~~`api.conexa.casadf.com.br`~~ (ERRADO)
@@ -355,8 +355,8 @@ CORS_ORIGIN=https://app.conexa3.casadf.com.br, https://conexa3.casadf.com.br
 **Tempo total**: 25 minutos
 
 ### URLs Finais
-- Backend API: `https://api.conexa3.casadf.com.br`
-- Frontend Web: `https://app.conexa3.casadf.com.br`
+- Backend API: `https://api.zelare.seu-dominio.com.br`
+- Frontend Web: `https://app.zelare.seu-dominio.com.br`
 - Site: `https://conexa3.casadf.com.br`
 
 ---

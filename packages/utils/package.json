@@ -1,7 +1,7 @@
 {
-  "name": "@conexa/utils",
+  "name": "@zelare/utils",
   "version": "3.0.0",
-  "description": "Conexa V3 - Shared Utility Functions",
+  "description": "Zelare V3 - Shared Utility Functions",
   "main": "index.ts",
   "private": true,
   "dependencies": {

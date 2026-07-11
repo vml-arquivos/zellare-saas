@@ -142,7 +142,7 @@ Fortalecendo uma prática educativa reflexiva, responsável e alinhada às diret
 
 ---
 
-## Implicações para o Sistema Conexa V3.0
+## Implicações para o Sistema Zelare
 
 ### 1. Templates de Planejamento Baseados na Matriz
 

@@ -4,13 +4,13 @@ _Gerado por MANUZ, Engenheiro de Software Sênior._
 
 **Data:** 03 de Fevereiro de 2026
 
-Este documento detalha como utilizar a API do Módulo de Diário de Bordo Pedagógico do Conexa, incluindo endpoints, regras de acesso e exemplos práticos.
+Este documento detalha como utilizar a API do Módulo de Diário de Bordo Pedagógico do Zelare, incluindo endpoints, regras de acesso e exemplos práticos.
 
 ---
 
 ## 1. Visão Geral
 
-O Diário de Bordo é o coração do registro pedagógico no Conexa. Ele é baseado em **eventos**, permitindo que os educadores registrem o cotidiano da criança de forma rápida, segura e com valor pedagógico. Cada evento é vinculado a uma criança, uma turma e um autor, com auditoria completa de todas as ações.
+O Diário de Bordo é o coração do registro pedagógico no Zelare. Ele é baseado em **eventos**, permitindo que os educadores registrem o cotidiano da criança de forma rápida, segura e com valor pedagógico. Cada evento é vinculado a uma criança, uma turma e um autor, com auditoria completa de todas as ações.
 
 ## 2. API REST
 
@@ -35,7 +35,7 @@ Cria um novo evento no diário de bordo. As regras de acesso são validadas auto
   "childId": "clx_child_1",
   "classroomId": "clx_classroom_1",
   "tags": ["alimentação", "nutrição", "desenvolvimento"],
-  "mediaUrls": ["https://storage.conexa.com/media/foto_almoco_1.jpg"]
+  "mediaUrls": ["https://storage.zelare.com.br/media/foto_almoco_1.jpg"]
 }
 ```
 

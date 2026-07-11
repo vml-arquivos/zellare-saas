@@ -1,4 +1,4 @@
-# Auditoria Conexa V3
+# Auditoria Zelare
 
 ## Veredito
 O repositório apresenta um bom estado de estabilização nas frentes prioritárias (Planejamento e Requisição de Materiais), com as entregas recentes (PRs #30, #31 e #32) resolvendo a maioria dos gargalos de UX e regras de negócio. No entanto, a frente de **Catálogo de materiais (integração)** foi entregue de forma *parcial* devido a uma falha silenciosa na persistência do vínculo relacional (`materialId`), e a frente de **CID** não se refere a diagnósticos médicos, mas sim a um acrônimo interno para `classroomId` ou `childId`.

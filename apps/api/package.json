@@ -1,5 +1,5 @@
 {
-  "name": "@conexa/api",
+  "name": "@zelare/api",
   "version": "1.0.0",
   "description": "_Gerado por MANUZ, IA Engenheira de Software Sênior._",
   "main": "index.js",
@@ -29,19 +29,21 @@
     "seed:alimentos:reset": "node scripts/seed-alimentos.js --reset",
     "seed:teste": "ts-node src/scripts/seed-turma-teste.ts",
     "typecheck": "tsc --noEmit",
-    "prepush": "npm run typecheck"
+    "prepush": "npm run typecheck",
+    "seed:completar-maio-hoje": "node scripts/seed-completar-maio-hoje-unidades.js",
+    "seed:completar-maio-hoje:dry": "DRY_RUN=true node scripts/seed-completar-maio-hoje-unidades.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vml-arquivos/Conexa-V2.git"
+    "url": "git+https://github.com/vml-arquivos/Zelare-V2.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/vml-arquivos/Conexa-V2/issues"
+    "url": "https://github.com/vml-arquivos/Zelare-V2/issues"
   },
-  "homepage": "https://github.com/vml-arquivos/Conexa-V2#readme",
+  "homepage": "https://github.com/vml-arquivos/Zelare-V2#readme",
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",

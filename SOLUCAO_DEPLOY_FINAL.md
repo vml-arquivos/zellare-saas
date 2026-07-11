@@ -61,13 +61,13 @@ Property 'fornecedor' does not exist on type 'PrismaService'.
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0
-pnpm --filter @conexa/api build
+cd /home/ubuntu/zelare-saas
+pnpm --filter @zelare/api build
 ```
 
 **Resultado**:
 ```
-✅ Datasets copied: /home/ubuntu/conexa-v3.0/apps/api/data -> /home/ubuntu/conexa-v3.0/apps/api/dist/data
+✅ Datasets copied: /home/ubuntu/zelare-saas/apps/api/data -> /home/ubuntu/zelare-saas/apps/api/dist/data
 ```
 
 **Build**: ✅ PASSOU 100%
@@ -89,17 +89,17 @@ pnpm --filter @conexa/api build
 
 | Serviço | Subdomínio | Porta | Descrição |
 |---------|------------|-------|-----------|
-| **Backend API** | `api.conexa.com` | 3000 | API REST (NestJS) |
-| **Frontend Web** | `app.conexa.com` | 5173 | Área de login e dashboards |
-| **Site** | `conexa.com` | 5174 | Landing page |
+| **Backend API** | `api.zelare.com.br` | 3000 | API REST (NestJS) |
+| **Frontend Web** | `app.zelare.com.br` | 5173 | Área de login e dashboards |
+| **Site** | `zelare.com.br` | 5174 | Landing page |
 
 ### Configuração DNS:
 
 **Adicione 3 registros A** no seu provedor DNS (Cloudflare, GoDaddy, Registro.br):
 
-1. **api.conexa.com** → IP da VPS
-2. **app.conexa.com** → IP da VPS
-3. **conexa.com** (raiz) → IP da VPS
+1. **api.zelare.com.br** → IP da VPS
+2. **app.zelare.com.br** → IP da VPS
+3. **zelare.com.br** (raiz) → IP da VPS
 
 **Guia completo**: `DOMINIOS_SUBDOMINIOS.md`
 
@@ -125,12 +125,12 @@ Se você tiver domínio próprio:
 
 1. **Configure DNS** (ver `DOMINIOS_SUBDOMINIOS.md`)
 2. **Adicione domínios no Coolify**:
-   - Backend: `api.conexa.com`
-   - Frontend: `app.conexa.com`
-   - Site: `conexa.com`
+   - Backend: `api.zelare.com.br`
+   - Frontend: `app.zelare.com.br`
+   - Site: `zelare.com.br`
 3. **Aguarde SSL** (automático via Let's Encrypt)
 
-**Se NÃO tiver domínio**: Use as URLs geradas pelo Coolify (ex: `https://conexa-v3-api-abc123.coolify.io`)
+**Se NÃO tiver domínio**: Use as URLs geradas pelo Coolify (ex: `https://zelare-saas-api-abc123.coolify.io`)
 
 ---
 
@@ -158,7 +158,7 @@ node scripts/create-admin.js
 ```
 
 **Credenciais**:
-- Email: `admin@conexa.com`
+- Email: `admin@zelare.com.br`
 - Senha: `Admin@123`
 
 ---
@@ -182,13 +182,13 @@ node scripts/seed-test-users.js
 
 1. **Health check da API**:
    ```bash
-   curl https://api.conexa.com/health
+   curl https://api.zelare.com.br/health
    # Deve retornar: {"status":"ok"}
    ```
 
 2. **Acesse o frontend**:
-   - URL: `https://app.conexa.com`
-   - Login: `admin@conexa.com`
+   - URL: `https://app.zelare.com.br`
+   - Login: `admin@zelare.com.br`
    - Senha: `Admin@123`
 
 3. **Teste dashboards**:

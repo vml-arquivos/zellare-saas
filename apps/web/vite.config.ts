@@ -15,12 +15,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['branding/cocris/logo-cocris.png', 'vite.svg'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'brand/zelare-logo-square.png'],
       manifest: {
-        name: 'COCRIS Pedagógico',
-        short_name: 'COCRIS',
-        description: 'Sistema de gestão pedagógica para educação infantil',
-        theme_color: '#4f46e5',
+        name: 'Zelare',
+        short_name: 'Zelare',
+        description: 'cuidado, pedagogia e gestão inteligente',
+        theme_color: '#003f4d',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
@@ -28,8 +28,8 @@ export default defineConfig({
         scope: '/',
         lang: 'pt-BR',
         icons: [
-          { src: 'branding/cocris/logo-cocris.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-          { src: 'branding/cocris/logo-cocris.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: 'favicon.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: 'brand/zelare-icon-card.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
         shortcuts: [
           { name: 'Chamada', url: '/app/mobile/chamada', description: 'Registrar chamada da turma' },
@@ -46,7 +46,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             // API: network-first com fallback para cache (dados frescos quando online)
-            urlPattern: /^https:\/\/apicocris\.casadf\.com\.br\/(?!auth).*/i,
+            urlPattern: /^https:\/\/api\.zelare\.seu-dominio\.com\.br\/(?!auth).*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -57,7 +57,7 @@ export default defineConfig({
           },
           {
             // Auth: sempre da rede (tokens não podem ser stale)
-            urlPattern: /^https:\/\/apicocris\.casadf\.com\.br\/auth.*/i,
+            urlPattern: /^https:\/\/api\.zelare\.seu-dominio\.com\.br\/auth.*/i,
             handler: 'NetworkOnly',
           },
           {

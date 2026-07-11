@@ -1,7 +1,7 @@
-# Auditoria do Módulo da Nutricionista — Conexa V3
+# Auditoria do Módulo da Nutricionista — Zelare
 
 **Data:** 01/04/2026  
-**Repositório:** `vml-arquivos/conexa-v3.0`  
+**Repositório:** `vml-arquivos/zelare-saas`  
 **Branch:** `main` (atualizado)
 
 ---

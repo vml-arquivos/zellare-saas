@@ -1,9 +1,9 @@
 
-# Conexa - Plataforma de Gestão Educacional
+# Zelare - Plataforma de Gestão Educacional
 
 ## 1. Visão do Projeto
 
-O **Conexa** é uma plataforma SaaS (_Software as a Service_) de gestão educacional, pedagógica e operacional, desenhada especificamente para o nicho de **instituições de educação infantil** que atendem crianças de 0 a 4 anos. 
+O **Zelare** é uma plataforma SaaS (_Software as a Service_) de gestão educacional, pedagógica e operacional, desenhada especificamente para o nicho de **instituições de educação infantil** que atendem crianças de 0 a 4 anos. 
 
 Nossa visão é criar um ecossistema digital integrado que centraliza a administração, otimiza a comunicação e, acima de tudo, potencializa o desenvolvimento pedagógico. A plataforma foi concebida para ser a base de um sistema exemplar: **escalável, auditável, humano-centrista e tecnicamente impecável**.
 
@@ -11,7 +11,7 @@ O sistema nasce com suporte nativo a múltiplas unidades (multi-tenancy), uma hi
 
 ## 2. Princípios Fundamentais
 
-O desenvolvimento do Conexa é guiado por princípios não negociáveis que garantem a segurança, a integridade e a qualidade do sistema.
+O desenvolvimento do Zelare é guiado por princípios não negociáveis que garantem a segurança, a integridade e a qualidade do sistema.
 
 | Princípio | Descrição |
 | :--- | :--- |
@@ -45,13 +45,13 @@ A primeira entrega se concentra na fundação do sistema: o banco de dados e a d
 └── README.md           # Este arquivo
 ```
 
-- **`prisma/schema.prisma`**: Arquivo central que descreve todas as tabelas, colunas, relações, enums e regras do banco de dados. Ele serve como a "fonte da verdade" para a estrutura de dados do Conexa.
+- **`prisma/schema.prisma`**: Arquivo central que descreve todas as tabelas, colunas, relações, enums e regras do banco de dados. Ele serve como a "fonte da verdade" para a estrutura de dados do Zelare.
 - **`README.md`**: Documento que introduz a visão, os princípios, a stack e a estrutura do projeto, servindo como guia para todos os desenvolvedores e stakeholders.
 
 
 ## 5. Autenticação e Controle de Acesso (RBAC)
 
-A segurança do Conexa é implementada através de um sistema robusto de autenticação baseada em JWT e um controle de acesso granular (RBAC) que respeita a hierarquia multi-tenant.
+A segurança do Zelare é implementada através de um sistema robusto de autenticação baseada em JWT e um controle de acesso granular (RBAC) que respeita a hierarquia multi-tenant.
 
 ### Fluxo de Autenticação
 
@@ -97,7 +97,7 @@ Esta abordagem garante que a segurança é declarativa, centralizada e fácil de
 
 ## 6. Módulo de Diário de Bordo Pedagógico
 
-O núcleo do Conexa é o Diário de Bordo, implementado através do `DiaryEventModule`. Ele permite o registro de eventos pedagógicos individuais para cada criança, com segurança e rastreabilidade.
+O núcleo do Zelare é o Diário de Bordo, implementado através do `DiaryEventModule`. Ele permite o registro de eventos pedagógicos individuais para cada criança, com segurança e rastreabilidade.
 
 ### Funcionalidades
 

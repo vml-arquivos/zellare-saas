@@ -155,7 +155,7 @@ interface EmpresaTransporte {
   nome: string;
 }
 
-const STORAGE_KEY = 'conexa:secretaria:nova-matricula:v2';
+const STORAGE_KEY = 'zelare:secretaria:nova-matricula:v2';
 
 const DOCUMENTOS_CHECKLIST: Array<{ key: keyof Omit<DocumentosMatricula, 'anexos'>; label: string }> = [
   { key: 'certidaoNascimento', label: 'Certidão de nascimento' },

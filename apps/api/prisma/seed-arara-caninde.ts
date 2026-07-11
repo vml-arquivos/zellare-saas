@@ -1,6 +1,6 @@
 /**
  * SEED REAL — CEPI ARARA-CANINDÉ 2026
- * Popula o banco com dados reais: mantenedora COCRIS, unidade Arara-Canindé,
+ * Popula o banco com dados reais: mantenedora Zelare, unidade Arara-Canindé,
  * 9 turmas, 7 professoras, 169 alunos e equipe de gestão.
  * Gerado automaticamente a partir do ALUNOS2026.xlsx
  */
@@ -350,13 +350,13 @@ async function main() {
 
   const senhaHash = await bcrypt.hash(SENHA_PADRAO, 10);
 
-  // ─── 1. Mantenedora COCRIS ──────────────────────────────────────────────────
+  // ─── 1. Mantenedora Zelare ──────────────────────────────────────────────────
   const mantenedora = await prisma.mantenedora.upsert({
     where: { id: MANTENEDORA_ID },
-    update: { name: 'COCRIS — Cooperativa de Crianças' },
+    update: { name: 'Zelare — Cooperativa de Crianças' },
     create: {
       id: MANTENEDORA_ID,
-      name: 'COCRIS — Cooperativa de Crianças',
+      name: 'Zelare — Cooperativa de Crianças',
       cnpj: '12345678000191',
       email: 'contato@cocris.org',
       phone: '61933334444',

@@ -1,7 +1,7 @@
-# ESTADO ATUAL DOS MÓDULOS — CONEXA V2
+# ESTADO ATUAL DOS MÓDULOS — ZELARE V2
 
 **Data:** 2026-02-19  
-**Projeto:** Conexa-V2 (Backend + Frontend)  
+**Projeto:** Zelare-V2 (Backend + Frontend)  
 **Objetivo:** Mapear estado de implementação de cada módulo do sistema
 
 ---
@@ -9,9 +9,9 @@
 ## RESUMO EXECUTIVO
 
 ### Repositórios Clonados
-- ✅ Backend (NestJS + Prisma): `/home/ubuntu/Conexa-V2`
-- ✅ Frontend (Vite + React): `/home/ubuntu/font-conexa-v2`
-- ✅ Site: `/home/ubuntu/site-cocris`
+- ✅ Backend (NestJS + Prisma): `/home/ubuntu/Zelare-V2`
+- ✅ Frontend (Vite + React): `/home/ubuntu/zelare-web`
+- ✅ Site: `/home/ubuntu/site-zelare`
 
 ### Commits Recentes (Backend)
 ```

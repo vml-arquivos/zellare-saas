@@ -63,7 +63,7 @@ export class LookupService {
 
     // 1. Roles globais e centrais (DEVELOPER, MANTENEDORA, STAFF_CENTRAL):
     //    Retornar TODAS as unidades da mantenedora — independente de unitScopes.
-    //    Isso garante que Coordenação Geral e Psicóloga vejam todas as unidades COCRIS.
+    //    Isso garante que Coordenação Geral e Psicóloga vejam todas as unidades Zelare.
     const hasGlobalRole = user.roles.some((role) =>
       ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL'].includes(role.level),
     );

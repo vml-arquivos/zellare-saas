@@ -1,4 +1,4 @@
-# 🔐 Variáveis de Ambiente - Deploy Conexa V3.0
+# 🔐 Variáveis de Ambiente - Deploy Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Status**: ✅ PRONTO PARA DEPLOY  
@@ -8,7 +8,7 @@
 
 ## 📋 Visão Geral
 
-Este documento contém **TODAS as variáveis de ambiente** necessárias para o deploy do Conexa V3.0 no Coolify.
+Este documento contém **TODAS as variáveis de ambiente** necessárias para o deploy do Zelare no Coolify.
 
 **3 Serviços**:
 1. **Backend API** (NestJS) - 15 variáveis obrigatórias
@@ -27,7 +27,7 @@ Copie e cole no Coolify (aba "Environment Variables"):
 # ============================================================================
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
-DATABASE_URL=postgresql://conexa_user:SUA_SENHA_AQUI@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
 
 # ============================================================================
 # JWT (OBRIGATÓRIO)
@@ -86,12 +86,12 @@ postgresql://[USUARIO]:[SENHA]@[CONTAINER]:5432/[BANCO]
 
 **Exemplo**:
 ```
-postgresql://conexa_user:Cx3@Pg$qL9#mN2vR@conexa-v3-db:5432/conexa
+postgresql://zelare_user:Cx3@Pg$qL9#mN2vR@zelare-saas-db:5432/conexa
 ```
 
 **Passo a passo**:
 1. No Coolify, vá em "Databases"
-2. Clique no banco `conexa-v3-db`
+2. Clique no banco `zelare-saas-db`
 3. Copie a "Connection String"
 4. Cole aqui
 
@@ -162,7 +162,7 @@ Kx9mN2vR5tY8wA1bC4dE6fG7hJ9kL0mN3pQ5rS8tU1vW4xY7zA0bC3dE6fG9hJ2k
 - `seu-dominio.com` pelo seu domínio real
 
 **Exemplos**:
-- `https://api.conexa.com.br`
+- `https://api.zelare.com.br.br`
 - `https://api.conexa.org`
 - `https://api-conexa.meudominio.com`
 
@@ -294,7 +294,7 @@ AWS_REGION=us-east-1
 AWS_S3_BUCKET=conexa-uploads
 
 # Redis (Cache)
-REDIS_URL=redis://conexa-v3-redis:6379
+REDIS_URL=redis://zelare-saas-redis:6379
 REDIS_TTL=3600
 
 # Email (Notificações)
@@ -303,7 +303,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=seu-email@gmail.com
 SMTP_PASSWORD=sua-senha-app
-EMAIL_FROM=noreply@conexa.com
+EMAIL_FROM=noreply@zelare.com.br
 
 # Sentry (Monitoramento de Erros)
 SENTRY_DSN=https://sua-key@sentry.io/projeto
@@ -333,7 +333,7 @@ VITE_API_URL=https://api.conexa.seu-dominio.com
 # ============================================================================
 # APP CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -360,7 +360,7 @@ VITE_APP_VERSION=3.0.0
 
 **Valores**:
 ```bash
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -378,7 +378,7 @@ Copie e cole no Coolify (aba "Environment Variables"):
 # ============================================================================
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
-DATABASE_URL=postgresql://conexa_user:SUA_SENHA_AQUI@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
 
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
@@ -417,7 +417,7 @@ PORT=5174
 ### BACKEND API
 
 ```bash
-DATABASE_URL=postgresql://conexa_user:SUA_SENHA_AQUI@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
 JWT_SECRET=sua-chave-secreta-super-segura-aqui-minimo-32-caracteres
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
@@ -441,7 +441,7 @@ LOG_FORMAT=json
 
 ```bash
 VITE_API_URL=https://api.conexa.seu-dominio.com
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -452,7 +452,7 @@ VITE_APP_VERSION=3.0.0
 ### SITE INSTITUCIONAL
 
 ```bash
-DATABASE_URL=postgresql://conexa_user:SUA_SENHA_AQUI@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
 API_URL=https://api.conexa.seu-dominio.com
 NODE_ENV=production
 PORT=5174

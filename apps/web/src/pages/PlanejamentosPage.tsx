@@ -341,7 +341,7 @@ export default function PlanejamentosPage() {
   });
 
   return (
-    <PageShell title="Planejamentos Pedagógicos" subtitle="Organize seus planejamentos com base na Matriz Curricular COCRIS 2026">
+    <PageShell title="Planejamentos Pedagógicos" subtitle="Organize seus planejamentos com base na Matriz Curricular Zelare 2026">
       {/* Seletor de unidade — apenas para STAFF_CENTRAL/MANTENEDORA */}
       {ehCentral && (
         <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-4">
@@ -746,7 +746,7 @@ export default function PlanejamentosPage() {
             <div className="flex items-start gap-3">
               <Sparkles className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-indigo-800">Matriz Curricular COCRIS 2026</h3>
+                <h3 className="font-semibold text-indigo-800">Matriz Curricular Zelare 2026</h3>
                 <p className="text-sm text-indigo-600 mt-0.5">
                   Baseada na BNCC e no Currículo em Movimento do DF. Clique em qualquer objetivo para adicioná-lo ao seu planejamento.
                 </p>

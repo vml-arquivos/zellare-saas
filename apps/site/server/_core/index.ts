@@ -71,7 +71,7 @@ async function startServer() {
   app.get("/api/health", (_req, res) => {
     res.json({
       status: "ok",
-      service: "cocris-site",
+      service: "zelare-site",
       version: "3.0.0",
       timestamp: new Date().toISOString(),
     });
@@ -113,7 +113,7 @@ async function startServer() {
   const HOST = "0.0.0.0";
 
   server.listen(PORT, HOST, () => {
-    console.log(`✅ Conexa Site rodando em http://${HOST}:${PORT}`);
+    console.log(`✅ Zelare Site rodando em http://${HOST}:${PORT}`);
     console.log(`🌐 Ambiente: ${process.env.NODE_ENV || "production"}`);
   });
 }

@@ -1,6 +1,6 @@
-## Relatório Final de Auditoria - Conexa
+## Relatório Final de Auditoria - Zelare
 
-Como **MANUZ, Engenheiro de Software Sênior**, realizei uma auditoria completa e objetiva do repositório Conexa. Este relatório apresenta o estado atual do projeto com evidências verificáveis.
+Como **MANUZ, Engenheiro de Software Sênior**, realizei uma auditoria completa e objetiva do repositório Zelare. Este relatório apresenta o estado atual do projeto com evidências verificáveis.
 
 ---
 

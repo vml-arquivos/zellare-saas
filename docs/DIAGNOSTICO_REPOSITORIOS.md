@@ -2,18 +2,18 @@
 
 ## Resumo Executivo
 
-Foram clonados e analisados três repositórios que compõem o sistema Conexa:
+Foram clonados e analisados três repositórios que compõem o sistema Zelare:
 
-1. **Conexa-V2** - Back-end (API REST)
-2. **font-conexa-v2** - Front-end (Interface Web)
-3. **site-cocris** - Site Institucional (Landing page + CMS)
+1. **Zelare-V2** - Back-end (API REST)
+2. **zelare-web** - Front-end (Interface Web)
+3. **site-zelare** - Site Institucional (Landing page + CMS)
 
 ---
 
-## 1. Repositório: Conexa-V2 (Back-end)
+## 1. Repositório: Zelare-V2 (Back-end)
 
 ### Informações Gerais
-- **URL**: vml-arquivos/Conexa-V2
+- **URL**: vml-arquivos/Zelare-V2
 - **Branch Principal**: main
 - **Último Commit**: `8d0bfe7` - Merge pull request #17 (RBAC para reports)
 - **Total de Objetos**: 842
@@ -21,8 +21,8 @@ Foram clonados e analisados três repositórios que compõem o sistema Conexa:
 ### Branches Remotas (14 branches)
 - `main` (principal)
 - `codex/implementar-rbac-para-reports`
-- `feat/cocris-import-lookup-templates`
-- `feat/cocris-seed-data-logins`
+- `feat/zelare-import-lookup-templates`
+- `feat/zelare-seed-data-logins`
 - `feat/dashboard-mantenedora`
 - `feat/lookup-accessible-units-classrooms`
 - `feat/pr-002-seed-ei02-2026`
@@ -59,7 +59,7 @@ Foram clonados e analisados três repositórios que compõem o sistema Conexa:
 
 ### Estrutura de Diretórios
 ```
-Conexa-V2/
+Zelare-V2/
 ├── data/                    # Dados de seed (XLSX, JSON)
 ├── docs/                    # Documentação e evidências
 ├── ops/                     # Operações e evidências
@@ -102,10 +102,10 @@ Conexa-V2/
 
 ---
 
-## 2. Repositório: font-conexa-v2 (Front-end)
+## 2. Repositório: zelare-web (Front-end)
 
 ### Informações Gerais
-- **URL**: vml-arquivos/font-conexa-v2
+- **URL**: vml-arquivos/zelare-web
 - **Branch Principal**: main
 - **Último Commit**: `e8811de` - Merge pull request #11 (atendimento pais dashboard central)
 - **Total de Objetos**: 363
@@ -143,7 +143,7 @@ Conexa-V2/
 
 ### Estrutura de Diretórios
 ```
-font-conexa-v2/
+zelare-web/
 ├── public/
 ├── src/
 │   ├── api/                # Integração com API
@@ -171,10 +171,10 @@ font-conexa-v2/
 
 ---
 
-## 3. Repositório: site-cocris (Site Institucional)
+## 3. Repositório: site-zelare (Site Institucional)
 
 ### Informações Gerais
-- **URL**: vml-arquivos/site-cocris
+- **URL**: vml-arquivos/site-zelare
 - **Branch Principal**: main
 - **Último Commit**: `0bee3e2` - feat: adiciona Trabalhe Conosco completo e Compliance
 - **Total de Objetos**: 331
@@ -198,7 +198,7 @@ Nenhuma PR aberta.
 
 ### Estrutura de Diretórios
 ```
-site-cocris/
+site-zelare/
 ├── client/                  # Front-end do site
 │   ├── public/
 │   ├── src/
@@ -239,9 +239,9 @@ site-cocris/
 ### Arquitetura Atual
 **Modelo**: Três repositórios independentes (Multi-repo)
 
-1. **Back-end** (Conexa-V2): NestJS + Prisma + PostgreSQL/Supabase
-2. **Front-end** (font-conexa-v2): React + Vite + TailwindCSS
-3. **Site** (site-cocris): Full-stack (Vite + Drizzle + S3 + Stripe)
+1. **Back-end** (Zelare-V2): NestJS + Prisma + PostgreSQL/Supabase
+2. **Front-end** (zelare-web): React + Vite + TailwindCSS
+3. **Site** (site-zelare): Full-stack (Vite + Drizzle + S3 + Stripe)
 
 ### Desafios Identificados
 

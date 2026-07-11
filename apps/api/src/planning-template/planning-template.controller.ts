@@ -59,7 +59,7 @@ export class PlanningTemplateController {
    */
   /**
    * GET /planning-templates/cocris-defaults
-   * Retorna templates padrão COCRIS (sempre 200, nunca 404)
+   * Retorna templates padrão Zelare (sempre 200, nunca 404)
    *
    * Acesso: Todos os usuários autenticados
    */

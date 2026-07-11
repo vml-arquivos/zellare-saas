@@ -43,15 +43,15 @@
 }
 
 :root {
-  /* COCRIS Brand Colors */
-  --cocris-red: oklch(0.55 0.22 25); /* #E31E24 */
-  --cocris-blue: oklch(0.5 0.15 250); /* #0066CC */
-  --cocris-yellow: oklch(0.8 0.15 85); /* #FFC107 */
-  --cocris-dark-blue: oklch(0.25 0.08 250); /* #192F59 */
+  /* Zelare Brand Colors */
+  --zelare-red: oklch(0.55 0.22 25); /* #E31E24 */
+  --zelare-blue: oklch(0.5 0.15 250); /* #0066CC */
+  --zelare-yellow: oklch(0.8 0.15 85); /* #FFC107 */
+  --zelare-dark-blue: oklch(0.25 0.08 250); /* #192F59 */
   
-  --primary: oklch(0.55 0.22 25); /* COCRIS Red */
+  --primary: oklch(0.55 0.22 25); /* Zelare Red */
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.5 0.15 250); /* COCRIS Blue */
+  --sidebar-primary: oklch(0.5 0.15 250); /* Zelare Blue */
   --sidebar-primary-foreground: oklch(1 0 0);
   --chart-1: oklch(0.55 0.22 25);
   --chart-2: oklch(0.5 0.15 250);
@@ -85,9 +85,9 @@
 }
 
 .dark {
-  --primary: oklch(0.55 0.22 25); /* COCRIS Red */
+  --primary: oklch(0.55 0.22 25); /* Zelare Red */
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.5 0.15 250); /* COCRIS Blue */
+  --sidebar-primary: oklch(0.5 0.15 250); /* Zelare Blue */
   --sidebar-primary-foreground: oklch(1 0 0);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.85 0.005 65);

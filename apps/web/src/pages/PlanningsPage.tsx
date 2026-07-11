@@ -239,7 +239,7 @@ export function PlanningsPage() {
 
       {user && (
         <p className="text-xs text-gray-400 text-center">
-          Planejamentos de <span className="font-medium">{(user.nome as string) || user.email}</span> · Conexa V2 © 2026
+          Planejamentos de <span className="font-medium">{(user.nome as string) || user.email}</span> · Zelare © 2026
         </p>
       )}
     </div>

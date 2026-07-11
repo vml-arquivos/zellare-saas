@@ -2,7 +2,7 @@
 
 **Seus subdomínios**:
 - Backend API: `api.conexa.casadf.com.br`
-- Frontend Web: `app.conexa3.casadf.com.br`
+- Frontend Web: `app.zelare.seu-dominio.com.br`
 - Site: `conexa3.casadf.com.br`
 
 ---
@@ -47,7 +47,7 @@ API_URL=https://api.conexa.casadf.com.br
 # CORS (OBRIGATÓRIO)
 # ============================================================================
 # IMPORTANTE: Adicione os 2 subdomínios do frontend e site
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 
 # ============================================================================
 # GEMINI AI (OBRIGATÓRIO)
@@ -74,7 +74,7 @@ LOG_FORMAT=json
 
 ## 🎨 FRONTEND WEB
 
-**Domínio no Coolify**: `app.conexa3.casadf.com.br`
+**Domínio no Coolify**: `app.zelare.seu-dominio.com.br`
 
 **Variáveis de Ambiente** (3 variáveis):
 
@@ -87,7 +87,7 @@ VITE_API_URL=https://api.conexa.casadf.com.br
 # ============================================================================
 # APP CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -126,17 +126,17 @@ PORT=5174
 - [ ] `REDIS_URL` copiada do Redis
 - [ ] `JWT_SECRET` gerada com `openssl rand -base64 32`
 - [ ] `API_URL=https://api.conexa.casadf.com.br`
-- [ ] `CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br`
+- [ ] `CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br`
 - [ ] `GEMINI_API_KEY` obtida em https://makersuite.google.com/app/apikey
 - [ ] Todas as 14 variáveis configuradas
 - [ ] Redeploy realizado
 
-### 2. Frontend Web (`app.conexa3.casadf.com.br`)
+### 2. Frontend Web (`app.zelare.seu-dominio.com.br`)
 
 - [ ] DNS configurado: `app` → IP da VPS
-- [ ] Domínio configurado no Coolify: `app.conexa3.casadf.com.br`
+- [ ] Domínio configurado no Coolify: `app.zelare.seu-dominio.com.br`
 - [ ] `VITE_API_URL=https://api.conexa.casadf.com.br`
-- [ ] `VITE_APP_NAME=Conexa V3.0`
+- [ ] `VITE_APP_NAME=Zelare`
 - [ ] `VITE_APP_VERSION=3.0.0`
 - [ ] Todas as 3 variáveis configuradas
 - [ ] Deploy realizado
@@ -246,18 +246,18 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 **MUITO IMPORTANTE**: Adicione os 2 subdomínios separados por vírgula **SEM ESPAÇOS**:
 
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 ```
 
 **❌ ERRADO**:
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br, https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br, https://conexa3.casadf.com.br
 ```
 (Tem espaço após a vírgula)
 
 **❌ ERRADO**:
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br
 ```
 (Falta o site)
 
@@ -335,7 +335,7 @@ cd /app
 node scripts/create-admin.js
 ```
 
-Login: `admin@conexa.com` / `Admin@123`
+Login: `admin@zelare.com.br` / `Admin@123`
 
 ### 4. Crie Usuários de Teste (1 min)
 
@@ -348,7 +348,7 @@ node scripts/seed-test-users.js
 ### 5. Configure Frontend (5 min)
 
 1. Crie aplicação no Coolify
-2. Domínio: `app.conexa3.casadf.com.br`
+2. Domínio: `app.zelare.seu-dominio.com.br`
 3. Adicione as 3 variáveis
 4. Deploy
 
@@ -362,7 +362,7 @@ node scripts/seed-test-users.js
 ### 7. Teste Sistema (5 min)
 
 1. Health check: `curl https://api.conexa.casadf.com.br/health`
-2. Login: `https://app.conexa3.casadf.com.br` → `admin@conexa.com`
+2. Login: `https://app.zelare.seu-dominio.com.br` → `admin@zelare.com.br`
 3. Site: `https://conexa3.casadf.com.br`
 
 ---
@@ -377,7 +377,7 @@ curl https://api.conexa.casadf.com.br/health
 # Deve retornar: {"status":"ok"}
 
 # 2. Teste Frontend
-curl https://app.conexa3.casadf.com.br
+curl https://app.zelare.seu-dominio.com.br
 # Deve retornar HTML da página de login
 
 # 3. Teste Site
@@ -391,14 +391,14 @@ curl https://conexa3.casadf.com.br
 
 ### Subdomínios:
 - Backend: `api.conexa.casadf.com.br`
-- Frontend: `app.conexa3.casadf.com.br`
+- Frontend: `app.zelare.seu-dominio.com.br`
 - Site: `conexa3.casadf.com.br`
 
 ### Variáveis Críticas:
 
 **Backend**:
 - `DATABASE_URL` (copie do PostgreSQL)
-- `CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br`
+- `CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br`
 - `GEMINI_API_KEY` (obtenha no Google)
 
 **Frontend**:

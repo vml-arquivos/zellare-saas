@@ -172,7 +172,7 @@ function generoLabel(g?: string): string {
 }
 
 function logoKey(unitId: string) {
-  return `conexa:unit:logo:${unitId}`;
+  return `zelare:unit:logo:${unitId}`;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -666,7 +666,7 @@ export default function FichaAlunoPage() {
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6">
-          Ficha gerada em {new Date().toLocaleDateString('pt-BR')} — {unit?.name} — Sistema COCRIS Pedagógico
+          Ficha gerada em {new Date().toLocaleDateString('pt-BR')} — {unit?.name} — Sistema Zelare
         </p>
       </div>
 

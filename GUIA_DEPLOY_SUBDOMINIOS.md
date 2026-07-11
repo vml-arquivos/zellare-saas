@@ -12,8 +12,8 @@ Você precisa de **3 subdomínios**:
 
 | Serviço | Subdomínio | Porta | Status |
 |---------|------------|-------|--------|
-| **Backend API** | `api.conexa3.casadf.com.br` | 3000 | ✅ Já configurado |
-| **Frontend Web** | `app.conexa3.casadf.com.br` | 5173 | ⚠️ Precisa configurar |
+| **Backend API** | `api.zelare.seu-dominio.com.br` | 3000 | ✅ Já configurado |
+| **Frontend Web** | `app.zelare.seu-dominio.com.br` | 5173 | ⚠️ Precisa configurar |
 | **Site Institucional** | `site.conexa3.casadf.com.br` | 5174 | ⚠️ Precisa configurar |
 
 ---
@@ -30,7 +30,7 @@ Você precisa de **3 subdomínios**:
 
 #### 2. Nas Variáveis de Ambiente
 - Apenas para **referenciar** os outros serviços
-- Exemplo: `VITE_API_URL=https://api.conexa3.casadf.com.br`
+- Exemplo: `VITE_API_URL=https://api.zelare.seu-dominio.com.br`
 
 ---
 
@@ -42,7 +42,7 @@ Você precisa de **3 subdomínios**:
 
 Na imagem que você enviou, vejo:
 ```
-Domains: https://api.conexa3.casadf.com.br
+Domains: https://api.zelare.seu-dominio.com.br
 ```
 
 ✅ **Já está correto!** Não precisa mudar.
@@ -80,13 +80,13 @@ JWT_EXPIRES_IN=7d
 # ============================================================================
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 
 # ============================================================================
 # CORS (OBRIGATÓRIO)
 # ============================================================================
 # IMPORTANTE: Adicione os subdomínios do frontend e site
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://site.conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
 
 # ============================================================================
 # GEMINI AI (OBRIGATÓRIO)
@@ -201,9 +201,9 @@ Após configurar as variáveis:
 1. Vá em **"Projects"** → Selecione seu projeto
 2. Clique em **"+ Add Resource"** → **"Application"**
 3. Selecione **"GitHub"**
-4. Repositório: `vml-arquivos/conexa-v3.0`
+4. Repositório: `vml-arquivos/zelare-saas`
 5. Branch: `main`
-6. Name: `conexa-v3-web`
+6. Name: `zelare-saas-web`
 7. Clique em **"Continue"**
 
 ---
@@ -240,7 +240,7 @@ cd /apps/web && pnpm preview --host 0.0.0.0 --port 5173
 Na aba **"Configuration"** → **"General"** → **"Domains"**:
 
 1. Clique em **"Generate Domain"** (ou adicione manualmente)
-2. Digite: `app.conexa3.casadf.com.br`
+2. Digite: `app.zelare.seu-dominio.com.br`
 3. Clique em **"Save"**
 
 **IMPORTANTE**: Certifique-se de que o DNS está configurado!
@@ -261,7 +261,7 @@ No seu provedor DNS (Cloudflare, GoDaddy, etc.):
 
 **Teste**:
 ```bash
-nslookup app.conexa3.casadf.com.br
+nslookup app.zelare.seu-dominio.com.br
 ```
 
 Deve retornar o IP da VPS.
@@ -276,12 +276,12 @@ Na aba **"Environment Variables"**:
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_API_URL=https://api.conexa3.casadf.com.br
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
 
 # ============================================================================
 # APP CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_APP_NAME=Conexa V3.0
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -305,7 +305,7 @@ O Coolify vai gerar SSL automaticamente via Let's Encrypt.
 
 **Teste**:
 ```bash
-curl https://app.conexa3.casadf.com.br
+curl https://app.zelare.seu-dominio.com.br
 ```
 
 Deve retornar HTML da página de login.
@@ -319,9 +319,9 @@ Deve retornar HTML da página de login.
 1. Vá em **"Projects"** → Selecione seu projeto
 2. Clique em **"+ Add Resource"** → **"Application"**
 3. Selecione **"GitHub"**
-4. Repositório: `vml-arquivos/conexa-v3.0`
+4. Repositório: `vml-arquivos/zelare-saas`
 5. Branch: `main`
-6. Name: `conexa-v3-site`
+6. Name: `zelare-saas-site`
 7. Clique em **"Continue"**
 
 ---
@@ -390,7 +390,7 @@ DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
 ```
@@ -439,7 +439,7 @@ node scripts/create-admin.js
 ```
 
 **Credenciais**:
-- Email: `admin@conexa.com`
+- Email: `admin@zelare.com.br`
 - Senha: `Admin@123`
 
 ---
@@ -462,7 +462,7 @@ node scripts/seed-test-users.js
 #### 6.1 Teste Health Check
 
 ```bash
-curl https://api.conexa3.casadf.com.br/health
+curl https://api.zelare.seu-dominio.com.br/health
 ```
 
 **Deve retornar**:
@@ -474,8 +474,8 @@ curl https://api.conexa3.casadf.com.br/health
 
 #### 6.2 Teste Login
 
-1. Acesse: `https://app.conexa3.casadf.com.br`
-2. Login: `admin@conexa.com`
+1. Acesse: `https://app.zelare.seu-dominio.com.br`
+2. Login: `admin@zelare.com.br`
 3. Senha: `Admin@123`
 4. Deve entrar no dashboard
 
@@ -501,13 +501,13 @@ Deve aparecer o site institucional.
 
 ### Configuração DNS
 
-- [ ] Registro A para `app.conexa3.casadf.com.br` → IP da VPS
+- [ ] Registro A para `app.zelare.seu-dominio.com.br` → IP da VPS
 - [ ] Registro A para `site.conexa3.casadf.com.br` → IP da VPS
 - [ ] DNS propagado (teste com `nslookup`)
 
 ### Backend API
 
-- [ ] Domínio: `api.conexa3.casadf.com.br` (já configurado)
+- [ ] Domínio: `api.zelare.seu-dominio.com.br` (já configurado)
 - [ ] 14 variáveis de ambiente configuradas
 - [ ] `DATABASE_URL` copiada do PostgreSQL
 - [ ] `REDIS_URL` copiada do Redis (opcional)
@@ -522,9 +522,9 @@ Deve aparecer o site institucional.
 ### Frontend Web
 
 - [ ] Aplicação criada no Coolify
-- [ ] Domínio: `app.conexa3.casadf.com.br`
+- [ ] Domínio: `app.zelare.seu-dominio.com.br`
 - [ ] 3 variáveis de ambiente configuradas
-- [ ] `VITE_API_URL=https://api.conexa3.casadf.com.br`
+- [ ] `VITE_API_URL=https://api.zelare.seu-dominio.com.br`
 - [ ] Deploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] SSL ativo (cadeado verde)
@@ -540,9 +540,9 @@ Deve aparecer o site institucional.
 
 ### Testes
 
-- [ ] Health check: `https://api.conexa3.casadf.com.br/health` → `{"status":"ok"}`
-- [ ] Frontend: `https://app.conexa3.casadf.com.br` → Tela de login
-- [ ] Login funciona: `admin@conexa.com` / `Admin@123`
+- [ ] Health check: `https://api.zelare.seu-dominio.com.br/health` → `{"status":"ok"}`
+- [ ] Frontend: `https://app.zelare.seu-dominio.com.br` → Tela de login
+- [ ] Login funciona: `admin@zelare.com.br` / `Admin@123`
 - [ ] Dashboard carrega
 - [ ] IA funciona (teste "Gerar com IA")
 - [ ] Site: `https://site.conexa3.casadf.com.br` → Landing page
@@ -561,8 +561,8 @@ JWT_SECRET=sua-chave-secreta-super-segura-aqui-minimo-32-caracteres
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.conexa3.casadf.com.br
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://site.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
 GEMINI_API_KEY=sua-gemini-api-key-aqui
 GEMINI_MODEL=gemini-1.5-flash
 ENABLE_AI_ASSISTANT=true
@@ -575,8 +575,8 @@ LOG_FORMAT=json
 ### Frontend Web (3 variáveis)
 
 ```bash
-VITE_API_URL=https://api.conexa3.casadf.com.br
-VITE_APP_NAME=Conexa V3.0
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -584,7 +584,7 @@ VITE_APP_VERSION=3.0.0
 
 ```bash
 DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
 ```
@@ -624,7 +624,7 @@ O nome do container PostgreSQL no Coolify pode ser:
 **MUITO IMPORTANTE**: Adicione os 2 subdomínios:
 
 ```bash
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://site.conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
 ```
 
 **Sem espaços após a vírgula!**
@@ -660,7 +660,7 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 1. Verifique se o registro A foi salvo
 2. Aguarde mais tempo (até 48h)
 3. Limpe cache DNS: `ipconfig /flushdns` (Windows)
-4. Teste com: `nslookup app.conexa3.casadf.com.br`
+4. Teste com: `nslookup app.zelare.seu-dominio.com.br`
 
 ### Problema: SSL não gera
 
@@ -674,7 +674,7 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 
 **Solução**:
 1. Verifique `CORS_ORIGIN` no backend
-2. Deve incluir `https://app.conexa3.casadf.com.br`
+2. Deve incluir `https://app.zelare.seu-dominio.com.br`
 3. Sem espaços após vírgula
 4. Redeploy do backend
 
@@ -703,8 +703,8 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 Após seguir este guia:
 
 ✅ **3 aplicações rodando**:
-- Backend API: `https://api.conexa3.casadf.com.br`
-- Frontend Web: `https://app.conexa3.casadf.com.br`
+- Backend API: `https://api.zelare.seu-dominio.com.br`
+- Frontend Web: `https://app.zelare.seu-dominio.com.br`
 - Site: `https://site.conexa3.casadf.com.br`
 
 ✅ **PostgreSQL e Redis conectados**

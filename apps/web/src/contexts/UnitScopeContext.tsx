@@ -7,7 +7,7 @@
  *
  * Persistência:
  *   1. URL query param (?unitId=) — prioridade máxima, sincronizado bidirecional
- *   2. localStorage (key: "conexa:selectedUnitId") — fallback entre sessões
+ *   2. localStorage (key: "zelare:selectedUnitId") — fallback entre sessões
  *   3. Validação: se unitId não estiver em /lookup/units/accessible, limpa
  *
  * Modos:
@@ -65,7 +65,7 @@ interface UnitScopeContextType {
 
 const UnitScopeContext = createContext<UnitScopeContextType | undefined>(undefined);
 
-const LS_KEY = 'conexa:selectedUnitId';
+const LS_KEY = 'zelare:selectedUnitId';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 

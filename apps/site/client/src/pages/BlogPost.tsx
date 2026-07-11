@@ -82,7 +82,7 @@ export default function BlogPost() {
                     </div>
                     <div className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      <span>COCRIS</span>
+                      <span>Zelare</span>
                     </div>
                   </div>
 

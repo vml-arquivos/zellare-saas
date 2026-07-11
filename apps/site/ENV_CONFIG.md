@@ -1,4 +1,4 @@
-# Configuração de Variáveis de Ambiente - COCRIS
+# Configuração de Variáveis de Ambiente - Zelare
 
 ## Variáveis Já Configuradas (Manus)
 
@@ -38,7 +38,7 @@ STRIPE_WEBHOOK_SECRET=whsec_... (opcional)
 3. Copie a "Publishable key" (pk_test_ ou pk_live_)
 4. Para webhook:
    - Acesse https://dashboard.stripe.com/webhooks
-   - Crie endpoint: `https://cocris.casadef.com.br/api/webhooks/stripe`
+   - Crie endpoint: `https://zelare.casadef.com.br/api/webhooks/stripe`
    - Selecione eventos: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`
    - Copie o "Signing secret" (whsec_...)
 
@@ -49,7 +49,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=seu-email@gmail.com
 SMTP_PASSWORD=sua-senha-de-app
-SMTP_FROM=noreply@cocris.org
+SMTP_FROM=noreply@zelare.org
 ```
 
 **Gmail:**
@@ -92,14 +92,14 @@ No painel do Coolify:
    - Copie todas as variáveis do Manus
    - Adicione as variáveis Stripe
    - Adicione `DATABASE_URL` do MySQL criado
-   - Adicione `VITE_SITE_URL=https://cocris.casadef.com.br`
+   - Adicione `VITE_SITE_URL=https://zelare.casadef.com.br`
 
 ### 3. Configurar Domínio
 
 1. No painel DNS do seu provedor:
    ```
    Type: A ou CNAME
-   Name: cocris.casadef.com.br
+   Name: zelare.casadef.com.br
    Value: [IP do servidor Coolify]
    ```
 
@@ -167,4 +167,4 @@ CEP: qualquer
 
 - Documentação Manus: https://docs.manus.im
 - Documentação Stripe: https://stripe.com/docs
-- Issues GitHub: https://github.com/vml-arquivos/site-cocris/issues
+- Issues GitHub: https://github.com/vml-arquivos/site-zelare/issues

@@ -481,7 +481,7 @@ export default function ConfiguracoesPage() {
                   </div>
 
                   {[
-                    { label: 'Versão do Sistema', value: import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico' },
+                    { label: 'Versão do Sistema', value: import.meta.env.VITE_APP_NAME || 'Zelare' },
                     { label: 'Ambiente', value: 'Produção' },
                     { label: 'Banco de Dados', value: 'PostgreSQL (Prisma)' },
                     { label: 'Framework', value: 'React + Vite + TypeScript' },

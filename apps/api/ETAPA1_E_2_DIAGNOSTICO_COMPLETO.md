@@ -1,7 +1,7 @@
 # ETAPA 1 E 2 — DIAGNÓSTICO COMPLETO E VALIDAÇÃO PRISMA
 
 **Data:** 2026-02-04  
-**Projeto:** Conexa-V2  
+**Projeto:** Zelare-V2  
 **Objetivo:** Diagnosticar e resolver conectividade Prisma ↔ Supabase
 
 ---
@@ -52,7 +52,7 @@ Status: ✅ ATIVO
 
 #### DATABASE_URL (Runtime - Pooler Transaction Mode)
 ```
-postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
 ```
 
 **Características:**
@@ -63,7 +63,7 @@ postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.
 
 #### DIRECT_URL (Migrations - Pooler Session Mode)
 ```
-postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 **Características:**
@@ -307,8 +307,8 @@ exec node /app/dist/src/main.js
 
 ### Arquivo .env atualizado
 ```env
-DATABASE_URL="postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
-DIRECT_URL="postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+DATABASE_URL="postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
+DIRECT_URL="postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
 ```
 
 ### Comandos testados

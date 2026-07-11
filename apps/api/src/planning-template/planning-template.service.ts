@@ -206,7 +206,7 @@ export class PlanningTemplateService {
   }
 
   /**
-   * Retorna templates padrão COCRIS (sempre 200)
+   * Retorna templates padrão Zelare (sempre 200)
    */
   async getCocrisDefaults() {
     return [

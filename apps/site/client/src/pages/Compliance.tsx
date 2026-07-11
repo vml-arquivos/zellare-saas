@@ -7,8 +7,8 @@ export default function Compliance() {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Compliance e Ética - COCRIS"
-        description="Conheça nossos códigos de ética, políticas de conformidade e canal de denúncias da COCRIS."
+        title="Compliance e Ética - Zelare"
+        description="Conheça nossos códigos de ética, políticas de conformidade e canal de denúncias da Zelare."
       />
       <Header />
 
@@ -36,7 +36,7 @@ export default function Compliance() {
                     <h2 className="text-2xl font-bold mb-4">Código de Ética</h2>
                     <div className="space-y-4 text-foreground/70">
                       <p>
-                        A COCRIS pauta suas ações em princípios éticos sólidos, baseados nos valores cristãos
+                        A Zelare pauta suas ações em princípios éticos sólidos, baseados nos valores cristãos
                         da Assembleia de Deus Isabelle e no compromisso com o bem-estar das crianças.
                       </p>
                       <ul className="list-disc list-inside space-y-2 ml-4">
@@ -87,7 +87,7 @@ export default function Compliance() {
                       </p>
                       <div className="bg-white p-6 rounded-lg border border-amber-200 space-y-3">
                         <p className="font-semibold text-foreground">Como denunciar:</p>
-                        <p>📧 Email: <a href="mailto:denuncia@cocris.org" className="text-primary hover:underline">denuncia@cocris.org</a></p>
+                        <p>📧 Email: <a href="mailto:denuncia@zelare.com.br" className="text-primary hover:underline">denuncia@zelare.com.br</a></p>
                         <p>📞 Telefone: <a href="tel:+556121234567" className="text-primary hover:underline">(61) 2123-4567</a></p>
                         <p className="text-sm text-foreground/60 mt-4">
                           * Todas as denúncias são tratadas com sigilo e investigadas por comissão independente.

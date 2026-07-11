@@ -38,9 +38,9 @@ No painel do Coolify:
 2. Clique em **"+ Add Database"**
 3. Selecione **"PostgreSQL"**
 4. Preencha os campos:
-   - Name: `conexa-v3-db`
+   - Name: `zelare-saas-db`
    - Database: `conexa`
-   - Username: `conexa_user`
+   - Username: `zelare_user`
    - Password: `[senha forte]`
 5. Clique em **"Create"**
 
@@ -54,20 +54,20 @@ O Coolify automaticamente:
 5. Expõe porta 5432 internamente
 6. Inicia o PostgreSQL
 7. Cria o banco de dados `conexa`
-8. Cria o usuário `conexa_user` com a senha fornecida
+8. Cria o usuário `zelare_user` com a senha fornecida
 
 ### Passo 3: Você Obtém a Connection String
 
 Após criado, o Coolify fornece:
 ```
-postgresql://conexa_user:[SENHA]@conexa-v3-db:5432/conexa
+postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
 ```
 
 ### Passo 4: Você Usa no Backend
 
 Configure a variável de ambiente no backend:
 ```bash
-DATABASE_URL=postgresql://conexa_user:[SENHA]@conexa-v3-db:5432/conexa
+DATABASE_URL=postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
 ```
 
 ### Passo 5: Execute as Migrations
@@ -90,19 +90,19 @@ O Coolify cria um container Docker com:
 
 ```yaml
 Image: postgres:16-alpine
-Container Name: conexa-v3-db
+Container Name: zelare-saas-db
 Port: 5432 (interno)
 Volume: /var/lib/postgresql/data
 Environment:
   POSTGRES_DB: conexa
-  POSTGRES_USER: conexa_user
+  POSTGRES_USER: zelare_user
   POSTGRES_PASSWORD: [sua senha]
 ```
 
 ### Rede Interna
 
 O PostgreSQL fica em uma **rede Docker interna** do Coolify:
-- Acessível por outros containers via nome: `conexa-v3-db`
+- Acessível por outros containers via nome: `zelare-saas-db`
 - **NÃO** exposto publicamente na internet
 - Seguro e isolado
 
@@ -123,7 +123,7 @@ Os dados são salvos em um **volume Docker**:
 
 ### Você Precisa de PostGIS?
 
-**Provavelmente NÃO** para o Conexa V3.0, a menos que você precise de:
+**Provavelmente NÃO** para o Zelare, a menos que você precise de:
 - 📍 Localização geográfica de unidades
 - 🗺️ Mapas interativos
 - 📏 Cálculo de distâncias entre pontos
@@ -153,7 +153,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 ### Recomendação
 
-Para o Conexa V3.0:
+Para o Zelare:
 - ✅ Use **PostgreSQL normal** (sem PostGIS)
 - ✅ Mais leve e rápido
 - ✅ Suficiente para todas as funcionalidades
@@ -248,7 +248,7 @@ Maintenance Work Mem: 512MB
 ### Opção 1: Via Console do Coolify
 
 1. No Coolify, vá em **"Databases"**
-2. Clique no banco `conexa-v3-db`
+2. Clique no banco `zelare-saas-db`
 3. Clique em **"Console"**
 4. Execute:
 ```sql
@@ -271,7 +271,7 @@ Se conectar com sucesso, está funcionando!
 
 Se tiver acesso SSH à VPS:
 ```bash
-docker exec -it conexa-v3-db psql -U conexa_user -d conexa
+docker exec -it zelare-saas-db psql -U zelare_user -d conexa
 ```
 
 ---
@@ -285,7 +285,7 @@ docker exec -it conexa-v3-db psql -U conexa_user -d conexa
 **Solução**:
 1. Verifique se o banco está rodando (status "Running")
 2. Verifique a `DATABASE_URL` no backend
-3. Verifique se o nome do container está correto: `conexa-v3-db`
+3. Verifique se o nome do container está correto: `zelare-saas-db`
 
 ### Problema 2: "Authentication failed"
 
@@ -343,19 +343,19 @@ docker exec -it conexa-v3-db psql -U conexa_user -d conexa
 
 ```bash
 # Ver logs do PostgreSQL
-docker logs conexa-v3-db
+docker logs zelare-saas-db
 
 # Backup manual
-docker exec conexa-v3-db pg_dump -U conexa_user conexa > backup.sql
+docker exec zelare-saas-db pg_dump -U zelare_user conexa > backup.sql
 
 # Restore manual
-docker exec -i conexa-v3-db psql -U conexa_user conexa < backup.sql
+docker exec -i zelare-saas-db psql -U zelare_user conexa < backup.sql
 
 # Ver conexões ativas
-docker exec conexa-v3-db psql -U conexa_user -d conexa -c "SELECT * FROM pg_stat_activity;"
+docker exec zelare-saas-db psql -U zelare_user -d conexa -c "SELECT * FROM pg_stat_activity;"
 
 # Ver tamanho do banco
-docker exec conexa-v3-db psql -U conexa_user -d conexa -c "SELECT pg_size_pretty(pg_database_size('conexa'));"
+docker exec zelare-saas-db psql -U zelare_user -d conexa -c "SELECT pg_size_pretty(pg_database_size('conexa'));"
 ```
 
 ---

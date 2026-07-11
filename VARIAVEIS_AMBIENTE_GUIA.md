@@ -27,10 +27,10 @@ JWT_EXPIRATION=7d
 NODE_ENV=production
 PORT=3000
 APP_TIMEZONE=America/Sao_Paulo
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 
 # CORS
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 
 # GEMINI AI
 GEMINI_API_KEY=[obtenha em: https://aistudio.google.com/app/apikey]
@@ -55,8 +55,8 @@ LOG_FORMAT=json
 **Variáveis necessárias** (3):
 
 ```bash
-VITE_API_URL=https://api.conexa3.casadf.com.br
-VITE_APP_NAME=Conexa V3.0
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -70,7 +70,7 @@ VITE_APP_VERSION=3.0.0
 
 ```bash
 DATABASE_URL=postgresql://[usuario]:[senha]@[host]:5432/[banco]
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
 ```

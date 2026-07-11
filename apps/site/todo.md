@@ -10,18 +10,18 @@
 - [x] Garantir que imagem fique visível e não distorcida
 
 ### Nomes Reais das Unidades
-- [x] Acessar cocris.org para coletar nomes oficiais de todas as unidades
+- [x] Acessar zelare.org para coletar nomes oficiais de todas as unidades
 - [x] Atualizar banco de dados com nomes reais
 - [x] Atualizar todas as páginas que exibem nomes de unidades
 - [x] Verificar consistência em todo o site
 
-### Imagem da Creche COCRIS
+### Imagem da Creche Zelare
 - [x] Copiar imagem da fachada amarela/azul fornecida
-- [x] Atualizar banco de dados com nova imageUrl para Creche COCRIS
+- [x] Atualizar banco de dados com nova imageUrl para Creche Zelare
 - [x] Verificar exibição na página de unidades
 
 ### Links do Menu (Header)
-- [x] Acessar cocris.org e mapear todas as páginas do menu
+- [x] Acessar zelare.org e mapear todas as páginas do menu
 - [x] Adicionar links faltantes no Header (Compliance, CEPIs e Creches, Notícias)
 - [ ] Criar página Compliance se necessário
 - [x] Testar navegação completa
@@ -29,7 +29,7 @@
 ---
 
 ## ✅ Concluído Anteriormente
-- [x] Logo oficial da COCRIS
+- [x] Logo oficial da Zelare
 - [x] Paleta de cores da marca
 - [x] Estrutura base do site
 - [x] Sistema de blog e doações
@@ -78,7 +78,7 @@
 ### 6. Configuração de Deploy
 - [x] Criar arquivo .env.example com todas as variáveis (ENV_CONFIG.md)
 - [x] Documentar processo de deploy no Coolify
-- [ ] Configurar domínio cocris.casadef.com.br
+- [ ] Configurar domínio zelare.casadef.com.br
 - [ ] Testar build com pnpm build
 - [ ] Validar todas as rotas após deploy
 

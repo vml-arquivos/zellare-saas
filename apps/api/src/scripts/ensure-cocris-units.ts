@@ -10,7 +10,7 @@ interface UnitData {
   address: string;
 }
 
-const COCRIS_UNITS: UnitData[] = [
+const Zelare_UNITS: UnitData[] = [
   {
     code: 'ARARA-CAN',
     name: 'CEPI Arara Canindé',
@@ -56,18 +56,18 @@ const COCRIS_UNITS: UnitData[] = [
 ];
 
 async function main() {
-  console.log('🚀 Iniciando importação de unidades COCRIS...\n');
+  console.log('🚀 Iniciando importação de unidades Zelare...\n');
 
-  // 1. Buscar ou criar Mantenedora COCRIS
+  // 1. Buscar ou criar Mantenedora Zelare
   let mantenedora = await prisma.mantenedora.findUnique({
-    where: { cnpj: '00.000.000/0001-00' }, // CNPJ placeholder COCRIS
+    where: { cnpj: '00.000.000/0001-00' }, // CNPJ placeholder Zelare
   });
 
   if (!mantenedora) {
-    console.log('📌 Criando Mantenedora COCRIS...');
+    console.log('📌 Criando Mantenedora Zelare...');
     mantenedora = await prisma.mantenedora.create({
       data: {
-        name: 'COCRIS - Congregação Cristã no Brasil',
+        name: 'Zelare - Congregação Cristã no Brasil',
         cnpj: '00.000.000/0001-00',
         email: 'contato@cocris.org.br',
         phone: '(62) 3201-1000',
@@ -86,7 +86,7 @@ async function main() {
   let created = 0;
   let updated = 0;
 
-  for (const unitData of COCRIS_UNITS) {
+  for (const unitData of Zelare_UNITS) {
     const existing = await prisma.unit.findFirst({
       where: {
         code: unitData.code,
@@ -125,7 +125,7 @@ async function main() {
   console.log(`\n📊 Resumo:`);
   console.log(`   - Criadas: ${created}`);
   console.log(`   - Atualizadas: ${updated}`);
-  console.log(`   - Total: ${COCRIS_UNITS.length}`);
+  console.log(`   - Total: ${Zelare_UNITS.length}`);
   console.log(`\n✅ Importação concluída!`);
 }
 

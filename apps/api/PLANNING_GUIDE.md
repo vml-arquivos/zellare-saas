@@ -4,7 +4,7 @@ _Gerado por MANUZ, Engenheiro de Software Sênior._
 
 **Data:** 03 de Fevereiro de 2026
 
-Este documento detalha como utilizar a API do Módulo de Planejamento Pedagógico do Conexa, incluindo endpoints, regras de acesso e exemplos práticos.
+Este documento detalha como utilizar a API do Módulo de Planejamento Pedagógico do Zelare, incluindo endpoints, regras de acesso e exemplos práticos.
 
 ---
 

@@ -286,7 +286,7 @@ export default function Doacoes() {
                 <div className="card-premium">
                   <h3 className="text-xl font-bold text-primary mb-3">Minha doação é dedutível do Imposto de Renda?</h3>
                   <p className="text-foreground/70">
-                    Sim! Doações para a COCRIS podem ser deduzidas do Imposto de Renda conforme legislação vigente. Emitimos recibo para todas as doações.
+                    Sim! Doações para a Zelare podem ser deduzidas do Imposto de Renda conforme legislação vigente. Emitimos recibo para todas as doações.
                   </p>
                 </div>
 
@@ -300,7 +300,7 @@ export default function Doacoes() {
                 <div className="card-premium">
                   <h3 className="text-xl font-bold text-primary mb-3">Posso doar para uma unidade específica?</h3>
                   <p className="text-foreground/70">
-                    Sim! Durante o processo de doação, você pode escolher destinar sua contribuição para uma unidade específica ou para o projeto geral da COCRIS.
+                    Sim! Durante o processo de doação, você pode escolher destinar sua contribuição para uma unidade específica ou para o projeto geral da Zelare.
                   </p>
                 </div>
               </div>

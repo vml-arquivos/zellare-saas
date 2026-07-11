@@ -1,4 +1,4 @@
-# Validação de Build - Conexa V3.0
+# Validação de Build - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Status**: ✅ **TODOS OS BUILDS PASSARAM**
@@ -130,7 +130,7 @@ GEMINI_API_KEY=... (opcional)
 
 **Frontend (apps/web/.env)**:
 ```env
-VITE_API_BASE_URL=https://api.conexa.com
+VITE_API_BASE_URL=https://api.zelare.com.br
 ```
 
 **Site (apps/site/.env)**:
@@ -143,8 +143,8 @@ DATABASE_URL=postgresql://...
 
 ```bash
 # No servidor de produção
-cd /home/ubuntu/conexa-v3.0
-pnpm --filter @conexa/database migrate:deploy
+cd /home/ubuntu/zelare-saas
+pnpm --filter @zelare/database migrate:deploy
 ```
 
 ### 3. Iniciar Aplicações

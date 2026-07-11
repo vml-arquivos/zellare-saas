@@ -1,4 +1,4 @@
-// Matriz Pedagógica Conexa 2026 — gerada automaticamente a partir da Sequência Pedagógica Piloto
+// Matriz Pedagógica Zelare 2026 — gerada automaticamente a partir da Sequência Pedagógica Piloto
 // Total: 219 objetivos de aprendizagem
 
 export interface ObjetivoAprendizagem {

@@ -37,7 +37,7 @@
 #!/usr/bin/env sh
 set -eu
 
-echo "=== Conexa-V2 Entrypoint ==="
+echo "=== Zelare-V2 Entrypoint ==="
 echo "Validando variáveis de ambiente obrigatórias..."
 
 # Validar DATABASE_URL (obrigatória)
@@ -123,7 +123,7 @@ docker run --rm -e DIRECT_URL="..." conexa-v2:local
 
 **Saída Esperada:**
 ```
-=== Conexa-V2 Entrypoint ===
+=== Zelare-V2 Entrypoint ===
 Validando variáveis de ambiente obrigatórias...
 ERRO: DATABASE_URL não definida no runtime.
 Configure esta variável no Coolify (Environment Variables).
@@ -142,7 +142,7 @@ docker run --rm -e DATABASE_URL="..." conexa-v2:local
 
 **Saída Esperada:**
 ```
-=== Conexa-V2 Entrypoint ===
+=== Zelare-V2 Entrypoint ===
 Validando variáveis de ambiente obrigatórias...
 ✅ Variáveis de ambiente validadas.
 
@@ -166,7 +166,7 @@ docker run --rm \
 
 **Saída Esperada:**
 ```
-=== Conexa-V2 Entrypoint ===
+=== Zelare-V2 Entrypoint ===
 Validando variáveis de ambiente obrigatórias...
 ✅ Variáveis de ambiente validadas.
 
@@ -201,7 +201,7 @@ docker run --rm \
 
 **Saída Esperada:**
 ```
-=== Conexa-V2 Entrypoint ===
+=== Zelare-V2 Entrypoint ===
 Validando variáveis de ambiente obrigatórias...
 ✅ Variáveis de ambiente validadas.
 
@@ -241,7 +241,7 @@ docker run --rm \
 
 **Saída Esperada:**
 ```
-=== Conexa-V2 Entrypoint ===
+=== Zelare-V2 Entrypoint ===
 Validando variáveis de ambiente obrigatórias...
 ✅ Variáveis de ambiente validadas.
 

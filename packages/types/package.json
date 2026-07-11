@@ -1,7 +1,7 @@
 {
-  "name": "@conexa/types",
+  "name": "@zelare/types",
   "version": "3.0.0",
-  "description": "Conexa V3 - Shared TypeScript Types and Interfaces",
+  "description": "Zelare V3 - Shared TypeScript Types and Interfaces",
   "main": "index.ts",
   "private": true,
   "dependencies": {},

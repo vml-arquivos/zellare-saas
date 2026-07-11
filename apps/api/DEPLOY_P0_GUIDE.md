@@ -12,14 +12,14 @@
 
 ## 📋 OPÇÃO A: Deploy em Staging (Recomendado)
 
-### 1. Criar Resource "Conexa API - Staging" no Coolify
+### 1. Criar Resource "Zelare API - Staging" no Coolify
 
 **Configuração:**
 ```
-Name: Conexa API - Staging
+Name: Zelare API - Staging
 Type: Application
 Source: GitHub
-Repository: vml-arquivos/Conexa-V2
+Repository: vml-arquivos/Zelare-V2
 Branch: security/p0-isolation-lockdown
 Build Pack: nixpacks
 Port: 3000
@@ -27,8 +27,8 @@ Port: 3000
 
 **Variáveis de Ambiente:**
 ```env
-DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
 JWT_SECRET=[mesmo da produção]
 JWT_REFRESH_SECRET=[mesmo da produção]
 SUPABASE_URL=https://ockzuvbnzfoqsiwmpixr.supabase.co
@@ -111,7 +111,7 @@ gh pr merge 1 --squash
 ### 1. Merge PR
 
 ```bash
-cd /home/ubuntu/Conexa-V2
+cd /home/ubuntu/Zelare-V2
 git checkout main
 git pull origin main
 
@@ -130,7 +130,7 @@ gh pr merge 1 --squash
 
 **Opção 2.2: Manual**
 1. Acessar Coolify
-2. Selecionar "Conexa API - Production"
+2. Selecionar "Zelare API - Production"
 3. Clicar em "Redeploy"
 4. Aguardar build e startup
 
@@ -156,7 +156,7 @@ export DIARY_EVENT_ID_B="..."
 
 **Teste 1: Frontend continua funcionando**
 ```
-https://democonexa.casadf.com.br/login
+https://demo.zelare.seu-dominio.com.br/login
 ```
 
 **Teste 2: API responde**
@@ -179,7 +179,7 @@ curl -X GET https://apiconexa.casadf.com.br/plannings/ID_OUTRA_MANTENEDORA \
 **Rollback Imediato no Coolify:**
 
 1. Acessar Coolify
-2. Selecionar "Conexa API - Production"
+2. Selecionar "Zelare API - Production"
 3. Clicar em "Deployments"
 4. Selecionar deployment anterior (commit `abc1234`)
 5. Clicar em "Redeploy"
@@ -187,7 +187,7 @@ curl -X GET https://apiconexa.casadf.com.br/plannings/ID_OUTRA_MANTENEDORA \
 **OU via Git:**
 
 ```bash
-cd /home/ubuntu/Conexa-V2
+cd /home/ubuntu/Zelare-V2
 git checkout main
 git revert HEAD
 git push origin main
@@ -303,6 +303,6 @@ git push origin main
 
 ---
 
-**Repositório:** https://github.com/vml-arquivos/Conexa-V2  
-**PR:** https://github.com/vml-arquivos/Conexa-V2/pull/1  
+**Repositório:** https://github.com/vml-arquivos/Zelare-V2  
+**PR:** https://github.com/vml-arquivos/Zelare-V2/pull/1  
 **Commit:** e0c3fc2

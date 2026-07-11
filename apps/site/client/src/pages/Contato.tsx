@@ -75,8 +75,8 @@ export default function Contato() {
                     <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                      <a href="mailto:contato@cocris.org" className="text-primary hover:text-secondary transition-colors">
-                        contato@cocris.org
+                      <a href="mailto:contato@zelare.com.br" className="text-primary hover:text-secondary transition-colors">
+                        contato@zelare.com.br
                       </a>
                     </div>
                   </div>
@@ -106,7 +106,7 @@ export default function Contato() {
 
               {/* Contact Form */}
               <div className="lg:col-span-2">
-                <div className="card-cocris">
+                <div className="card-zelare">
                   <h2 className="text-2xl font-bold text-primary mb-6">
                     Envie uma Mensagem
                   </h2>

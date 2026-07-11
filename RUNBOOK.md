@@ -1,4 +1,4 @@
-# 📘 RUNBOOK: Conexa V3.0 — PACKET V3-OPS-PRP-001
+# 📘 RUNBOOK: Zelare — PACKET V3-OPS-PRP-001
 
 **Data:** 2026-02-24
 **Autor:** Manus AI
@@ -30,7 +30,7 @@ As seguintes variáveis de ambiente **DEVEM** ser configuradas no ambiente de pr
 | `DATABASE_URL` | `api` | URL de conexão com o banco de dados principal | `postgresql://user:pass@host:port/main_db` | **Sim** |
 | `SITE_DATABASE_URL` | `site` | URL de conexão com o banco de dados do site (agora Postgres) | `postgresql://user:pass@host:port/site_db` | **Sim** |
 | `JWT_SECRET` | `api` | Segredo para assinar os tokens JWT | `segredo_forte_de_pelo_menos_32_chars` | **Sim** |
-| `CORS_ORIGIN` | `api` | Whitelist de origens para o CORS | `https://app.conexa.com,https://conexa.com` | **Sim** |
+| `CORS_ORIGIN` | `api` | Whitelist de origens para o CORS | `https://app.zelare.com.br,https://zelare.com.br` | **Sim** |
 | `OPENAI_API_KEY` | `api` | Chave da API da OpenAI para o motor de IA | `sk-xxxxxxxx` | **Sim** |
 
 ### 2.2. Passos de Build e Deploy
@@ -42,14 +42,14 @@ O pipeline deve executar os seguintes comandos na raiz do monorepo:
 pnpm install --frozen-lockfile
 
 # 2. Gerar cliente Prisma (necessário para o build do backend)
-pnpm --filter @conexa/database exec prisma generate
+pnpm --filter @zelare/database exec prisma generate
 
 # 3. Build de todos os apps e pacotes
 pnpm build
 
 # 4. Executar migrations no banco de dados principal (API)
 # Este comando deve ser executado no container da API APÓS o build
-pnpm --filter @conexa/api exec -- npx prisma migrate deploy
+pnpm --filter @zelare/api exec -- npx prisma migrate deploy
 
 # 5. Executar migrations no banco de dados do site
 # Este comando deve ser executado no container do SITE APÓS o build
@@ -62,7 +62,7 @@ pnpm --filter @conexa/api exec -- npx prisma migrate deploy
 Após o deploy, execute o script `smoke-tests.sh` para uma verificação rápida da saúde do sistema.
 
 ```bash
-./smoke-tests.sh https://api.conexa.com https://app.conexa.com
+./smoke-tests.sh https://api.zelare.com.br https://app.zelare.com.br
 ```
 
 ## 3. Procedimento de Rollback
@@ -91,7 +91,7 @@ Em caso de falha crítica, o rollback deve ser feito revertendo o commit da `mai
 
 Se um professor reportar que seus registros de micro-gestos não estão aparecendo, instrua-o a:
 1.  Conectar-se a uma rede Wi-Fi estável.
-2.  Abrir o Conexa e ir para o `TeacherDashboardPremium`.
+2.  Abrir o Zelare e ir para o `TeacherDashboardPremium`.
 3.  Aguardar a notificação "X registro(s) offline sincronizados!".
 
 O sistema tentará descarregar a fila automaticamente ao detectar conexão online.

@@ -1,4 +1,4 @@
-# GUIA DE CONFIGURAÇÃO COOLIFY - CONEXA-V2
+# GUIA DE CONFIGURAÇÃO COOLIFY - ZELARE-V2
 
 **Data:** 2026-02-04  
 **Objetivo:** Configurar variáveis de ambiente no Coolify para deploy funcional
@@ -8,16 +8,16 @@
 ## 1. VARIÁVEIS DE AMBIENTE OBRIGATÓRIAS
 
 ### Acesse o Coolify
-1. Vá para o projeto Conexa-V2 no Coolify
+1. Vá para o projeto Zelare-V2 no Coolify
 2. Clique em **Environment Variables**
 3. Adicione as seguintes variáveis:
 
 ### Database (Supabase)
 
 ```env
-DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
 
-DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 ⚠️ **IMPORTANTE:**
@@ -212,7 +212,7 @@ curl -X GET \
 
 **Solução:**
 1. Verificar se usuário é `postgres.ockzuvbnzfoqsiwmpixr` (com project_ref)
-2. Verificar se senha está correta: `Conexaapiv1db`
+2. Verificar se senha está correta: `Zelareapiv1db`
 3. Verificar se host é `aws-1-sa-east-1.pooler.supabase.com` (não aws-0)
 
 ### App não sobe após deploy

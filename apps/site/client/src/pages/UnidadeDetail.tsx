@@ -50,7 +50,7 @@ export default function UnidadeDetail() {
             <section className="relative h-[400px] md:h-[500px]">
               <img
                 src={unit.imageUrl || '/images/cepi-exterior.jpg'}
-                alt={`${unit.unitName} - Educação Infantil COCRIS`}
+                alt={`${unit.unitName} - Educação Infantil Zelare`}
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
@@ -179,7 +179,7 @@ export default function UnidadeDetail() {
 
                     {/* Stats Card */}
                     <div className="card-premium bg-gradient-to-br from-primary/5 to-secondary/5">
-                      <h3 className="text-xl font-bold text-primary mb-4">Sobre a COCRIS</h3>
+                      <h3 className="text-xl font-bold text-primary mb-4">Sobre a Zelare</h3>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">

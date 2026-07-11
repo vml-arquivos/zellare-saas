@@ -1,5 +1,5 @@
 /**
- * offlineDB.ts — Motor de persistência offline do Conexa PWA
+ * offlineDB.ts — Motor de persistência offline do Zelare PWA
  *
  * Estratégia:
  * 1. Dados de referência (alunos, turmas) são pré-carregados no IndexedDB ao logar

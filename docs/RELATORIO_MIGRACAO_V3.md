@@ -1,4 +1,4 @@
-# Relatório de Migração - Conexa V3.0
+# Relatório de Migração - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Versão**: 3.0.0  
@@ -8,7 +8,7 @@
 
 ## Resumo Executivo
 
-A migração dos três repositórios independentes (Conexa-V2, font-conexa-v2, site-cocris) para um único monorepo unificado (conexa-v3.0) foi concluída com sucesso. O novo repositório está estruturado como uma plataforma SaaS multi-tenant totalmente editável e pronta para fork.
+A migração dos três repositórios independentes (Zelare-V2, zelare-web, site-zelare) para um único monorepo unificado (zelare-saas) foi concluída com sucesso. O novo repositório está estruturado como uma plataforma SaaS multi-tenant totalmente editável e pronta para fork.
 
 ---
 
@@ -33,7 +33,7 @@ A migração dos três repositórios independentes (Conexa-V2, font-conexa-v2, s
 Criada estrutura completa com **pnpm workspaces**:
 
 ```
-conexa-v3.0/
+zelare-saas/
 ├── apps/
 │   ├── api/              # Backend (NestJS)
 │   ├── web/              # Frontend (React)
@@ -53,11 +53,11 @@ Criados 5 pacotes compartilhados:
 
 | Pacote | Descrição | Componentes |
 |--------|-----------|-------------|
-| `@conexa/ui` | Componentes UI | 50+ componentes shadcn/ui |
-| `@conexa/types` | Tipos TypeScript | Enums, DTOs, Interfaces |
-| `@conexa/utils` | Utilitários | Formatação, validação, etc. |
-| `@conexa/database` | Schema Prisma | Models, migrations, seeds |
-| `@conexa/config` | Configurações | ESLint, TS, etc. |
+| `@zelare/ui` | Componentes UI | 50+ componentes shadcn/ui |
+| `@zelare/types` | Tipos TypeScript | Enums, DTOs, Interfaces |
+| `@zelare/utils` | Utilitários | Formatação, validação, etc. |
+| `@zelare/database` | Schema Prisma | Models, migrations, seeds |
+| `@zelare/config` | Configurações | ESLint, TS, etc. |
 
 ### ✅ 4. Multi-tenancy Preparado
 
@@ -103,19 +103,19 @@ Configurado ambiente de desenvolvimento local:
 
 | Repositório | Arquivos | Linhas de Código |
 |-------------|----------|------------------|
-| Conexa-V2 (API) | 250+ | ~50.000 |
-| font-conexa-v2 (Web) | 80+ | ~15.000 |
-| site-cocris (Site) | 120+ | ~25.000 |
+| Zelare-V2 (API) | 250+ | ~50.000 |
+| zelare-web (Web) | 80+ | ~15.000 |
+| site-zelare (Site) | 120+ | ~25.000 |
 | **Total** | **450+** | **~90.000** |
 
 ### Pacotes Criados
 
 | Pacote | Arquivos | Exports |
 |--------|----------|---------|
-| @conexa/ui | 50+ | 50+ componentes |
-| @conexa/types | 1 | 30+ tipos |
-| @conexa/utils | 1 | 20+ funções |
-| @conexa/database | 3 | Schema completo |
+| @zelare/ui | 50+ | 50+ componentes |
+| @zelare/types | 1 | 30+ tipos |
+| @zelare/utils | 1 | 20+ funções |
+| @zelare/database | 3 | Schema completo |
 
 ### Commits
 
@@ -131,14 +131,14 @@ Configurado ambiente de desenvolvimento local:
 
 **Antes**:
 ```
-Conexa-V2/
-font-conexa-v2/
-site-cocris/
+Zelare-V2/
+zelare-web/
+site-zelare/
 ```
 
 **Depois**:
 ```
-conexa-v3.0/
+zelare-saas/
 ├── apps/api/
 ├── apps/web/
 ├── apps/site/
@@ -166,9 +166,9 @@ conexa-v3.0/
 **Antes**:
 ```bash
 # Três builds separados
-cd Conexa-V2 && npm run build
-cd font-conexa-v2 && npm run build
-cd site-cocris && npm run build
+cd Zelare-V2 && npm run build
+cd zelare-web && npm run build
+cd site-zelare && npm run build
 ```
 
 **Depois**:
@@ -187,9 +187,9 @@ pnpm build:site
 **Antes**:
 ```bash
 # Três terminais
-cd Conexa-V2 && npm run start:dev
-cd font-conexa-v2 && npm run dev
-cd site-cocris && npm run dev
+cd Zelare-V2 && npm run start:dev
+cd zelare-web && npm run dev
+cd site-zelare && npm run dev
 ```
 
 **Depois**:
@@ -218,7 +218,7 @@ docker-compose up
 
 ### ⚠️ Modificado
 
-- ⚠️ Nomes de pacotes (`conexa-v2` → `@conexa/api`)
+- ⚠️ Nomes de pacotes (`conexa-v2` → `@zelare/api`)
 - ⚠️ Estrutura de diretórios
 - ⚠️ Imports entre pacotes
 - ⚠️ Configuração de build
@@ -240,9 +240,9 @@ docker-compose up
 
 ### Fase 2: Integração (Curto Prazo)
 
-- [ ] Atualizar imports do front-end para usar `@conexa/ui`
-- [ ] Atualizar imports para usar `@conexa/types`
-- [ ] Atualizar imports para usar `@conexa/utils`
+- [ ] Atualizar imports do front-end para usar `@zelare/ui`
+- [ ] Atualizar imports para usar `@zelare/types`
+- [ ] Atualizar imports para usar `@zelare/utils`
 - [ ] Configurar CI/CD no GitHub Actions
 
 ### Fase 3: Multi-tenancy (Médio Prazo)
@@ -309,7 +309,7 @@ docker-compose up
 
 ## Conclusão
 
-A migração para o monorepo Conexa V3.0 foi **100% bem-sucedida**. O novo repositório está:
+A migração para o monorepo Zelare foi **100% bem-sucedida**. O novo repositório está:
 
 - ✅ **Funcional**: Todo código migrado e operacional
 - ✅ **Documentado**: Guias completos de uso e contribuição
@@ -318,13 +318,13 @@ A migração para o monorepo Conexa V3.0 foi **100% bem-sucedida**. O novo repos
 - ✅ **Deployável**: Pronto para produção
 
 O repositório está disponível em:
-**https://github.com/vml-arquivos/conexa-v3.0**
+**https://github.com/vml-arquivos/zelare-saas**
 
 ---
 
 ## Agradecimentos
 
-Agradecimentos especiais à equipe da COCRIS por fornecer os requisitos detalhados e documentação pedagógica que guiaram esta migração.
+Agradecimentos especiais à equipe da Zelare por fornecer os requisitos detalhados e documentação pedagógica que guiaram esta migração.
 
 ---
 

@@ -1,9 +1,9 @@
 /**
  * seed_units_cocris.ts
- * Script idempotente para garantir que as 6 unidades COCRIS existam no banco.
+ * Script idempotente para garantir que as 6 unidades Zelare existam no banco.
  *
  * Estratégia:
- * 1. Buscar mantenedora com nome contendo "COCRIS" (case-insensitive)
+ * 1. Buscar mantenedora com nome contendo "Zelare" (case-insensitive)
  * 2. Fallback: usar mantenedoraId do usuário pedagogico@cocris.org.br
  * 3. Upsert das 6 unidades por code (idempotente)
  *
@@ -24,7 +24,7 @@ interface UnitSeed {
   phone: string;
 }
 
-const COCRIS_UNITS: UnitSeed[] = [
+const Zelare_UNITS: UnitSeed[] = [
   {
     code: 'ARARA-CAN',
     name: 'CEPI Arara Canindé',
@@ -82,14 +82,14 @@ const COCRIS_UNITS: UnitSeed[] = [
 ];
 
 async function main() {
-  console.log('🚀 Iniciando seed idempotente das unidades COCRIS...\n');
+  console.log('🚀 Iniciando seed idempotente das unidades Zelare...\n');
 
   // 1. Descobrir mantenedoraId
   let mantenedoraId: string | null = null;
 
-  // Preferência: buscar mantenedora com nome contendo "COCRIS"
+  // Preferência: buscar mantenedora com nome contendo "Zelare"
   const mantenedoras = await prisma.mantenedora.findMany({
-    where: { name: { contains: 'COCRIS', mode: 'insensitive' } },
+    where: { name: { contains: 'Zelare', mode: 'insensitive' } },
     select: { id: true, name: true },
   });
 
@@ -97,7 +97,7 @@ async function main() {
     mantenedoraId = mantenedoras[0].id;
     console.log(`✅ Mantenedora encontrada por nome: ${mantenedoras[0].name} (${mantenedoraId})`);
   } else {
-    console.log('⚠️  Mantenedora "COCRIS" não encontrada por nome. Tentando fallback pelo usuário...');
+    console.log('⚠️  Mantenedora "Zelare" não encontrada por nome. Tentando fallback pelo usuário...');
 
     // Fallback: usar mantenedoraId do usuário pedagogico@cocris.org.br
     const user = await prisma.user.findUnique({
@@ -125,12 +125,12 @@ async function main() {
   unidadesExistentes.forEach((u) => console.log(`   - [${u.code}] ${u.name} (${u.id})`));
 
   // 3. Upsert das 6 unidades (por code + mantenedoraId)
-  console.log('\n🔄 Executando upsert das 6 unidades COCRIS...\n');
+  console.log('\n🔄 Executando upsert das 6 unidades Zelare...\n');
 
   let created = 0;
   let updated = 0;
 
-  for (const unitData of COCRIS_UNITS) {
+  for (const unitData of Zelare_UNITS) {
     const existing = await prisma.unit.findFirst({
       where: {
         code: unitData.code,
@@ -186,7 +186,7 @@ async function main() {
   unidadesFinais.forEach((u) => console.log(`   - [${u.code}] ${u.name} — ${u.city}/${u.state} (${u.id})`));
 
   if (unidadesFinais.length >= 6) {
-    console.log('\n✅ Seed concluído com sucesso! As 6 unidades COCRIS estão presentes no banco.');
+    console.log('\n✅ Seed concluído com sucesso! As 6 unidades Zelare estão presentes no banco.');
   } else {
     console.warn(`\n⚠️  Apenas ${unidadesFinais.length} unidades encontradas. Verifique o banco.`);
   }

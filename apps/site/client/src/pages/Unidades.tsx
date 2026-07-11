@@ -45,7 +45,7 @@ export default function Unidades() {
                     <div className="relative h-48 mb-6 -mx-6 -mt-6 rounded-t-xl overflow-hidden">
                       <img
                         src={unit.imageUrl || '/images/cepi-exterior.jpg'}
-                        alt={`${unit.unitName} - Educação Infantil COCRIS`}
+                        alt={`${unit.unitName} - Educação Infantil Zelare`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>

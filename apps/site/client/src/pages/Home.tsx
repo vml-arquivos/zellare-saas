@@ -41,9 +41,9 @@ export default function Home() {
   return (
     <>
       <SEO 
-        title="COCRIS - Associação Beneficente Coração de Cristo"
-        description="A COCRIS é uma organização sem fins lucrativos dedicada à educação infantil e assistência social, promovendo o desenvolvimento de crianças em vulnerabilidade social através de valores éticos e educacionais."
-        keywords="COCRIS, educação infantil, assistência social, Brasília, CEPI, creche, desenvolvimento infantil"
+        title="Zelare - Associação Beneficente Coração de Cristo"
+        description="A Zelare é uma organização sem fins lucrativos dedicada à educação infantil e assistência social, promovendo o desenvolvimento de crianças em vulnerabilidade social através de valores éticos e educacionais."
+        keywords="Zelare, educação infantil, assistência social, Brasília, CEPI, creche, desenvolvimento infantil"
       />
       <SchemaOrg />
       
@@ -111,7 +111,7 @@ export default function Home() {
                 <div className="animate-fade-in-up">
                   <img 
                     src="/images/activities/atividade-1.jpg" 
-                    alt="Crianças em atividade educacional na COCRIS"
+                    alt="Crianças em atividade educacional na Zelare"
                     className="rounded-2xl shadow-2xl hover-lift"
                   />
                 </div>
@@ -145,7 +145,7 @@ export default function Home() {
               <div className="text-center mb-16 animate-fade-in-up">
                 <h2 className="text-4xl font-bold mb-4 text-primary">Nossos Valores</h2>
                 <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  A COCRIS tem valores que norteiam o trabalho na instituição e visa a "Qualidade" 
+                  A Zelare tem valores que norteiam o trabalho na instituição e visa a "Qualidade" 
                   nas relações humanas, baseadas no afeto, no respeito, na solidariedade e na alegria.
                 </p>
               </div>
@@ -288,7 +288,7 @@ export default function Home() {
                     <Mail className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">E-mail</h3>
-                  <p className="text-muted-foreground">contato@cocris.org</p>
+                  <p className="text-muted-foreground">contato@zelare.com.br</p>
                 </div>
                 <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">

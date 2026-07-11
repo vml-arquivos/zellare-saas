@@ -30,7 +30,7 @@ export default function QuemSomos() {
               </h2>
               <div className="space-y-6 text-foreground/80 leading-relaxed">
                 <p>
-                  A Associação Beneficente Coração de Cristo (COCRIS) foi fundada com o propósito de transformar vidas através da educação infantil de qualidade. Nascida da visão de oferecer oportunidades iguais a crianças em vulnerabilidade social, a COCRIS consolidou-se como uma referência em educação infantil em Brasília.
+                  A Associação Beneficente Coração de Cristo (Zelare) foi fundada com o propósito de transformar vidas através da educação infantil de qualidade. Nascida da visão de oferecer oportunidades iguais a crianças em vulnerabilidade social, a Zelare consolidou-se como uma referência em educação infantil em Brasília.
                 </p>
                 <p>
                   Ao longo de mais de uma década de atuação, a organização expandiu suas operações, criando sete unidades educacionais que atendem milhares de crianças anualmente. Cada unidade foi pensada para oferecer um ambiente seguro, acolhedor e estimulante para o desenvolvimento integral das crianças.
@@ -50,21 +50,21 @@ export default function QuemSomos() {
               Nossos Pilares
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="card-cocris">
+              <div className="card-zelare">
                 <Target className="w-10 h-10 text-primary mb-4" />
                 <h3 className="text-xl font-bold text-primary mb-4">Missão</h3>
                 <p className="text-foreground/70 leading-relaxed">
                   Contribuir para o desenvolvimento das potencialidades físicas e psíquicas das crianças, direcionando-as para a conquista de Valor Humano Universal, tornando-as cidadãs criativas, conscientes de seu papel e responsabilidades.
                 </p>
               </div>
-              <div className="card-cocris">
+              <div className="card-zelare">
                 <Award className="w-10 h-10 text-secondary mb-4" />
                 <h3 className="text-xl font-bold text-secondary mb-4">Visão</h3>
                 <p className="text-foreground/70 leading-relaxed">
                   Ser reconhecida como uma OSC de Excelência em Educação Infantil, transmitindo valores baseados na moral e ética, promovendo conhecimento com afeto e respeito, de forma lúdica e criativa.
                 </p>
               </div>
-              <div className="card-cocris">
+              <div className="card-zelare">
                 <Handshake className="w-10 h-10 text-accent mb-4" />
                 <h3 className="text-xl font-bold text-accent mb-4">Valores</h3>
                 <p className="text-foreground/70 leading-relaxed">

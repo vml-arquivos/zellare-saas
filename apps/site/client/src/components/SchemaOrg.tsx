@@ -14,10 +14,10 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
         return {
           '@context': 'https://schema.org',
           '@type': 'NGO',
-          name: 'COCRIS - Associação Beneficente Coração de Cristo',
-          alternateName: 'COCRIS',
+          name: 'Zelare - Associação Beneficente Coração de Cristo',
+          alternateName: 'Zelare',
           url: baseUrl,
-          logo: `${baseUrl}/images/logo.png`,
+          logo: `${baseUrl}/images/zelare-logo-square.png`,
           description: 'Organização sem fins lucrativos dedicada à educação infantil de excelência no Distrito Federal',
           foundingDate: '2009',
           address: {
@@ -36,8 +36,8 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
             availableLanguage: 'Portuguese',
           },
           sameAs: [
-            'https://www.facebook.com/cocris',
-            'https://www.instagram.com/cocris',
+            'https://www.facebook.com/zelare',
+            'https://www.instagram.com/zelare',
           ],
           ...data,
         };
@@ -54,14 +54,14 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
           dateModified: data.updatedAt || new Date().toISOString(),
           author: {
             '@type': 'Organization',
-            name: 'COCRIS',
+            name: 'Zelare',
           },
           publisher: {
             '@type': 'Organization',
-            name: 'COCRIS',
+            name: 'Zelare',
             logo: {
               '@type': 'ImageObject',
-              url: `${baseUrl}/images/logo.png`,
+              url: `${baseUrl}/images/zelare-logo-square.png`,
             },
           },
           ...data,
@@ -72,7 +72,7 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
         return {
           '@context': 'https://schema.org',
           '@type': 'WebPage',
-          name: data.title || 'COCRIS',
+          name: data.title || 'Zelare',
           description: data.description || '',
           url: typeof window !== 'undefined' ? window.location.href : '',
           ...data,

@@ -1,7 +1,7 @@
 {
-  "name": "@conexa/database",
+  "name": "@zelare/database",
   "version": "3.0.0",
-  "description": "Conexa V3 - Database Schema and Migrations (Prisma)",
+  "description": "Zelare V3 - Database Schema and Migrations (Prisma)",
   "main": "index.ts",
   "private": true,
   "scripts": {

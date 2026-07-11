@@ -155,4 +155,4 @@ APP_TIMEZONE="America/Sao_Paulo"
 
 ---
 
-**O Conexa está agora conectado ao Supabase e pronto para receber dados!** 🎉
+**O Zelare está agora conectado ao Supabase e pronto para receber dados!** 🎉

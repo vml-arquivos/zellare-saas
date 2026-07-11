@@ -62,7 +62,7 @@ export function LoginPage() {
     return (
       <div style={{
         minHeight: '100dvh', display: 'flex', flexDirection: 'column',
-        background: 'linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
+        background: 'linear-gradient(160deg, #062b34 0%, #003f4d 50%, #008f5a 100%)',
         fontFamily: '"Inter","system-ui",sans-serif',
         padding: '0 24px',
         paddingTop: 'max(48px, env(safe-area-inset-top))',
@@ -79,21 +79,21 @@ export function LoginPage() {
             border: '1px solid rgba(255,255,255,0.2)',
           }}>
             <img
-              src="/branding/cocris/logo-cocris.png"
-              alt="COCRIS"
+              src="/brand/zelare-logo-square.png"
+              alt="Zelare"
               style={{ width: 48, height: 48, objectFit: 'contain' }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
               }}
             />
-            <span style={{ display: 'none', fontSize: 28, fontWeight: 800, color: '#fff' }}>C</span>
+            <span style={{ display: 'none', fontSize: 28, fontWeight: 800, color: '#fff' }}>Z</span>
           </div>
           <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, letterSpacing: -0.5 }}>
-            COCRIS Pedagógico
+            Zelare
           </h1>
           <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-            Gestão de educação infantil
+            cuidado, pedagogia e gestão inteligente
           </p>
         </div>
 
@@ -173,7 +173,7 @@ export function LoginPage() {
             disabled={loading || !email || !password}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: loading ? '#818cf8' : '#4f46e5',
+              background: loading ? '#6ee7b7' : '#009f62',
               color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!email || !password) ? 0.6 : 1,
@@ -202,7 +202,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #1d4ed8 100%)' }}>
+    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #062b34 0%, #003f4d 45%, #009f62 100%)' }}>
       {/* Painel esquerdo — identidade visual */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden">
         {/* Círculos decorativos */}
@@ -210,11 +210,11 @@ export function LoginPage() {
         <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #93c5fd, transparent)', transform: 'translate(30%, 30%)' }} />
 
         <div className="relative z-10 max-w-md text-center">
-          {/* Logo desktop — COCRIS institucional */}
+          {/* Logo desktop — Zelare institucional */}
           <div className="flex items-center justify-center mb-8">
             <img
-              src={import.meta.env.VITE_APP_LOGO_URL || '/branding/cocris/logo-cocris.png'}
-              alt={import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}
+              src={import.meta.env.VITE_APP_LOGO_URL || '/brand/zelare-logo-square.png'}
+              alt={import.meta.env.VITE_APP_NAME || 'Zelare'}
               className="h-24 w-auto object-contain drop-shadow-2xl"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -225,34 +225,34 @@ export function LoginPage() {
             {/* Fallback texto (oculto por padrão) */}
             <div className="hidden items-center gap-3" aria-hidden="true">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                <span className="text-blue-700 font-black text-3xl">C</span>
+                <span className="text-emerald-700 font-black text-3xl">Z</span>
               </div>
               <div className="text-left">
-                <h1 className="text-4xl font-black tracking-tight">{import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}</h1>
-                <p className="text-blue-200 text-sm font-medium tracking-widest uppercase">Sistema Pedagógico</p>
+                <h1 className="text-4xl font-black tracking-tight">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
+                <p className="text-emerald-100 text-sm font-medium tracking-widest uppercase">Gestão inteligente</p>
               </div>
             </div>
           </div>
 
           <h2 className="text-3xl font-bold mb-4 leading-tight">
-            Educação mais<br />
-            <span className="text-blue-300">inteligente</span> e cuidadosa
+            Cuidado, pedagogia<br />
+            <span className="text-emerald-200">e gestão inteligente</span>
           </h2>
-          <p className="text-blue-100 text-lg leading-relaxed mb-8">
-            Planejamentos, chamadas, relatórios e acompanhamento do desenvolvimento das crianças — tudo em um só lugar.
+          <p className="text-emerald-50 text-lg leading-relaxed mb-8">
+            Uma plataforma para entidades públicas e privadas cuidarem da rotina pedagógica, dos registros, dos relatórios e da gestão educacional em um só lugar.
           </p>
 
           {/* Features */}
           <div className="grid grid-cols-1 gap-3 text-left">
             {[
-              { icon: '📋', text: 'Chamada diária com 1 clique' },
+              { icon: '📋', text: 'Rotina pedagógica em poucos cliques' },
               { icon: '📚', text: 'Planejamentos baseados na BNCC' },
-              { icon: '📊', text: 'Relatórios e análises automáticas' },
+              { icon: '📊', text: 'Relatórios e gestão inteligente' },
               { icon: '🤖', text: 'Assistente de IA para educadores' },
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3 backdrop-blur-sm">
                 <span className="text-xl">{f.icon}</span>
-                <span className="text-sm font-medium text-blue-50">{f.text}</span>
+                <span className="text-sm font-medium text-emerald-50">{f.text}</span>
               </div>
             ))}
           </div>
@@ -262,11 +262,11 @@ export function LoginPage() {
       {/* Painel direito — formulário */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
-          {/* Logo mobile — COCRIS institucional */}
+          {/* Logo mobile — Zelare institucional */}
           <div className="lg:hidden flex items-center justify-center mb-8">
             <img
-              src={import.meta.env.VITE_APP_LOGO_URL || '/branding/cocris/logo-cocris.png'}
-              alt={import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}
+              src={import.meta.env.VITE_APP_LOGO_URL || '/brand/zelare-logo-square.png'}
+              alt={import.meta.env.VITE_APP_NAME || 'Zelare'}
               className="h-16 w-auto object-contain drop-shadow-lg"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -277,11 +277,11 @@ export function LoginPage() {
             {/* Fallback texto mobile (oculto por padrão) */}
             <div className="hidden items-center gap-3" aria-hidden="true">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-blue-700 font-black text-2xl">C</span>
+                <span className="text-emerald-700 font-black text-2xl">Z</span>
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white">{import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}</h1>
-                <p className="text-blue-200 text-xs">Sistema Pedagógico</p>
+                <h1 className="text-2xl font-black text-white">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
+                <p className="text-emerald-100 text-xs">Gestão inteligente</p>
               </div>
             </div>
           </div>
@@ -289,8 +289,8 @@ export function LoginPage() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Bem-vindo de volta</span>
+                <Sparkles className="h-5 w-5 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wide">Bem-vindo de volta</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Acesse sua conta</h2>
               <p className="text-gray-500 text-sm mt-1">Entre com seu e-mail e senha cadastrados</p>
@@ -309,7 +309,7 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="seu@email.com"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all text-gray-900 placeholder-gray-400"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all text-gray-900 placeholder-gray-400"
                 />
               </div>
 
@@ -326,7 +326,7 @@ export function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all text-gray-900 placeholder-gray-400"
+                    className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all text-gray-900 placeholder-gray-400"
                   />
                   <button
                     type="button"
@@ -350,7 +350,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
               >
                 {loading ? (
                   <>
@@ -360,7 +360,7 @@ export function LoginPage() {
                 ) : (
                   <>
                     <BookOpen className="h-5 w-5" />
-                    Entrar no Sistema
+                    Entrar no Zelare
                   </>
                 )}
               </button>
@@ -368,7 +368,7 @@ export function LoginPage() {
 
             <div className="mt-8 pt-6 border-t border-gray-100 text-center">
               <p className="text-xs text-gray-400">
-                {import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'} © 2026 — Sistema Pedagógico Inteligente
+                {import.meta.env.VITE_APP_NAME || 'Zelare'} © 2026 — cuidado, pedagogia e gestão inteligente
               </p>
             </div>
           </div>

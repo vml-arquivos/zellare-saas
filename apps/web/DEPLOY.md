@@ -1,4 +1,4 @@
-# DEPLOY - FONT-CONEXA-V2
+# DEPLOY - FONT-ZELARE-V2
 
 Instruções de deploy do frontend premium no Coolify.
 
@@ -32,7 +32,7 @@ dist
 ### 3. Domínio Oficial
 
 ```
-https://demo.conexa.casadev.com.br
+https://demo.zelare.seu-dominio.com.br
 ```
 
 ---
@@ -55,12 +55,12 @@ npm run build
 
 ### 1. Acessibilidade
 ```bash
-curl -I https://demo.conexa.casadev.com.br
+curl -I https://demo.zelare.seu-dominio.com.br
 ```
 Resposta esperada: `HTTP/2 200`
 
 ### 2. Smoke Test: Dashboard do Professor
-1. Acessar: `https://demo.conexa.casadev.com.br/app/professor`
+1. Acessar: `https://demo.zelare.seu-dominio.com.br/app/professor`
 2. Verificar se o **PageShell** renderiza corretamente.
 3. Verificar se a **Topbar** exibe a data pedagógica e o badge da turma.
 4. Validar estados:
@@ -90,7 +90,7 @@ Se houver problemas, reverta para o commit anterior e faça o redeploy no Coolif
 ---
 
 ## 🔗 REFERÊNCIAS
-- **Frontend:** https://demo.conexa.casadev.com.br
+- **Frontend:** https://demo.zelare.seu-dominio.com.br
 - **API Backend:** https://apiconexa.casadf.com.br
 
 ---

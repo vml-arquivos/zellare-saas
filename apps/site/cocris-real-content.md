@@ -1,10 +1,10 @@
-# Conteúdo Real da COCRIS (extraído de cocris.org)
+# Conteúdo Real da Zelare (extraído de zelare.org)
 
 ## Informações de Contato
 - **Endereço:** Avenida Recanto das Emas, Quadra 301, Lote 26, Brasília-DF
 - **Telefones:** (61) 3575-4125 / 3575-4119
-- **Email:** contato@cocris.org
-- **Site:** cocris.org
+- **Email:** contato@zelare.org
+- **Site:** zelare.org
 
 ## Nome Oficial
 **Associação Beneficente Coração de Cristo (ABCC)**
@@ -34,7 +34,7 @@ O trabalho realizado na escola tem como base o Currículo em Movimentos da Educa
 ## Unidades (CEPIs e Creches)
 1. CEPI ARARA CANINDÉ
 2. CEPI BEIJA FLOR
-3. CRECHE COCRIS
+3. CRECHE Zelare
 4. CEPI FLAMBOYANT
 5. CRECHE PELICANO
 6. CRECHE ROUXINOL

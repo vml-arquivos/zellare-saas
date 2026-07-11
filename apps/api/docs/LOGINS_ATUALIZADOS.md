@@ -1,6 +1,6 @@
-# 🔐 Logins do Sistema Conexa V2 - Nomes Reais
+# 🔐 Logins do Sistema Zelare - Nomes Reais
 
-**Senha padrão para todos:** `Cocris@2026`
+**Senha padrão para todos:** `Zelare@2026`
 
 ---
 
@@ -8,8 +8,8 @@
 
 | Email | Nome | Função | Acesso |
 |:------|:-----|:-------|:-------|
-| bruna.vaz@cocris.org | **Bruna Vaz** | Coordenadora Geral Pedagógica | 7 unidades |
-| carla.psicologa@cocris.org | **Carla** | Psicóloga | 7 unidades |
+| bruna.vaz@zelare.org | **Bruna Vaz** | Coordenadora Geral Pedagógica | 7 unidades |
+| carla.psicologa@zelare.org | **Carla** | Psicóloga | 7 unidades |
 
 ---
 
@@ -17,10 +17,10 @@
 
 | Email | Nome | Função |
 |:------|:-----|:-------|
-| diretor.arara@cocris.org | **Daniel** | Diretor |
-| ana.carolina@cocris.org | **Ana Carolina de Araujo** | Coordenadora Pedagógica |
-| secretaria.arara@cocris.org | **Adriel** | Secretário |
-| nutricionista.arara@cocris.org | **Dorli** | Nutricionista |
+| diretor.arara@zelare.org | **Daniel** | Diretor |
+| ana.carolina@zelare.org | **Ana Carolina de Araujo** | Coordenadora Pedagógica |
+| secretaria.arara@zelare.org | **Adriel** | Secretário |
+| nutricionista.arara@zelare.org | **Dorli** | Nutricionista |
 
 ---
 
@@ -28,12 +28,12 @@
 
 | Email | Nome | Turma |
 |:------|:-----|:------|
-| maria.silva@cocris.edu.br | **Raquel** | Berçário I |
-| ana.santos@cocris.edu.br | **Elisangela** | Berçário II A |
-| joana.oliveira@cocris.edu.br | **Luciene** | Maternal I A |
-| carla.souza@cocris.edu.br | **Raquel** | Maternal II A |
-| paula.costa@cocris.edu.br | Paula Costa | Pré-escola I *(nome fictício)* |
-| fernanda.lima@cocris.edu.br | Fernanda Lima | Pré-escola II *(nome fictício)* |
+| maria.silva@zelare.edu.br | **Raquel** | Berçário I |
+| ana.santos@zelare.edu.br | **Elisangela** | Berçário II A |
+| joana.oliveira@zelare.edu.br | **Luciene** | Maternal I A |
+| carla.souza@zelare.edu.br | **Raquel** | Maternal II A |
+| paula.costa@zelare.edu.br | Paula Costa | Pré-escola I *(nome fictício)* |
+| fernanda.lima@zelare.edu.br | Fernanda Lima | Pré-escola II *(nome fictício)* |
 
 ---
 
@@ -43,18 +43,18 @@
 
 | Turma | Professora | Email no Sistema |
 |:------|:-----------|:-----------------|
-| Berçário I | **RAQUEL** | maria.silva@cocris.edu.br |
-| Berçário II A | **ELISANGELA** | ana.santos@cocris.edu.br |
+| Berçário I | **RAQUEL** | maria.silva@zelare.edu.br |
+| Berçário II A | **ELISANGELA** | ana.santos@zelare.edu.br |
 | Berçário II B | **JESSICA** | ❌ Não cadastrada |
 
 ### Maternal
 
 | Turma | Professora | Email no Sistema |
 |:------|:-----------|:-----------------|
-| Maternal I A | **LUCIENE** | joana.oliveira@cocris.edu.br |
+| Maternal I A | **LUCIENE** | joana.oliveira@zelare.edu.br |
 | Maternal I B | **ANA** | ❌ Não cadastrada |
 | Maternal I C | **EDILVANA** | ❌ Não cadastrada |
-| Maternal II A | **RAQUEL** | carla.souza@cocris.edu.br |
+| Maternal II A | **RAQUEL** | carla.souza@zelare.edu.br |
 | Maternal II B | **ANGELICA** | ❌ Não cadastrada |
 | Maternal II C | **LUCIENE** | ❌ Não cadastrada |
 
@@ -62,8 +62,8 @@
 
 | Turma | Professora | Email no Sistema |
 |:------|:-----------|:-----------------|
-| Pré-escola I | *(Não informado)* | paula.costa@cocris.edu.br |
-| Pré-escola II | *(Não informado)* | fernanda.lima@cocris.edu.br |
+| Pré-escola I | *(Não informado)* | paula.costa@zelare.edu.br |
+| Pré-escola II | *(Não informado)* | fernanda.lima@zelare.edu.br |
 
 ---
 

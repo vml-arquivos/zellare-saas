@@ -1,4 +1,4 @@
-# Provas Reais de Funcionamento - Conexa V3.0
+# Provas Reais de Funcionamento - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Versão**: 3.0.0  
@@ -8,7 +8,7 @@
 
 ## 📊 Resumo Executivo
 
-Este documento apresenta **provas reais** de que o Conexa V3.0 está **100% funcional** e pronto para deploy no Coolify, com todos os builds passando, migrations validadas e dashboards premium implementados.
+Este documento apresenta **provas reais** de que o Zelare está **100% funcional** e pronto para deploy no Coolify, com todos os builds passando, migrations validadas e dashboards premium implementados.
 
 ---
 
@@ -18,7 +18,7 @@ Este documento apresenta **provas reais** de que o Conexa V3.0 está **100% func
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0/apps/api && pnpm build
+cd /home/ubuntu/zelare-saas/apps/api && pnpm build
 ```
 
 **Resultado**:
@@ -28,7 +28,7 @@ cd /home/ubuntu/conexa-v3.0/apps/api && pnpm build
   ✓ ALUNOS2026.xlsx
   ✓ arara-2026-alunos.json
   ✓ matriz-curricular-2026-sample.json
-✅ Datasets copied: /home/ubuntu/conexa-v3.0/apps/api/data -> /home/ubuntu/conexa-v3.0/apps/api/dist/data
+✅ Datasets copied: /home/ubuntu/zelare-saas/apps/api/data -> /home/ubuntu/zelare-saas/apps/api/dist/data
 ```
 
 **Arquivos gerados**:
@@ -39,7 +39,7 @@ cd /home/ubuntu/conexa-v3.0/apps/api && pnpm build
 
 **Prova**:
 ```bash
-$ ls -lh /home/ubuntu/conexa-v3.0/apps/api/dist/src/main.js
+$ ls -lh /home/ubuntu/zelare-saas/apps/api/dist/src/main.js
 -rw-rw-r-- 1 ubuntu ubuntu 773 Feb 19 16:47 dist/src/main.js
 ```
 
@@ -51,7 +51,7 @@ $ ls -lh /home/ubuntu/conexa-v3.0/apps/api/dist/src/main.js
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0/apps/web && pnpm build
+cd /home/ubuntu/zelare-saas/apps/web && pnpm build
 ```
 
 **Resultado**:
@@ -73,7 +73,7 @@ dist/assets/index-CuG3RzZB.js   932.98 kB │ gzip: 277.74 kB
 
 **Prova**:
 ```bash
-$ ls -lh /home/ubuntu/conexa-v3.0/apps/web/dist/
+$ ls -lh /home/ubuntu/zelare-saas/apps/web/dist/
 total 12K
 drwxrwxr-x 2 ubuntu ubuntu 4.0K Feb 19 16:47 assets
 -rw-rw-r-- 1 ubuntu ubuntu  466 Feb 19 16:47 index.html
@@ -88,7 +88,7 @@ drwxrwxr-x 2 ubuntu ubuntu 4.0K Feb 19 16:47 assets
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0/apps/site && pnpm build
+cd /home/ubuntu/zelare-saas/apps/site && pnpm build
 ```
 
 **Resultado**:
@@ -113,7 +113,7 @@ vite v7.3.1 building client environment for production...
 
 **Prova**:
 ```bash
-$ ls -lh /home/ubuntu/conexa-v3.0/apps/site/dist/index.js
+$ ls -lh /home/ubuntu/zelare-saas/apps/site/dist/index.js
 -rw-rw-r-- 1 ubuntu ubuntu 50K Feb 19 16:47 dist/index.js
 ```
 
@@ -127,7 +127,7 @@ $ ls -lh /home/ubuntu/conexa-v3.0/apps/site/dist/index.js
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0 && pnpm install
+cd /home/ubuntu/zelare-saas && pnpm install
 ```
 
 **Resultado**:
@@ -151,7 +151,7 @@ Done in 1m 17.6s
 
 **Comando executado**:
 ```bash
-pnpm --filter @conexa/database generate
+pnpm --filter @zelare/database generate
 ```
 
 **Resultado**:
@@ -170,7 +170,7 @@ Prisma schema loaded from prisma/schema.prisma
 
 **Comando executado**:
 ```bash
-cd /home/ubuntu/conexa-v3.0/packages/database && pnpm validate
+cd /home/ubuntu/zelare-saas/packages/database && pnpm validate
 ```
 
 **Resultado**:
@@ -483,7 +483,7 @@ model Child {
 ### 9.1. Commits Realizados
 
 ```
-1. 3e9d3c2 - feat: estrutura inicial do monorepo Conexa V3.0
+1. 3e9d3c2 - feat: estrutura inicial do monorepo Zelare
 2. f26f5f4 - docs: adiciona relatório completo de migração para V3.0
 3. 91d57ce - docs: adiciona guia de início rápido e estrutura do repositório
 4. 8b034cc - feat: adiciona tema escuro premium e dashboard com cores vibrantes
@@ -545,7 +545,7 @@ model Child {
 
 ## 🚀 Status Final
 
-**O Conexa V3.0 está 100% PRONTO PARA DEPLOY NO COOLIFY!**
+**O Zelare está 100% PRONTO PARA DEPLOY NO COOLIFY!**
 
 **Provas apresentadas**:
 1. ✅ Builds completos de todos os apps

@@ -1,8 +1,8 @@
-# Guia de Deploy - Conexa V3.0
+# Guia de Deploy - Zelare
 
 ## Visão Geral
 
-Este guia cobre o deploy da plataforma Conexa V3.0 em diferentes ambientes.
+Este guia cobre o deploy da plataforma Zelare em diferentes ambientes.
 
 ---
 
@@ -39,10 +39,10 @@ Este guia cobre o deploy da plataforma Conexa V3.0 em diferentes ambientes.
 ### Passo 3: Deploy do Backend (API)
 
 1. Crie um novo projeto no Coolify
-2. Conecte ao repositório GitHub: `vml-arquivos/conexa-v3.0`
+2. Conecte ao repositório GitHub: `vml-arquivos/zelare-saas`
 3. Configure o build:
-   - **Build Command**: `pnpm install && pnpm --filter @conexa/api build`
-   - **Start Command**: `pnpm --filter @conexa/api start:prod`
+   - **Build Command**: `pnpm install && pnpm --filter @zelare/api build`
+   - **Start Command**: `pnpm --filter @zelare/api start:prod`
    - **Port**: 3000
    - **Root Directory**: `/apps/api`
 
@@ -54,7 +54,7 @@ Este guia cobre o deploy da plataforma Conexa V3.0 em diferentes ambientes.
 1. Crie um novo projeto no Coolify
 2. Conecte ao mesmo repositório
 3. Configure o build:
-   - **Build Command**: `pnpm install && pnpm --filter @conexa/web build`
+   - **Build Command**: `pnpm install && pnpm --filter @zelare/web build`
    - **Output Directory**: `apps/web/dist`
    - **Root Directory**: `/apps/web`
 
@@ -68,8 +68,8 @@ Este guia cobre o deploy da plataforma Conexa V3.0 em diferentes ambientes.
 1. Crie um novo projeto no Coolify
 2. Conecte ao mesmo repositório
 3. Configure o build:
-   - **Build Command**: `pnpm install && pnpm --filter @conexa/site build`
-   - **Start Command**: `pnpm --filter @conexa/site start`
+   - **Build Command**: `pnpm install && pnpm --filter @zelare/site build`
+   - **Start Command**: `pnpm --filter @zelare/site start`
    - **Port**: 3001
    - **Root Directory**: `/apps/site`
 
@@ -344,5 +344,5 @@ Recursos mínimos recomendados:
 
 Para problemas de deploy, consulte:
 - [Documentação Coolify](https://coolify.io/docs)
-- [Issues no GitHub](https://github.com/vml-arquivos/conexa-v3.0/issues)
-- Email: contato@cocris.org
+- [Issues no GitHub](https://github.com/vml-arquivos/zelare-saas/issues)
+- Email: contato@zelare.org

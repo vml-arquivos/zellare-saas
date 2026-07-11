@@ -1,5 +1,5 @@
 /**
- * useOfflineSync — Hook de sincronização offline para o Conexa PWA
+ * useOfflineSync — Hook de sincronização offline para o Zelare PWA
  *
  * Uso:
  *   const { isOnline, queueCount, syncNow, postOfflineSafe } = useOfflineSync();

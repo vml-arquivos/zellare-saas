@@ -1,12 +1,12 @@
-# Relatório Técnico Mestre: Conexa V3.0 - Análise Completa
+# Relatório Técnico Mestre: Zelare - Análise Completa
 
-Este documento fornece uma análise cirúrgica e minuciosa do sistema Conexa V3.0, consolidando todas as funcionalidades implementadas, o roadmap de desenvolvimento, a arquitetura, os níveis de acesso e as credenciais de teste. O objetivo é garantir uma transferência de contexto completa e permitir a continuidade do projeto com máxima performance.
+Este documento fornece uma análise cirúrgica e minuciosa do sistema Zelare, consolidando todas as funcionalidades implementadas, o roadmap de desenvolvimento, a arquitetura, os níveis de acesso e as credenciais de teste. O objetivo é garantir uma transferência de contexto completa e permitir a continuidade do projeto com máxima performance.
 
 ---
 
 ## 🚀 1. Arquitetura Geral do Sistema
 
-O Conexa V3.0 é um monorepo (`vml-arquivos/conexa-v3.0`) estruturado com as seguintes camadas:
+O Zelare é um monorepo (`vml-arquivos/zelare-saas`) estruturado com as seguintes camadas:
 
 | Camada | Tecnologia Principal | Descrição |
 | :--- | :--- | :--- |
@@ -107,10 +107,10 @@ Para facilitar o teste e a validação das funcionalidades implementadas, as seg
 
 | Perfil | Email | Senha | Observações |
 |---|---|---|---|
-| **Professor** | `professor@conexa.com` | `123456` | Acesso à `RdicCriancaPage`, `TeacherDashboardPage`, `DiarioBordoPage`. |
-| **Coordenadora Unidade** | `coordenadora@conexa.com` | `123456` | Acesso à `RdicCoordPage`, `PainelAlergiasPage`, `DashboardConsumoMateriaisPage`. Pode aprovar RDICs. |
-| **Coordenadora Geral** | `geral@conexa.com` | `123456` | Acesso à `RdicGeralPage` (somente leitura de RDICs PUBLICADOS). |
-| **Nutricionista** | `nutricionista@conexa.com` | `123456` | Acesso ao `PainelAlergiasPage`. |
+| **Professor** | `professor@zelare.com.br` | `123456` | Acesso à `RdicCriancaPage`, `TeacherDashboardPage`, `DiarioBordoPage`. |
+| **Coordenadora Unidade** | `coordenadora@zelare.com.br` | `123456` | Acesso à `RdicCoordPage`, `PainelAlergiasPage`, `DashboardConsumoMateriaisPage`. Pode aprovar RDICs. |
+| **Coordenadora Geral** | `geral@zelare.com.br` | `123456` | Acesso à `RdicGeralPage` (somente leitura de RDICs PUBLICADOS). |
+| **Nutricionista** | `nutricionista@zelare.com.br` | `123456` | Acesso ao `PainelAlergiasPage`. |
 
 **Nota:** As senhas são genéricas para ambiente de teste. Em produção, senhas seguras e políticas de rotação devem ser aplicadas.
 
@@ -118,7 +118,7 @@ Para facilitar o teste e a validação das funcionalidades implementadas, as seg
 
 ## ✅ 6. Considerações Finais
 
-O sistema Conexa V3.0 está em um estágio avançado de desenvolvimento, com uma arquitetura bem definida e um conjunto robusto de funcionalidades já em operação. A continuidade do projeto é facilitada pela documentação detalhada e pela clareza dos próximos passos. A integração com N8N e agentes de IA é totalmente suportada pela estrutura de dados existente, permitindo a expansão para automação e inteligência de dados.
+O sistema Zelare está em um estágio avançado de desenvolvimento, com uma arquitetura bem definida e um conjunto robusto de funcionalidades já em operação. A continuidade do projeto é facilitada pela documentação detalhada e pela clareza dos próximos passos. A integração com N8N e agentes de IA é totalmente suportada pela estrutura de dados existente, permitindo a expansão para automação e inteligência de dados.
 
 Este relatório serve como a base para qualquer intervenção futura, garantindo que o conhecimento técnico e de negócio seja preservado e acessível. 
 

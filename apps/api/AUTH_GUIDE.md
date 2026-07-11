@@ -1,15 +1,15 @@
-# Guia de Autenticação e RBAC - Conexa
+# Guia de Autenticação e RBAC - Zelare
 
 **Autor:** MANUZ, Engenheiro de Software Sênior
 **Data:** 03 de Fevereiro de 2026
 
-Este guia explica como funciona o sistema de autenticação e controle de acesso (RBAC) do Conexa, incluindo exemplos práticos de uso.
+Este guia explica como funciona o sistema de autenticação e controle de acesso (RBAC) do Zelare, incluindo exemplos práticos de uso.
 
 ---
 
 ## 1. Visão Geral
 
-O Conexa implementa um sistema de autenticação e autorização robusto baseado em:
+O Zelare implementa um sistema de autenticação e autorização robusto baseado em:
 
 - **JWT (JSON Web Tokens)**: Para autenticação stateless
 - **RBAC (Role-Based Access Control)**: Para controle de acesso baseado em papéis
@@ -303,4 +303,4 @@ curl -X GET http://localhost:3000/unidade/clx1111111111/data \
 
 ---
 
-**O sistema de autenticação e RBAC do Conexa está pronto para uso!** 🔐✨
+**O sistema de autenticação e RBAC do Zelare está pronto para uso!** 🔐✨

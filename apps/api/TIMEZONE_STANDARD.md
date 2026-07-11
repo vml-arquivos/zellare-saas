@@ -1,4 +1,4 @@
-## Padrão de Timezone - Conexa
+## Padrão de Timezone - Zelare
 
 ### 1. Fuso Horário Pedagógico
 

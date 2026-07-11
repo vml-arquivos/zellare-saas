@@ -78,7 +78,7 @@ export default function MobileShell() {
               Olá, {nomeUsuario}
             </p>
             <p style={{ margin: 0, fontSize: 11, color: '#94a3b8', lineHeight: 1.2 }}>
-              COCRIS Pedagógico · v{BUILD_ID}
+              Zelare · v{BUILD_ID}
             </p>
           </div>
         </div>

@@ -47,7 +47,7 @@ export default function Transparencia() {
               Transparência
             </h1>
             <p className="text-lg text-foreground/70 max-w-2xl">
-              Acesse todos os documentos e relatórios da COCRIS. Operamos com total transparência e prestação de contas.
+              Acesse todos os documentos e relatórios da Zelare. Operamos com total transparência e prestação de contas.
             </p>
           </div>
         </section>
@@ -59,7 +59,7 @@ export default function Transparencia() {
                 Documentos Públicos
               </h2>
               <p className="text-lg text-foreground/70 max-w-3xl mx-auto">
-                A COCRIS opera com total transparência. Todos os nossos documentos financeiros, relatórios de auditoria e documentos institucionais estão disponíveis para consulta pública.
+                A Zelare opera com total transparência. Todos os nossos documentos financeiros, relatórios de auditoria e documentos institucionais estão disponíveis para consulta pública.
               </p>
             </div>
 
@@ -73,7 +73,7 @@ export default function Transparencia() {
                     <a
                       key={idx}
                       href={doc.url}
-                      className="card-cocris flex items-center justify-between hover:shadow-lg transition-shadow"
+                      className="card-zelare flex items-center justify-between hover:shadow-lg transition-shadow"
                     >
                       <div className="flex gap-4 items-start flex-1">
                         <FileText className="w-8 h-8 text-primary flex-shrink-0 mt-1" />

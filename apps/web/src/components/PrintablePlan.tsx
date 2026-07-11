@@ -461,7 +461,7 @@ export function buildPrintableHTML(plan: Planning): string {
   <div class="page">
     <!-- Cabeçalho -->
     <div class="header">
-      <div class="header-logo">COCRIS Pedagógico — Sistema de Gestão Pedagógica</div>
+      <div class="header-logo">Zelare — cuidado, pedagogia e gestão inteligente</div>
       <div class="header-title">${plan.title}</div>
       <div class="header-subtitle">Planejamento de Aula — gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
     </div>
@@ -509,7 +509,7 @@ export function buildPrintableHTML(plan: Planning): string {
 
     <!-- Rodapé -->
     <div class="footer">
-      <span>COCRIS Pedagógico — Sistema de Gestão Pedagógica</span>
+      <span>Zelare — cuidado, pedagogia e gestão inteligente</span>
       <span>Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
     </div>
   </div>

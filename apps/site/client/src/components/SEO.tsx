@@ -10,9 +10,9 @@ interface SEOProps {
 }
 
 export default function SEO({
-  title = 'COCRIS - Associação Beneficente Coração de Cristo',
+  title = 'Zelare - Associação Beneficente Coração de Cristo',
   description = 'Organização sem fins lucrativos dedicada à educação infantil de excelência. Administramos 6 unidades de educação infantil no Distrito Federal, transformando vidas através do acolhimento e aprendizagem.',
-  keywords = 'COCRIS, educação infantil, creche, CEPI, Recanto das Emas, Brazlândia, educação, crianças, vulnerabilidade social, ONG, doações',
+  keywords = 'Zelare, educação infantil, creche, CEPI, Recanto das Emas, Brazlândia, educação, crianças, vulnerabilidade social, ONG, doações',
   image = '/images/children-learning.webp',
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = 'website',
@@ -45,7 +45,7 @@ export default function SEO({
     updateMetaTag('og:image', image, true);
     updateMetaTag('og:url', url, true);
     updateMetaTag('og:type', type, true);
-    updateMetaTag('og:site_name', 'COCRIS', true);
+    updateMetaTag('og:site_name', 'Zelare', true);
     updateMetaTag('og:locale', 'pt_BR', true);
 
     // Twitter Card tags
@@ -56,7 +56,7 @@ export default function SEO({
 
     // Additional SEO tags
     updateMetaTag('robots', 'index, follow');
-    updateMetaTag('author', 'COCRIS - Associação Beneficente Coração de Cristo');
+    updateMetaTag('author', 'Zelare - Associação Beneficente Coração de Cristo');
     updateMetaTag('language', 'Portuguese');
     updateMetaTag('revisit-after', '7 days');
 

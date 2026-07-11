@@ -1,10 +1,10 @@
-# Estrutura Real do Site COCRIS.ORG
+# Estrutura Real do Site Zelare.ORG
 
 ## NOMES REAIS DAS UNIDADES (CEPIs e CRECHES)
 
 1. **CEPI ARARA CANINDÉ**
 2. **CEPI BEIJA FLOR**
-3. **CRECHE COCRIS**
+3. **CRECHE Zelare**
 4. **CEPI FLAMBOYANT**
 5. **CRECHE PELICANO**
 6. **CRECHE ROUXINOL**
@@ -32,7 +32,7 @@
 - Submenu:
   - CEPI ARARA CANINDÉ
   - CEPI BEIJA FLOR
-  - CRECHE COCRIS
+  - CRECHE Zelare
   - CEPI FLAMBOYANT
   - CRECHE PELICANO
   - CRECHE ROUXINOL
@@ -71,8 +71,8 @@
 
 - **Endereço:** Avenida Recanto das Emas, Quadra 301, Lote 26, Brasília-DF
 - **Telefones:** (61) 3575-4125 / 3575-4119
-- **Email:** contato@cocris.org
-- **Website:** www.cocris.org
+- **Email:** contato@zelare.org
+- **Website:** www.zelare.org
 
 ## MISSÃO, VISÃO E VALORES
 

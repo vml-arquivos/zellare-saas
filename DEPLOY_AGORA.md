@@ -1,4 +1,4 @@
-# 🚀 DEPLOY AGORA - Conexa V3.0
+# 🚀 DEPLOY AGORA - Zelare
 
 **Status**: ✅ LIBERADO PARA DEPLOY  
 **Tempo estimado**: 30-45 minutos  
@@ -11,9 +11,9 @@
 Antes de começar, tenha em mãos:
 
 - [ ] Acesso ao Coolify
-- [ ] Repositório GitHub: `vml-arquivos/conexa-v3.0`
+- [ ] Repositório GitHub: `vml-arquivos/zelare-saas`
 - [ ] Gemini API Key: https://makersuite.google.com/app/apikey
-- [ ] Domínios (opcional): `api.conexa.com`, `app.conexa.com`, `conexa.com`
+- [ ] Domínios (opcional): `api.zelare.com.br`, `app.zelare.com.br`, `zelare.com.br`
 
 ---
 
@@ -28,9 +28,9 @@ Antes de começar, tenha em mãos:
    - Clique em **"Databases"** → **"+ Add Database"**
    - Selecione **"PostgreSQL"**
    - Preencha:
-     - Name: `conexa-v3-db`
+     - Name: `zelare-saas-db`
      - Database: `conexa`
-     - Username: `conexa_user`
+     - Username: `zelare_user`
      - Password: `[gere uma senha forte]`
    - Clique em **"Create"**
 
@@ -40,7 +40,7 @@ Antes de começar, tenha em mãos:
 4. **Copie a Connection String**
    - Clique no banco criado
    - Copie a **"Connection String"**
-   - Exemplo: `postgresql://conexa_user:senha@conexa-v3-db:5432/conexa`
+   - Exemplo: `postgresql://zelare_user:senha@zelare-saas-db:5432/conexa`
    - **ANOTE!** Você vai usar várias vezes
 
 ✅ **Banco criado!**
@@ -52,12 +52,12 @@ Antes de começar, tenha em mãos:
 1. **Crie a Aplicação**
    - Clique em **"Applications"** → **"+ Add Application"**
    - Selecione **"GitHub"**
-   - Repositório: `vml-arquivos/conexa-v3.0`
+   - Repositório: `vml-arquivos/zelare-saas`
    - Branch: `main`
-   - Name: `conexa-v3-api`
+   - Name: `zelare-saas-api`
 
 2. **Configure Build**
-   - Build Command: `pnpm install && pnpm --filter @conexa/database generate && pnpm --filter @conexa/api build`
+   - Build Command: `pnpm install && pnpm --filter @zelare/database generate && pnpm --filter @zelare/api build`
    - Start Command: `node apps/api/dist/src/main.js`
    - Port: `3000`
    - Working Directory: `/`
@@ -67,7 +67,7 @@ Antes de começar, tenha em mãos:
    Clique em **"Environment Variables"** e adicione:
 
    ```bash
-   DATABASE_URL=postgresql://conexa_user:SUA_SENHA@conexa-v3-db:5432/conexa
+   DATABASE_URL=postgresql://zelare_user:SUA_SENHA@zelare-saas-db:5432/conexa
    JWT_SECRET=[gere com: openssl rand -base64 32]
    JWT_EXPIRES_IN=7d
    NODE_ENV=production
@@ -109,7 +109,7 @@ Antes de começar, tenha em mãos:
    cd apps/api
    node scripts/create-admin.js
    ```
-   - Anote: Email `admin@conexa.com` / Senha `Admin@123`
+   - Anote: Email `admin@zelare.com.br` / Senha `Admin@123`
 
 7. **Crie Usuários de Teste**
    - No console, execute:
@@ -132,12 +132,12 @@ Antes de começar, tenha em mãos:
 1. **Crie a Aplicação**
    - Clique em **"Applications"** → **"+ Add Application"**
    - Selecione **"GitHub"**
-   - Repositório: `vml-arquivos/conexa-v3.0`
+   - Repositório: `vml-arquivos/zelare-saas`
    - Branch: `main`
-   - Name: `conexa-v3-web`
+   - Name: `zelare-saas-web`
 
 2. **Configure Build**
-   - Build Command: `pnpm install && pnpm --filter @conexa/web build`
+   - Build Command: `pnpm install && pnpm --filter @zelare/web build`
    - Output Directory: `apps/web/dist`
    - Port: `5173`
    - Working Directory: `/`
@@ -146,7 +146,7 @@ Antes de começar, tenha em mãos:
    
    ```bash
    VITE_API_URL=https://api.conexa.seu-dominio.com
-   VITE_APP_NAME=Conexa V3.0
+   VITE_APP_NAME=Zelare
    VITE_APP_VERSION=3.0.0
    ```
 
@@ -171,12 +171,12 @@ Antes de começar, tenha em mãos:
 1. **Crie a Aplicação**
    - Clique em **"Applications"** → **"+ Add Application"**
    - Selecione **"GitHub"**
-   - Repositório: `vml-arquivos/conexa-v3.0`
+   - Repositório: `vml-arquivos/zelare-saas`
    - Branch: `main`
-   - Name: `conexa-v3-site`
+   - Name: `zelare-saas-site`
 
 2. **Configure Build**
-   - Build Command: `pnpm install && pnpm --filter @conexa/site build`
+   - Build Command: `pnpm install && pnpm --filter @zelare/site build`
    - Start Command: `node apps/site/dist/index.js`
    - Port: `5174`
    - Working Directory: `/`
@@ -184,7 +184,7 @@ Antes de começar, tenha em mãos:
 3. **Configure Variáveis de Ambiente**
    
    ```bash
-   DATABASE_URL=postgresql://conexa_user:SUA_SENHA@conexa-v3-db:5432/conexa
+   DATABASE_URL=postgresql://zelare_user:SUA_SENHA@zelare-saas-db:5432/conexa
    API_URL=https://api.conexa.seu-dominio.com
    NODE_ENV=production
    PORT=5174
@@ -214,9 +214,9 @@ Antes de começar, tenha em mãos:
 1. **Configure DNS**
    - No seu provedor de DNS (Cloudflare, GoDaddy, etc.)
    - Adicione registros A ou CNAME apontando para o IP da VPS:
-     - `api.conexa.com` → IP da VPS
-     - `app.conexa.com` → IP da VPS
-     - `conexa.com` → IP da VPS
+     - `api.zelare.com.br` → IP da VPS
+     - `app.zelare.com.br` → IP da VPS
+     - `zelare.com.br` → IP da VPS
 
 2. **Configure no Coolify**
    - Para cada aplicação:
@@ -233,7 +233,7 @@ Antes de começar, tenha em mãos:
 
 **Se NÃO tiver domínios:**
 - Use as URLs geradas pelo Coolify
-- Exemplo: `https://conexa-v3-api-abc123.coolify.io`
+- Exemplo: `https://zelare-saas-api-abc123.coolify.io`
 
 ---
 
@@ -247,7 +247,7 @@ Antes de começar, tenha em mãos:
 
 2. **Teste Login**
    - Acesse: `https://app.conexa.seu-dominio.com`
-   - Login: `admin@conexa.com`
+   - Login: `admin@zelare.com.br`
    - Senha: `Admin@123`
    - Deve entrar no dashboard
 
@@ -259,7 +259,7 @@ Antes de começar, tenha em mãos:
 4. **Teste Usuários de Teste**
    - Logout
    - Teste cada nível:
-     - `developer@conexa.com` / `Teste@123`
+     - `developer@zelare.com.br` / `Teste@123`
      - `admin@mantenedora.com` / `Teste@123`
      - `coordenacao@central.com` / `Teste@123`
      - `diretor@unidade1.com` / `Teste@123`
@@ -275,7 +275,7 @@ Antes de começar, tenha em mãos:
 
 ## 🎉 DEPLOY CONCLUÍDO!
 
-Parabéns! O Conexa V3.0 está no ar! 🚀
+Parabéns! O Zelare está no ar! 🚀
 
 ### O Que Você Tem Agora
 
@@ -317,11 +317,11 @@ Parabéns! O Conexa V3.0 está no ar! 🚀
 ### Imediato (Hoje)
 
 1. **Altere senhas**
-   - Admin: `admin@conexa.com`
+   - Admin: `admin@zelare.com.br`
    - Usuários de teste
 
 2. **Crie mantenedora real**
-   - Login como `developer@conexa.com`
+   - Login como `developer@zelare.com.br`
    - Crie sua instituição
 
 3. **Crie unidades reais**
@@ -381,7 +381,7 @@ Parabéns! O Conexa V3.0 está no ar! 🚀
 **Solução**:
 1. Verifique se o banco está rodando
 2. Verifique `DATABASE_URL`
-3. Verifique nome do container: `conexa-v3-db`
+3. Verifique nome do container: `zelare-saas-db`
 
 ### Problema: "Authentication failed"
 

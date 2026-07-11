@@ -28,7 +28,7 @@ export async function createCheckoutSession(params: {
         price_data: {
           currency: 'brl',
           product_data: {
-            name: `Doação para COCRIS${params.destination ? ` - ${params.destination}` : ''}`,
+            name: `Doação para Zelare${params.destination ? ` - ${params.destination}` : ''}`,
             description: params.message || 'Apoie a educação infantil de qualidade',
           },
           unit_amount: params.amount,

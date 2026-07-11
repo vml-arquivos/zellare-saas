@@ -1,11 +1,11 @@
-# Handover de Sistema: Conexa V3.0 (SaaS Educacional)
+# Handover de Sistema: Zelare (SaaS Educacional)
 
-Este documento transfere o contexto total, arquitetura, decisões técnicas e roadmap do sistema Conexa V3.0 para o próximo agente ou desenvolvedor.
+Este documento transfere o contexto total, arquitetura, decisões técnicas e roadmap do sistema Zelare para o próximo agente ou desenvolvedor.
 
 ---
 
 ## 🚀 1. Estado Atual e Repositório
-- **Repositório:** `vml-arquivos/conexa-v3.0`
+- **Repositório:** `vml-arquivos/zelare-saas`
 - **Branch:** `main`
 - **Último Commit:** `a39d815` (Painel Alergias, Dashboard Consumo, Exportar PDF)
 - **Status de Build:** 

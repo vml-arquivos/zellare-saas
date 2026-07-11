@@ -1,11 +1,11 @@
-# Guia Completo de Deploy - Site COCRIS
+# Guia Completo de Deploy - Site Zelare
 
 ## 📋 Pré-requisitos
 
 - Servidor VPS com Ubuntu 20.04+ ou Debian 11+
 - Docker e Docker Compose instalados
 - Coolify instalado e configurado
-- Domínio cocris.casadef.com.br apontando para o servidor
+- Domínio zelare.casadef.com.br apontando para o servidor
 - Conta Stripe (para pagamentos)
 - Banco de dados MySQL/MariaDB
 
@@ -18,21 +18,21 @@
 No painel do Coolify:
 
 1. **Criar novo serviço MySQL:**
-   - Nome: `cocris-db`
+   - Nome: `zelare-db`
    - Versão: MySQL 8.0 ou MariaDB 10.11
    - Anotar credenciais: usuário, senha, porta, database
 
 2. **Construir DATABASE_URL:**
    ```
-   mysql://usuario:senha@cocris-db:3306/cocris
+   mysql://usuario:senha@zelare-db:3306/zelare
    ```
 
 ### 2. Configurar Aplicação
 
 1. **Criar novo Application no Coolify:**
-   - Nome: `cocris-site`
+   - Nome: `zelare-site`
    - Tipo: GitHub Repository
-   - Repositório: `vml-arquivos/site-cocris`
+   - Repositório: `vml-arquivos/site-zelare`
    - Branch: `main`
 
 2. **Build Settings:**
@@ -53,7 +53,7 @@ No painel do Coolify:
 
    ```env
    # Database
-   DATABASE_URL=mysql://usuario:senha@cocris-db:3306/cocris
+   DATABASE_URL=mysql://usuario:senha@zelare-db:3306/zelare
    
    # Authentication (copiar do Manus)
    JWT_SECRET=your-jwt-secret-min-32-chars
@@ -65,7 +65,7 @@ No painel do Coolify:
    # Manus App (copiar do Manus)
    VITE_APP_ID=your-app-id
    VITE_APP_TITLE=CoCris - Educação Infantil
-   VITE_APP_LOGO=/images/logo.png
+   VITE_APP_LOGO=/images/zelare-logo-square.png
    
    # Manus Forge API (copiar do Manus)
    BUILT_IN_FORGE_API_URL=https://forge.manus.im
@@ -83,7 +83,7 @@ No painel do Coolify:
    STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
    
    # Site Config
-   VITE_SITE_URL=https://cocris.casadef.com.br
+   VITE_SITE_URL=https://zelare.casadef.com.br
    NODE_ENV=production
    ```
 
@@ -92,14 +92,14 @@ No painel do Coolify:
 1. **No painel DNS (Registro.br, Cloudflare, etc.):**
    ```
    Type: A
-   Name: cocris.casadef.com.br
+   Name: zelare.casadef.com.br
    Value: [IP do servidor Coolify]
    TTL: 3600
    ```
 
 2. **No Coolify:**
    - Vá em Settings > Domains
-   - Adicione: `cocris.casadef.com.br`
+   - Adicione: `zelare.casadef.com.br`
    - Habilite "Enable HTTPS" (Let's Encrypt)
    - Aguarde propagação DNS (5-30 minutos)
 
@@ -123,7 +123,7 @@ No painel do Coolify:
    ```
 
 3. **Verificar site:**
-   - Acesse https://cocris.casadef.com.br
+   - Acesse https://zelare.casadef.com.br
    - Teste navegação entre páginas
    - Verifique imagens e assets
 
@@ -147,8 +147,8 @@ No painel do Coolify:
 2. Clique em "Add endpoint"
 3. Configure:
    ```
-   Endpoint URL: https://cocris.casadef.com.br/api/webhooks/stripe
-   Description: COCRIS Payment Webhook
+   Endpoint URL: https://zelare.casadef.com.br/api/webhooks/stripe
+   Description: Zelare Payment Webhook
    Events to send:
      - checkout.session.completed
      - payment_intent.succeeded
@@ -190,7 +190,7 @@ No painel do Coolify:
    SMTP_PORT=587
    SMTP_USER=seu-email@gmail.com
    SMTP_PASSWORD=senha-de-app-gerada
-   SMTP_FROM=noreply@cocris.org
+   SMTP_FROM=noreply@zelare.org
    ```
 
 ### Opção 2: SendGrid
@@ -203,7 +203,7 @@ No painel do Coolify:
    SMTP_PORT=587
    SMTP_USER=apikey
    SMTP_PASSWORD=SG.sua-api-key
-   SMTP_FROM=noreply@cocris.org
+   SMTP_FROM=noreply@zelare.org
    ```
 
 ---
@@ -213,9 +213,9 @@ No painel do Coolify:
 ### 1. Google Search Console
 
 1. Acesse https://search.google.com/search-console
-2. Adicione propriedade: `cocris.casadef.com.br`
+2. Adicione propriedade: `zelare.casadef.com.br`
 3. Verifique propriedade (DNS ou HTML)
-4. Envie sitemap: `https://cocris.casadef.com.br/sitemap.xml`
+4. Envie sitemap: `https://zelare.casadef.com.br/sitemap.xml`
 
 ### 2. Google Analytics (Opcional)
 
@@ -251,10 +251,10 @@ sudo ufw enable
 
 ```bash
 # Backup manual
-docker exec cocris-db mysqldump -u usuario -p cocris > backup-$(date +%Y%m%d).sql
+docker exec zelare-db mysqldump -u usuario -p zelare > backup-$(date +%Y%m%d).sql
 
 # Backup automático (crontab)
-0 2 * * * docker exec cocris-db mysqldump -u usuario -p cocris > /backups/cocris-$(date +\%Y\%m\%d).sql
+0 2 * * * docker exec zelare-db mysqldump -u usuario -p zelare > /backups/zelare-$(date +\%Y\%m\%d).sql
 ```
 
 ### 4. Monitoramento
@@ -302,7 +302,7 @@ pnpm build
 
 ```bash
 # Testar conexão
-mysql -h cocris-db -u usuario -p cocris
+mysql -h zelare-db -u usuario -p zelare
 
 # Verificar se serviço está rodando
 docker ps | grep mysql
@@ -311,9 +311,9 @@ docker ps | grep mysql
 ### Site Não Carrega
 
 1. Verificar logs: `docker logs -f [container-id]`
-2. Verificar DNS: `nslookup cocris.casadef.com.br`
+2. Verificar DNS: `nslookup zelare.casadef.com.br`
 3. Verificar porta: `curl http://localhost:3000`
-4. Verificar SSL: `curl https://cocris.casadef.com.br`
+4. Verificar SSL: `curl https://zelare.casadef.com.br`
 
 ### Pagamentos Não Funcionam
 
@@ -328,8 +328,8 @@ docker ps | grep mysql
 
 - **Documentação Coolify:** https://coolify.io/docs
 - **Documentação Stripe:** https://stripe.com/docs
-- **Issues GitHub:** https://github.com/vml-arquivos/site-cocris/issues
-- **Email:** suporte@cocris.org
+- **Issues GitHub:** https://github.com/vml-arquivos/site-zelare/issues
+- **Email:** suporte@zelare.org
 
 ---
 

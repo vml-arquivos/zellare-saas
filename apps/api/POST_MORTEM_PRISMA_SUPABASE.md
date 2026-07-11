@@ -1,7 +1,7 @@
 # POST-MORTEM TÉCNICO — INTEGRAÇÃO PRISMA ↔ SUPABASE
 
 **Data:** 2026-02-04  
-**Projeto:** Conexa-V2  
+**Projeto:** Zelare-V2  
 **Duração da investigação:** ~2 horas  
 **Status:** ✅ **RESOLVIDO**
 
@@ -9,7 +9,7 @@
 
 ## RESUMO EXECUTIVO
 
-O erro **P1001: Can't reach database server** que ocorria intermitentemente no deploy do Conexa-V2 foi diagnosticado e resolvido. A causa raiz era **firewall do Supabase bloqueando conexões PostgreSQL diretas** de IPs não autorizados, combinado com um **healthcheck que dependia do banco de dados**.
+O erro **P1001: Can't reach database server** que ocorria intermitentemente no deploy do Zelare-V2 foi diagnosticado e resolvido. A causa raiz era **firewall do Supabase bloqueando conexões PostgreSQL diretas** de IPs não autorizados, combinado com um **healthcheck que dependia do banco de dados**.
 
 ### Impacto
 - ❌ Deploys falhando ou demorando excessivamente
@@ -80,7 +80,7 @@ async check() {
 
 #### DATABASE_URL (Runtime)
 ```
-postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
 ```
 
 - Pooler Transaction Mode (porta 6543)
@@ -89,7 +89,7 @@ postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.
 
 #### DIRECT_URL (Migrations)
 ```
-postgresql://postgres.ockzuvbnzfoqsiwmpixr:Conexaapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 - Pooler Session Mode (porta 5432)
@@ -154,7 +154,7 @@ Criados os seguintes documentos:
 
 ### Commit 1: fix(health): separate liveness and readiness probes
 **SHA:** `127926c`  
-**Link:** https://github.com/vml-arquivos/Conexa-V2/commit/127926c
+**Link:** https://github.com/vml-arquivos/Zelare-V2/commit/127926c
 
 **Mudanças:**
 - Separado `/health` (liveness) de `/health/ready` (readiness)

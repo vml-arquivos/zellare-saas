@@ -1,4 +1,4 @@
-# ⚙️ Configuração Coolify - Frontend Conexa V3.0
+# ⚙️ Configuração Coolify - Frontend Zelare
 
 ## 🔴 IMPORTANTE: Configuração para Monorepo
 
@@ -12,7 +12,7 @@ Este app faz parte de um **monorepo pnpm**. O Dockerfile precisa acessar a raiz 
 
 | Campo | Valor |
 |-------|-------|
-| **Name** | Conexa V3 - Frontend |
+| **Name** | Zelare - Frontend |
 | **Build Pack** | Dockerfile |
 | **Base Directory** | `/` (raiz do repo) |
 | **Dockerfile Location** | `apps/web/Dockerfile` |
@@ -26,7 +26,7 @@ Este app faz parte de um **monorepo pnpm**. O Dockerfile precisa acessar a raiz 
 
 | Domínio | HTTPS |
 |---------|-------|
-| `app.conexa3.casadf.com.br` | ✅ Enabled (Let's Encrypt) |
+| `app.zelare.seu-dominio.com.br` | ✅ Enabled (Let's Encrypt) |
 
 ---
 
@@ -35,8 +35,8 @@ Este app faz parte de um **monorepo pnpm**. O Dockerfile precisa acessar a raiz 
 ⚠️ **IMPORTANTE**: Todas as variáveis devem ser marcadas como **Build Time** (não Runtime)
 
 ```bash
-VITE_API_URL=https://api.conexa3.casadf.com.br
-VITE_APP_NAME=Conexa V3.0
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 VITE_APP_ENV=production
 VITE_ENABLE_OFFLINE=true
@@ -45,7 +45,7 @@ VITE_ENABLE_AI_ASSISTANT=true
 VITE_ENABLE_DEBUG=false
 VITE_DEFAULT_THEME=dark
 VITE_DEFAULT_LANGUAGE=pt-BR
-VITE_STORAGE_PREFIX=conexa_
+VITE_STORAGE_PREFIX=zelare_
 VITE_API_TIMEOUT=30000
 ```
 
@@ -55,7 +55,7 @@ VITE_API_TIMEOUT=30000
 
 ### Estrutura do Monorepo
 ```
-conexa-v3.0/
+zelare-saas/
 ├── apps/web/           ← Frontend (este app)
 ├── packages/
 │   ├── ui/            ← Componentes compartilhados
@@ -70,7 +70,7 @@ conexa-v3.0/
 2. Copia **todos os packages/** (dependências internas)
 3. Copia **apps/web/** (código do frontend)
 4. Instala deps com `pnpm install --frozen-lockfile`
-5. Builda com `pnpm --filter @conexa/web build`
+5. Builda com `pnpm --filter @zelare/web build`
 
 ---
 
@@ -79,7 +79,7 @@ conexa-v3.0/
 - [ ] Base Directory configurado como `/` (raiz)
 - [ ] Dockerfile Location: `apps/web/Dockerfile`
 - [ ] Todas as variáveis VITE_* configuradas como **Build Time**
-- [ ] Domínio `app.conexa3.casadf.com.br` configurado
+- [ ] Domínio `app.zelare.seu-dominio.com.br` configurado
 - [ ] HTTPS habilitado
 - [ ] Port: `80`
 
@@ -87,7 +87,7 @@ conexa-v3.0/
 
 ## 🐛 Troubleshooting
 
-### Erro: "Cannot find module '@conexa/ui'"
+### Erro: "Cannot find module '@zelare/ui'"
 **Causa**: Base Directory está errado (apps/web ao invés de /)  
 **Solução**: Mudar Base Directory para `/`
 
@@ -107,8 +107,8 @@ Após deploy bem-sucedido:
 
 | Email | Senha | Nível |
 |-------|-------|-------|
-| developer@conexa.com | Teste@123 | Developer |
-| admin@cocris.org.br | Teste@123 | Admin Mantenedora |
+| developer@zelare.com.br | Teste@123 | Developer |
+| admin@zelare.org.br | Teste@123 | Admin Mantenedora |
 | coordenador@cepi.com.br | Teste@123 | Coordenador |
 | nonata@cepi.com.br | Teste@123 | Professora |
 

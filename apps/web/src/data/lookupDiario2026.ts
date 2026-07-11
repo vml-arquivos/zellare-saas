@@ -1,4 +1,4 @@
-// Lookup Diário da Matriz Pedagógica Conexa 2026
+// Lookup Diário da Matriz Pedagógica Zelare 2026
 // Gerado automaticamente a partir da Sequência Pedagógica Piloto 2026
 // Estrutura: DATA (DD/MM) -> SEGMENTO -> objetivos do dia
 

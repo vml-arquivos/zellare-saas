@@ -31,7 +31,7 @@ async function bootstrap() {
 
   // ─── CORS estrito com whitelist explícita ─────────────────────────────────
   // Suporta CORS_ORIGIN via variável de ambiente (separado por vírgula)
-  // ou usa os domínios COCRIS como padrão.
+  // ou usa os domínios Zelare como padrão.
   const corsEnv = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
     : [];
@@ -70,7 +70,7 @@ async function bootstrap() {
 
   const port = Number(process.env.PORT) || 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`🚀 COCRIS Pedagógico API rodando em http://0.0.0.0:${port}`);
+  console.log(`🚀 Zelare API rodando em http://0.0.0.0:${port}`);
   console.log(`🔒 CORS habilitado para: ${allowedOrigins.join(', ')}`);
 }
 

@@ -1,6 +1,6 @@
-# Guia de Contribuição - Conexa V3.0
+# Guia de Contribuição - Zelare
 
-Obrigado por considerar contribuir com o Conexa V3.0! 🎉
+Obrigado por considerar contribuir com o Zelare! 🎉
 
 ## Código de Conduta
 
@@ -15,8 +15,8 @@ Este projeto segue um Código de Conduta. Ao participar, você concorda em mante
 ```bash
 # Fork o repositório no GitHub
 # Depois clone seu fork
-git clone https://github.com/SEU_USUARIO/conexa-v3.0.git
-cd conexa-v3.0
+git clone https://github.com/SEU_USUARIO/zelare-saas.git
+cd zelare-saas
 ```
 
 ### 2. Configurar Ambiente
@@ -336,7 +336,7 @@ export function calculateAge(birthDate: string): number {
 
 ## Reportar Bugs
 
-Use o [GitHub Issues](https://github.com/vml-arquivos/conexa-v3.0/issues) com o template:
+Use o [GitHub Issues](https://github.com/vml-arquivos/zelare-saas/issues) com o template:
 
 ```markdown
 ## Descrição do Bug
@@ -363,7 +363,7 @@ Se aplicável
 
 ## Sugerir Funcionalidades
 
-Use o [GitHub Issues](https://github.com/vml-arquivos/conexa-v3.0/issues) com o template:
+Use o [GitHub Issues](https://github.com/vml-arquivos/zelare-saas/issues) com o template:
 
 ```markdown
 ## Descrição da Funcionalidade
@@ -383,8 +383,8 @@ Outras formas de resolver o problema
 
 ## Dúvidas?
 
-- Abra uma [Discussion](https://github.com/vml-arquivos/conexa-v3.0/discussions)
-- Entre em contato: contato@cocris.org
+- Abra uma [Discussion](https://github.com/vml-arquivos/zelare-saas/discussions)
+- Entre em contato: contato@zelare.org
 
 ---
 

@@ -450,7 +450,7 @@ export default function MatrizPedagogicaPage() {
               <div>
                 <h2 className="text-xl font-bold text-indigo-800 mb-2">Sequência Pedagógica Piloto 2026</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  A Matriz Pedagógica do Conexa é baseada na <strong>Sequência Pedagógica Piloto 2026</strong>,
+                  A Matriz Pedagógica do Zelare é baseada na <strong>Sequência Pedagógica Piloto 2026</strong>,
                   documento que organiza os objetivos de aprendizagem e desenvolvimento da Educação Infantil
                   alinhados à <strong>Base Nacional Comum Curricular (BNCC)</strong>, distribuídos em 4 bimestres
                   e 3 segmentos etários.

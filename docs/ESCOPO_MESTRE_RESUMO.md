@@ -1,8 +1,8 @@
-# Resumo do Escopo Mestre - Conexa V2
+# Resumo do Escopo Mestre - Zelare
 
 ## 1. Visão Geral do Sistema
 
-**Nome**: Conexa V2
+**Nome**: Zelare
 
 **Tipo**: Plataforma SaaS educacional (backend-first), multi-tenant, orientada à gestão pedagógica e documental da Educação Infantil.
 
@@ -279,4 +279,4 @@ DESENVOLVEDOR
 
 ---
 
-**Fonte**: ESCOPOMestreConexaV2.pdf (páginas 1-5)
+**Fonte**: ESCOPOMestreZelareV2.pdf (páginas 1-5)

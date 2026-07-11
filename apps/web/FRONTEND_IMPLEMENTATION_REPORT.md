@@ -1,4 +1,4 @@
-# FRONTEND FONT-CONEXA-V2 - RELATÓRIO DE IMPLEMENTAÇÃO
+# FRONTEND FONT-ZELARE-V2 - RELATÓRIO DE IMPLEMENTAÇÃO
 
 **Data:** 2026-02-06  
 **Status:** ✅ **CONCLUÍDO**
@@ -7,7 +7,7 @@
 
 ## RESUMO EXECUTIVO
 
-Frontend **font-conexa-v2** criado do zero com React/Vite/TypeScript, autenticação completa, layout SaaS e páginas MVP consumindo a API em produção.
+Frontend **zelare-web** criado do zero com React/Vite/TypeScript, autenticação completa, layout SaaS e páginas MVP consumindo a API em produção.
 
 ### Tecnologias Utilizadas
 - **React 19.2.4** - Framework UI
@@ -22,7 +22,7 @@ Frontend **font-conexa-v2** criado do zero com React/Vite/TypeScript, autentica�
 ## ESTRUTURA DO PROJETO
 
 ```
-font-conexa-v2/
+zelare-web/
 ├── src/
 │   ├── api/                    # Camada de API
 │   │   ├── http.ts            # Axios instance com interceptors
@@ -219,7 +219,7 @@ catch (err: any) {
 
 **Commit:** `feat: initial frontend implementation with React/Vite/TS`  
 **SHA:** `bed4671`  
-**Link:** https://github.com/vml-arquivos/font-conexa-v2/commit/bed4671
+**Link:** https://github.com/vml-arquivos/zelare-web/commit/bed4671
 
 **Arquivos criados:** 37 arquivos, 4067 linhas
 
@@ -248,7 +248,7 @@ dist
 ### Domínio
 
 ```
-https://democonexa.casadf.com.br
+https://demo.zelare.seu-dominio.com.br
 ```
 
 ---
@@ -318,7 +318,7 @@ https://democonexa.casadf.com.br
 ### 1. Deploy no Coolify
 
 1. Criar novo projeto no Coolify
-2. Conectar ao repositório `vml-arquivos/font-conexa-v2`
+2. Conectar ao repositório `vml-arquivos/zelare-web`
 3. Configurar variáveis de ambiente:
    ```
    VITE_API_BASE_URL=https://apiconexa.casadf.com.br
@@ -326,17 +326,17 @@ https://democonexa.casadf.com.br
 4. Configurar build:
    - Build command: `npm ci && npm run build`
    - Output directory: `dist`
-5. Configurar domínio: `democonexa.casadf.com.br`
+5. Configurar domínio: `demo.zelare.seu-dominio.com.br`
 6. Deploy
 
 ### 2. Validação Pós-Deploy
 
 ```bash
 # Verificar se frontend está acessível
-curl -I https://democonexa.casadf.com.br
+curl -I https://demo.zelare.seu-dominio.com.br
 
 # Testar login (via browser)
-# 1. Acessar https://democonexa.casadf.com.br/login
+# 1. Acessar https://demo.zelare.seu-dominio.com.br/login
 # 2. Fazer login com credenciais válidas
 # 3. Verificar se redireciona para /app/dashboard
 # 4. Verificar se email do usuário aparece no topbar
@@ -355,7 +355,7 @@ Se houver problemas no deploy:
 
 ```bash
 # No repositório local
-cd /home/ubuntu/font-conexa-v2
+cd /home/ubuntu/zelare-web
 git revert HEAD
 git push origin main
 ```
@@ -421,7 +421,7 @@ export default defineConfig({
 
 ## CONCLUSÃO
 
-Frontend **font-conexa-v2** implementado com sucesso e pronto para deploy no Coolify.
+Frontend **zelare-web** implementado com sucesso e pronto para deploy no Coolify.
 
 ### ✅ Todos os requisitos atendidos:
 - ✅ App Vite React TS criado
@@ -436,12 +436,12 @@ Frontend **font-conexa-v2** implementado com sucesso e pronto para deploy no Coo
 - ✅ Commit + push realizados
 
 ### 🚀 Próximo passo:
-Deploy no Coolify com domínio `democonexa.casadf.com.br`
+Deploy no Coolify com domínio `demo.zelare.seu-dominio.com.br`
 
 ---
 
-**Repositório:** https://github.com/vml-arquivos/font-conexa-v2  
-**Commit:** https://github.com/vml-arquivos/font-conexa-v2/commit/bed4671
+**Repositório:** https://github.com/vml-arquivos/zelare-web  
+**Commit:** https://github.com/vml-arquivos/zelare-web/commit/bed4671
 
 ---
 

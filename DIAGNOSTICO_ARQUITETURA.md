@@ -1,11 +1,11 @@
-# Diagnóstico da Arquitetura e Plano de Ação: Conexa V3.0
+# Diagnóstico da Arquitetura e Plano de Ação: Zelare
 
 **Data:** 21 de Fevereiro de 2026
 **Agente Responsável:** Manus AI
 
 ## 1. Introdução
 
-Este documento apresenta uma análise detalhada do repositório `vml-arquivos/conexa-v3.0`, conforme as diretrizes do protocolo de handover. O objetivo é validar a arquitetura existente, confirmar o estado atual do projeto e estabelecer um plano de ação claro para as próximas missões de desenvolvimento: a implementação do **Cockpit do Professor** com mutações otimistas e a criação do **Motor de IA Assistiva** com anonimização de dados (LGPD).
+Este documento apresenta uma análise detalhada do repositório `vml-arquivos/zelare-saas`, conforme as diretrizes do protocolo de handover. O objetivo é validar a arquitetura existente, confirmar o estado atual do projeto e estabelecer um plano de ação claro para as próximas missões de desenvolvimento: a implementação do **Cockpit do Professor** com mutações otimistas e a criação do **Motor de IA Assistiva** com anonimização de dados (LGPD).
 
 A análise foi realizada através da clonagem do repositório, exploração de sua estrutura de arquivos e leitura aprofundada dos componentes-chave da aplicação.
 
@@ -49,6 +49,6 @@ A partir da análise, foram identificados os seguintes pontos de atenção e pre
 
 ## 4. Conclusão e Próximos Passos
 
-O diagnóstico confirma que a base de código do Conexa V3.0 é sólida, bem-estruturada e pronta para as evoluções planejadas. Os pré-requisitos e os planos de ação para ambas as frentes de trabalho (Frontend e Backend) estão claros.
+O diagnóstico confirma que a base de código do Zelare é sólida, bem-estruturada e pronta para as evoluções planejadas. Os pré-requisitos e os planos de ação para ambas as frentes de trabalho (Frontend e Backend) estão claros.
 
 Conforme o protocolo de handover, a próxima etapa é solicitar formalmente os arquivos vitais para dar início à fase de implementação. A análise prévia destes arquivos já permitiu a construção deste diagnóstico detalhado, e agora eles servirão como base para o desenvolvimento efetivo.

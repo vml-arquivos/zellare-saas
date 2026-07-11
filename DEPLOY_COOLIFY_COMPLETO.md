@@ -1,4 +1,4 @@
-# Guia Completo de Deploy no Coolify - Conexa V3.0
+# Guia Completo de Deploy no Coolify - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Versão**: 3.0.0  
@@ -20,7 +20,7 @@ Antes de iniciar o deploy, certifique-se de ter:
 
 ## 🎯 Arquitetura de Deploy
 
-O Conexa V3.0 será deployado em **3 serviços separados** no Coolify:
+O Zelare será deployado em **3 serviços separados** no Coolify:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -78,7 +78,7 @@ postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:
 1. No Coolify, clique em **+ New Resource**
 2. Escolha **Application**
 3. Selecione **GitHub** como source
-4. Conecte o repositório: `vml-arquivos/conexa-v3.0`
+4. Conecte o repositório: `vml-arquivos/zelare-saas`
 5. Configure:
    - **Branch**: `main`
    - **Build Pack**: `nixpacks`
@@ -88,7 +88,7 @@ postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:
 
 **Build Command**:
 ```bash
-pnpm install && pnpm --filter @conexa/database generate && pnpm --filter @conexa/api build
+pnpm install && pnpm --filter @zelare/database generate && pnpm --filter @zelare/api build
 ```
 
 **Start Command**:
@@ -139,8 +139,8 @@ No terminal do servidor (SSH):
 
 ```bash
 # Clonar repositório temporariamente
-git clone https://github.com/vml-arquivos/conexa-v3.0.git /tmp/conexa-v3
-cd /tmp/conexa-v3
+git clone https://github.com/vml-arquivos/zelare-saas.git /tmp/zelare-saas
+cd /tmp/zelare-saas
 
 # Instalar dependências
 pnpm install
@@ -150,19 +150,19 @@ export DATABASE_URL="sua_connection_string_aqui"
 export DIRECT_URL="sua_direct_url_aqui"
 
 # Gerar Prisma Client
-pnpm --filter @conexa/database generate
+pnpm --filter @zelare/database generate
 
 # Executar migrations
-pnpm --filter @conexa/database migrate:deploy
+pnpm --filter @zelare/database migrate:deploy
 
 # Limpar
-cd ~ && rm -rf /tmp/conexa-v3
+cd ~ && rm -rf /tmp/zelare-saas
 ```
 
 ### 2.5. Configurar Domínio (Opcional)
 
 No Coolify, configure o domínio:
-- **Domain**: `api.conexa.com` (ou seu domínio)
+- **Domain**: `api.zelare.com.br` (ou seu domínio)
 - **HTTPS**: Ativado (Let's Encrypt automático)
 
 ### 2.6. Deploy!
@@ -174,7 +174,7 @@ Clique em **Deploy** e aguarde o build.
 Após o deploy, teste:
 
 ```bash
-curl https://api.conexa.com/health
+curl https://api.zelare.com.br/health
 ```
 
 Resposta esperada:
@@ -196,7 +196,7 @@ Resposta esperada:
 1. No Coolify, clique em **+ New Resource**
 2. Escolha **Application**
 3. Selecione **GitHub** como source
-4. Conecte o repositório: `vml-arquivos/conexa-v3.0`
+4. Conecte o repositório: `vml-arquivos/zelare-saas`
 5. Configure:
    - **Branch**: `main`
    - **Build Pack**: `nixpacks`
@@ -206,7 +206,7 @@ Resposta esperada:
 
 **Build Command**:
 ```bash
-pnpm install && pnpm --filter @conexa/web build
+pnpm install && pnpm --filter @zelare/web build
 ```
 
 **Start Command** (servir estático com Nginx):
@@ -221,13 +221,13 @@ pnpm install && pnpm --filter @conexa/web build
 
 ```env
 # URL da API (use o domínio configurado no passo 2)
-VITE_API_BASE_URL=https://api.conexa.com
+VITE_API_BASE_URL=https://api.zelare.com.br
 
 # Ambiente
 VITE_APP_ENV=production
 
 # Nome da aplicação
-VITE_APP_NAME=Conexa V3
+VITE_APP_NAME=Zelare
 
 # Versão
 VITE_APP_VERSION=3.0.0
@@ -235,7 +235,7 @@ VITE_APP_VERSION=3.0.0
 
 ### 3.4. Configurar Domínio
 
-- **Domain**: `app.conexa.com` (ou seu domínio)
+- **Domain**: `app.zelare.com.br` (ou seu domínio)
 - **HTTPS**: Ativado
 
 ### 3.5. Deploy!
@@ -244,7 +244,7 @@ Clique em **Deploy**.
 
 ### 3.6. Testar
 
-Acesse `https://app.conexa.com` e faça login.
+Acesse `https://app.zelare.com.br` e faça login.
 
 ---
 
@@ -255,7 +255,7 @@ Acesse `https://app.conexa.com` e faça login.
 1. No Coolify, clique em **+ New Resource**
 2. Escolha **Application**
 3. Selecione **GitHub** como source
-4. Conecte o repositório: `vml-arquivos/conexa-v3.0`
+4. Conecte o repositório: `vml-arquivos/zelare-saas`
 5. Configure:
    - **Branch**: `main`
    - **Build Pack**: `nixpacks`
@@ -265,7 +265,7 @@ Acesse `https://app.conexa.com` e faça login.
 
 **Build Command**:
 ```bash
-pnpm install && pnpm --filter @conexa/site build
+pnpm install && pnpm --filter @zelare/site build
 ```
 
 **Start Command**:
@@ -297,7 +297,7 @@ DATABASE_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.
 
 ### 4.4. Configurar Domínio
 
-- **Domain**: `www.conexa.com` (ou seu domínio)
+- **Domain**: `www.zelare.com.br` (ou seu domínio)
 - **HTTPS**: Ativado
 
 ### 4.5. Deploy!
@@ -310,11 +310,11 @@ Clique em **Deploy**.
 
 ### 5.1. Checklist de Verificação
 
-- [ ] **Backend API** está rodando em `https://api.conexa.com`
+- [ ] **Backend API** está rodando em `https://api.zelare.com.br`
 - [ ] **Health check** retorna `{"status": "ok"}`
-- [ ] **Frontend Web** está acessível em `https://app.conexa.com`
+- [ ] **Frontend Web** está acessível em `https://app.zelare.com.br`
 - [ ] **Login** funciona corretamente
-- [ ] **Site Institucional** está acessível em `https://www.conexa.com`
+- [ ] **Site Institucional** está acessível em `https://www.zelare.com.br`
 - [ ] **Migrations** foram aplicadas com sucesso
 - [ ] **SSL/HTTPS** está ativo em todos os domínios
 
@@ -322,15 +322,15 @@ Clique em **Deploy**.
 
 ```bash
 # Health check
-curl https://api.conexa.com/health
+curl https://api.zelare.com.br/health
 
 # Login
-curl -X POST https://api.conexa.com/auth/login \
+curl -X POST https://api.zelare.com.br/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "dev@cocris.org", "password": "dev123"}'
+  -d '{"email": "dev@zelare.org", "password": "dev123"}'
 
 # Listar unidades (com token)
-curl https://api.conexa.com/lookup/units \
+curl https://api.zelare.com.br/lookup/units \
   -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
@@ -365,8 +365,8 @@ Se quiser popular o banco com dados de teste:
 ```bash
 # No servidor (SSH)
 cd /tmp
-git clone https://github.com/vml-arquivos/conexa-v3.0.git
-cd conexa-v3.0
+git clone https://github.com/vml-arquivos/zelare-saas.git
+cd zelare-saas
 
 # Configurar .env
 export DATABASE_URL="sua_connection_string"
@@ -374,11 +374,11 @@ export DIRECT_URL="sua_direct_url"
 
 # Instalar e seed
 pnpm install
-pnpm --filter @conexa/database generate
-pnpm --filter @conexa/database seed
+pnpm --filter @zelare/database generate
+pnpm --filter @zelare/database seed
 
 # Limpar
-cd ~ && rm -rf /tmp/conexa-v3.0
+cd ~ && rm -rf /tmp/zelare-saas
 ```
 
 ---
@@ -397,7 +397,7 @@ cd ~ && rm -rf /tmp/conexa-v3.0
 **Solução**:
 Adicione ao **Build Command**:
 ```bash
-pnpm --filter @conexa/database generate
+pnpm --filter @zelare/database generate
 ```
 
 ### Erro: "Migration failed"
@@ -490,15 +490,15 @@ Recursos mínimos recomendados:
 
 ## 🎉 Conclusão
 
-Parabéns! O Conexa V3.0 está deployado e rodando no Coolify! 🚀
+Parabéns! O Zelare está deployado e rodando no Coolify! 🚀
 
 **URLs de Acesso**:
-- Backend API: `https://api.conexa.com`
-- Frontend Web: `https://app.conexa.com`
-- Site Institucional: `https://www.conexa.com`
+- Backend API: `https://api.zelare.com.br`
+- Frontend Web: `https://app.zelare.com.br`
+- Site Institucional: `https://www.zelare.com.br`
 
 **Credenciais de Teste** (se fez seed):
-- Email: `dev@cocris.org`
+- Email: `dev@zelare.org`
 - Senha: `dev123`
 
 ---
@@ -506,8 +506,8 @@ Parabéns! O Conexa V3.0 está deployado e rodando no Coolify! 🚀
 ## 📞 Suporte
 
 Para problemas de deploy:
-- 📧 Email: contato@cocris.org
-- 💻 GitHub Issues: [vml-arquivos/conexa-v3.0](https://github.com/vml-arquivos/conexa-v3.0/issues)
+- 📧 Email: contato@zelare.org
+- 💻 GitHub Issues: [vml-arquivos/zelare-saas](https://github.com/vml-arquivos/zelare-saas/issues)
 
 ---
 

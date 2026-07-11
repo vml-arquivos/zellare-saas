@@ -1,5 +1,5 @@
 /**
- * UnifiedDashboard — Hub central do COCRIS Pedagógico
+ * UnifiedDashboard — Hub central do Zelare
  *
  * Renderiza widgets modulares de acordo com o perfil do usuário (RBAC).
  * Cada widget é independente e pode ser expandido sem afetar os demais.
@@ -414,7 +414,7 @@ const W_MANTENEDORA: Widget[] = [
   {
     id: 'global-dashboard',
     title: 'Painel Global',
-    description: 'Visão executiva de toda a rede COCRIS.',
+    description: 'Visão executiva das entidades no Zelare.',
     icon: <Building2 className="h-5 w-5" />,
     path: '/app/dashboard',
     accent: 'bg-brand-600',
@@ -571,7 +571,7 @@ export function UnifiedDashboard() {
   } else if (isMantenedora) {
     widgets = W_MANTENEDORA;
     sectionTitle = 'Painel da Mantenedora';
-    sectionSubtitle = 'Visão executiva da rede COCRIS';
+    sectionSubtitle = 'Visão executiva da rede Zelare';
   } else if (isCentral) {
     widgets = W_CENTRAL;
     sectionTitle = 'Equipe Central';
@@ -617,7 +617,7 @@ export function UnifiedDashboard() {
       <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 px-5 sm:px-6 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
           <p className="text-[10px] font-medium text-brand-400 tracking-widest mb-1.5 uppercase">
-            {import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}
+            {import.meta.env.VITE_APP_NAME || 'Zelare'}
           </p>
           <h1 className="text-lg sm:text-xl font-semibold text-white leading-snug">
             {greeting}, {userName.split(' ')[0]}

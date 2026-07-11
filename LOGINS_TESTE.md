@@ -1,4 +1,4 @@
-# 🔐 Logins de Teste - Conexa V3.0
+# 🔐 Logins de Teste - Zelare
 
 **Data**: 19 de Fevereiro de 2026  
 **Senha Padrão**: `Teste@123`  
@@ -8,7 +8,7 @@
 
 ## 📋 Visão Geral dos Níveis de Acesso
 
-O sistema Conexa V3.0 possui **5 níveis hierárquicos** de acesso, com **11 papéis específicos**:
+O sistema Zelare possui **5 níveis hierárquicos** de acesso, com **11 papéis específicos**:
 
 | Nível | Nome | Papéis | Quantidade |
 |-------|------|--------|------------|
@@ -37,7 +37,7 @@ O sistema Conexa V3.0 possui **5 níveis hierárquicos** de acesso, com **11 pap
 
 | Email | Senha | Nome |
 |-------|-------|------|
-| `developer@conexa.com` | `Teste@123` | Developer Sistema |
+| `developer@zelare.com.br` | `Teste@123` | Developer Sistema |
 
 ### Uso
 - Desenvolvimento e testes

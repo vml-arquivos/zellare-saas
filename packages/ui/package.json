@@ -1,7 +1,7 @@
 {
-  "name": "@conexa/ui",
+  "name": "@zelare/ui",
   "version": "3.0.0",
-  "description": "Conexa V3 - Shared UI Components (shadcn/ui + Radix UI)",
+  "description": "Zelare V3 - Shared UI Components (shadcn/ui + Radix UI)",
   "main": "index.ts",
   "private": true,
   "exports": {

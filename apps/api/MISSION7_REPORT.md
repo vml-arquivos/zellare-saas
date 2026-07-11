@@ -169,4 +169,4 @@ IMPORT_GUIDE.md (novo)
 
 A **Missão 7** foi concluída com sucesso. O sistema agora possui um pipeline completo, seguro e idempotente para importar a Matriz Curricular 2026 do PDF para o banco de dados.
 
-**O Conexa está pronto para receber a Matriz Curricular oficial!** 🎓✨
+**O Zelare está pronto para receber a Matriz Curricular oficial!** 🎓✨

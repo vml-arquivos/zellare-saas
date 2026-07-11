@@ -297,10 +297,10 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="px-4 py-4 border-b border-slate-800/60">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              {/* Logo institucional COCRIS */}
+              {/* Logo institucional Zelare */}
               <img
-                src={import.meta.env.VITE_APP_LOGO_URL || '/branding/cocris/logo-cocris.png'}
-                alt={import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}
+                src={import.meta.env.VITE_APP_LOGO_URL || '/brand/zelare-logo-square.png'}
+                alt={import.meta.env.VITE_APP_NAME || 'Zelare'}
                 className="h-9 w-auto object-contain flex-shrink-0"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -311,11 +311,11 @@ export function Sidebar({ onClose }: SidebarProps) {
               {/* Fallback: ícone + texto */}
               <div className="hidden items-center gap-2" aria-hidden="true">
                 <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xs">C</span>
+                  <span className="text-white font-bold text-xs">Z</span>
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-sm font-bold leading-tight text-white truncate">{import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'}</h1>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Sistema Pedagógico</p>
+                  <h1 className="text-sm font-bold leading-tight text-white truncate">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Gestão inteligente</p>
                 </div>
               </div>
             </div>
@@ -442,7 +442,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             </div>
           )}
         </div>
-        <p className="text-[10px] text-slate-700 text-center pt-1">{import.meta.env.VITE_APP_NAME || 'COCRIS Pedagógico'} © 2026</p>
+        <p className="text-[10px] text-slate-700 text-center pt-1">{import.meta.env.VITE_APP_NAME || 'Zelare'} © 2026</p>
       </div>
     </aside>
   );

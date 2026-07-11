@@ -1,4 +1,4 @@
-# 🚀 Resumo Executivo - Deploy Conexa V3.0 no Coolify
+# 🚀 Resumo Executivo - Deploy Zelare no Coolify
 
 **Data**: 19 de Fevereiro de 2026  
 **Status**: ✅ PRONTO PARA DEPLOY  
@@ -8,7 +8,7 @@
 
 ## 📊 Visão Geral
 
-O sistema Conexa V3.0 está **100% pronto para deploy em produção** no Coolify. Todos os arquivos de configuração, scripts e documentação foram criados e testados.
+O sistema Zelare está **100% pronto para deploy em produção** no Coolify. Todos os arquivos de configuração, scripts e documentação foram criados e testados.
 
 ---
 
@@ -137,7 +137,7 @@ O sistema Conexa V3.0 está **100% pronto para deploy em produção** no Coolify
 ```bash
 node scripts/create-admin.js
 # ou
-node scripts/create-admin.js admin@conexa.com Admin@123 Admin Sistema
+node scripts/create-admin.js admin@zelare.com.br Admin@123 Admin Sistema
 ```
 
 ### 6. health-check.sh
@@ -345,7 +345,7 @@ node scripts/create-admin.js admin@conexa.com Admin@123 Admin Sistema
 
 ## 🎉 Conclusão
 
-O Conexa V3.0 está **100% pronto para deploy em produção**!
+O Zelare está **100% pronto para deploy em produção**!
 
 **Principais Conquistas**:
 - ✅ 3 apps buildados e testados

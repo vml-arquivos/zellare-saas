@@ -1,6 +1,6 @@
-# Font-Conexa-V2
+# Zelare Web
 
-Frontend premium do sistema Conexa V2 desenvolvido com React, Vite, TypeScript e Shadcn/UI.
+Frontend premium do sistema Zelare desenvolvido com React, Vite, TypeScript e Shadcn/UI.
 
 ---
 
@@ -64,7 +64,7 @@ VITE_API_BASE_URL=https://apiconexa.casadf.com.br
 
 **Domínio Oficial:**
 ```
-https://demo.conexa.casadev.com.br
+https://demo.zelare.seu-dominio.com.br
 ```
 
 ---

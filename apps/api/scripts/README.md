@@ -1,4 +1,4 @@
-# Scripts de Seed - Conexa V3.0
+# Scripts de Seed - Zelare
 
 ## 📋 Visão Geral
 
@@ -12,7 +12,7 @@ Scripts para popular o banco de dados com dados de teste e dados reais.
 Seed básico com dados fictícios para desenvolvimento.
 
 **Estrutura**:
-- 1 Mantenedora: Associação COCRIS
+- 1 Mantenedora: Associação Zelare
 - 1 Unidade: Unidade Piloto
 - 3 Turmas: A, B, C
 - 13 Usuários (developer, mantenedora, staff, coordenadores, professores)
@@ -28,7 +28,7 @@ node scripts/seed-all-users.js
 Seed com dados REAIS da planilha ALUNOS2026.xlsx do CEPI Arara Canindé.
 
 **Estrutura**:
-- 1 Mantenedora: Associação COCRIS
+- 1 Mantenedora: Associação Zelare
 - 1 Unidade: CEPI Arara Canindé
 - **9 Turmas reais**:
   - Berçário I (8 alunos) - Prof. Nonata
@@ -54,9 +54,9 @@ node scripts/seed-real-data.js
 ```
 
 **Logins Disponíveis** (senha: `Teste@123`):
-- `developer@conexa.com` - Acesso total
-- `admin@cocris.org.br` - Admin Mantenedora
-- `pedagogico@cocris.org.br` - Staff Central
+- `developer@zelare.com.br` - Acesso total
+- `admin@zelare.org.br` - Admin Mantenedora
+- `pedagogico@zelare.org.br` - Staff Central
 - `coordenador@cepi.com.br` - Coordenador Unidade
 - `nonata@cepi.com.br` - Professora Berçário I
 - `elisangela@cepi.com.br` - Professora Berçário II A

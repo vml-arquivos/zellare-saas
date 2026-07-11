@@ -1,4 +1,4 @@
-## Guia de Importação da Matriz Curricular - Conexa
+## Guia de Importação da Matriz Curricular - Zelare
 
 Este guia descreve o processo completo de importação da Matriz Curricular 2026 a partir de um arquivo PDF.
 

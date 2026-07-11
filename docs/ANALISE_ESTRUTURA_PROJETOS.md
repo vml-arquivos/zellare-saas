@@ -2,7 +2,7 @@
 
 ## 1. Análise de Build e Deploy
 
-### 1.1 Back-end (Conexa-V2)
+### 1.1 Back-end (Zelare-V2)
 
 **Framework**: NestJS + Prisma
 
@@ -32,7 +32,7 @@
 
 ---
 
-### 1.2 Front-end (font-conexa-v2)
+### 1.2 Front-end (zelare-web)
 
 **Framework**: React 19 + Vite + TypeScript
 
@@ -61,7 +61,7 @@
 
 ---
 
-### 1.3 Site Institucional (site-cocris)
+### 1.3 Site Institucional (site-zelare)
 
 **Framework**: Vite + React + Drizzle ORM (Full-stack)
 
@@ -92,14 +92,14 @@
 
 ### 2.1 Comparação de Bibliotecas UI
 
-| Componente | font-conexa-v2 | site-cocris |
+| Componente | zelare-web | site-zelare |
 |------------|----------------|-------------|
 | **Base** | Radix UI | Radix UI |
 | **Estilização** | TailwindCSS | TailwindCSS |
 | **Componentes** | 4 básicos | 40+ completos |
 | **Padrão** | Custom | shadcn/ui |
 
-**Componentes no site-cocris** (shadcn/ui completo):
+**Componentes no site-zelare** (shadcn/ui completo):
 - accordion, alert-dialog, alert, aspect-ratio, avatar
 - badge, breadcrumb, button-group, button, calendar
 - card, carousel, chart, checkbox, collapsible
@@ -111,13 +111,13 @@
 - tabs, textarea, toast, toggle-group, toggle
 - tooltip
 
-**Oportunidade**: Consolidar biblioteca UI do site-cocris como padrão para todo o monorepo.
+**Oportunidade**: Consolidar biblioteca UI do site-zelare como padrão para todo o monorepo.
 
 ---
 
 ## 3. Análise de Autenticação
 
-### 3.1 Back-end (Conexa-V2)
+### 3.1 Back-end (Zelare-V2)
 
 **Sistema**: JWT + RBAC + Multi-tenant
 
@@ -151,7 +151,7 @@
 
 ---
 
-### 3.2 Site (site-cocris)
+### 3.2 Site (site-zelare)
 
 **Sistema**: Autenticação própria (separada)
 
@@ -163,7 +163,7 @@
 
 ## 4. Análise de Banco de Dados
 
-### 4.1 Back-end (Conexa-V2)
+### 4.1 Back-end (Zelare-V2)
 
 **ORM**: Prisma
 **Banco**: PostgreSQL (Supabase)
@@ -202,7 +202,7 @@ Mantenedora (tenant raiz)
 
 ---
 
-### 4.2 Site (site-cocris)
+### 4.2 Site (site-zelare)
 
 **ORM**: Drizzle
 **Banco**: Próprio (separado)
@@ -417,9 +417,9 @@ Tenant (Mantenedora)
 2. ⏳ Criar estrutura de monorepo (pnpm workspaces)
 3. ⏳ Migrar código dos três repositórios
 4. ⏳ Consolidar dependências compartilhadas
-5. ⏳ Criar pacote `@conexa/ui` com componentes
-6. ⏳ Criar pacote `@conexa/types` com tipos
-7. ⏳ Criar pacote `@conexa/utils` com utilitários
+5. ⏳ Criar pacote `@zelare/ui` com componentes
+6. ⏳ Criar pacote `@zelare/types` com tipos
+7. ⏳ Criar pacote `@zelare/utils` com utilitários
 
 ---
 

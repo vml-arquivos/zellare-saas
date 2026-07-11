@@ -1,15 +1,15 @@
 # Configuração Rápida Coolify
 
-## Backend API (api.conexa3.casadf.com.br)
+## Backend API (api.zelare.seu-dominio.com.br)
 
 ### 1. General
-- **Name**: conexa-v3-api
+- **Name**: zelare-saas-api
 - **Build Pack**: Dockerfile
 - **Base Directory**: `/apps/api`
 - **Dockerfile Location**: `/Dockerfile`
 
 ### 2. Network
-- **Domains**: `https://api.conexa3.casadf.com.br`
+- **Domains**: `https://api.zelare.seu-dominio.com.br`
 - **Ports Exposes**: `3000`
 - **Port Mappings**: `3000:3000`
 
@@ -30,8 +30,8 @@ JWT_EXPIRATION=7d
 NODE_ENV=production
 PORT=3000
 APP_TIMEZONE=America/Sao_Paulo
-API_URL=https://api.conexa3.casadf.com.br
-CORS_ORIGIN=https://app.conexa3.casadf.com.br,https://conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
+CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
 GEMINI_API_KEY=[SUA_CHAVE_AQUI]
 GEMINI_MODEL=gemini-2.0-flash-exp
 ENABLE_AI_ASSISTANT=true
@@ -47,21 +47,21 @@ node scripts/seed-admin.js
 
 ---
 
-## Frontend Web (app.conexa3.casadf.com.br)
+## Frontend Web (app.zelare.seu-dominio.com.br)
 
 ### 1. General
-- **Name**: conexa-v3-web
+- **Name**: zelare-saas-web
 - **Build Pack**: nixpacks
 - **Base Directory**: `/apps/web`
 
 ### 2. Network
-- **Domains**: `https://app.conexa3.casadf.com.br`
+- **Domains**: `https://app.zelare.seu-dominio.com.br`
 - **Ports Exposes**: `5173`
 
 ### 3. Environment Variables (3)
 ```
-VITE_API_URL=https://api.conexa3.casadf.com.br
-VITE_APP_NAME=Conexa V3.0
+VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
@@ -70,7 +70,7 @@ VITE_APP_VERSION=3.0.0
 ## Site (conexa3.casadf.com.br)
 
 ### 1. General
-- **Name**: conexa-v3-site
+- **Name**: zelare-saas-site
 - **Build Pack**: nixpacks
 - **Base Directory**: `/apps/site`
 
@@ -81,7 +81,7 @@ VITE_APP_VERSION=3.0.0
 ### 3. Environment Variables (4)
 ```
 DATABASE_URL=postgres://postgres:G8pDA7CYCRRyYPDJMU82peXreI6gYJbKGf47X75q3fvmCMHTuJDomaBVBQSNc1kw@vswwog0sss0c48ggwsgsg4ow:5432/postgres
-API_URL=https://api.conexa3.casadf.com.br
+API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
 ```
@@ -99,15 +99,15 @@ PORT=5174
 
 ```bash
 # API
-curl https://api.conexa3.casadf.com.br/health
+curl https://api.zelare.seu-dominio.com.br/health
 
 # Login
-curl -X POST https://api.conexa3.casadf.com.br/auth/login \
+curl -X POST https://api.zelare.seu-dominio.com.br/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@conexa.com","password":"Admin@123"}'
+  -d '{"email":"admin@zelare.com.br","password":"Admin@123"}'
 
 # Frontend
-curl https://app.conexa3.casadf.com.br
+curl https://app.zelare.seu-dominio.com.br
 
 # Site
 curl https://conexa3.casadf.com.br

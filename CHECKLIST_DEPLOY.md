@@ -1,4 +1,4 @@
-# ✅ Checklist de Deploy - Conexa V3.0
+# ✅ Checklist de Deploy - Zelare
 
 **Data de Deploy**: ___/___/______  
 **Responsável**: _______________________  
@@ -34,7 +34,7 @@
 ### Criação
 - [ ] PostgreSQL criado no Coolify
 - [ ] Nome do banco: `conexa`
-- [ ] Usuário criado: `conexa_user`
+- [ ] Usuário criado: `zelare_user`
 - [ ] Senha forte definida e anotada
 - [ ] Connection string obtida
 
@@ -49,7 +49,7 @@
 
 ### Configuração
 - [ ] Aplicação criada no Coolify
-- [ ] Nome: `conexa-v3-api`
+- [ ] Nome: `zelare-saas-api`
 - [ ] Repositório conectado
 - [ ] Branch: `main`
 - [ ] Build command configurado
@@ -80,7 +80,7 @@
 
 ### Usuário Admin
 - [ ] Script `create-admin.js` executado
-- [ ] Email: `admin@conexa.com`
+- [ ] Email: `admin@zelare.com.br`
 - [ ] Senha anotada
 - [ ] Login testado
 
@@ -96,7 +96,7 @@
 
 ### Configuração
 - [ ] Aplicação criada no Coolify
-- [ ] Nome: `conexa-v3-web`
+- [ ] Nome: `zelare-saas-web`
 - [ ] Repositório conectado
 - [ ] Build command configurado
 - [ ] Output directory: `apps/web/dist`
@@ -127,7 +127,7 @@
 
 ### Configuração
 - [ ] Aplicação criada no Coolify
-- [ ] Nome: `conexa-v3-site`
+- [ ] Nome: `zelare-saas-site`
 - [ ] Repositório conectado
 - [ ] Build command configurado
 - [ ] Start command configurado

@@ -69,15 +69,15 @@ const URGENT_USERS: UserToCreate[] = [
 ];
 
 async function main() {
-  console.log('🚀 Criando logins urgentes COCRIS...\n');
+  console.log('🚀 Criando logins urgentes Zelare...\n');
 
-  // 1. Buscar Mantenedora COCRIS
+  // 1. Buscar Mantenedora Zelare
   const mantenedora = await prisma.mantenedora.findUnique({
     where: { cnpj: '00.000.000/0001-00' },
   });
 
   if (!mantenedora) {
-    throw new Error('❌ Mantenedora COCRIS não encontrada. Execute ensure-cocris-units.ts primeiro.');
+    throw new Error('❌ Mantenedora Zelare não encontrada. Execute ensure-cocris-units.ts primeiro.');
   }
 
   console.log(`✅ Mantenedora: ${mantenedora.name} (${mantenedora.id})\n`);

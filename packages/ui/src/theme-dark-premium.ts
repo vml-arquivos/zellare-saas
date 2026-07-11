@@ -1,5 +1,5 @@
 /**
- * Tema Escuro Premium - Conexa V3.0
+ * Tema Escuro Premium - Zelare
  * 
  * Paleta de cores vibrantes e harmoniosas para dashboards profissionais
  * Inspirado em: Vercel, Linear, Stripe Dashboard

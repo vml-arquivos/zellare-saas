@@ -1,6 +1,6 @@
 # Verificação completa de acessos operacionais
 
-Este diretório contém scripts manuais para diagnóstico e correção controlada de acessos operacionais no banco PostgreSQL de produção do Conexa.
+Este diretório contém scripts manuais para diagnóstico e correção controlada de acessos operacionais no banco PostgreSQL de produção do Zelare.
 
 O arquivo `03_verificar_acessos_completa_corrigida.sql` é **somente leitura**. Ele foi criado para substituir a verificação que falhou ao comparar o enum PostgreSQL `RoleType` diretamente com texto. Nesta versão, as comparações usam casts seguros, como `r.type::text`, e o script também verifica se há dados pedagógicos associados a `unitId` legado ou órfão.
 

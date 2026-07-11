@@ -1,6 +1,6 @@
 # Mapa de Acesso por Perfil (RBAC)
 
-Este documento detalha os menus, rotas e principais endpoints da API associados a cada perfil de usuário no Conexa V3.0. O objetivo é alinhar a navegação da UI (menus) com as permissões de acesso já definidas no backend e no roteador do frontend.
+Este documento detalha os menus, rotas e principais endpoints da API associados a cada perfil de usuário no Zelare. O objetivo é alinhar a navegação da UI (menus) com as permissões de acesso já definidas no backend e no roteador do frontend.
 
 ---
 
