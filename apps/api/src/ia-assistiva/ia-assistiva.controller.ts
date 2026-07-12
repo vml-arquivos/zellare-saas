@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { IaAssistivaService } from './ia-assistiva.service';
 import { GerarAtividadeDto } from './dto/gerar-atividade.dto';
+import { GerarPlanoDeAulaDto } from './dto/gerar-plano-de-aula.dto';
+import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
@@ -92,5 +94,39 @@ export class IaAssistivaController {
       childId: body.childId,
       periodo: body.periodo,
     });
+  }
+
+  /**
+   * POST /ia/gerar-plano-de-aula
+   * Gera um plano de aula completo (vários dias), cobrindo objetivos reais
+   * do framework pedagógico escolhido pela instituição — não uma atividade
+   * solta, o planejamento inteiro de uma semana.
+   *
+   * Acesso: Professor, Unidade, Mantenedora, Developer
+   */
+  @Post('gerar-plano-de-aula')
+  @HttpCode(HttpStatus.OK)
+  gerarPlanoDeAula(
+    @Body() dto: GerarPlanoDeAulaDto,
+    @CurrentUser() _user: JwtPayload,
+  ) {
+    return this.iaService.gerarPlanoDeAula(dto);
+  }
+
+  /**
+   * POST /ia/ideias-rapidas
+   * Ideias rápidas e simples pro dia a dia — sem estrutura pesada, pra quando
+   * o professor só precisa de inspiração imediata (brincadeira de transição,
+   * acalmar a turma, preencher 10 minutos).
+   *
+   * Acesso: Professor, Unidade, Mantenedora, Developer
+   */
+  @Post('ideias-rapidas')
+  @HttpCode(HttpStatus.OK)
+  gerarIdeiasRapidas(
+    @Body() dto: GerarIdeiasRapidasDto,
+    @CurrentUser() _user: JwtPayload,
+  ) {
+    return this.iaService.gerarIdeiasRapidas(dto);
   }
 }

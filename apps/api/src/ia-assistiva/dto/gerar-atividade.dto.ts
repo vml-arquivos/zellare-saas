@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 
 export enum FaixaEtaria {
   EI01 = 'EI01', // Bebês (0 a 1 ano e 6 meses)
@@ -20,24 +20,43 @@ export enum TipoAtividade {
 }
 
 export class GerarAtividadeDto {
-  /** Campo de Experiência da BNCC (vem da Sequência Piloto — IMUTÁVEL) */
+  /**
+   * Caminho NOVO (recomendado): aponta pra um objetivo de qualquer framework
+   * pedagógico plugável (BNCC, Reggio, currículo próprio da instituição...).
+   * Quando informado, a IA busca o texto do objetivo direto no banco.
+   */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  campoDeExperiencia: string;
+  frameworkObjectiveId?: string;
 
-  /** Objetivo da BNCC (vem da Sequência Piloto — IMUTÁVEL) */
+  /**
+   * Caminho LEGADO (mantido por compatibilidade — COCRIS e quem já usa BNCC/DF
+   * direto): campo de experiência e objetivos informados na mão.
+   * Se frameworkObjectiveId for informado, estes três são ignorados.
+   */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  objetivoBNCC: string;
+  campoDeExperiencia?: string;
 
-  /** Objetivo do Currículo em Movimento DF (vem da Sequência Piloto — IMUTÁVEL) */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  objetivoCurriculo: string;
+  objetivoBNCC?: string;
 
-  /** Faixa etária da turma */
+  @IsOptional()
+  @IsString()
+  objetivoCurriculo?: string;
+
+  /** Faixa etária da turma (legado, EI01/EI02/EI03) — opcional se ageRangeMeses for informado */
+  @IsOptional()
   @IsEnum(FaixaEtaria)
-  faixaEtaria: FaixaEtaria;
+  faixaEtaria?: FaixaEtaria;
+
+  /** Idade da turma em meses — caminho novo, mais preciso que faixaEtaria, funciona pra qualquer framework */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(72)
+  ageRangeMeses?: number;
 
   /** Tipo de atividade desejado (opcional — se não informado, a IA escolhe) */
   @IsOptional()

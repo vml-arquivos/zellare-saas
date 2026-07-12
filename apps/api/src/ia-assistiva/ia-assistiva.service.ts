@@ -1,6 +1,8 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException, BadRequestException } from '@nestjs/common';
 import OpenAI from 'openai';
 import { GerarAtividadeDto, FaixaEtaria, TipoAtividade } from './dto/gerar-atividade.dto';
+import { GerarPlanoDeAulaDto } from './dto/gerar-plano-de-aula.dto';
+import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface AtividadeGerada {
@@ -139,21 +141,63 @@ export class IaAssistivaService {
    * Currículo em Movimento são FIXOS e vêm da Sequência Piloto. A IA APENAS
    * cria a atividade/experiência para atingir esses objetivos.
    */
+  /**
+   * Resolve o objetivo pedagógico a partir de QUALQUER framework plugável
+   * (frameworkObjectiveId) ou, por compatibilidade, dos campos BNCC/DF
+   * informados na mão (caminho legado, usado pela COCRIS hoje).
+   */
+  private async resolverObjetivoPedagogico(dto: {
+    frameworkObjectiveId?: string;
+    campoDeExperiencia?: string;
+    objetivoBNCC?: string;
+    objetivoCurriculo?: string;
+  }): Promise<{ campoDeExperiencia: string; objetivoBNCC: string; objetivoCurriculo: string }> {
+    if (dto.frameworkObjectiveId) {
+      const objetivo = await this.prisma.frameworkObjective.findUnique({
+        where: { id: dto.frameworkObjectiveId },
+        include: { dimension: true, framework: true },
+      });
+      if (!objetivo) {
+        throw new BadRequestException('Objetivo de framework pedagógico não encontrado');
+      }
+      return {
+        campoDeExperiencia: objetivo.dimension.name,
+        objetivoBNCC: objetivo.text,
+        objetivoCurriculo: `${objetivo.framework.name}${objetivo.code ? ` (${objetivo.code})` : ''}`,
+      };
+    }
+    if (dto.campoDeExperiencia && dto.objetivoBNCC && dto.objetivoCurriculo) {
+      return {
+        campoDeExperiencia: dto.campoDeExperiencia,
+        objetivoBNCC: dto.objetivoBNCC,
+        objetivoCurriculo: dto.objetivoCurriculo,
+      };
+    }
+    throw new BadRequestException(
+      'Informe frameworkObjectiveId, ou os três campos campoDeExperiencia/objetivoBNCC/objetivoCurriculo.',
+    );
+  }
+
   async gerarAtividade(dto: GerarAtividadeDto): Promise<AtividadeGerada> {
     const cliente = this.getCliente();
-    const faixaLabel = LABELS_FAIXA[dto.faixaEtaria] || dto.faixaEtaria;
+    const objetivo = await this.resolverObjetivoPedagogico(dto);
+    const faixaLabel = dto.faixaEtaria
+      ? LABELS_FAIXA[dto.faixaEtaria] || dto.faixaEtaria
+      : dto.ageRangeMeses !== undefined
+        ? `${dto.ageRangeMeses} meses`
+        : 'não informada';
     const tipoLabel = dto.tipoAtividade
       ? LABELS_TIPO[dto.tipoAtividade]
       : 'à sua escolha (sugira o mais adequado)';
 
-    const prompt = `Você é uma especialista em Educação Infantil, com profundo conhecimento na BNCC e no Currículo em Movimento do Distrito Federal.
+    const prompt = `Você é uma especialista em Educação Infantil (0 a 6 anos).
 
 Sua tarefa é criar UMA atividade pedagógica completa e detalhada para professores de Educação Infantil.
 
-## CONTEXTO FIXO (NÃO ALTERE ESTES DADOS — vêm da Sequência Piloto 2026)
-- **Campo de Experiência:** ${dto.campoDeExperiencia}
-- **Objetivo BNCC:** ${dto.objetivoBNCC}
-- **Objetivo do Currículo em Movimento DF:** ${dto.objetivoCurriculo}
+## OBJETIVO PEDAGÓGICO A CUMPRIR (NÃO ALTERE — vem do currículo escolhido pela instituição)
+- **Área/Campo:** ${objetivo.campoDeExperiencia}
+- **Objetivo:** ${objetivo.objetivoBNCC}
+- **Referência curricular:** ${objetivo.objetivoCurriculo}
 
 ## DADOS DA TURMA
 - **Faixa Etária:** ${faixaLabel}
@@ -163,9 +207,9 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
 
 ## INSTRUÇÕES
 1. Crie uma atividade CRIATIVA, LÚDICA e ADEQUADA à faixa etária informada.
-2. A atividade deve ser DIRETAMENTE alinhada ao Campo de Experiência e aos objetivos acima.
-3. Use linguagem simples e direta, como se estivesse escrevendo para a professora executar em sala.
-4. Considere a realidade de uma escola pública do DF com recursos básicos.
+2. A atividade deve ser DIRETAMENTE alinhada à área/campo e ao objetivo acima.
+3. Use linguagem simples e direta, como se estivesse escrevendo para o professor executar em sala.
+4. Considere recursos básicos, acessíveis à maioria das instituições.
 5. Inclua adaptações para crianças com necessidades especiais.
 
 ## FORMATO DE RESPOSTA (JSON VÁLIDO — sem markdown, sem explicações fora do JSON)
@@ -191,7 +235,7 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
           {
             role: 'system',
             content:
-              'Você é uma especialista em Educação Infantil brasileira. Responda APENAS com JSON válido, sem markdown, sem texto adicional.',
+              'Você é uma especialista em Educação Infantil. Responda APENAS com JSON válido, sem markdown, sem texto adicional.',
           },
           { role: 'user', content: prompt },
         ],
@@ -214,12 +258,12 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
 
       const atividade = JSON.parse(jsonLimpo);
 
-      // Garantir que os campos fixos da Sequência Piloto sejam preservados
+      // Garantir que os campos fixos do objetivo pedagógico sejam preservados
       return {
         ...atividade,
-        campoDeExperiencia: dto.campoDeExperiencia,
-        objetivoBNCC: dto.objetivoBNCC,
-        objetivoCurriculo: dto.objetivoCurriculo,
+        campoDeExperiencia: objetivo.campoDeExperiencia,
+        objetivoBNCC: objetivo.objetivoBNCC,
+        objetivoCurriculo: objetivo.objetivoCurriculo,
         faixaEtaria: faixaLabel,
         geradoPorIA: true,
       };
@@ -462,6 +506,142 @@ Responda em JSON:
       throw new ServiceUnavailableException(
         'Serviço de IA temporariamente indisponível.',
       );
+    }
+  }
+
+  /**
+   * Gera um PLANO DE AULA completo, cobrindo vários dias letivos, cada um
+   * ligado a um objetivo real do framework pedagógico escolhido pela
+   * instituição. É o gerador "de verdade" — não uma atividade solta, mas
+   * o planejamento inteiro de uma semana, pronto pra virar Planning.
+   */
+  async gerarPlanoDeAula(dto: GerarPlanoDeAulaDto) {
+    const cliente = this.getCliente();
+
+    const objetivos = await this.prisma.frameworkObjective.findMany({
+      where: { id: { in: dto.frameworkObjectiveIds } },
+      include: { dimension: true, framework: true },
+    });
+    if (objetivos.length === 0) {
+      throw new BadRequestException('Nenhum objetivo de framework pedagógico encontrado para os IDs informados');
+    }
+
+    let materialBase = '';
+    if (dto.contentUploadId) {
+      const upload = await this.prisma.institutionContentUpload.findUnique({
+        where: { id: dto.contentUploadId },
+      });
+      if (upload?.extractedData) {
+        materialBase = `\n## MATERIAL DE REFERÊNCIA DA PRÓPRIA INSTITUIÇÃO (use como inspiração de estilo e conteúdo)\n${JSON.stringify(upload.extractedData)}\n`;
+      }
+    }
+
+    const objetivosTexto = objetivos
+      .map((o) => `- [${o.framework.name} / ${o.dimension.name}]: ${o.text}`)
+      .join('\n');
+
+    const prompt = `Você é uma especialista em Educação Infantil (0 a 6 anos), criando o planejamento semanal de uma turma.
+
+## OBJETIVOS PEDAGÓGICOS A COBRIR NO PLANO (do currículo escolhido pela instituição)
+${objetivosTexto}
+
+${dto.tema ? `## TEMA/PROJETO DA SEMANA\n${dto.tema}\n` : ''}
+## DADOS DA TURMA
+- **Idade:** ${dto.ageRangeMeses} meses
+- **Quantidade de dias letivos a planejar:** ${dto.quantidadeDias}
+- **Número de crianças:** ${dto.numeroCriancas ?? 'não informado'}
+${dto.contextoAdicional ? `- **Contexto adicional:** ${dto.contextoAdicional}` : ''}
+${materialBase}
+## INSTRUÇÕES
+1. Distribua os objetivos acima ao longo dos ${dto.quantidadeDias} dias — pode repetir um objetivo em mais de um dia, mas cubra todos.
+2. Cada dia tem UMA atividade principal, criativa e executável com recursos básicos.
+3. Mantenha uma progressão que faça sentido ao longo da semana (não repita a mesma atividade dois dias seguidos).
+4. Linguagem direta, para o professor executar.
+
+## FORMATO DE RESPOSTA (JSON VÁLIDO — sem markdown)
+{
+  "tituloDoPlano": "Nome do plano/semana",
+  "dias": [
+    {
+      "dia": 1,
+      "objetivoTrabalhando": "qual objetivo da lista acima este dia cobre",
+      "titulo": "Título da atividade do dia",
+      "descricao": "Descrição em 2-3 frases",
+      "materiais": ["material 1", "material 2"],
+      "duracao": "ex: 40 minutos"
+    }
+  ]
+}`;
+
+    try {
+      const resposta = await cliente.chat.completions.create({
+        model: this.getModelo(),
+        messages: [
+          { role: 'system', content: 'Você é uma especialista em Educação Infantil. Responda APENAS com JSON válido.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 2500,
+      });
+      const conteudo = resposta.choices[0]?.message?.content;
+      if (!conteudo) throw new ServiceUnavailableException('A IA não retornou conteúdo. Tente novamente.');
+      const jsonLimpo = conteudo.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const plano = JSON.parse(jsonLimpo);
+      return {
+        ...plano,
+        frameworkObjectiveIds: dto.frameworkObjectiveIds,
+        geradoPorIA: true,
+      };
+    } catch (error) {
+      this.logger.error('Erro ao gerar plano de aula com IA:', error);
+      if (error instanceof ServiceUnavailableException || error instanceof BadRequestException) throw error;
+      throw new ServiceUnavailableException('Serviço de IA temporariamente indisponível. Tente novamente em instantes.');
+    }
+  }
+
+  /**
+   * Ideias RÁPIDAS — sem estrutura pesada, pra quando o professor só precisa
+   * de inspiração imediata no meio do dia (brincadeira de transição, acalmar
+   * a turma, preencher 10 minutos). É o caminho mais simples do sistema.
+   */
+  async gerarIdeiasRapidas(dto: GerarIdeiasRapidasDto) {
+    const cliente = this.getCliente();
+    const quantidade = dto.quantidade ?? 5;
+
+    const prompt = `Você é uma educadora infantil experiente, dando ideias RÁPIDAS pra outra professora que precisa de algo AGORA, sem tempo pra planejar.
+
+## O QUE ELA PRECISA
+"${dto.necessidade}"
+${dto.ageRangeMeses !== undefined ? `\n## IDADE DA TURMA\n${dto.ageRangeMeses} meses` : ''}
+
+## INSTRUÇÕES
+Dê ${quantidade} ideias curtas, práticas, sem precisar de material elaborado ou preparação prévia. Uma frase de descrição cada, direto ao ponto.
+
+## FORMATO (JSON VÁLIDO — sem markdown)
+{
+  "ideias": [
+    { "titulo": "Nome curto da ideia", "descricao": "Como fazer, em 1 frase direta", "duracaoEstimada": "ex: 5 min" }
+  ]
+}`;
+
+    try {
+      const resposta = await cliente.chat.completions.create({
+        model: this.getModelo(),
+        messages: [
+          { role: 'system', content: 'Você dá ideias rápidas e práticas pra professoras de educação infantil. Responda APENAS com JSON válido.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.85,
+        max_tokens: 900,
+      });
+      const conteudo = resposta.choices[0]?.message?.content;
+      if (!conteudo) throw new ServiceUnavailableException('A IA não retornou conteúdo. Tente novamente.');
+      const jsonLimpo = conteudo.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      return JSON.parse(jsonLimpo);
+    } catch (error) {
+      this.logger.error('Erro ao gerar ideias rápidas com IA:', error);
+      if (error instanceof ServiceUnavailableException) throw error;
+      throw new ServiceUnavailableException('Serviço de IA temporariamente indisponível. Tente novamente em instantes.');
     }
   }
 }
