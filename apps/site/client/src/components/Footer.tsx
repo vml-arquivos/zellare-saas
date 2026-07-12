@@ -79,7 +79,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://app.conexa3.casadf.com.br"
+                  href="https://appzelare.casadf.com.br/login"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground/70 hover:text-primary transition-colors"

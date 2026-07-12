@@ -10,10 +10,10 @@ interface SEOProps {
 }
 
 export default function SEO({
-  title = 'Zelare - Associação Beneficente Coração de Cristo',
-  description = 'Organização sem fins lucrativos dedicada à educação infantil de excelência. Administramos 6 unidades de educação infantil no Distrito Federal, transformando vidas através do acolhimento e aprendizagem.',
-  keywords = 'Zelare, educação infantil, creche, CEPI, Recanto das Emas, Brazlândia, educação, crianças, vulnerabilidade social, ONG, doações',
-  image = '/images/children-learning.webp',
+  title = 'Zelare — Cuidado, pedagogia e gestão inteligente',
+  description = 'A plataforma que conecta gestão escolar, pedagogia, cuidado, corpo docente e família em um só lugar. Para instituições públicas e privadas de educação infantil.',
+  keywords = 'Zelare, gestão escolar, educação infantil, plataforma pedagógica, creche, CEI, software para escolas, planejamento pedagógico, diário de bordo',
+  image = '/images/zelare-logo-square.png',
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = 'website',
 }: SEOProps) {

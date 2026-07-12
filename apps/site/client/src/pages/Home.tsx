@@ -1,304 +1,427 @@
-import { Heart, Users, BookOpen, Award, ArrowRight, Phone, Mail, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import {
+  ArrowRight,
+  Building2,
+  BookOpen,
+  HeartPulse,
+  GraduationCap,
+  Users,
+  Sparkles,
+  Puzzle,
+  WifiOff,
+  Layers,
+  Upload,
+  Check,
+} from 'lucide-react';
 import { Link } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import SEO from '@/components/SEO';
-import SchemaOrg from '@/components/SchemaOrg';
+
+const CHAIN = [
+  { label: 'Currículo', detail: 'BNCC, Reggio, Montessori — ou o seu próprio', icon: BookOpen },
+  { label: 'Planejamento', detail: 'O professor escolhe o tema, a turma, a semana', icon: Layers },
+  { label: 'Diário de bordo', detail: 'Cada dia registrado, sempre ligado ao plano', icon: Sparkles },
+  { label: 'Família', detail: 'Acompanha a evolução em tempo real', icon: Users },
+];
+
+const PILLARS = [
+  {
+    icon: Building2,
+    title: 'Gestão escolar',
+    description: 'Matrícula, turmas, unidades e financeiro num só lugar — de uma unidade a uma rede inteira.',
+  },
+  {
+    icon: BookOpen,
+    title: 'Pedagógico',
+    description: 'Currículo plugável, planejamento e diário de bordo, ligados de ponta a ponta e auditáveis.',
+  },
+  {
+    icon: HeartPulse,
+    title: 'Cuidado e saúde',
+    description: 'Restrições alimentares, cardápio, acompanhamento nutricional e alertas de saúde.',
+  },
+  {
+    icon: GraduationCap,
+    title: 'Corpo docente',
+    description: 'Formação continuada, avaliação e coordenação pedagógica acompanhando cada professor.',
+  },
+  {
+    icon: Users,
+    title: 'Família',
+    description: 'Recados, diário de bordo e desenvolvimento da criança, direto no celular dos responsáveis.',
+  },
+];
+
+const RECURSOS = [
+  {
+    icon: Puzzle,
+    title: 'Currículo plugável',
+    description:
+      'Comece com a BNCC pronta, ou monte o currículo da sua instituição do zero. O motor pedagógico se adapta a você — não o contrário.',
+  },
+  {
+    icon: Upload,
+    title: 'Suba o que você já usa',
+    description:
+      'Plano de aula em PDF ou Word que sua equipe já usa no dia a dia? Envie, e a Zelare estrutura como template reutilizável.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Assistente de IA',
+    description:
+      'Sugestões de atividade alinhadas ao currículo escolhido e à faixa etária de cada turma, sem sair do planejamento.',
+  },
+  {
+    icon: WifiOff,
+    title: 'Funciona offline',
+    description:
+      'A professora registra a chamada e o diário mesmo sem internet na sala. Sincroniza sozinho quando a conexão volta.',
+  },
+];
+
+const PAPEIS = [
+  'Direção',
+  'Coordenação pedagógica',
+  'Secretaria',
+  'Professor',
+  'Professor auxiliar',
+  'Nutrição',
+  'Psicologia',
+  'Financeiro',
+  'Administração geral',
+];
+
+const PLANOS = [
+  {
+    nome: 'Essencial',
+    publico: 'Uma unidade, começando agora',
+    destaque: false,
+    itens: [
+      '1 unidade, turmas ilimitadas',
+      'Planejamento e diário de bordo',
+      'Framework BNCC incluso',
+      'Portal da família',
+      'Suporte por e-mail',
+    ],
+  },
+  {
+    nome: 'Profissional',
+    publico: 'Rede em crescimento, várias unidades',
+    destaque: true,
+    itens: [
+      'Unidades ilimitadas',
+      'Tudo do Essencial',
+      'Currículo próprio e templates customizados',
+      'Assistente de IA',
+      'Upload de material próprio',
+      'Suporte prioritário',
+    ],
+  },
+  {
+    nome: 'Rede / Governo',
+    publico: 'Secretarias e grandes redes conveniadas',
+    destaque: false,
+    itens: [
+      'Tudo do Profissional',
+      'Domínio e identidade visual próprios',
+      'Relatórios sob medida para o convênio',
+      'Onboarding assistido',
+      'Gerente de conta dedicado',
+    ],
+  },
+];
 
 export default function Home() {
-  const values = [
-    {
-      icon: Heart,
-      title: 'Afeto e Cuidado',
-      description: 'Promovemos um ambiente de cuidados, afeto e aprendizagem responsável, saudável e feliz.',
-    },
-    {
-      icon: Users,
-      title: 'Respeito e Solidariedade',
-      description: 'Valorizamos relações humanas baseadas no afeto, respeito a si e ao outro, e na solidariedade.',
-    },
-    {
-      icon: BookOpen,
-      title: 'Educação de Qualidade',
-      description: 'Oferecemos ensino de qualidade que busca a integração das diferentes áreas do conhecimento.',
-    },
-    {
-      icon: Award,
-      title: 'Desenvolvimento Integral',
-      description: 'Trabalhamos a criança em seus aspectos físico, psicológico, intelectual e social.',
-    },
-  ];
-
-  const stats = [
-    { number: '7', label: 'Unidades Educacionais', icon: MapPin },
-    { number: '1000+', label: 'Crianças Atendidas', icon: Users },
-    { number: '25+', label: 'Anos de História', icon: Award },
-    { number: '100+', label: 'Colaboradores', icon: Heart },
-  ];
+  const [hoveredChain, setHoveredChain] = useState<number | null>(null);
 
   return (
     <>
-      <SEO 
-        title="Zelare - Associação Beneficente Coração de Cristo"
-        description="A Zelare é uma organização sem fins lucrativos dedicada à educação infantil e assistência social, promovendo o desenvolvimento de crianças em vulnerabilidade social através de valores éticos e educacionais."
-        keywords="Zelare, educação infantil, assistência social, Brasília, CEPI, creche, desenvolvimento infantil"
+      <SEO
+        title="Zelare — Cuidado, pedagogia e gestão inteligente"
+        description="A plataforma que conecta gestão escolar, pedagogia, cuidado, corpo docente e família em um só lugar. Currículo plugável — adapta-se à sua instituição, pública ou privada."
+        keywords="Zelare, gestão escolar, plataforma pedagógica, software para creche, planejamento pedagógico, diário de bordo, BNCC"
       />
-      <SchemaOrg />
-      
-      <div className="min-h-screen flex flex-col">
+
+      <div className="min-h-screen flex flex-col bg-white">
         <Header />
-        
+
         <main>
-          {/* Hero Section */}
-          <section className="hero-section relative">
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
+          {/* ── Hero ─────────────────────────────────────────────────── */}
+          <section className="relative overflow-hidden bg-zelare-ink">
+            <div
+              className="absolute inset-0 opacity-[0.07]"
               style={{
-                backgroundImage: 'url(https://files.manuscdn.com/user_upload_by_module/session_file/310519663355075489/ppuBdPmxegwdlNhk.png)',
+                backgroundImage:
+                  'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+                backgroundSize: '28px 28px',
               }}
             />
-            <div className="absolute inset-0 bg-primary/30" />
-            
-            <div className="container relative z-10 text-white text-center animate-fade-in-up">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Transformando Vidas Através da <br />
-                <span className="text-yellow-300">Educação e do Amor</span>
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto font-light">
-                Promovemos o acesso aos direitos das crianças em vulnerabilidade social, 
-                transformando-os por meio do desenvolvimento comunitário.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/doacoes">
-                  <Button size="lg" className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6">
-                    Fazer uma Doação
-                    <Heart className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/quem-somos">
-                  <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6">
-                    Conheça Nossa História
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Stats Section */}
-          <section className="py-16 bg-gradient-to-br from-primary/10 to-secondary/10">
-            <div className="container">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                      <stat.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <div className="text-4xl font-bold text-primary mb-2">{stat.number}</div>
-                    <div className="text-muted-foreground font-medium">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Mission Section */}
-          <section className="py-20 bg-white">
-            <div className="container">
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="animate-fade-in-up">
-                  <img 
-                    src="/images/activities/atividade-1.jpg" 
-                    alt="Crianças em atividade educacional na Zelare"
-                    className="rounded-2xl shadow-2xl hover-lift"
-                  />
-                </div>
-                <div className="animate-slide-in-right">
-                  <h2 className="text-4xl font-bold mb-6 text-primary">Nossa Missão</h2>
-                  <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                    Contribuir para o desenvolvimento das potencialidades físicas e psíquicas das crianças, 
-                    direcionando-as para a conquista de Valor Humano Universal, tornando-as cidadãs criativas, 
-                    conscientes de seu papel e responsabilidades, capazes de lidar com uma sociedade em constante mutação.
-                  </p>
-                  <div className="bg-primary/5 border-l-4 border-primary p-6 rounded-r-lg mb-6">
-                    <p className="text-muted-foreground italic">
-                      "E tudo quanto fizerdes, fazei-o de coração, como ao Senhor, e não aos homens."
-                    </p>
-                    <p className="text-sm text-primary font-semibold mt-2">Colossenses 3:23</p>
-                  </div>
-                  <Link href="/quem-somos">
-                    <Button className="btn-primary">
-                      Saiba Mais Sobre Nós
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Values Section */}
-          <section className="py-20 bg-gradient-to-br from-secondary/5 to-primary/5">
-            <div className="container">
-              <div className="text-center mb-16 animate-fade-in-up">
-                <h2 className="text-4xl font-bold mb-4 text-primary">Nossos Valores</h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  A Zelare tem valores que norteiam o trabalho na instituição e visa a "Qualidade" 
-                  nas relações humanas, baseadas no afeto, no respeito, na solidariedade e na alegria.
+            <div className="container relative z-10 pt-20 pb-28 md:pt-28 md:pb-36">
+              <div className="max-w-3xl">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zelare-mint/15 border border-zelare-mint/30 text-zelare-mint text-xs font-semibold tracking-wide uppercase mb-6">
+                  Para instituições de 0 a 6 anos
+                </span>
+                <h1 className="font-display text-white text-4xl md:text-6xl leading-[1.08] tracking-tight mb-6">
+                  O elo entre currículo, sala e família —
+                  <span className="text-zelare-mint"> sem perder nenhum dia.</span>
+                </h1>
+                <p className="text-lg md:text-xl text-white/75 max-w-2xl mb-10 leading-relaxed">
+                  Zelare conecta gestão escolar, planejamento pedagógico, cuidado e comunicação
+                  com a família — num motor de currículo que se molda à sua instituição, pública
+                  ou privada. Não o contrário.
                 </p>
-              </div>
-              
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {values.map((value, index) => (
-                  <Card key={index} className="card-premium hover-lift animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <CardContent className="p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                        <value.icon className="h-8 w-8 text-primary" />
-                      </div>
-                      <h3 className="text-xl font-bold mb-3 text-foreground">{value.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">{value.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Units Preview Section */}
-          <section className="py-20 bg-white">
-            <div className="container">
-              <div className="text-center mb-16 animate-fade-in-up">
-                <h2 className="text-4xl font-bold mb-4 text-primary">Nossas Unidades</h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  Conheça os CEPIs e Creches onde desenvolvemos nosso trabalho de educação infantil 
-                  com excelência e dedicação.
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8 mb-12">
-                <Card className="overflow-hidden hover-lift animate-fade-in-up">
-                  <img 
-                    src="/images/units/Arara-Caninde.png" 
-                    alt="CEPI Arara Canindé"
-                    className="w-full h-48 object-cover"
-                  />
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-primary">CEPI Arara Canindé</h3>
-                    <p className="text-muted-foreground mb-4">Educação infantil de qualidade no Recanto das Emas</p>
-                    <Link href="/unidades/cepi-arara-caninde">
-                      <Button variant="outline" className="w-full">
-                        Saiba Mais
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-
-                <Card className="overflow-hidden hover-lift animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                  <img 
-                    src="/images/units/CEPI-FLAMBOYANT.png" 
-                    alt="CEPI Flamboyant"
-                    className="w-full h-48 object-cover"
-                  />
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-primary">CEPI Flamboyant</h3>
-                    <p className="text-muted-foreground mb-4">Ambiente acolhedor para o desenvolvimento infantil</p>
-                    <Link href="/unidades/cepi-flamboyant">
-                      <Button variant="outline" className="w-full">
-                        Saiba Mais
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-
-                <Card className="overflow-hidden hover-lift animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  <img 
-                    src="/images/units/cepi-sabia-do-campo.jpg" 
-                    alt="CEPI Sabiá do Campo"
-                    className="w-full h-48 object-cover"
-                  />
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-primary">CEPI Sabiá do Campo</h3>
-                    <p className="text-muted-foreground mb-4">Espaço de aprendizado e crescimento</p>
-                    <Link href="/unidades/cepi-sabia-do-campo">
-                      <Button variant="outline" className="w-full">
-                        Saiba Mais
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="text-center">
-                <Link href="/unidades">
-                  <Button size="lg" className="btn-primary">
-                    Ver Todas as Unidades
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* CTA Section */}
-          <section className="py-20 bg-gradient-to-br from-primary to-secondary text-white">
-            <div className="container text-center">
-              <div className="max-w-3xl mx-auto animate-fade-in-up">
-                <h2 className="text-4xl font-bold mb-6">Faça Parte Dessa Transformação</h2>
-                <p className="text-xl mb-8 opacity-90">
-                  Sua contribuição ajuda a transformar vidas e construir um futuro melhor para 
-                  centenas de crianças em situação de vulnerabilidade social.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/doacoes">
-                    <Button size="lg" className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-6">
-                      Doar Agora
-                      <Heart className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
+                <div className="flex flex-col sm:flex-row gap-4">
                   <Link href="/contato">
-                    <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6">
-                      Entre em Contato
-                      <Phone className="ml-2 h-5 w-5" />
-                    </Button>
+                    <button className="flex items-center justify-center gap-2 px-7 py-4 bg-zelare-teal text-white text-base font-semibold rounded-full hover:bg-zelare-mint hover:text-zelare-ink transition-all duration-200 shadow-lg">
+                      Solicitar demonstração
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </Link>
+                  <a href="#como-funciona">
+                    <button className="flex items-center justify-center gap-2 px-7 py-4 border border-white/25 text-white text-base font-semibold rounded-full hover:bg-white/10 transition-all duration-200">
+                      Ver como funciona
+                    </button>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Elemento de assinatura: a corrente auditável do produto */}
+            <div className="relative z-10 pb-16 md:pb-24">
+              <div className="container">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {CHAIN.map((step, i) => (
+                    <div key={step.label} className="relative">
+                      <div
+                        onMouseEnter={() => setHoveredChain(i)}
+                        onMouseLeave={() => setHoveredChain(null)}
+                        className={`h-full rounded-2xl border p-5 backdrop-blur-sm transition-all duration-300 ${
+                          hoveredChain === i
+                            ? 'bg-white/10 border-zelare-mint/50'
+                            : 'bg-white/[0.04] border-white/10'
+                        }`}
+                      >
+                        <step.icon
+                          className={`w-6 h-6 mb-4 transition-colors duration-300 ${
+                            hoveredChain === i ? 'text-zelare-mint' : 'text-white/50'
+                          }`}
+                        />
+                        <div className="font-display text-white text-lg mb-1">{step.label}</div>
+                        <div className="text-sm text-white/55 leading-snug">{step.detail}</div>
+                      </div>
+                      {i < CHAIN.length - 1 && (
+                        <div className="hidden lg:block absolute top-1/2 -right-4 w-4 h-px bg-white/20" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-white/40 text-xs mt-4 text-center sm:text-left">
+                  Cada diário nasce ligado a um plano, e cada plano a um objetivo curricular — auditável do início ao fim.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Ecossistema ──────────────────────────────────────────── */}
+          <section id="ecossistema" className="py-20 md:py-28 bg-zelare-paper">
+            <div className="container">
+              <div className="max-w-2xl mb-14">
+                <span className="text-zelare-teal text-sm font-semibold tracking-wide uppercase">
+                  Um ecossistema, não um punhado de telas
+                </span>
+                <h2 className="font-display text-zelare-ink text-3xl md:text-4xl mt-3 leading-tight">
+                  Cinco áreas que hoje vivem em planilhas, grupos de WhatsApp e cadernos separados.
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {PILLARS.map((pillar) => (
+                  <div
+                    key={pillar.title}
+                    className="group bg-white rounded-2xl border border-zelare-ink/8 p-7 hover:border-zelare-teal/40 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-zelare-mint/40 flex items-center justify-center mb-5 group-hover:bg-zelare-teal transition-colors duration-300">
+                      <pillar.icon className="w-5 h-5 text-zelare-teal group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <h3 className="font-display text-zelare-ink text-xl mb-2">{pillar.title}</h3>
+                    <p className="text-sm text-zelare-ink/60 leading-relaxed">{pillar.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Recursos ─────────────────────────────────────────────── */}
+          <section id="recursos" className="py-20 md:py-28 bg-white">
+            <div className="container">
+              <div className="max-w-2xl mb-14">
+                <span className="text-zelare-teal text-sm font-semibold tracking-wide uppercase">
+                  O que torna o Zelare diferente
+                </span>
+                <h2 className="font-display text-zelare-ink text-3xl md:text-4xl mt-3 leading-tight">
+                  Feito para se adaptar à sua instituição — não o contrário.
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
+                {RECURSOS.map((r) => (
+                  <div key={r.title} className="flex gap-5">
+                    <div className="shrink-0 w-12 h-12 rounded-xl bg-zelare-ink flex items-center justify-center">
+                      <r.icon className="w-5 h-5 text-zelare-mint" />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-zelare-ink text-lg mb-1.5">{r.title}</h3>
+                      <p className="text-sm text-zelare-ink/60 leading-relaxed">{r.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Como funciona ────────────────────────────────────────── */}
+          <section id="como-funciona" className="py-20 md:py-28 bg-zelare-ink relative overflow-hidden">
+            <div className="container relative z-10">
+              <div className="max-w-2xl mb-16">
+                <span className="text-zelare-mint text-sm font-semibold tracking-wide uppercase">
+                  Como funciona
+                </span>
+                <h2 className="font-display text-white text-3xl md:text-4xl mt-3 leading-tight">
+                  Da escolha do currículo ao relatório pronto, em quatro passos reais.
+                </h2>
+              </div>
+              <div className="relative">
+                <div className="hidden md:block absolute left-6 top-6 bottom-6 w-px bg-white/15" />
+                <div className="space-y-10 md:space-y-14">
+                  {[
+                    {
+                      n: '1',
+                      title: 'Escolha ou monte seu currículo',
+                      desc: 'Comece com a BNCC pronta na biblioteca, clone e adapte, ou construa o currículo da sua instituição do zero.',
+                    },
+                    {
+                      n: '2',
+                      title: 'A equipe planeja por turma',
+                      desc: 'Cada professor monta o planejamento da semana ligado a um objetivo real do currículo escolhido.',
+                    },
+                    {
+                      n: '3',
+                      title: 'O dia a dia vira diário de bordo',
+                      desc: 'Chamada, atividades e observações — sempre amarradas ao plano do dia, mesmo sem internet na sala.',
+                    },
+                    {
+                      n: '4',
+                      title: 'Família e gestão acompanham em tempo real',
+                      desc: 'Relatórios de desenvolvimento, frequência e alimentação prontos — para a família e para quem gere a rede.',
+                    },
+                  ].map((step) => (
+                    <div key={step.n} className="relative flex gap-6 md:gap-8">
+                      <div className="relative z-10 shrink-0 w-12 h-12 rounded-full bg-zelare-ink border-2 border-zelare-mint flex items-center justify-center font-display text-zelare-mint text-lg">
+                        {step.n}
+                      </div>
+                      <div className="pt-1.5">
+                        <h3 className="font-display text-white text-xl mb-2">{step.title}</h3>
+                        <p className="text-white/60 leading-relaxed max-w-xl">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Contact Info Section */}
-          <section className="py-16 bg-muted">
+          {/* ── Papéis de acesso ─────────────────────────────────────── */}
+          <section className="py-16 bg-zelare-paper border-b border-zelare-ink/5">
             <div className="container">
-              <div className="grid md:grid-cols-3 gap-8 text-center">
-                <div className="animate-fade-in-up">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <Phone className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">Telefone</h3>
-                  <p className="text-muted-foreground">(61) 3575-4125</p>
-                  <p className="text-muted-foreground">(61) 3575-4119</p>
-                </div>
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <Mail className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">E-mail</h3>
-                  <p className="text-muted-foreground">contato@zelare.com.br</p>
-                </div>
-                <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <MapPin className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">Endereço</h3>
-                  <p className="text-muted-foreground">Avenida Recanto das Emas, Quadra 301, Lote 26</p>
-                  <p className="text-muted-foreground">Brasília-DF</p>
-                </div>
+              <p className="text-zelare-teal text-sm font-semibold tracking-wide uppercase mb-6 text-center">
+                Um acesso certo para cada função da instituição
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {PAPEIS.map((papel) => (
+                  <span
+                    key={papel}
+                    className="px-4 py-2 rounded-full bg-white border border-zelare-ink/10 text-zelare-ink/75 text-sm font-medium"
+                  >
+                    {papel}
+                  </span>
+                ))}
               </div>
+            </div>
+          </section>
+
+          {/* ── Planos ───────────────────────────────────────────────── */}
+          <section id="planos" className="py-20 md:py-28 bg-white">
+            <div className="container">
+              <div className="max-w-2xl mb-14 mx-auto text-center">
+                <span className="text-zelare-teal text-sm font-semibold tracking-wide uppercase">
+                  Planos
+                </span>
+                <h2 className="font-display text-zelare-ink text-3xl md:text-4xl mt-3 leading-tight">
+                  De uma unidade a uma rede conveniada inteira.
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {PLANOS.map((plano) => (
+                  <div
+                    key={plano.nome}
+                    className={`rounded-2xl p-8 flex flex-col ${
+                      plano.destaque
+                        ? 'bg-zelare-ink text-white ring-2 ring-zelare-teal shadow-xl md:-translate-y-3'
+                        : 'bg-zelare-paper text-zelare-ink border border-zelare-ink/8'
+                    }`}
+                  >
+                    {plano.destaque && (
+                      <span className="self-start px-3 py-1 rounded-full bg-zelare-mint text-zelare-ink text-xs font-semibold mb-4">
+                        Mais escolhido
+                      </span>
+                    )}
+                    <h3 className="font-display text-2xl mb-1">{plano.nome}</h3>
+                    <p className={`text-sm mb-6 ${plano.destaque ? 'text-white/60' : 'text-zelare-ink/55'}`}>
+                      {plano.publico}
+                    </p>
+                    <ul className="space-y-3 mb-8 flex-1">
+                      {plano.itens.map((item) => (
+                        <li key={item} className="flex items-start gap-2.5 text-sm">
+                          <Check
+                            className={`w-4 h-4 mt-0.5 shrink-0 ${
+                              plano.destaque ? 'text-zelare-mint' : 'text-zelare-teal'
+                            }`}
+                          />
+                          <span className={plano.destaque ? 'text-white/85' : 'text-zelare-ink/75'}>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/contato">
+                      <button
+                        className={`w-full py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+                          plano.destaque
+                            ? 'bg-zelare-mint text-zelare-ink hover:bg-white'
+                            : 'bg-zelare-ink text-white hover:bg-zelare-teal'
+                        }`}
+                      >
+                        Falar com o time
+                      </button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-zelare-ink/45 text-sm mt-10">
+                Preços variam por número de unidades e crianças atendidas — sem taxa de implantação para redes conveniadas.
+              </p>
+            </div>
+          </section>
+
+          {/* ── CTA final ────────────────────────────────────────────── */}
+          <section className="py-20 md:py-24 bg-zelare-teal">
+            <div className="container text-center">
+              <h2 className="font-display text-white text-3xl md:text-4xl leading-tight max-w-2xl mx-auto mb-8">
+                Sua instituição já tem a rotina. O Zelare organiza o resto.
+              </h2>
+              <Link href="/contato">
+                <button className="inline-flex items-center gap-2 px-8 py-4 bg-white text-zelare-teal text-base font-semibold rounded-full hover:bg-zelare-ink hover:text-white transition-all duration-200 shadow-lg">
+                  Solicitar demonstração
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </Link>
             </div>
           </section>
         </main>
