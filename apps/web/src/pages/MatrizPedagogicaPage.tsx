@@ -204,7 +204,7 @@ function ObjetivoCard({ obj, compact, mostrarExemplo }: {
               <CheckCircle className="h-3 w-3 mr-1" /> Usar no Planejamento
             </Button>
             <Button size="sm" variant="outline" className="text-xs h-7 text-indigo-600 border-indigo-200 hover:bg-indigo-50">
-              <Star className="h-3 w-3 mr-1" /> Vincular ao RDIC
+              <Star className="h-3 w-3 mr-1" /> Vincular ao Desenvolvimento
             </Button>
           </div>
         </div>

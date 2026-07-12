@@ -1325,7 +1325,7 @@ export default function DesenvolvimentoInfantilPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { label: 'RDICs Publicados', path: '/app/rdic-geral', desc: 'Relatórios individuais' },
+            { label: 'Relatórios Publicados', path: '/app/rdic-geral', desc: 'Relatórios individuais' },
             { label: 'Coordenação Geral', path: '/app/coordenacao-geral', desc: 'Visão da rede' },
             { label: 'Análises Centrais', path: '/app/central', desc: 'Indicadores gerais' },
             { label: 'Relatórios', path: '/app/reports', desc: 'Exportar dados' },

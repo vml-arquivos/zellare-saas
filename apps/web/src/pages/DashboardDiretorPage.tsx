@@ -127,7 +127,7 @@ export function DashboardDiretorPage() {
         alertas.push(`${planEmRevisao} planejamento(s) aguardando revisão`);
       }
       if (rdicTotal > 0 && rdicIniciados / rdicTotal < 0.3) {
-        alertas.push(`RDIC do 1º Trimestre: apenas ${Math.round((rdicIniciados / rdicTotal) * 100)}% iniciados`);
+        alertas.push(`Desenvolvimento do 1º Trimestre: apenas ${Math.round((rdicIniciados / rdicTotal) * 100)}% iniciados`);
       }
       setAlertasPedagogicos(alertas);
 
@@ -381,7 +381,7 @@ export function DashboardDiretorPage() {
                     <p className="text-[11px] text-gray-500 mt-0.5">Planos p/ revisar</p>
                   </div>
 
-                  {/* RDIC trimestre */}
+                  {/* Desenvolvimento trimestre */}
                   <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
@@ -389,7 +389,7 @@ export function DashboardDiretorPage() {
                     <p className="text-xl font-bold text-gray-800">
                       {dados?.rdicAprovadosTrimestre ?? 0}
                     </p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">RDIC aprovados 1T</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">Desenvolvimento aprovados 1T</p>
                   </div>
                 </div>
 

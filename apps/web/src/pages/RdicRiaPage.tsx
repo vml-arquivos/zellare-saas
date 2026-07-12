@@ -210,9 +210,9 @@ export default function RdicRiaPage() {
         observacaoGeral: rdicForm.observacaoGeral,
         proximosPassos: rdicForm.proximosPassos,
         dimensoes: rdicForm.dimensoes,
-        type: 'RDIC',
+        type: 'Desenvolvimento',
       });
-      toast.success('RDIC salvo com sucesso!');
+      toast.success('Desenvolvimento salvo com sucesso!');
       setAba('rdic');
       loadData();
       setRdicForm({
@@ -223,7 +223,7 @@ export default function RdicRiaPage() {
         })),
       });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Erro ao salvar RDIC');
+      toast.error(err?.response?.data?.message || 'Erro ao salvar Desenvolvimento');
     } finally { setSaving(false); }
   }
 
@@ -268,14 +268,14 @@ export default function RdicRiaPage() {
   );
   return (
     <PageShell
-      title="RDIC — Registro de Desenvolvimento Individual da Criança"
+      title="Desenvolvimento — Registro de Desenvolvimento Individual da Criança"
       subtitle="Avaliação bimestral por dimensões de desenvolvimento baseada nos 5 Campos de Experiência da BNCC"
     >
       {/* Abas */}
       <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 flex-wrap">
         {[
-          { id: 'rdic', label: 'Registros RDIC', icon: <User className="h-4 w-4" /> },
-          { id: 'novo-rdic', label: 'Novo RDIC', icon: <Plus className="h-4 w-4" /> },
+          { id: 'rdic', label: 'Registros Desenvolvimento', icon: <User className="h-4 w-4" /> },
+          { id: 'novo-rdic', label: 'Novo Desenvolvimento', icon: <Plus className="h-4 w-4" /> },
           ...(isCoordenador ? [
             { id: 'ria', label: 'RIA — Intervenções', icon: <ClipboardCheck className="h-4 w-4" /> },
             { id: 'nova-ria', label: 'Nova RIA', icon: <FileText className="h-4 w-4" /> },
@@ -288,14 +288,14 @@ export default function RdicRiaPage() {
         ))}
       </div>
 
-      {/* ─── LISTA RDIC ─── */}
+      {/* ─── LISTA Desenvolvimento ─── */}
       {aba === 'rdic' && (
         <div className="space-y-4">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <Brain className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-blue-800">RDIC — Registro de Desenvolvimento Individual da Criança</h3>
+                <h3 className="font-semibold text-blue-800">Desenvolvimento — Registro de Desenvolvimento Individual da Criança</h3>
                 <p className="text-sm text-blue-600 mt-0.5">
                   Avaliação bimestral por dimensões de desenvolvimento baseada nos 5 Campos de Experiência da BNCC.
                   Registre o nível de desenvolvimento de cada criança em cada indicador.
@@ -310,7 +310,7 @@ export default function RdicRiaPage() {
               <Input placeholder="Buscar por criança..." className="pl-9" value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
             <Button onClick={() => setAba('novo-rdic')} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Novo RDIC
+              <Plus className="h-4 w-4" /> Novo Desenvolvimento
             </Button>
           </div>
 
@@ -319,9 +319,9 @@ export default function RdicRiaPage() {
           {!loading && rdicFiltrado.length === 0 && (
             <EmptyState
               icon={<Brain className="h-12 w-12 text-gray-300" />}
-              title="Nenhum RDIC registrado"
+              title="Nenhum Desenvolvimento registrado"
               description="Crie o primeiro Registro de Desenvolvimento Individual da Criança"
-              action={<Button onClick={() => setAba('novo-rdic')}><Plus className="h-4 w-4 mr-2" />Criar RDIC</Button>}
+              action={<Button onClick={() => setAba('novo-rdic')}><Plus className="h-4 w-4 mr-2" />Criar Desenvolvimento</Button>}
             />
           )}
 
@@ -395,7 +395,7 @@ export default function RdicRiaPage() {
         </div>
       )}
 
-      {/* ─── NOVO RDIC ─── */}
+      {/* ─── NOVO Desenvolvimento ─── */}
       {aba === 'novo-rdic' && (
         <div className="space-y-6 max-w-3xl">
           <Card className="border-2 border-blue-100">
@@ -491,7 +491,7 @@ export default function RdicRiaPage() {
           <div className="flex gap-3">
             <Button onClick={salvarRdic} disabled={saving} className="flex-1">
               {saving ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Salvar RDIC
+              Salvar Desenvolvimento
             </Button>
             <Button variant="outline" onClick={() => setAba('rdic')}>Cancelar</Button>
           </div>

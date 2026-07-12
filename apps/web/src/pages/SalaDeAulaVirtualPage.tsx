@@ -381,7 +381,7 @@ export default function SalaDeAulaVirtualPage() {
     if (!alunoSelecionado || !turmaId) return;
     setGerandoRdic(true);
     try {
-      // Verifica se já existe RDIC para este período
+      // Verifica se já existe Desenvolvimento para este período
       const anoAtual = new Date().getFullYear();
       const mesAtual = new Date().getMonth() + 1;
       const periodo = mesAtual <= 3 ? '1B' : mesAtual <= 6 ? '2B' : mesAtual <= 9 ? '3B' : '4B';
@@ -422,7 +422,7 @@ export default function SalaDeAulaVirtualPage() {
         geradoAutomaticamente: true,
         geradoEm: new Date().toISOString(),
       };
-      // Tenta criar o RDIC (se já existir, vai para a página de edição)
+      // Tenta criar o Desenvolvimento (se já existir, vai para a página de edição)
       try {
         await http.post('/rdic', {
           childId: alunoSelecionado.id,
@@ -431,17 +431,17 @@ export default function SalaDeAulaVirtualPage() {
           anoLetivo: anoAtual,
           rascunhoJson,
         });
-        toast.success(`RDIC de ${alunoSelecionado.firstName} criado! Acesse RDIC por Criança para completar.`);
+        toast.success(`Desenvolvimento de ${alunoSelecionado.firstName} criado! Acesse Desenvolvimento por Criança para completar.`);
       } catch (err: any) {
         if (err?.response?.status === 400 && err?.response?.data?.message?.includes('Já existe')) {
-          toast.info(`RDIC de ${alunoSelecionado.firstName} já existe para este período. Acesse RDIC por Criança para editar.`);
+          toast.info(`Desenvolvimento de ${alunoSelecionado.firstName} já existe para este período. Acesse Desenvolvimento por Criança para editar.`);
         } else {
           throw err;
         }
       }
       navigate('/app/rdic-crianca');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Erro ao gerar RDIC.');
+      toast.error(err?.response?.data?.message || 'Erro ao gerar Desenvolvimento.');
     } finally {
       setGerandoRdic(false);
     }
@@ -997,7 +997,7 @@ export default function SalaDeAulaVirtualPage() {
                   { id: 'registro', label: 'Registrar', icon: <Plus className="h-3.5 w-3.5" /> },
                   { id: 'historico', label: 'Histórico', icon: <History className="h-3.5 w-3.5" /> },
                   { id: 'desenvolvimento', label: 'Evolução', icon: <TrendingUp className="h-3.5 w-3.5" /> },
-                  { id: 'rdic', label: 'RDIC', icon: <FileText className="h-3.5 w-3.5" /> },
+                  { id: 'rdic', label: 'Desenvolvimento', icon: <FileText className="h-3.5 w-3.5" /> },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -1402,24 +1402,24 @@ export default function SalaDeAulaVirtualPage() {
                 </div>
               )}
 
-              {/* ─── ABA: RDIC ─── */}
+              {/* ─── ABA: Desenvolvimento ─── */}
               {abaAluno === 'rdic' && (
                 <div className="space-y-4">
                   <Card className="border-2 border-indigo-100">
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         <FileText className="h-5 w-5 text-indigo-600" />
-                        Relatório de Desenvolvimento Individual da Criança (RDIC)
+                        Relatório de Desenvolvimento Individual da Criança (Desenvolvimento)
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* Resumo dos dados coletados */}
                       {loadingHistorico ? (
-                        <LoadingState message="Calculando dados para o RDIC..." />
+                        <LoadingState message="Calculando dados para o Desenvolvimento..." />
                       ) : (
                         <>
                           <div className="bg-blue-50 rounded-xl p-4">
-                            <p className="text-sm font-semibold text-blue-800 mb-2">Dados coletados para gerar o RDIC:</p>
+                            <p className="text-sm font-semibold text-blue-800 mb-2">Dados coletados para gerar o Desenvolvimento:</p>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="bg-white rounded-lg p-3 text-center">
                                 <p className="text-2xl font-bold text-indigo-600">{historicoAluno.length}</p>
@@ -1448,10 +1448,10 @@ export default function SalaDeAulaVirtualPage() {
                           </div>
 
                           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                            <p className="text-sm font-semibold text-amber-800 mb-1">O que acontece ao gerar o RDIC:</p>
+                            <p className="text-sm font-semibold text-amber-800 mb-1">O que acontece ao gerar o Desenvolvimento:</p>
                             <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                              <li>Um rascunho do RDIC é criado automaticamente com base nos seus registros</li>
-                              <li>Você será redirecionado para a página RDIC por Criança para completar e enviar</li>
+                              <li>Um rascunho do Desenvolvimento é criado automaticamente com base nos seus registros</li>
+                              <li>Você será redirecionado para a página Desenvolvimento por Criança para completar e enviar</li>
                               <li>A coordenadora revisará e aprovará o relatório final</li>
                               <li>Após publicado, fica disponível para coordenadora geral e psicóloga</li>
                             </ul>
@@ -1464,9 +1464,9 @@ export default function SalaDeAulaVirtualPage() {
                               className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                             >
                               {gerandoRdic ? (
-                                <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Gerando RDIC...</>
+                                <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Gerando Desenvolvimento...</>
                               ) : (
-                                <><FileText className="h-4 w-4 mr-2" /> Gerar RDIC de {alunoSelecionado?.firstName}</>
+                                <><FileText className="h-4 w-4 mr-2" /> Gerar Desenvolvimento de {alunoSelecionado?.firstName}</>
                               )}
                             </Button>
                             <Button
@@ -1474,12 +1474,12 @@ export default function SalaDeAulaVirtualPage() {
                               onClick={() => navigate('/app/rdic-crianca')}
                               className="flex-1"
                             >
-                              <Eye className="h-4 w-4 mr-2" /> Ver RDICs Existentes
+                              <Eye className="h-4 w-4 mr-2" /> Ver Relatórios Existentes
                             </Button>
                           </div>
 
                           {historicoAluno.length === 0 && (
-                            <p className="text-center text-sm text-gray-400">Adicione pelo menos 1 registro de atividade para gerar o RDIC.</p>
+                            <p className="text-center text-sm text-gray-400">Adicione pelo menos 1 registro de atividade para gerar o Desenvolvimento.</p>
                           )}
                         </>
                       )}

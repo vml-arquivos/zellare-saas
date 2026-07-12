@@ -17,7 +17,7 @@ interface ChildQuickActionsProps {
 /**
  * Barra reutilizável de ações rápidas da criança.
  *
- * Mantém a navegação entre Central RDIC, Painel Analítico, Timeline e
+ * Mantém a navegação entre Central Desenvolvimento, Painel Analítico, Timeline e
  * Observações de Desenvolvimento consistente em todas as telas da criança.
  * É um componente somente de frontend: não muda contratos, banco ou RBAC.
  */
@@ -26,7 +26,7 @@ export function ChildQuickActions({
   classroomId,
   current,
   canCreateRdic = false,
-  rdicLabel = 'Criar/Editar RDIC',
+  rdicLabel = 'Criar/Editar Desenvolvimento',
   onRefresh,
   className = '',
 }: ChildQuickActionsProps) {
@@ -57,7 +57,7 @@ export function ChildQuickActions({
         disabled={!safeChildId}
         className={`${baseBtn} ${current === 'central' ? active : neutral}`}
       >
-        <Brain className="h-4 w-4" /> Central RDIC
+        <Brain className="h-4 w-4" /> Central Desenvolvimento
       </Button>
 
       <Button

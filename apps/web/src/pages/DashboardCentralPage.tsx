@@ -482,7 +482,7 @@ export function DashboardCentralPage() {
                     : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
                 }`}
               >
-                {aba === 'graficos' ? 'Gráficos' : aba === 'planejamentos' ? `Planejamentos (${planejamentosCentral.length})` : `RDICs (${rdicsCentral.length})`}
+                {aba === 'graficos' ? 'Gráficos' : aba === 'planejamentos' ? `Planejamentos (${planejamentosCentral.length})` : `Relatórios (${rdicsCentral.length})`}
               </button>
             ))}
           </div>
@@ -550,11 +550,11 @@ export function DashboardCentralPage() {
         {abaCentral === 'rdics' && (
           <div className="p-4">
             {carregandoCentral ? (
-              <p className="text-sm text-gray-400 text-center py-8">Carregando RDICs...</p>
+              <p className="text-sm text-gray-400 text-center py-8">Carregando Relatórios...</p>
             ) : rdicsCentral.length === 0 ? (
               <div className="text-center py-8">
                 <Brain className="h-10 w-10 mx-auto text-gray-300 mb-2" />
-                <p className="text-sm text-gray-400">Nenhum RDIC publicado no momento.</p>
+                <p className="text-sm text-gray-400">Nenhum Desenvolvimento publicado no momento.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -603,7 +603,7 @@ export function DashboardCentralPage() {
 
         {abaCentral === 'graficos' && (
           <div className="p-4 text-center text-sm text-gray-400 py-8">
-            Selecione "Planejamentos" ou "RDICs" para ver os dados pedagógicos das unidades.
+            Selecione "Planejamentos" ou "Relatórios" para ver os dados pedagógicos das unidades.
           </div>
         )}
       </div>

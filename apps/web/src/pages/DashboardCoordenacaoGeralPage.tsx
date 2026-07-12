@@ -291,7 +291,7 @@ export default function DashboardCoordenacaoGeralPage() {
     }).finally(() => setLoadingDev(false));
   }, [abaAtiva]);
 
-  // ─── Carregar RDIC e diários por unidade quando aba pedagógico abre ──────────
+  // ─── Carregar Desenvolvimento e diários por unidade quando aba pedagógico abre ──────────
   useEffect(() => {
     if (abaAtiva !== 'pedagogico') return;
     if (rdicRede.length > 0) return; // já carregado
@@ -657,12 +657,12 @@ export default function DashboardCoordenacaoGeralPage() {
       ══════════════════════════════════════════════════════════════════ */}
       {abaAtiva === 'pedagogico' && (
         <div className="space-y-5">
-          {/* ── RDIC por Unidade — 1º Trimestre ── */}
-          <SectionCard title="RDIC por Unidade — 1º Trimestre 2026" icon={<Brain className="h-4 w-4 text-indigo-500" />}>
+          {/* ── Desenvolvimento por Unidade — 1º Trimestre ── */}
+          <SectionCard title="Desenvolvimento por Unidade — 1º Trimestre 2026" icon={<Brain className="h-4 w-4 text-indigo-500" />}>
             {loadingRdic ? (
               <div className="h-24 animate-pulse bg-gray-100 rounded-xl" />
             ) : rdicRede.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-6">Sem dados de RDIC disponíveis</p>
+              <p className="text-xs text-gray-400 text-center py-6">Sem dados de Desenvolvimento disponíveis</p>
             ) : (
               <div className="space-y-3">
                 {rdicRede.map((u, i) => (
@@ -769,7 +769,7 @@ export default function DashboardCoordenacaoGeralPage() {
               { label: 'Diários de Bordo',      icon: <BookOpen className="h-5 w-5" />,  path: '/app/coordenacao',                badge: '' },
               { label: 'Matriz 2026',           icon: <Brain className="h-5 w-5" />,     path: '/app/matriz-pedagogica',          badge: '' },
               { label: 'Análises Centrais',     icon: <BarChart2 className="h-5 w-5" />, path: '/app/central',                    badge: '' },
-              { label: 'RDICs Publicados',      icon: <Eye className="h-5 w-5" />,       path: '/app/rdic-geral',                 badge: '' },
+              { label: 'Relatórios Publicados',      icon: <Eye className="h-5 w-5" />,       path: '/app/rdic-geral',                 badge: '' },
               { label: 'Desenvolvimento Infantil', icon: <Sparkles className="h-5 w-5" />, path: '/app/desenvolvimento-infantil', badge: 'Novo' },
               { label: 'Relatórios',            icon: <TrendingUp className="h-5 w-5" />, path: '/app/reports',                   badge: '' },
               { label: 'Coord. Pedagógica',     icon: <Network className="h-5 w-5" />,   path: '/app/coordenacao-pedagogica',     badge: '' },

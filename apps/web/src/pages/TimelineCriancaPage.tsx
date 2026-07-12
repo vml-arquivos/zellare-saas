@@ -9,7 +9,7 @@ import { BookOpen, Activity, FileText, ArrowLeft, AlertTriangle, Clock, HeartPul
 import { ChildQuickActions } from '../components/children/ChildQuickActions';
 import { toast } from 'sonner';
 
-type TimelineType = 'DIARIO' | 'OBSERVACAO' | 'RDIC' | 'ALERTA';
+type TimelineType = 'DIARIO' | 'OBSERVACAO' | 'Desenvolvimento' | 'ALERTA';
 type TimelineFilter = 'TODOS' | TimelineType | 'ALERTAS';
 
 type TimelineEvent = {
@@ -123,12 +123,12 @@ function normalizeTimelineEvent(item: any): TimelineEvent | null {
     };
   }
 
-  if (type === 'RDIC') {
+  if (type === 'Desenvolvimento') {
     return {
       id: String(item.id ?? `${date}-rdic`),
-      type: 'RDIC',
+      type: 'Desenvolvimento',
       date,
-      title: item.title ?? 'RDIC',
+      title: item.title ?? 'Desenvolvimento',
       description: item.description ?? (item.status ? `Status: ${item.status}` : 'Relatório individual da criança'),
       status: item.status,
       source: item.source,
@@ -210,9 +210,9 @@ async function loadLegacyTimeline(childId: string): Promise<ChildSummary> {
     const periodo = item.periodoEnum ?? item.periodo ?? item.period ?? '';
     timeline.push({
       id: String(item.id ?? `${date}-rdic`),
-      type: 'RDIC',
+      type: 'Desenvolvimento',
       date,
-      title: periodo ? `RDIC ${periodo}` : 'RDIC',
+      title: periodo ? `Desenvolvimento ${periodo}` : 'Desenvolvimento',
       description: item.status ? `Status: ${item.status}` : 'Relatório individual da criança',
       status: item.status,
       source: 'RDIXInstancia',
@@ -242,7 +242,7 @@ async function loadLegacyTimeline(childId: string): Promise<ChildSummary> {
     if (!date) return;
     timeline.push({
       id: String(item.id ?? `${date}-plano`),
-      type: 'RDIC',
+      type: 'Desenvolvimento',
       date,
       title: item.title ?? item.titulo ?? 'Plano Pedagógico',
       description: item.description ?? item.descricao ?? (item.status ? `Status: ${item.status}` : 'Planejamento aprovado'),
@@ -312,7 +312,7 @@ async function loadLegacyTimeline(childId: string): Promise<ChildSummary> {
 /**
  * Timeline da criança.
  * Camada de leitura e diagnóstico visual sobre dados já existentes.
- * Não altera matriz, planejamento, diário, RDIC ou qualquer dado histórico.
+ * Não altera matriz, planejamento, diário, Desenvolvimento ou qualquer dado histórico.
  */
 export default function TimelineCriancaPage() {
   const { childId } = useParams<{ childId: string }>();
@@ -359,7 +359,7 @@ export default function TimelineCriancaPage() {
       total: events.length,
       diario: Number(apiMetrics.diary ?? events.filter((event) => event.type === 'DIARIO').length),
       observacoes: Number(apiMetrics.observations ?? events.filter((event) => event.type === 'OBSERVACAO').length),
-      rdic: Number(apiMetrics.rdic ?? events.filter((event) => event.type === 'RDIC').length),
+      rdic: Number(apiMetrics.rdic ?? events.filter((event) => event.type === 'Desenvolvimento').length),
       alertas: Number(apiMetrics.openAlerts ?? events.filter((event) => event.type === 'ALERTA' || Boolean(event.alert?.trim())).length),
       obsAlertas: Number(apiMetrics.observationsWithAlerts ?? events.filter((event) => Boolean(event.alert?.trim())).length),
       restricoes: Number(apiMetrics.dietaryRestrictions ?? 0),
@@ -405,7 +405,7 @@ export default function TimelineCriancaPage() {
             <Card className="border-slate-200"><CardContent className="p-3"><p className="text-xs text-gray-500">Total</p><p className="text-xl font-semibold text-gray-900">{metrics.total}</p></CardContent></Card>
             <Card className="border-indigo-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Diário</p><p className="text-xl font-semibold text-indigo-700">{metrics.diario}</p></CardContent></Card>
             <Card className="border-emerald-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Observações</p><p className="text-xl font-semibold text-emerald-700">{metrics.observacoes}</p></CardContent></Card>
-            <Card className="border-amber-100"><CardContent className="p-3"><p className="text-xs text-gray-500">RDIC</p><p className="text-xl font-semibold text-amber-700">{metrics.rdic}</p></CardContent></Card>
+            <Card className="border-amber-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Desenvolvimento</p><p className="text-xl font-semibold text-amber-700">{metrics.rdic}</p></CardContent></Card>
             <Card className="border-red-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Alertas</p><p className="text-xl font-semibold text-red-700">{metrics.alertas + metrics.obsAlertas}</p></CardContent></Card>
             <Card className="border-blue-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Presença 30d</p><p className="text-xl font-semibold text-blue-700">{metrics.presenca30 === null || metrics.presenca30 === undefined ? '—' : `${metrics.presenca30}%`}</p></CardContent></Card>
             <Card className="border-orange-100"><CardContent className="p-3"><p className="text-xs text-gray-500">Saúde/Nutrição</p><p className="text-xl font-semibold text-orange-700">{metrics.restricoes}</p></CardContent></Card>
@@ -434,7 +434,7 @@ export default function TimelineCriancaPage() {
               ['TODOS', 'Todos'],
               ['DIARIO', 'Diário'],
               ['OBSERVACAO', 'Observações'],
-              ['RDIC', 'RDIC'],
+              ['Desenvolvimento', 'Desenvolvimento'],
               ['ALERTAS', 'Alertas'],
             ] as Array<[TimelineFilter, string]>).map(([value, label]) => (
               <Button key={value} size="sm" variant={filter === value ? 'default' : 'outline'} onClick={() => setFilter(value)}>

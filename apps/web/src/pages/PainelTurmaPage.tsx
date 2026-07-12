@@ -113,7 +113,7 @@ export default function PainelTurmaPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             {icon:<Users className="h-5 w-5 mx-auto mb-1 text-indigo-400"/>,val:total,label:'Crianças na turma'},
-            {icon:<CheckCircle className="h-5 w-5 mx-auto mb-1 text-emerald-400"/>,val:aprovTotal,label:'RDICs aprovados (3T)'},
+            {icon:<CheckCircle className="h-5 w-5 mx-auto mb-1 text-emerald-400"/>,val:aprovTotal,label:'Relatórios aprovados (3T)'},
             {icon:<AlertTriangle className="h-5 w-5 mx-auto mb-1 text-red-400"/>,val:(health?.stats?.comAlergia??0)+(health?.stats?.comDieta??0),label:'Alertas alimentares'},
             {icon:<Activity className="h-5 w-5 mx-auto mb-1 text-blue-400"/>,val:eventos.length,label:'Observações (8 sem.)'},
           ].map((k,i)=>(

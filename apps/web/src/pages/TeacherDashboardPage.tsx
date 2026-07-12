@@ -150,7 +150,7 @@ const ACOES_RAPIDAS = [
   { id: 'diario', label: 'Diário da Turma', desc: 'Registrar o dia', icon: <BookOpen className="h-6 w-6" />, cor: 'bg-blue-500', rota: '/app/diario-calendario' },
   { id: 'planejamento', label: 'Planejamentos', desc: 'Planejar semana', icon: <Calendar className="h-6 w-6" />, cor: 'bg-purple-500', rota: '/app/planejamentos' },
   { id: 'sala', label: 'Sala de Aula Virtual', desc: 'Tarefas e desempenho', icon: <GraduationCap className="h-6 w-6" />, cor: 'bg-violet-500', rota: '/app/sala-de-aula-virtual' },
-  { id: 'rdic', label: 'RDIC por Criança', desc: 'Desenvolvimento individual', icon: <Brain className="h-6 w-6" />, cor: 'bg-indigo-500', rota: '/app/rdic-crianca' },
+  { id: 'rdic', label: 'Desenvolvimento por Criança', desc: 'Desenvolvimento individual', icon: <Brain className="h-6 w-6" />, cor: 'bg-indigo-500', rota: '/app/rdic-crianca' },
   { id: 'materiais', label: 'Materiais', desc: 'Solicitar recursos', icon: <ShoppingCart className="h-6 w-6" />, cor: 'bg-orange-500', rota: '/app/material-requests' },
   { id: 'fotos', label: 'Fotos da Turma', desc: 'Galeria e RDX', icon: <Camera className="h-6 w-6" />, cor: 'bg-pink-500', rota: '/app/rdx' },
   { id: 'relatorio', label: 'Relatórios', desc: 'Ver evolução', icon: <TrendingUp className="h-6 w-6" />, cor: 'bg-teal-500', rota: '/app/reports' },
@@ -221,7 +221,7 @@ export default function TeacherDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [fotoAmpliada, setFotoAmpliada] = useState<{ url: string; nome: string } | null>(null);
   const [abaAtiva, setAbaAtiva] = useState<'turma' | 'acoes' | 'indicadores' | 'ia' | 'rdic'>('turma');
-  // Aba RDIC da Turma
+  // Aba Desenvolvimento da Turma
   const [rdicsMap, setRdicsMap] = useState<Record<string, { count: number; ultimoStatus: string; ultimoPeriodo: string }>>({});
   const [loadingRdics, setLoadingRdics] = useState(false);
   const [entradaDiarioIA, setEntradaDiarioIA] = useState('');
@@ -316,7 +316,7 @@ export default function TeacherDashboardPage() {
     };
   }, []);
 
-  // Carregar RDICs da turma quando aba rdic é ativada
+  // Carregar Relatórios da turma quando aba rdic é ativada
   useEffect(() => {
     const lista = data?.alunos ?? [];
     if (abaAtiva === 'rdic' && lista.length > 0 && Object.keys(rdicsMap).length === 0) {
@@ -815,7 +815,7 @@ export default function TeacherDashboardPage() {
           <div className="flex gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1">
             {[
               { id: 'turma', label: 'Minha Turma', icon: <Users className="h-4 w-4" /> },
-              { id: 'rdic', label: 'RDIC', icon: <Brain className="h-4 w-4" /> },
+              { id: 'rdic', label: 'Desenvolvimento', icon: <Brain className="h-4 w-4" /> },
               { id: 'acoes', label: 'Ações Rápidas', icon: <Sparkles className="h-4 w-4" /> },
               { id: 'ia', label: 'IA Pedagógica', icon: <FileText className="h-4 w-4" /> },
               { id: 'indicadores', label: 'Progresso', icon: <TrendingUp className="h-4 w-4" /> },
@@ -923,12 +923,12 @@ export default function TeacherDashboardPage() {
             <RecadosWidget titulo="Recados da Coordenação" />
           )}
 
-          {/* ─── RDIC DA TURMA ─── */}
+          {/* ─── Desenvolvimento DA TURMA ─── */}
           {abaAtiva === 'rdic' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-bold text-gray-700">RDIC da Turma — Bimestre Atual</h2>
+                  <h2 className="text-base font-bold text-gray-700">Desenvolvimento da Turma — Bimestre Atual</h2>
                   <p className="text-xs text-gray-400 mt-0.5">Cobertura de Registros de Desenvolvimento Individual</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -944,12 +944,12 @@ export default function TeacherDashboardPage() {
                     onClick={() => navigate('/app/rdic-crianca')}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs"
                   >
-                    <Plus className="h-3 w-3 mr-1" /> Novo RDIC
+                    <Plus className="h-3 w-3 mr-1" /> Novo Desenvolvimento
                   </Button>
                 </div>
               </div>
 
-              {/* Tarefa 3.5 — Indicador de crianças com objetivos pendentes (sem RDIC no trimestre atual) */}
+              {/* Tarefa 3.5 — Indicador de crianças com objetivos pendentes (sem Desenvolvimento no trimestre atual) */}
               {!loadingRdics && alunos.length > 0 && (() => {
                 const trimestreAtual = Math.ceil((new Date().getMonth() + 1) / 4) || 1;
                 const semRdicTrimestre = alunos.filter(a => {
@@ -969,7 +969,7 @@ export default function TeacherDashboardPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-amber-800">
-                          {semRdicTrimestre.length} {semRdicTrimestre.length === 1 ? 'criança' : 'crianças'} sem RDIC no {trimestreAtual}º trimestre
+                          {semRdicTrimestre.length} {semRdicTrimestre.length === 1 ? 'criança' : 'crianças'} sem Desenvolvimento no {trimestreAtual}º trimestre
                         </p>
                         <p className="text-xs text-amber-600 mt-0.5">
                           {semRdicTrimestre.slice(0, 3).map(a => a.firstName).join(', ')}
@@ -1003,14 +1003,14 @@ export default function TeacherDashboardPage() {
                     />
                   </div>
                   <p className="text-xs text-indigo-500 mt-1">
-                    {loadingRdics ? 'Carregando...' : `${alunos.length > 0 ? Math.round((Object.values(rdicsMap).filter(r => r.count > 0).length / alunos.length) * 100) : 0}% das crianças com pelo menos 1 RDIC registrado`}
+                    {loadingRdics ? 'Carregando...' : `${alunos.length > 0 ? Math.round((Object.values(rdicsMap).filter(r => r.count > 0).length / alunos.length) * 100) : 0}% das crianças com pelo menos 1 Desenvolvimento registrado`}
                   </p>
                 </div>
               )}
 
               {/* Lista por criança */}
               {loadingRdics ? (
-                <div className="text-center py-8 text-gray-400 text-sm">Carregando RDICs...</div>
+                <div className="text-center py-8 text-gray-400 text-sm">Carregando Relatórios...</div>
               ) : (
                 <div className="space-y-2">
                   {alunos.map(aluno => {
@@ -1026,7 +1026,7 @@ export default function TeacherDashboardPage() {
                     const statusLabel = info.ultimoStatus === 'PUBLICADO' ? 'Publicado'
                       : info.ultimoStatus === 'REVISAO' ? 'Em Revisão'
                       : info.ultimoStatus === 'RASCUNHO' ? 'Rascunho'
-                      : 'Sem RDIC';
+                      : 'Sem Desenvolvimento';
                     return (
                       <button
                         key={aluno.id}
@@ -1094,7 +1094,7 @@ export default function TeacherDashboardPage() {
                   </div>
                   <div>
                     <p className="font-bold text-gray-900">Análise Pedagógica com IA</p>
-                    <p className="text-xs text-gray-500">Descreva o dia e a IA gera RDIC automaticamente</p>
+                    <p className="text-xs text-gray-500">Descreva o dia e a IA gera Desenvolvimento automaticamente</p>
                   </div>
                 </div>
                 <textarea
@@ -1122,7 +1122,7 @@ export default function TeacherDashboardPage() {
                         setRelatorioIA({
                           relatorio: `A turma demonstrou excelente engajamento nas atividades do dia. Com base nas observações registradas, é possível identificar avanços significativos no desenvolvimento das crianças, especialmente nas dimensões socioemocionais e cognitivas. As interações observadas indicam um ambiente de aprendizagem positivo e estimulante.`,
                           pontosFortess: ['Engajamento e participação ativa nas atividades', 'Interações sociais positivas entre as crianças', 'Demonstração de curiosidade e interesse em aprender'],
-                          sugestoes: ['Ampliar atividades de exploração sensorial', 'Oferecer mais momentos de brincadeira livre e simbólica', 'Registrar microgestos pedagógicos para enriquecer o RDIC'],
+                          sugestoes: ['Ampliar atividades de exploração sensorial', 'Oferecer mais momentos de brincadeira livre e simbólica', 'Registrar microgestos pedagógicos para enriquecer o Desenvolvimento'],
                         });
                       } finally { setAnalisandoIA(false); }
                     }}
@@ -1174,10 +1174,10 @@ export default function TeacherDashboardPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 text-sm" onClick={() => { navigate('/app/rdic-crianca'); toast.success('Acesse RDIC para salvar este relatório'); }}>
-                      <Download className="h-4 w-4 mr-2" /> Salvar como RDIC
+                    <Button variant="outline" className="flex-1 text-sm" onClick={() => { navigate('/app/rdic-crianca'); toast.success('Acesse Desenvolvimento para salvar este relatório'); }}>
+                      <Download className="h-4 w-4 mr-2" /> Salvar como Desenvolvimento
                     </Button>
-                    <Button variant="outline" className="flex-1 text-sm" onClick={() => { navigate('/app/rdic-crianca'); toast.success('Acesse RDIC para salvar o registro'); }}>
+                    <Button variant="outline" className="flex-1 text-sm" onClick={() => { navigate('/app/rdic-crianca'); toast.success('Acesse Desenvolvimento para salvar o registro'); }}>
                       <Send className="h-4 w-4 mr-2" /> Salvar como RIA
                     </Button>
                   </div>
@@ -1243,7 +1243,7 @@ export default function TeacherDashboardPage() {
                         <Brain className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">RDIC</p>
+                        <p className="font-semibold text-gray-800">Desenvolvimento</p>
                         <p className="text-xs text-gray-500">Registros de desenvolvimento</p>
                       </div>
                     </div>

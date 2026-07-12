@@ -70,7 +70,7 @@ const W_PROFESSOR: Widget[] = [
   },
   {
     id: 'rdic',
-    title: 'RDIC por Criança',
+    title: 'Desenvolvimento por Criança',
     description: 'Relatório de Desenvolvimento Individual da Criança.',
     icon: <Brain className="h-5 w-5" />,
     path: '/app/rdic-crianca',
@@ -139,8 +139,8 @@ const W_COORD_PEDAGOGICO: Widget[] = [
   },
   {
     id: 'rdic-coord',
-    title: 'RDIC — Revisão',
-    description: 'Revise e aprove os RDICs dos professores.',
+    title: 'Desenvolvimento — Revisão',
+    description: 'Revise e aprove os Relatórios dos professores.',
     icon: <Brain className="h-5 w-5" />,
     path: '/app/rdic-coord',
     accent: 'bg-amber-600',
@@ -277,7 +277,7 @@ const W_CENTRAL: Widget[] = [
   },
   {
     id: 'rdic-geral',
-    title: 'RDICs Publicados',
+    title: 'Relatórios Publicados',
     description: 'Relatórios de desenvolvimento publicados.',
     icon: <Brain className="h-5 w-5" />,
     path: '/app/rdic-geral',

@@ -655,7 +655,7 @@ function getExecucaoHint(statusExecucaoPlano: 'FEITO' | 'PARCIAL' | 'NAO_REALIZA
 }
 
 function getAvaliacaoIntro() {
-  return 'Faça a leitura pedagógica do dia e registre observações individuais breves por criança, sem escrever diretamente em RDIC.';
+  return 'Faça a leitura pedagógica do dia e registre observações individuais breves por criança, sem escrever diretamente em Desenvolvimento.';
 }
 
 function getAvaliacaoIndividualHelper() {
@@ -3383,7 +3383,7 @@ export default function DiarioBordoPage() {
                     </span>
                     <div>
                       <p className="text-sm font-bold text-fuchsia-900">Observações individuais</p>
-                      <p className="text-xs text-fuchsia-600">Clique em um comportamento e selecione as crianças. Alimenta o RDIC.</p>
+                      <p className="text-xs text-fuchsia-600">Clique em um comportamento e selecione as crianças. Alimenta o Desenvolvimento.</p>
                     </div>
                   </div>
                   {(['desempenho', 'comportamento', 'desenvolvimento'] as const).map(grupo => {
@@ -3666,7 +3666,7 @@ export default function DiarioBordoPage() {
                   {/* Nota informativa */}
                   <p className="text-[10px] text-indigo-400 text-center italic">
                     Estas observações foram geradas automaticamente a partir do plano de aula de hoje.
-                    Alimentam o RDIC e os relatórios de desenvolvimento.
+                    Alimentam o Desenvolvimento e os relatórios de desenvolvimento.
                   </p>
                 </div>
               )}
@@ -3711,7 +3711,7 @@ export default function DiarioBordoPage() {
                     </div>
                     <p className="text-xs text-indigo-700 pl-9">
                       Campo obrigatório. Gerado pela IA com base nos dados acima — revise e edite antes de salvar.
-                      Este texto alimenta o RIA e o RDIC.
+                      Este texto alimenta o RIA e o Desenvolvimento.
                     </p>
                   </div>
                   <button
@@ -3731,7 +3731,7 @@ export default function DiarioBordoPage() {
                   </button>
                 </div>
                 <Textarea
-                  placeholder="Clique em 'Gerar com IA' para criar a avaliação automaticamente, ou escreva diretamente aqui. Este campo será usado no RIA e RDIC."
+                  placeholder="Clique em 'Gerar com IA' para criar a avaliação automaticamente, ou escreva diretamente aqui. Este campo será usado no RIA e Desenvolvimento."
                   rows={6}
                   value={form.avaliacaoPlanoAula}
                   onChange={e => setForm(f => ({ ...f, avaliacaoPlanoAula: e.target.value }))}

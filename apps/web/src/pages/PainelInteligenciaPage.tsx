@@ -40,7 +40,7 @@ const TIPOS_ANALISE: Array<{ value: TipoAnalise; label: string; icon: React.Reac
     value: 'visao-geral-turma',
     label: 'Visão Geral da Turma',
     icon: <Users className="h-5 w-5 text-indigo-500" />,
-    desc: 'Completude RDIC, distribuição de status e actividade docente por trimestre.',
+    desc: 'Completude Desenvolvimento, distribuição de status e actividade docente por trimestre.',
   },
   {
     value: 'evolucao-pedagogica',
@@ -58,7 +58,7 @@ const TIPOS_ANALISE: Array<{ value: TipoAnalise; label: string; icon: React.Reac
     value: 'auditoria-docente',
     label: 'Auditoria de Execução Docente',
     icon: <Shield className="h-5 w-5 text-amber-500" />,
-    desc: 'Cobertura de observações, taxa de devolução de RDICs e actividade semanal do Diário.',
+    desc: 'Cobertura de observações, taxa de devolução de Relatórios e actividade semanal do Diário.',
   },
 ];
 
@@ -114,7 +114,7 @@ function PainelVisaoGeralTurma({ turmaId, turmaNome }: { turmaId: string; turmaN
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: 'Completude RDIC', desc: '3 trimestres · progresso geral', cor: 'indigo', icon: <TrendingUp className="h-5 w-5 text-indigo-400" /> },
+          { label: 'Completude Desenvolvimento', desc: '3 trimestres · progresso geral', cor: 'indigo', icon: <TrendingUp className="h-5 w-5 text-indigo-400" /> },
           { label: 'Status por Trimestre', desc: 'Aprovados / Em Revisão / Pendentes', cor: 'emerald', icon: <Activity className="h-5 w-5 text-emerald-400" /> },
           { label: 'Actividade Semanal', desc: 'Observações do Diário (8 semanas)', cor: 'blue', icon: <BookOpen className="h-5 w-5 text-blue-400" /> },
         ].map((c, i) => (
@@ -158,7 +158,7 @@ function PainelEvolucaoPedagogica({ criancaId, criancaNome }: { criancaId: strin
         </h3>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => navigate(`/app/crianca/${criancaId}/rdic-central`)} className="text-xs flex items-center gap-1">
-            Central RDIC
+            Central Desenvolvimento
           </Button>
           <Button size="sm" onClick={() => navigate(`/app/crianca/${criancaId}/painel-analitico`)} className="text-xs bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1">
             <Sparkles className="h-3 w-3" /> Painel Analítico
@@ -196,7 +196,7 @@ function PainelSaudeNutricao({ criancaId, criancaNome, turmaId }: { criancaId: s
         </h3>
         {criancaId && (
           <Button size="sm" variant="outline" onClick={() => navigate(`/app/crianca/${criancaId}/rdic-central`)} className="text-xs">
-            Central RDIC
+            Central Desenvolvimento
           </Button>
         )}
       </div>
@@ -220,7 +220,7 @@ function PainelSaudeNutricao({ criancaId, criancaNome, turmaId }: { criancaId: s
         <div className="bg-rose-50 border border-rose-100 rounded-xl p-4 flex items-start gap-3">
           <AlertCircle className="h-4 w-4 text-rose-500 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-rose-700">
-            Para ver os alertas activos e o plano nutricional completo desta criança, aceda à <strong>Central RDIC</strong>.
+            Para ver os alertas activos e o plano nutricional completo desta criança, aceda à <strong>Central Desenvolvimento</strong>.
           </p>
         </div>
       )}

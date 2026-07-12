@@ -797,7 +797,7 @@ export default function CoordenacaoPedagogicaPage() {
                 <p>2. Análise dos indicadores pedagógicos do mês</p>
                 <p>3. Revisão da Matriz Curricular 2026</p>
                 <p>4. Formação continuada — Campos de Experiência</p>
-                <p>5. Relatórios RDIC — discussão de casos</p>
+                <p>5. Relatórios Desenvolvimento — discussão de casos</p>
                 <p>6. Planejamento do próximo mês</p>
                 <p>7. Informe administrativo e financeiro</p>
                 <p>8. Encaminhamentos</p>
@@ -808,7 +808,7 @@ export default function CoordenacaoPedagogicaPage() {
                     ...f,
                     tipo: 'MENSAL_GERAL',
                     titulo: `Pauta Mensal — ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`,
-                    pautaItens: '1. Abertura e boas-vindas\n2. Análise dos indicadores pedagógicos do mês\n3. Revisão da Matriz Curricular 2026\n4. Formação continuada — Campos de Experiência\n5. Relatórios RDIC — discussão de casos\n6. Planejamento do próximo mês\n7. Informe administrativo e financeiro\n8. Encaminhamentos',
+                    pautaItens: '1. Abertura e boas-vindas\n2. Análise dos indicadores pedagógicos do mês\n3. Revisão da Matriz Curricular 2026\n4. Formação continuada — Campos de Experiência\n5. Relatórios Desenvolvimento — discussão de casos\n6. Planejamento do próximo mês\n7. Informe administrativo e financeiro\n8. Encaminhamentos',
                     participantes: 'Coordenação Geral, Coordenadoras de Unidade',
                   }));
                   setModalPauta(true);

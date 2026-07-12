@@ -74,7 +74,7 @@ export default function PainelAnaliticoCriancaPage() {
     if (!childId) return;
     setLoadingC(true);
     try { const r = await http.get(`/rdic/child/${childId}/central`); setCentral(r?.data ?? null); }
-    catch (e: any) { toast.error(e?.response?.data?.message ?? 'Erro ao carregar RDIC.'); }
+    catch (e: any) { toast.error(e?.response?.data?.message ?? 'Erro ao carregar Desenvolvimento.'); }
     finally { setLoadingC(false); }
   }, [childId]);
 
@@ -190,9 +190,9 @@ export default function PainelAnaliticoCriancaPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
             { icon:<Brain className="h-5 w-5 mx-auto mb-1 text-indigo-400"/>, val:`${resumo.pctGeral}%`, label:'Consolidado BNCC', sub:`${resumo.totalCons}/${resumo.totalInd}`, onClick: undefined },
-            { icon:<Award className="h-5 w-5 mx-auto mb-1 text-emerald-400"/>, val:central?.rdics?.length??0, label:'RDICs registados', sub:'', onClick: undefined },
+            { icon:<Award className="h-5 w-5 mx-auto mb-1 text-emerald-400"/>, val:central?.rdics?.length??0, label:'Relatórios registados', sub:'', onClick: undefined },
             { icon:<Activity className="h-5 w-5 mx-auto mb-1 text-blue-400"/>, val:totalEvt, label:'Observações (180d)', sub:aba!=='diario'?'Ver diário →':'', onClick: ()=>setAba('diario') },
-            { icon:<TrendingUp className="h-5 w-5 mx-auto mb-1 text-purple-400"/>, val:resumo.tend==='up'?'↑ Progresso':resumo.tend==='down'?'↓ Atenção':resumo.tend==='stable'?'→ Estável':'— Primeiro RDIC', label:'Tendência', sub:'', onClick: undefined },
+            { icon:<TrendingUp className="h-5 w-5 mx-auto mb-1 text-purple-400"/>, val:resumo.tend==='up'?'↑ Progresso':resumo.tend==='down'?'↓ Atenção':resumo.tend==='stable'?'→ Estável':'— Primeiro Desenvolvimento', label:'Tendência', sub:'', onClick: undefined },
             // Tarefa 2.2 — Frequência
             { icon:<ChevronRight className="h-5 w-5 mx-auto mb-1 text-sky-400"/>, val: frequencia?.pct !== null && frequencia?.pct !== undefined ? `${frequencia.pct}%` : '—', label:`Frequência (60d)`, sub: frequencia ? `${frequencia.presentes}/${frequencia.total} dias` : 'Carregando...', onClick: undefined },
             // Tarefa 2.2 — Restrições alimentares
@@ -222,8 +222,8 @@ export default function PainelAnaliticoCriancaPage() {
             {resumo.totalInd===0?(
               <Card><CardContent className="py-12 text-center">
                 <Brain className="h-10 w-10 mx-auto mb-3 text-gray-300"/>
-                <p className="text-sm text-gray-500">Nenhum RDIC com indicadores preenchidos.</p>
-                <Button size="sm" onClick={()=>navigate(`/app/rdic-crianca?childId=${childId}`)} className="mt-3 bg-indigo-600 text-white text-xs">Criar RDIC</Button>
+                <p className="text-sm text-gray-500">Nenhum Desenvolvimento com indicadores preenchidos.</p>
+                <Button size="sm" onClick={()=>navigate(`/app/rdic-crianca?childId=${childId}`)} className="mt-3 bg-indigo-600 text-white text-xs">Criar Desenvolvimento</Button>
               </CardContent></Card>
             ):(
               <>
@@ -277,7 +277,7 @@ export default function PainelAnaliticoCriancaPage() {
                   <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-blue-500"/>Evolução Trimestral</CardTitle></CardHeader>
                   <CardContent>
                     {central.rdics.length<2?(
-                      <div className="flex items-center justify-center h-20 text-gray-400 text-xs"><AlertCircle className="h-4 w-4 mr-2 opacity-50"/>Registe o 2º RDIC para ver a evolução.</div>
+                      <div className="flex items-center justify-center h-20 text-gray-400 text-xs"><AlertCircle className="h-4 w-4 mr-2 opacity-50"/>Registe o 2º Desenvolvimento para ver a evolução.</div>
                     ):(
                       <ResponsiveContainer width="100%" height={210}>
                         <BarChart data={evolData} margin={{top:5,right:10,bottom:5,left:-10}}>

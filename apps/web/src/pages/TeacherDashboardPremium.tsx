@@ -207,7 +207,7 @@ export default function TeacherDashboardPremium() {
                 </Button>
                 <Button onClick={() => navigate('/app/rdic-crianca')} className="bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white h-24 flex flex-col items-center justify-center space-y-2 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
                   <Users className="h-6 w-6" />
-                  <span className="text-sm">RDIC por Criança</span>
+                  <span className="text-sm">Desenvolvimento por Criança</span>
                 </Button>
                 <Button onClick={() => navigate('/app/plano-de-aula')} className="bg-gradient-to-r from-[#F59E0B] to-[#D97706] hover:from-[#D97706] hover:to-[#B45309] text-white h-24 flex flex-col items-center justify-center space-y-2 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   <Calendar className="h-6 w-6" />
@@ -215,7 +215,7 @@ export default function TeacherDashboardPremium() {
                 </Button>
                 <Button onClick={() => navigate('/app/rdic-ria')} className="bg-gradient-to-r from-[#A855F7] to-[#9333EA] hover:from-[#9333EA] hover:to-[#7E22CE] text-white h-24 flex flex-col items-center justify-center space-y-2 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
                   <Star className="h-6 w-6" />
-                  <span className="text-sm">RDIC / RIA</span>
+                  <span className="text-sm">Desenvolvimento / RIA</span>
                 </Button>
               </div>
             </CardContent>

@@ -47,7 +47,7 @@ import RdicCriancaPage from '../pages/RdicCriancaPage';
 import SalaDeAulaVirtualPage from '../pages/SalaDeAulaVirtualPage';
 import RdicCoordPage from '../pages/RdicCoordPage';
 import RdicGeralPage from '../pages/RdicGeralPage';
-// ─── Fases 1, 2 e 3 — Central RDIC, Painel Analítico e Painel da Turma ────────────────────
+// ─── Fases 1, 2 e 3 — Central Desenvolvimento, Painel Analítico e Painel da Turma ────────────────────
 import CentralRdicCriancaPage from '../pages/CentralRdicCriancaPage';
 import PainelAnaliticoCriancaPage from '../pages/PainelAnaliticoCriancaPage';
 import PainelTurmaPage from '../pages/PainelTurmaPage';
@@ -202,7 +202,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      // ─── RDIC por Criança (professor) ──────────────────────────────────────
+      // ─── Desenvolvimento por Criança (professor) ──────────────────────────────────────
       {
         path: 'rdic-crianca',
         element: (
@@ -212,7 +212,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      // ─── RDIC Coordenação Pedagógica da Unidade (revisão e aprovação) ────────
+      // ─── Desenvolvimento Coordenação Pedagógica da Unidade (revisão e aprovação) ────────
       {
         path: 'rdic-coord',
         element: (
@@ -222,7 +222,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      // ─── RDIC Coordenação Geral (somente leitura, apenas PUBLICADOS) ────────
+      // ─── Desenvolvimento Coordenação Geral (somente leitura, apenas PUBLICADOS) ────────
       {
         path: 'rdic-geral',
         element: (
@@ -232,7 +232,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      // ─── RDIC & RIA ────────────────────────────────────────────────────────
+      // ─── Desenvolvimento & RIA ────────────────────────────────────────────────────────
       {
         path: 'rdic-ria',
         element: (
@@ -242,7 +242,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      // ─── RDIC alias (/app/rdic → RdicCriancaPage) ─────────────────────────────────
+      // ─── Desenvolvimento alias (/app/rdic → RdicCriancaPage) ─────────────────────────────────
       {
         path: 'rdic',
         element: (

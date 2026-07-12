@@ -3,7 +3,7 @@
  * Perfil: STAFF_CENTRAL_PSICOLOGIA
  *
  * Dados reais via endpoints:
- *  - GET /rdic/geral                         — RDICs aprovados/publicados
+ *  - GET /rdic/geral                         — Relatórios aprovados/publicados
  *  - GET /development-observations           — Observações de desenvolvimento
  *  - GET /coordenacao/dashboard/geral        — Indicadores gerais da rede
  *  - GET /children                           — Alunos para busca
@@ -240,7 +240,7 @@ export default function DashboardPsicologoPage() {
     fill: OBS_CATEGORY[cat]?.color ?? '#6b7280',
   }));
 
-  // RDICs filtrados
+  // Relatórios filtrados
   const rdicsFiltrados = rdics.filter(r => {
     const matchStatus = filtroStatus === 'todos' || r.status === filtroStatus;
     const matchBusca  = !busca || r.child?.name?.toLowerCase().includes(busca.toLowerCase()) ||
@@ -255,7 +255,7 @@ export default function DashboardPsicologoPage() {
     return matchCat && matchBusca;
   });
 
-  // Distribuição de RDICs por unidade
+  // Distribuição de Relatórios por unidade
   const rdicsPorUnidade = Object.entries(
     rdics.reduce((acc, r) => {
       const nome = r.classroom?.unit?.name ?? 'Sem unidade';
@@ -267,7 +267,7 @@ export default function DashboardPsicologoPage() {
   // ─── Abas ────────────────────────────────────────────────────────────────
   const ABAS = [
     { id: 'visao',       label: 'Visão Geral',    icon: <Brain className="h-3.5 w-3.5" /> },
-    { id: 'rdics',       label: `RDICs${rdicsRevisao.length > 0 ? ` (${rdicsRevisao.length})` : ''}`, icon: <FileText className="h-3.5 w-3.5" /> },
+    { id: 'rdics',       label: `Relatórios${rdicsRevisao.length > 0 ? ` (${rdicsRevisao.length})` : ''}`, icon: <FileText className="h-3.5 w-3.5" /> },
     { id: 'observacoes', label: 'Observações',     icon: <ClipboardList className="h-3.5 w-3.5" /> },
     { id: 'alunos',      label: 'Alunos',          icon: <Users className="h-3.5 w-3.5" /> },
     { id: 'ocorrencias', label: 'Ocorrências',      icon: <TriangleAlert className="h-3.5 w-3.5" /> },
@@ -285,16 +285,16 @@ export default function DashboardPsicologoPage() {
           <span className="text-xs font-semibold text-purple-700">Atenção:</span>
           {rdicsRevisao.length > 0 && (
             <span className="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 border-blue-300">
-              <Bell className="h-3 w-3" />{rdicsRevisao.length} RDIC(s) em revisão
+              <Bell className="h-3 w-3" />{rdicsRevisao.length} Desenvolvimento(s) em revisão
             </span>
           )}
           {rdicsDevolvidos.length > 0 && (
             <span className="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-800 border-yellow-300">
-              <Bell className="h-3 w-3" />{rdicsDevolvidos.length} RDIC(s) devolvido(s)
+              <Bell className="h-3 w-3" />{rdicsDevolvidos.length} Desenvolvimento(s) devolvido(s)
             </span>
           )}
           <button onClick={() => setAbaAtiva('rdics')} className="ml-auto text-xs text-purple-600 underline">
-            Ver RDICs
+            Ver Relatórios
           </button>
         </div>
       )}
@@ -326,10 +326,10 @@ export default function DashboardPsicologoPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <KpiCard icon={<Users className="h-5 w-5" />} label="Total de alunos na rede"
                 value={fmt(ind?.totalAlunos)} tone="info" />
-              <KpiCard icon={<FileText className="h-5 w-5" />} label="RDICs aprovados/publicados"
+              <KpiCard icon={<FileText className="h-5 w-5" />} label="Relatórios aprovados/publicados"
                 value={fmt(rdicsAprovados.length)} tone="success"
                 onClick={() => setAbaAtiva('rdics')} />
-              <KpiCard icon={<Clock className="h-5 w-5" />} label="RDICs em revisão"
+              <KpiCard icon={<Clock className="h-5 w-5" />} label="Relatórios em revisão"
                 value={fmt(rdicsRevisao.length)}
                 tone={rdicsRevisao.length > 0 ? 'warning' : 'success'}
                 onClick={() => setAbaAtiva('rdics')} />
@@ -377,8 +377,8 @@ export default function DashboardPsicologoPage() {
                 )}
               </SectionCard>
 
-              {/* RDICs por unidade */}
-              <SectionCard title="RDICs por Unidade" icon={<Building2 className="h-4 w-4 text-blue-500" />}>
+              {/* Relatórios por unidade */}
+              <SectionCard title="Relatórios por Unidade" icon={<Building2 className="h-4 w-4 text-blue-500" />}>
                 {rdicsPorUnidade.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={rdicsPorUnidade} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
@@ -386,11 +386,11 @@ export default function DashboardPsicologoPage() {
                       <XAxis dataKey="nome" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 11 }} />
                       <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                      <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="RDICs" />
+                      <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Relatórios" />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-xs text-gray-400 text-center py-8">Sem RDICs registrados</p>
+                  <p className="text-xs text-gray-400 text-center py-8">Sem Relatórios registrados</p>
                 )}
               </SectionCard>
             </div>
@@ -399,7 +399,7 @@ export default function DashboardPsicologoPage() {
           {/* Atalhos */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Ver RDICs',        icon: <FileText className="h-5 w-5" />,    onClick: () => setAbaAtiva('rdics') },
+              { label: 'Ver Relatórios',        icon: <FileText className="h-5 w-5" />,    onClick: () => setAbaAtiva('rdics') },
               { label: 'Observações',      icon: <ClipboardList className="h-5 w-5" />, onClick: () => setAbaAtiva('observacoes') },
               { label: 'Análises Centrais', icon: <TrendingUp className="h-5 w-5" />,  onClick: () => navigate('/app/central') },
               { label: 'Relatórios',       icon: <BookOpen className="h-5 w-5" />,     onClick: () => navigate('/app/reports') },
@@ -415,7 +415,7 @@ export default function DashboardPsicologoPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          ABA: RDICs
+          ABA: Relatórios
       ══════════════════════════════════════════════════════════════════ */}
       {abaAtiva === 'rdics' && (
         <div className="space-y-4">
@@ -449,7 +449,7 @@ export default function DashboardPsicologoPage() {
           ) : rdicsFiltrados.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-2xl">
               <FileText className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Nenhum RDIC encontrado</p>
+              <p className="text-sm text-gray-400">Nenhum Desenvolvimento encontrado</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -477,7 +477,7 @@ export default function DashboardPsicologoPage() {
                       <button
                         onClick={() => navigate(`/app/rdic-geral`)}
                         className="p-1.5 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all"
-                        title="Ver RDIC"
+                        title="Ver Desenvolvimento"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -575,7 +575,7 @@ export default function DashboardPsicologoPage() {
       {abaAtiva === 'alunos' && (
         <div className="space-y-4">
           <p className="text-sm text-gray-500">
-            Para visualizar o perfil completo de desenvolvimento de um aluno, acesse as Análises Centrais ou os RDICs Publicados.
+            Para visualizar o perfil completo de desenvolvimento de um aluno, acesse as Análises Centrais ou os Relatórios Publicados.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -603,7 +603,7 @@ export default function DashboardPsicologoPage() {
               <div className="space-y-2">
                 {[
                   { label: 'Desenvolvimento Infantil', path: '/app/desenvolvimento-infantil', desc: 'Observações por unidade, turma e criança' },
-                  { label: 'RDICs Publicados',     path: '/app/rdic-geral',  desc: 'Relatórios de desenvolvimento individuais' },
+                  { label: 'Relatórios Publicados',     path: '/app/rdic-geral',  desc: 'Relatórios de desenvolvimento individuais' },
                   { label: 'Análises Centrais',    path: '/app/central',     desc: 'Indicadores e gráficos da rede' },
                   { label: 'Relatórios',           path: '/app/reports',     desc: 'Exportar dados e relatórios' },
                   { label: 'Coordenação Geral',    path: '/app/coordenacao-geral', desc: 'Visão geral de todas as unidades' },
