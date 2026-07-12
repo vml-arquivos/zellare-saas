@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zelare.casadf.com.br/sitemap.xml

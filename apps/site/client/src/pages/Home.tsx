@@ -17,6 +17,7 @@ import { Link } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import SchemaOrg from '@/components/SchemaOrg';
 
 const CHAIN = [
   { label: 'Currículo', detail: 'BNCC, Reggio, Montessori — ou o seu próprio', icon: BookOpen },
@@ -142,6 +143,8 @@ export default function Home() {
         description="A plataforma que conecta gestão escolar, pedagogia, cuidado, corpo docente e família em um só lugar. Currículo plugável — adapta-se à sua instituição, pública ou privada."
         keywords="Zelare, gestão escolar, plataforma pedagógica, software para creche, planejamento pedagógico, diário de bordo, BNCC"
       />
+      <SchemaOrg type="Organization" />
+      <SchemaOrg type="SoftwareApplication" />
 
       <div className="min-h-screen flex flex-col bg-white">
         <Header />

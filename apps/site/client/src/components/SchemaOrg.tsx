@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 interface SchemaOrgProps {
-  type?: 'Organization' | 'Article' | 'WebPage';
+  type?: 'Organization' | 'SoftwareApplication' | 'Article' | 'WebPage';
   data?: Record<string, any>;
 }
 
@@ -13,32 +13,30 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
       if (type === 'Organization') {
         return {
           '@context': 'https://schema.org',
-          '@type': 'NGO',
-          name: 'Zelare - Associação Beneficente Coração de Cristo',
-          alternateName: 'Zelare',
+          '@type': 'Organization',
+          name: 'Zelare',
+          alternateName: 'Zelare — Cuidado, pedagogia e gestão inteligente',
           url: baseUrl,
           logo: `${baseUrl}/images/zelare-logo-square.png`,
-          description: 'Organização sem fins lucrativos dedicada à educação infantil de excelência no Distrito Federal',
-          foundingDate: '2009',
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'Avenida Recanto das Emas, Quadra 301, Lote 26',
-            addressLocality: 'Recanto das Emas',
-            addressRegion: 'DF',
-            postalCode: '72620214',
-            addressCountry: 'BR',
+          description: 'Plataforma de gestão escolar, pedagógica e de cuidado para instituições de educação infantil, públicas e privadas.',
+          ...data,
+        };
+      }
+
+      if (type === 'SoftwareApplication') {
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'Zelare',
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          description: 'Plataforma que conecta gestão escolar, pedagogia, cuidado, corpo docente e família para instituições de educação infantil.',
+          offers: {
+            '@type': 'AggregateOffer',
+            priceCurrency: 'BRL',
+            lowPrice: '0',
+            offerCount: '3',
           },
-          contactPoint: {
-            '@type': 'ContactPoint',
-            telephone: '+55-61-3575-4125',
-            contactType: 'customer service',
-            areaServed: 'BR',
-            availableLanguage: 'Portuguese',
-          },
-          sameAs: [
-            'https://www.facebook.com/zelare',
-            'https://www.instagram.com/zelare',
-          ],
           ...data,
         };
       }
@@ -83,21 +81,24 @@ export default function SchemaOrg({ type = 'Organization', data = {} }: SchemaOr
     };
 
     const schemaData = getSchemaData();
-    
-    // Remove existing schema script if any
-    const existingScript = document.querySelector('script[type="application/ld+json"]');
+    const markerAttr = `schema-${type}`;
+
+    // Remove só o script deste MESMO tipo, se já existir — permite várias
+    // instâncias (Organization + SoftwareApplication, por exemplo) juntas
+    // na mesma página, sem uma apagar a outra.
+    const existingScript = document.querySelector(`script[data-${markerAttr}]`);
     if (existingScript) {
       existingScript.remove();
     }
 
-    // Add new schema script
     const script = document.createElement('script');
     script.type = 'application/ld+json';
+    script.setAttribute(`data-${markerAttr}`, 'true');
     script.text = JSON.stringify(schemaData);
     document.head.appendChild(script);
 
     return () => {
-      const scriptToRemove = document.querySelector('script[type="application/ld+json"]');
+      const scriptToRemove = document.querySelector(`script[data-${markerAttr}]`);
       if (scriptToRemove) {
         scriptToRemove.remove();
       }

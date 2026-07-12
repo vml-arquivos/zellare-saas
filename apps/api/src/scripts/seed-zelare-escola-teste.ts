@@ -163,7 +163,9 @@ async function main() {
 
   let seq = 1;
   for (const def of userDefs) {
-    const email = `${semAcento(def.firstName)}@zelare.com.br`;
+    // DEVELOPER sempre usa "dev@zelare.com.br" — fixo, memorável, não muda.
+    // Os demais papéis seguem o padrão primeironome@zelare.com.br.
+    const email = def.roleType === 'DEVELOPER' ? 'dev@zelare.com.br' : `${semAcento(def.firstName)}@zelare.com.br`;
     const user = await prisma.user.upsert({
       where: { email },
       update: {},
@@ -333,7 +335,10 @@ async function main() {
 
   console.log('\n🎉 Instituição teste COMPLETA do Zelare criada com sucesso!\n');
   console.log('📋 LOGINS (senha para todos: ' + SENHA_PADRAO + ')');
-  userDefs.forEach((u) => console.log(`   - ${semAcento(u.firstName)}@zelare.com.br  [${u.roleType}]`));
+  userDefs.forEach((u) => {
+    const email = u.roleType === 'DEVELOPER' ? 'dev@zelare.com.br' : `${semAcento(u.firstName)}@zelare.com.br`;
+    console.log(`   - ${email}  [${u.roleType}]`);
+  });
   console.log('\n📦 IDs para referência:');
   console.log('   mantenedoraId:', MANTENEDORA_ID, '| unitId:', UNIT_ID, '| frameworkId:', FRAMEWORK_ID);
   console.log(`   ${totalCriancas} crianças cadastradas, 4 por turma, com dados completos.`);
