@@ -23,6 +23,7 @@ const mockPrisma = {
   curriculumMatrix: {
     findUnique: jest.fn(),
     findFirst: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
   },
   curriculumMatrixEntry: {
@@ -332,6 +333,58 @@ describe('CurriculumImportService', () => {
           unprivilegedUser,
         ),
       ).rejects.toThrow(/Apenas Mantenedora/);
+    });
+  });
+
+  // ── 6. CSV robusto e preview somente leitura ─────────────────────────────────
+  describe('CSV robusto', () => {
+    it('deve aceitar separador ponto e vírgula e vírgulas dentro de campos entre aspas', () => {
+      const parseFn = (service as any).parseCsvEntries.bind(service);
+      const result = parseFn(
+        Buffer.from([
+          'data;campo_experiencia;objetivo_bncc;objetivo_curriculo',
+          '2026-02-02;"O eu, o outro e o nós";"Objetivo, com vírgula";Currículo da criança',
+        ].join('\n')),
+        'EI02',
+      );
+
+      expect(result.delimiter).toBe(';');
+      expect(result.entries).toHaveLength(1);
+      expect(result.entries[0].objetivoBNCC).toBe('Objetivo, com vírgula');
+      expect(result.entries[0].campoDeExperiencia).toBe(CampoDeExperiencia.O_EU_O_OUTRO_E_O_NOS);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('deve rejeitar datas impossíveis e não gerar entries inválidas', () => {
+      const parseFn = (service as any).parseCsvEntries.bind(service);
+      const result = parseFn(
+        Buffer.from([
+          'data,campo_experiencia,objetivo_bncc,objetivo_curriculo',
+          '2026-02-30,O_EU_O_OUTRO_E_O_NOS,Objetivo,Currículo',
+        ].join('\n')),
+        'EI02',
+      );
+
+      expect(result.entries).toHaveLength(0);
+      expect(result.rows[0].status).toBe('ERROR');
+      expect(result.errors.join(' ')).toMatch(/data inválida/);
+    });
+
+    it('deve gerar preview sem criar matriz ou entries', async () => {
+      (mockPrisma.curriculumMatrix.findFirst as jest.Mock).mockResolvedValue(null);
+      const result = await service.previewCsv(
+        Buffer.from([
+          'data,campo_experiencia,objetivo_bncc,objetivo_curriculo',
+          '2026-02-02,O_EU_O_OUTRO_E_O_NOS,Objetivo,Currículo',
+        ].join('\n')),
+        { mantenedoraId: 'mant-001', name: 'Matriz 2026', year: 2026, segment: 'EI02', version: 1 },
+        mockUser,
+      );
+
+      expect(result.validRows).toBe(1);
+      expect(result.preview[0].action).toBe('INSERT');
+      expect(mockPrisma.curriculumMatrix.create).not.toHaveBeenCalled();
+      expect(mockPrisma.curriculumMatrixEntry.create).not.toHaveBeenCalled();
     });
   });
 });

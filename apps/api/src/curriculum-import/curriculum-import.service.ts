@@ -14,7 +14,7 @@ import {
 } from './curriculum-pdf-parser.service';
 import { ImportCurriculumDto, ImportMatrixDto, ImportMode } from './dto/import-curriculum.dto';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
-import { RoleLevel, AuditLogAction, AuditLogEntity } from '@prisma/client';
+import { CampoDeExperiencia, RoleLevel, AuditLogAction, AuditLogEntity } from '@prisma/client';
 import { getPedagogicalDay } from '../common/utils/date.utils';
 
 /**
@@ -30,6 +30,30 @@ export interface ImportResult {
   preview?: any[];
   errors: string[];
 }
+
+export interface CsvPreviewRow {
+  line: number;
+  status: 'VALID' | 'ERROR';
+  action?: 'INSERT' | 'UPDATE' | 'UNCHANGED';
+  date?: string;
+  campoDeExperiencia?: string;
+  objetivoBNCC?: string;
+  objetivoCurriculo?: string;
+  errors: string[];
+}
+
+export interface CsvPreviewResult {
+  matrixId?: string;
+  delimiter: ',' | ';';
+  headers: string[];
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  errors: string[];
+  preview: CsvPreviewRow[];
+}
+
+type ParsedCsvEntry = ParsedMatrixEntry & { line: number; dateKey: string };
 
 @Injectable()
 export class CurriculumImportService {
@@ -127,193 +151,333 @@ export class CurriculumImportService {
   // ─── Tarefa 3.3 — Importação via CSV ────────────────────────────────────────
 
   /**
-   * Importa uma matriz curricular a partir de um CSV em memória (Buffer).
-   *
-   * Colunas esperadas (case-insensitive, separador vírgula):
-   *   data (YYYY-MM-DD), campo_experiencia, objetivo_bncc, codigo_bncc,
-   *   objetivo_curriculo, intencionalidade (opcional), exemplo_atividade (opcional)
-   *
-   * Cria a CurriculumMatrix se não existir, depois faz upsert das entries.
-   * Retorna relatório: { importados, erros, matrixId }
+   * Valida o CSV e calcula o impacto da importação sem criar matriz ou entry.
+   * O endpoint é deliberadamente somente leitura para permitir aprovação humana.
+   */
+  async previewCsv(
+    csvBuffer: Buffer,
+    params: { mantenedoraId: string; name: string; year: number; segment: string; version: number },
+    user: JwtPayload,
+  ): Promise<CsvPreviewResult> {
+    this.validatePermission(user);
+    this.validateMantenedoraScope(params.mantenedoraId, user);
+    this.validateCsvParams(params);
+
+    const parsed = this.parseCsvEntries(csvBuffer, params.segment);
+    const existingMatrix = await this.prisma.curriculumMatrix.findFirst({
+      where: {
+        mantenedoraId: params.mantenedoraId,
+        year: params.year,
+        segment: params.segment,
+        version: params.version,
+      },
+    });
+
+    const preview = parsed.rows.map((row) => ({ ...row }));
+    if (existingMatrix) {
+      for (const entry of parsed.entries.slice(0, 30)) {
+        const row = preview.find((item) => item.line === entry.line);
+        if (!row) continue;
+        const existing = await this.findEntryByPedagogicalDay(existingMatrix.id, entry.date);
+        row.action = existing
+          ? (this.hasChanges(existing, entry) ? 'UPDATE' : 'UNCHANGED')
+          : 'INSERT';
+      }
+    } else {
+      for (const entry of parsed.entries.slice(0, 30)) {
+        const row = preview.find((item) => item.line === entry.line);
+        if (row) row.action = 'INSERT';
+      }
+    }
+
+    return {
+      matrixId: existingMatrix?.id,
+      delimiter: parsed.delimiter,
+      headers: parsed.headers,
+      totalRows: parsed.totalRows,
+      validRows: parsed.entries.length,
+      invalidRows: parsed.rows.filter((row) => row.status === 'ERROR').length,
+      errors: parsed.errors,
+      preview: preview.slice(0, 30),
+    };
+  }
+
+  /**
+   * Importa uma matriz curricular a partir de CSV. O parser é compartilhado
+   * com o preview para garantir que a aprovação humana veja exatamente o que
+   * será aplicado. A criação da matriz ocorre somente depois da validação.
    */
   async importCsv(
     csvBuffer: Buffer,
-    params: {
-      mantenedoraId: string;
-      name: string;
-      year: number;
-      segment: string;
-      version: number;
-    },
+    params: { mantenedoraId: string; name: string; year: number; segment: string; version: number },
     user: JwtPayload,
-  ): Promise<{ matrixId: string; importados: number; erros: string[] }> {
+  ): Promise<{
+    matrixId: string;
+    importados: number;
+    inseridos: number;
+    atualizados: number;
+    semAlteracao: number;
+    totalLinhas: number;
+    erros: string[];
+  }> {
     this.validatePermission(user);
+    this.validateMantenedoraScope(params.mantenedoraId, user);
+    this.validateCsvParams(params);
 
-    const { mantenedoraId, name, year, segment, version } = params;
-
-    // Parse CSV em memória
-    const text = csvBuffer.toString('utf-8');
-    const lines = text.split(/\r?\n/).filter((l) => l.trim());
-    if (lines.length < 2) {
-      throw new BadRequestException('CSV vazio ou sem linhas de dados');
-    }
-
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/^"|"$/g, ''));
-
-    // Validar colunas obrigatórias
-    const obrigatorias = ['data', 'campo_experiencia', 'objetivo_bncc', 'objetivo_curriculo'];
-    const faltando = obrigatorias.filter((c) => !headers.includes(c));
-    if (faltando.length > 0) {
+    const parsed = this.parseCsvEntries(csvBuffer, params.segment);
+    if (parsed.entries.length === 0) {
       throw new BadRequestException(
-        `Colunas obrigatórias ausentes no CSV: ${faltando.join(', ')}`,
+        parsed.errors.length > 0
+          ? `Nenhuma linha válida para importar. ${parsed.errors.slice(0, 5).join(' | ')}`
+          : 'CSV vazio ou sem linhas de dados',
       );
     }
 
-    // Mapeamento de campo_experiencia string → enum
-    const CAMPO_MAP: Record<string, string> = {
-      'o eu o outro e o nos': 'O_EU_O_OUTRO_E_O_NOS',
-      'corpo gestos e movimentos': 'CORPO_GESTOS_E_MOVIMENTOS',
-      'tracos sons cores e formas': 'TRACOS_SONS_CORES_E_FORMAS',
-      'escuta fala pensamento e imaginacao': 'ESCUTA_FALA_PENSAMENTO_E_IMAGINACAO',
-      'espacos tempos quantidades relacoes e transformacoes':
-        'ESPACOS_TEMPOS_QUANTIDADES_RELACOES_E_TRANSFORMACOES',
-      'eu outro nos': 'O_EU_O_OUTRO_E_O_NOS',
-      'corpo gestos': 'CORPO_GESTOS_E_MOVIMENTOS',
-      'tracos sons': 'TRACOS_SONS_CORES_E_FORMAS',
-      'escuta fala': 'ESCUTA_FALA_PENSAMENTO_E_IMAGINACAO',
-      'espacos tempos': 'ESPACOS_TEMPOS_QUANTIDADES_RELACOES_E_TRANSFORMACOES',
-    };
-
-    const normalizarCampo = (raw: string): string | null => {
-      const key = raw
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z ]/g, '')
-        .trim();
-      if (CAMPO_MAP[key]) return CAMPO_MAP[key];
-      for (const [k, v] of Object.entries(CAMPO_MAP)) {
-        if (key.includes(k) || k.includes(key)) return v;
-      }
-      const enumValues = [
-        'O_EU_O_OUTRO_E_O_NOS',
-        'CORPO_GESTOS_E_MOVIMENTOS',
-        'TRACOS_SONS_CORES_E_FORMAS',
-        'ESCUTA_FALA_PENSAMENTO_E_IMAGINACAO',
-        'ESPACOS_TEMPOS_QUANTIDADES_RELACOES_E_TRANSFORMACOES',
-      ];
-      const upper = raw.toUpperCase().replace(/[^A-Z_]/g, '');
-      if (enumValues.includes(upper)) return upper;
-      return null;
-    };
-
-    // Criar ou localizar a CurriculumMatrix
     let matrix = await this.prisma.curriculumMatrix.findFirst({
-      where: { mantenedoraId, year, segment, version },
+      where: {
+        mantenedoraId: params.mantenedoraId,
+        year: params.year,
+        segment: params.segment,
+        version: params.version,
+      },
     });
 
     if (!matrix) {
       matrix = await this.prisma.curriculumMatrix.create({
         data: {
-          mantenedoraId,
-          name,
-          year,
-          segment,
-          version,
+          mantenedoraId: params.mantenedoraId,
+          name: params.name.trim(),
+          year: params.year,
+          segment: params.segment,
+          version: params.version,
           isActive: true,
           createdBy: user.sub,
         },
       });
     }
 
-    let importados = 0;
-    const erros: string[] = [];
+    const result = await this.applyUpsert(matrix, parsed.entries, false, user);
+    await this.auditService.log({
+      action: AuditLogAction.IMPORT,
+      entity: AuditLogEntity.CURRICULUM_MATRIX,
+      entityId: matrix.id,
+      userId: user.sub,
+      mantenedoraId: matrix.mantenedoraId,
+      unitId: undefined,
+      changes: {
+        source: 'CSV',
+        totalRows: parsed.totalRows,
+        validRows: parsed.entries.length,
+        invalidRows: parsed.errors.length,
+        inserted: result.inserts,
+        updated: result.updates,
+        unchanged: result.unchanged,
+        delimiter: parsed.delimiter,
+      },
+    });
+    await this.matrixCacheInvalidation.bump(params.mantenedoraId);
 
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
-      const row: Record<string, string> = {};
-      headers.forEach((h, idx) => { row[h] = cols[idx] ?? ''; });
+    return {
+      matrixId: matrix.id,
+      importados: parsed.entries.length,
+      inseridos: result.inserts,
+      atualizados: result.updates,
+      semAlteracao: result.unchanged,
+      totalLinhas: parsed.totalRows,
+      erros: parsed.errors,
+    };
+  }
 
-      const dataStr = row['data'];
-      const campoRaw = row['campo_experiencia'];
-      const objetivoBNCC = row['objetivo_bncc'];
-      const objetivoCurriculo = row['objetivo_curriculo'];
+  private validateCsvParams(params: { mantenedoraId: string; name: string; year: number; segment: string; version: number }) {
+    if (!params.mantenedoraId?.trim()) throw new BadRequestException('mantenedoraId é obrigatório');
+    if (!params.name?.trim()) throw new BadRequestException('Nome da matriz é obrigatório');
+    if (!['EI01', 'EI02', 'EI03'].includes(params.segment)) throw new BadRequestException('Segmento inválido. Use EI01, EI02 ou EI03.');
+    if (!Number.isInteger(params.year) || params.year < 2000 || params.year > 2100) throw new BadRequestException('Ano letivo inválido.');
+    if (!Number.isInteger(params.version) || params.version < 1) throw new BadRequestException('Versão inválida.');
+  }
 
-      if (!dataStr || !campoRaw || !objetivoBNCC || !objetivoCurriculo) {
-        erros.push(`Linha ${i + 1}: campos obrigatórios ausentes`);
-        continue;
-      }
+  private validateMantenedoraScope(mantenedoraId: string, user: JwtPayload) {
+    const isDeveloper = user.roles.some((role) => role.level === RoleLevel.DEVELOPER);
+    if (!isDeveloper && (!user.mantenedoraId || user.mantenedoraId !== mantenedoraId)) {
+      throw new ForbiddenException('Você não tem permissão para importar dados de outra mantenedora.');
+    }
+  }
 
-      // Validar data
-      const dateObj = new Date(`${dataStr}T12:00:00-03:00`);
-      if (isNaN(dateObj.getTime())) {
-        erros.push(`Linha ${i + 1}: data inválida "${dataStr}"`);
-        continue;
-      }
+  private parseCsvEntries(csvBuffer: Buffer, segment: string): {
+    delimiter: ',' | ';';
+    headers: string[];
+    totalRows: number;
+    entries: ParsedCsvEntry[];
+    rows: CsvPreviewRow[];
+    errors: string[];
+  } {
+    const { records, delimiter, malformed } = this.parseCsvRecords(csvBuffer.toString('utf-8'));
+    if (records.length < 2) throw new BadRequestException('CSV vazio ou sem linhas de dados');
 
-      // Mapear campo de experiência
-      const campoEnum = normalizarCampo(campoRaw);
-      if (!campoEnum) {
-        erros.push(`Linha ${i + 1}: campo_experiencia não reconhecido "${campoRaw}"`);
-        continue;
-      }
+    const headers = records[0].cells.map((header) => this.normalizeCsvHeader(header));
+    const required = ['data', 'campo_experiencia', 'objetivo_bncc', 'objetivo_curriculo'];
+    const missing = required.filter((header) => !headers.includes(header));
+    if (missing.length > 0) throw new BadRequestException(`Colunas obrigatórias ausentes no CSV: ${missing.join(', ')}`);
 
-      // Calcular weekOfYear e dayOfWeek
-      const startOfYear = new Date(dateObj.getFullYear(), 0, 1);
-      const weekOfYear = Math.ceil(
-        ((dateObj.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7,
-      );
-      const dayOfWeek = dateObj.getDay() === 0 ? 7 : dateObj.getDay();
+    const indexes = new Map(headers.map((header, index) => [header, index]));
+    const errors = [...malformed];
+    const rows: CsvPreviewRow[] = [];
+    const entries: ParsedCsvEntry[] = [];
+    const seenDates = new Set<string>();
 
-      try {
-        const existing = await this.prisma.curriculumMatrixEntry.findFirst({
-          where: {
-            matrixId: matrix.id,
-            date: {
-              gte: new Date(`${dataStr}T00:00:00-03:00`),
-              lte: new Date(`${dataStr}T23:59:59-03:00`),
-            },
-          },
-        });
+    for (const record of records.slice(1)) {
+      const rowErrors: string[] = [];
+      const value = (names: string[]) => {
+        const index = names.map((name) => indexes.get(name)).find((item) => item !== undefined);
+        return index === undefined ? '' : (record.cells[index] ?? '').trim();
+      };
+      const dataStr = value(['data', 'date']);
+      const campoRaw = value(['campo_experiencia', 'campo_de_experiencia']);
+      const objetivoBNCC = value(['objetivo_bncc', 'objetivo_bncc_texto']);
+      const objetivoCurriculo = value(['objetivo_curriculo', 'objetivo_do_curriculo']);
+      const codigoBNCC = value(['codigo_bncc', 'codigo_bncc_code']) || undefined;
+      const intencionalidade = value(['intencionalidade']) || undefined;
+      const exemploAtividade = value(['exemplo_atividade', 'atividade']) || undefined;
 
-        if (existing) {
-          await this.prisma.curriculumMatrixEntry.update({
-            where: { id: existing.id },
-            data: {
-              campoDeExperiencia: campoEnum as any,
-              objetivoBNCC,
-              objetivoBNCCCode: row['codigo_bncc'] || null,
-              objetivoCurriculo,
-              intencionalidade: row['intencionalidade'] || null,
-              exemploAtividade: row['exemplo_atividade'] || null,
-            },
-          });
-        } else {
-          await this.prisma.curriculumMatrixEntry.create({
-            data: {
-              matrixId: matrix.id,
-              date: dateObj,
-              weekOfYear,
-              dayOfWeek,
-              campoDeExperiencia: campoEnum as any,
-              objetivoBNCC,
-              objetivoBNCCCode: row['codigo_bncc'] || null,
-              objetivoCurriculo,
-              intencionalidade: row['intencionalidade'] || null,
-              exemploAtividade: row['exemplo_atividade'] || null,
-            },
-          });
+      if (!dataStr) rowErrors.push('data é obrigatória');
+      if (!campoRaw) rowErrors.push('campo_experiencia é obrigatório');
+      if (!objetivoBNCC) rowErrors.push('objetivo_bncc é obrigatório');
+      if (!objetivoCurriculo) rowErrors.push('objetivo_curriculo é obrigatório');
+
+      let date: Date | undefined;
+      let dateKey: string | undefined;
+      if (dataStr) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dataStr);
+        if (!match) rowErrors.push(`data deve seguir YYYY-MM-DD (recebido: ${dataStr})`);
+        else {
+          const [, year, month, day] = match;
+          const check = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+          if (check.getUTCFullYear() !== Number(year) || check.getUTCMonth() !== Number(month) - 1 || check.getUTCDate() !== Number(day)) {
+            rowErrors.push(`data inválida: ${dataStr}`);
+          } else {
+            dateKey = dataStr;
+            date = new Date(`${dataStr}T12:00:00-03:00`);
+            if (seenDates.has(dateKey)) rowErrors.push(`data duplicada no mesmo arquivo: ${dataStr}`);
+            seenDates.add(dateKey);
+          }
         }
-        importados++;
-      } catch (err: any) {
-        erros.push(`Linha ${i + 1}: ${err?.message ?? 'erro desconhecido'}`);
+      }
+
+      const campo = campoRaw ? this.normalizeCsvCampo(campoRaw, codigoBNCC) : null;
+      if (campoRaw && !campo) rowErrors.push(`campo_experiencia não reconhecido: ${campoRaw}`);
+      if (codigoBNCC && codigoBNCC.length > 40) rowErrors.push('codigo_bncc excede 40 caracteres');
+      if (objetivoBNCC.length > 5000 || objetivoCurriculo.length > 5000) rowErrors.push('objetivos excedem 5.000 caracteres');
+
+      const previewRow: CsvPreviewRow = {
+        line: record.line,
+        status: rowErrors.length > 0 ? 'ERROR' : 'VALID',
+        date: dataStr || undefined,
+        campoDeExperiencia: campo || campoRaw || undefined,
+        objetivoBNCC: objetivoBNCC || undefined,
+        objetivoCurriculo: objetivoCurriculo || undefined,
+        errors: rowErrors,
+      };
+      rows.push(previewRow);
+      if (rowErrors.length > 0 || !date || !dateKey || !campo) {
+        errors.push(`Linha ${record.line}: ${rowErrors.join('; ')}`);
+        continue;
+      }
+
+      const dayOfWeek = date.getUTCDay() === 0 ? 7 : date.getUTCDay();
+      const yearStart = new Date(`${date.getUTCFullYear()}-01-01T12:00:00-03:00`);
+      const weekOfYear = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + yearStart.getUTCDay() + 1) / 7);
+      entries.push({
+        line: record.line,
+        dateKey,
+        date,
+        weekOfYear,
+        dayOfWeek,
+        bimester: Math.floor(date.getUTCMonth() / 2) + 1,
+        campoDeExperiencia: campo,
+        objetivoBNCC,
+        objetivoBNCCCode: codigoBNCC,
+        objetivoCurriculo,
+        intencionalidade,
+        exemploAtividade,
+      });
+    }
+
+    return { delimiter, headers, totalRows: records.length - 1, entries, rows, errors };
+  }
+
+  private parseCsvRecords(text: string): { records: Array<{ line: number; cells: string[] }>; delimiter: ',' | ';'; malformed: string[] } {
+    const source = text.replace(/^\uFEFF/, '');
+    const firstLine = source.split(/\r?\n/, 1)[0] ?? '';
+    const delimiter: ',' | ';' = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+    const records: Array<{ line: number; cells: string[] }> = [];
+    const malformed: string[] = [];
+    let cells: string[] = [];
+    let field = '';
+    let inQuotes = false;
+    let line = 1;
+    let recordLine = 1;
+
+    const pushRecord = () => {
+      cells.push(field);
+      field = '';
+      if (cells.some((cell) => cell.trim() !== '')) records.push({ line: recordLine, cells });
+      cells = [];
+      recordLine = line + 1;
+    };
+
+    for (let index = 0; index < source.length; index += 1) {
+      const char = source[index];
+      if (char === '"') {
+        if (inQuotes && source[index + 1] === '"') {
+          field += '"';
+          index += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === delimiter && !inQuotes) {
+        cells.push(field);
+        field = '';
+      } else if (char === '\n' && !inQuotes) {
+        pushRecord();
+        line += 1;
+      } else {
+        field += char;
+        if (char === '\n') line += 1;
       }
     }
 
-    // Invalidar cache
-    await this.matrixCacheInvalidation.bump(mantenedoraId);
+    if (inQuotes) malformed.push(`Linha ${recordLine}: aspas não fechadas`);
+    if (field.length > 0 || cells.length > 0) pushRecord();
+    return { records, delimiter, malformed };
+  }
 
-    return { matrixId: matrix.id, importados, erros };
+  private normalizeCsvHeader(header: string): string {
+    return header
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  }
+
+  private normalizeCsvCampo(raw: string, bnccCode?: string): CampoDeExperiencia | null {
+    const normalized = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const upper = raw.toUpperCase().replace(/[^A-Z_]/g, '');
+    const enumValues = Object.values(CampoDeExperiencia) as string[];
+    if (enumValues.includes(upper)) return upper as CampoDeExperiencia;
+    if (normalized.includes('eu') && (normalized.includes('outro') || normalized.includes('nos'))) return CampoDeExperiencia.O_EU_O_OUTRO_E_O_NOS;
+    if (normalized.includes('corpo') || normalized.includes('gestos') || normalized.includes('movimentos')) return CampoDeExperiencia.CORPO_GESTOS_E_MOVIMENTOS;
+    if (normalized.includes('tracos') || normalized.includes('sons') || normalized.includes('cores') || normalized.includes('formas')) return CampoDeExperiencia.TRACOS_SONS_CORES_E_FORMAS;
+    if (normalized.includes('escuta') || normalized.includes('fala') || normalized.includes('pensamento') || normalized.includes('imaginacao')) return CampoDeExperiencia.ESCUTA_FALA_PENSAMENTO_E_IMAGINACAO;
+    if (normalized.includes('espacos') || normalized.includes('espaco') || normalized.includes('tempos') || normalized.includes('quantidade') || normalized.includes('relacoes') || normalized.includes('transformacoes')) return CampoDeExperiencia.ESPACOS_TEMPOS_QUANTIDADES_RELACOES_E_TRANSFORMACOES;
+    const code = bnccCode?.toUpperCase() ?? '';
+    if (code.includes('EO')) return CampoDeExperiencia.O_EU_O_OUTRO_E_O_NOS;
+    if (code.includes('CG')) return CampoDeExperiencia.CORPO_GESTOS_E_MOVIMENTOS;
+    if (code.includes('TS')) return CampoDeExperiencia.TRACOS_SONS_CORES_E_FORMAS;
+    if (code.includes('EF')) return CampoDeExperiencia.ESCUTA_FALA_PENSAMENTO_E_IMAGINACAO;
+    if (code.includes('ET')) return CampoDeExperiencia.ESPACOS_TEMPOS_QUANTIDADES_RELACOES_E_TRANSFORMACOES;
+    return null;
   }
 
   // ─── Métodos privados ────────────────────────────────────────────────────────
