@@ -114,6 +114,20 @@ export class IaAssistivaController {
   }
 
   /**
+   * POST /ia/revisar-planejamento
+   * Revisa um planejamento real em modo somente leitura.
+   * A resposta é uma recomendação estruturada e requer revisão humana.
+   */
+  @Post('revisar-planejamento')
+  @HttpCode(HttpStatus.OK)
+  revisarPlanejamento(
+    @Body() body: { planningId: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.iaService.revisarPlanejamento(body.planningId, user);
+  }
+
+  /**
    * POST /ia/ideias-rapidas
    * Ideias rápidas e simples pro dia a dia — sem estrutura pesada, pra quando
    * o professor só precisa de inspiração imediata (brincadeira de transição,

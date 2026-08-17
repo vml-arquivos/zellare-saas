@@ -1,10 +1,18 @@
-import { Injectable, Logger, ServiceUnavailableException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import OpenAI from 'openai';
 import { GerarAtividadeDto, FaixaEtaria, TipoAtividade } from './dto/gerar-atividade.dto';
 import { GerarPlanoDeAulaDto } from './dto/gerar-plano-de-aula.dto';
 import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { canAccessUnit } from '../common/utils/can-access-unit';
 
 export interface AtividadeGerada {
   titulo: string;
@@ -627,6 +635,158 @@ ${materialBase}
       this.logger.error('Erro ao gerar plano de aula com IA:', error);
       if (error instanceof ServiceUnavailableException || error instanceof BadRequestException) throw error;
       throw new ServiceUnavailableException('Serviço de IA temporariamente indisponível. Tente novamente em instantes.');
+    }
+  }
+
+  /**
+   * Revisa um planejamento real em modo somente leitura.
+   * A resposta é uma recomendação estruturada para o professor/coordenação;
+   * nenhum campo do Planning é alterado automaticamente.
+   */
+  async revisarPlanejamento(planningId: string, user: JwtPayload) {
+    if (!planningId?.trim()) {
+      throw new BadRequestException('planningId é obrigatório.');
+    }
+
+    const planning = await this.prisma.planning.findUnique({
+      where: { id: planningId },
+      include: {
+        classroom: { include: { unit: true } },
+        curriculumMatrix: {
+          include: {
+            entries: {
+              orderBy: { date: 'asc' },
+              take: 30,
+              include: {
+                frameworkObjective: {
+                  include: { dimension: true, framework: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!planning) {
+      throw new NotFoundException(`Planejamento "${planningId}" não encontrado.`);
+    }
+    if (planning.mantenedoraId !== user.mantenedoraId) {
+      throw new ForbiddenException('Acesso negado ao planejamento.');
+    }
+    await this.assertUnitAccess(user, planning.unitId);
+
+    const cliente = this.getCliente();
+    const entries = planning.curriculumMatrix?.entries ?? [];
+    const objectives = entries
+      .map((entry) => entry.frameworkObjective)
+      .filter(Boolean)
+      .map((objective) => ({
+        framework: objective!.framework.name,
+        dimension: objective!.dimension.name,
+        code: objective!.code,
+        text: objective!.text,
+      }));
+
+    const prompt = `Você é uma coordenadora pedagógica experiente em Educação Infantil.
+
+Revise o planejamento abaixo com foco em coerência, intencionalidade, inclusão, viabilidade e alinhamento curricular. Não faça diagnóstico de crianças, não invente fatos e não altere o planejamento. Retorne somente recomendações para revisão humana.
+
+## PLANEJAMENTO REAL
+- ID: ${planning.id}
+- Título: ${planning.title}
+- Status: ${planning.status}
+- Turma: ${planning.classroom.name}
+- Faixa etária: ${planning.classroom.ageGroupMin} a ${planning.classroom.ageGroupMax} meses
+- Período: ${planning.startDate.toISOString()} até ${planning.endDate.toISOString()}
+- Descrição: ${planning.description ?? ''}
+- Conteúdo pedagógico: ${JSON.stringify(planning.pedagogicalContent ?? planning.activities ?? {})}
+- Avaliação: ${planning.evaluation ?? ''}
+
+## OBJETIVOS CURRICULARES ENCONTRADOS
+${JSON.stringify(objectives)}
+
+## FORMATO JSON OBRIGATÓRIO
+{
+  "resumo": "Síntese curta da qualidade do planejamento",
+  "pontosFortes": ["ponto observável"],
+  "lacunas": ["lacuna observável ou []"],
+  "sugestoes": ["sugestão prática e revisável"],
+  "perguntasParaProfessor": ["pergunta de reflexão"],
+  "alertas": ["alerta somente quando houver evidência no planejamento ou []"]
+}`;
+
+    try {
+      const resposta = await cliente.chat.completions.create({
+        model: this.getModelo(),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Você é uma coordenadora pedagógica. Responda apenas com JSON válido e nunca invente dados sobre crianças.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.25,
+        max_tokens: 1800,
+      });
+      const conteudo = resposta.choices[0]?.message?.content;
+      if (!conteudo) {
+        throw new ServiceUnavailableException('A IA não retornou uma revisão. Tente novamente.');
+      }
+      const revisao = JSON.parse(
+        conteudo.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim(),
+      ) as Record<string, unknown>;
+      const listas = ['pontosFortes', 'lacunas', 'sugestoes', 'perguntasParaProfessor', 'alertas'];
+      if (
+        typeof revisao.resumo !== 'string' ||
+        !revisao.resumo.trim() ||
+        listas.some(
+          (campo) =>
+            !Array.isArray(revisao[campo]) ||
+            (revisao[campo] as unknown[]).some((item) => typeof item !== 'string'),
+        )
+      ) {
+        throw new ServiceUnavailableException('A IA retornou uma revisão fora do formato esperado.');
+      }
+
+      return {
+        planningId: planning.id,
+        planningStatus: planning.status,
+        reviewedAt: new Date().toISOString(),
+        fonte: {
+          classroomId: planning.classroomId,
+          curriculumMatrixId: planning.curriculumMatrixId,
+          objectivesCount: objectives.length,
+        },
+        revisao: {
+          ...revisao,
+          resumo: revisao.resumo.trim(),
+        },
+        geradoPorIA: true,
+        requerRevisaoHumana: true,
+      };
+    } catch (error) {
+      this.logger.error('Erro ao revisar planejamento com IA:', error);
+      if (error instanceof ServiceUnavailableException || error instanceof ForbiddenException || error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new ServiceUnavailableException(
+        'Serviço de IA temporariamente indisponível. Tente novamente em instantes.',
+      );
+    }
+  }
+
+  private async assertUnitAccess(user: JwtPayload, targetUnitId: string): Promise<void> {
+    const allowed = await canAccessUnit(user, targetUnitId, async ({ userId }) => {
+      const scopes = await this.prisma.userRoleUnitScope.findMany({
+        where: { userRole: { userId, isActive: true } },
+        select: { unitId: true },
+      });
+      return scopes.map((scope) => scope.unitId);
+    });
+    if (!allowed) {
+      throw new ForbiddenException('Acesso negado ao escopo da unidade.');
     }
   }
 

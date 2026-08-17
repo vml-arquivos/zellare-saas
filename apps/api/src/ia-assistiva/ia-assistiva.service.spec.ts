@@ -1,4 +1,4 @@
-import { ServiceUnavailableException } from '@nestjs/common';
+import { ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
 import { IaAssistivaService } from './ia-assistiva.service';
 
 describe('IaAssistivaService — validação de plano gerado', () => {
@@ -47,6 +47,29 @@ describe('IaAssistivaService — validação de plano gerado', () => {
         new Set(['Objetivo']),
       ),
     ).toThrow(ServiceUnavailableException);
+  });
+
+  it('bloqueia revisão de planejamento de outra mantenedora', async () => {
+    const prisma = {
+      planning: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'planning-1',
+          mantenedoraId: 'mantenedora-2',
+          unitId: 'unit-2',
+        }),
+      },
+    };
+    const scopedService = new IaAssistivaService(prisma as any);
+
+    await expect(
+      scopedService.revisarPlanejamento('planning-1', {
+        sub: 'user-1',
+        email: 'teacher@example.com',
+        mantenedoraId: 'mantenedora-1',
+        unitId: 'unit-1',
+        roles: [],
+      } as any),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('rejeita objetivo que não pertence à matriz permitida', () => {
