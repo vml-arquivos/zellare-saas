@@ -1,8 +1,10 @@
 import {
+  IsArray,
   IsDateString,
   IsEnum,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -12,7 +14,12 @@ import {
 import {
   FinanceApprovalStatus,
   FinanceEmploymentStatus,
+  FinancePayrollItemKind,
+  FinancePayrollStatus,
+  FinancePayableStatus,
   FinancePeriodStatus,
+  FinancePurchaseStatus,
+  FinanceStockMovementType,
   FinanceTimeEntryStatus,
 } from '@prisma/client';
 
@@ -144,6 +151,7 @@ export class CreateTimeAdjustmentDto {
   @IsString()
   reason!: string;
 
+  @IsObject()
   proposedData!: Record<string, unknown>;
 }
 
@@ -172,4 +180,224 @@ export class ListFinanceQueryDto {
   @IsOptional()
   @IsEnum(FinanceTimeEntryStatus)
   status?: FinanceTimeEntryStatus;
+}
+
+export class ListPayableQueryDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+
+  @IsOptional()
+  @IsString()
+  periodId?: string;
+
+  @IsOptional()
+  @IsEnum(FinancePayableStatus)
+  status?: FinancePayableStatus;
+}
+
+export class ListStockQueryDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+}
+
+export class ListPurchaseQueryDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+
+  @IsOptional()
+  @IsEnum(FinancePurchaseStatus)
+  status?: FinancePurchaseStatus;
+}
+
+export class CreatePayrollDto {
+  @IsString()
+  periodId!: string;
+}
+
+export class UpdatePayrollStatusDto {
+  @IsEnum(FinancePayrollStatus)
+  status!: FinancePayrollStatus;
+}
+
+export class ListPayrollQueryDto {
+  @IsOptional()
+  @IsString()
+  periodId?: string;
+}
+
+export class CreatePayableDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+
+  @IsOptional()
+  @IsString()
+  periodId?: string;
+
+  @IsOptional()
+  @IsString()
+  supplierId?: string;
+
+  @IsString()
+  beneficiary!: string;
+
+  @IsString()
+  description!: string;
+
+  @IsString()
+  category!: string;
+
+  @IsString()
+  sourceType!: string;
+
+  @IsOptional()
+  @IsString()
+  sourceId?: string;
+
+  @IsDateString()
+  dueDate!: string;
+
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  amount!: number;
+
+  @IsOptional()
+  @IsString()
+  documentRef?: string;
+}
+
+export class UpdatePayableStatusDto {
+  @IsEnum(FinancePayableStatus)
+  status!: FinancePayableStatus;
+
+  @IsOptional()
+  @IsString()
+  comment?: string;
+
+  @IsOptional()
+  @IsString()
+  paymentRef?: string;
+}
+
+export class CreateStockItemDto {
+  @IsString()
+  unitId!: string;
+
+  @IsString()
+  code!: string;
+
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  minimumQuantity?: number;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+}
+
+export class CreateStockMovementDto {
+  @IsString()
+  unitId!: string;
+
+  @IsString()
+  stockItemId!: string;
+
+  @IsEnum(FinanceStockMovementType)
+  movementType!: FinanceStockMovementType;
+
+  @IsInt()
+  @Min(0)
+  quantity!: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  unitCost?: number;
+
+  @IsString()
+  sourceType!: string;
+
+  @IsOptional()
+  @IsString()
+  sourceId?: string;
+
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+
+export class CreatePurchaseQuoteDto {
+  @IsString()
+  unitId!: string;
+
+  @IsOptional()
+  @IsString()
+  purchaseId?: string;
+
+  @IsOptional()
+  @IsString()
+  supplierId?: string;
+
+  @IsEnum(FinancePurchaseStatus)
+  status!: FinancePurchaseStatus;
+
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  totalAmount!: number;
+
+  @IsOptional()
+  @IsString()
+  documentRef?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class GoodsReceiptItemDto {
+  @IsString()
+  stockItemId!: string;
+
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  unitCost?: number;
+}
+
+export class CreateGoodsReceiptDto {
+  @IsString()
+  unitId!: string;
+
+  @IsString()
+  purchaseId!: string;
+
+  @IsOptional()
+  @IsEnum(FinancePurchaseStatus)
+  status?: FinancePurchaseStatus;
+
+  @IsArray()
+  items!: GoodsReceiptItemDto[];
+
+  @IsOptional()
+  @IsString()
+  documentRef?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

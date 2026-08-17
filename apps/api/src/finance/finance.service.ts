@@ -7,7 +7,12 @@ import {
 import {
   FinanceApprovalStatus,
   FinanceEmploymentStatus,
+  FinancePayrollItemKind,
+  FinancePayrollStatus,
+  FinancePayableStatus,
   FinancePeriodStatus,
+  FinancePurchaseStatus,
+  FinanceStockMovementType,
   FinanceTimeEntryStatus,
   Prisma,
   RoleLevel,
@@ -17,11 +22,23 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateEmployeeDto,
   CreateFinancialPeriodDto,
+  CreateGoodsReceiptDto,
+  CreatePayableDto,
+  CreatePayrollDto,
+  CreatePurchaseQuoteDto,
+  CreateStockItemDto,
+  CreateStockMovementDto,
   CreateTimeAdjustmentDto,
   CreateTimeEntryDto,
   DecideTimeAdjustmentDto,
   ListFinanceQueryDto,
+  ListPayableQueryDto,
+  ListPayrollQueryDto,
+  ListPurchaseQueryDto,
+  ListStockQueryDto,
   UpdateFinancialPeriodStatusDto,
+  UpdatePayableStatusDto,
+  UpdatePayrollStatusDto,
 } from './dto/finance.dto';
 
 const PERIOD_TRANSITIONS: Record<FinancePeriodStatus, FinancePeriodStatus[]> = {
@@ -33,6 +50,37 @@ const PERIOD_TRANSITIONS: Record<FinancePeriodStatus, FinancePeriodStatus[]> = {
   [FinancePeriodStatus.APROVADA]: [FinancePeriodStatus.FECHADA],
   [FinancePeriodStatus.FECHADA]: [FinancePeriodStatus.REABERTA],
   [FinancePeriodStatus.REABERTA]: [FinancePeriodStatus.EM_CONFERENCIA],
+};
+
+const PAYROLL_TRANSITIONS: Record<FinancePayrollStatus, FinancePayrollStatus[]> = {
+  [FinancePayrollStatus.RASCUNHO]: [FinancePayrollStatus.CALCULADA],
+  [FinancePayrollStatus.CALCULADA]: [FinancePayrollStatus.EM_CONFERENCIA],
+  [FinancePayrollStatus.EM_CONFERENCIA]: [
+    FinancePayrollStatus.CALCULADA,
+    FinancePayrollStatus.APROVADA,
+  ],
+  [FinancePayrollStatus.APROVADA]: [FinancePayrollStatus.FECHADA],
+  [FinancePayrollStatus.FECHADA]: [FinancePayrollStatus.RETIFICADA],
+  [FinancePayrollStatus.RETIFICADA]: [FinancePayrollStatus.CALCULADA],
+};
+
+const PAYABLE_TRANSITIONS: Record<FinancePayableStatus, FinancePayableStatus[]> = {
+  [FinancePayableStatus.RASCUNHO]: [
+    FinancePayableStatus.EM_APROVACAO,
+    FinancePayableStatus.CANCELADA,
+  ],
+  [FinancePayableStatus.EM_APROVACAO]: [
+    FinancePayableStatus.APROVADA,
+    FinancePayableStatus.CANCELADA,
+  ],
+  [FinancePayableStatus.APROVADA]: [
+    FinancePayableStatus.AGENDADA,
+    FinancePayableStatus.CANCELADA,
+  ],
+  [FinancePayableStatus.AGENDADA]: [FinancePayableStatus.PAGA, FinancePayableStatus.CANCELADA],
+  [FinancePayableStatus.PAGA]: [FinancePayableStatus.CONCILIADA],
+  [FinancePayableStatus.CONCILIADA]: [],
+  [FinancePayableStatus.CANCELADA]: [],
 };
 
 @Injectable()
@@ -88,14 +136,13 @@ export class FinanceService {
   }
 
   private async resolveCurrentEmployee(user: JwtPayload) {
-    const employee = await this.prisma.employeeProfile.findFirst({
+    return this.prisma.employeeProfile.findFirst({
       where: {
         mantenedoraId: user.mantenedoraId,
         userId: user.sub,
         employmentStatus: { not: FinanceEmploymentStatus.ENCERRADO },
       },
     });
-    return employee;
   }
 
   private async assertPeriodScope(user: JwtPayload, periodId: string) {
@@ -104,6 +151,12 @@ export class FinanceService {
     });
     if (!period) throw new NotFoundException('Competência financeira não encontrada');
     return period;
+  }
+
+  private async assertUnitScope(user: JwtPayload, unitId: string) {
+    const resolved = await this.resolveUnitId(user, unitId);
+    if (!resolved) throw new BadRequestException('Unidade é obrigatória para esta operação');
+    return resolved;
   }
 
   async listPeriods(user: JwtPayload) {
@@ -141,9 +194,7 @@ export class FinanceService {
     const current = await this.assertPeriodScope(user, periodId);
     const allowed = PERIOD_TRANSITIONS[current.status] || [];
     if (!allowed.includes(dto.status)) {
-      throw new BadRequestException(
-        `Transição inválida: ${current.status} → ${dto.status}`,
-      );
+      throw new BadRequestException(`Transição inválida: ${current.status} → ${dto.status}`);
     }
 
     const closing = dto.status === FinancePeriodStatus.FECHADA;
@@ -378,9 +429,380 @@ export class FinanceService {
         if (typeof proposed.breakMinutes === 'number') update.breakMinutes = proposed.breakMinutes;
         if (typeof proposed.workedMinutes === 'number') update.workedMinutes = proposed.workedMinutes;
         update.status = FinanceTimeEntryStatus.APROVADO;
+        update.approvedBy = user.sub;
+        update.approvedAt = new Date();
         await tx.timeEntry.update({ where: { id: adjustment.timeEntryId }, data: update });
       }
       return decided;
+    });
+  }
+
+  async listPayrolls(user: JwtPayload, query: ListPayrollQueryDto) {
+    if (query.periodId) await this.assertPeriodScope(user, query.periodId);
+    return this.prisma.payrollRun.findMany({
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        ...(query.periodId ? { periodId: query.periodId } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async calculatePayroll(dto: CreatePayrollDto, user: JwtPayload) {
+    const period = await this.assertPeriodScope(user, dto.periodId);
+    if (period.status === FinancePeriodStatus.FECHADA) {
+      throw new BadRequestException('Competência fechada não pode ser recalculada');
+    }
+    const employees = await this.prisma.employeeProfile.findMany({
+      where: { mantenedoraId: user.mantenedoraId, employmentStatus: FinanceEmploymentStatus.ATIVO },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+    });
+    const existing = await this.prisma.payrollRun.findUnique({ where: { periodId: dto.periodId } });
+    const recalculableStatuses: FinancePayrollStatus[] = [
+      FinancePayrollStatus.RASCUNHO,
+      FinancePayrollStatus.CALCULADA,
+      FinancePayrollStatus.RETIFICADA,
+    ];
+    if (existing && !recalculableStatuses.includes(existing.status)) {
+      throw new BadRequestException('Folha já está em conferência, aprovada ou fechada');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const run = existing
+        ? await tx.payrollRun.update({
+            where: { id: existing.id },
+            data: { status: FinancePayrollStatus.CALCULADA, computedAt: new Date(), createdBy: existing.createdBy },
+          })
+        : await tx.payrollRun.create({
+            data: {
+              mantenedoraId: user.mantenedoraId,
+              periodId: dto.periodId,
+              status: FinancePayrollStatus.CALCULADA,
+              createdBy: user.sub,
+              computedAt: new Date(),
+            },
+          });
+
+      const oldEmployees = await tx.payrollEmployee.findMany({
+        where: { payrollRunId: run.id },
+        select: { id: true },
+      });
+      if (oldEmployees.length) {
+        await tx.payrollItem.deleteMany({
+          where: { payrollEmployeeId: { in: oldEmployees.map((item) => item.id) } },
+        });
+        await tx.payrollEmployee.deleteMany({ where: { payrollRunId: run.id } });
+      }
+
+      let totalGross = new Prisma.Decimal(0);
+      let totalDeductions = new Prisma.Decimal(0);
+      let totalNet = new Prisma.Decimal(0);
+      let totalCharges = new Prisma.Decimal(0);
+      const snapshot: Array<Record<string, unknown>> = [];
+
+      for (const employee of employees) {
+        const gross = employee.baseSalary ?? new Prisma.Decimal(0);
+        const deductions = new Prisma.Decimal(0);
+        const net = gross.minus(deductions);
+        const employerCharges = new Prisma.Decimal(0);
+        const payrollEmployee = await tx.payrollEmployee.create({
+          data: {
+            payrollRunId: run.id,
+            employeeId: employee.id,
+            gross,
+            deductions,
+            net,
+            employerCharges,
+            snapshot: {
+              employeeCode: employee.employeeCode,
+              name: `${employee.firstName} ${employee.lastName}`,
+              baseSalary: gross.toNumber(),
+              referenceMonth: period.referenceMonth,
+            } as Prisma.InputJsonValue,
+          },
+        });
+        if (!gross.isZero()) {
+          await tx.payrollItem.create({
+            data: {
+              payrollEmployeeId: payrollEmployee.id,
+              kind: FinancePayrollItemKind.PROVENTO,
+              code: 'SALARIO_BASE',
+              description: 'Salário base',
+              amount: gross,
+              reference: period.referenceMonth,
+            },
+          });
+        }
+        totalGross = totalGross.plus(gross);
+        totalDeductions = totalDeductions.plus(deductions);
+        totalNet = totalNet.plus(net);
+        totalCharges = totalCharges.plus(employerCharges);
+        snapshot.push({ employeeId: employee.id, gross: gross.toNumber(), net: net.toNumber() });
+      }
+
+      return tx.payrollRun.update({
+        where: { id: run.id },
+        data: {
+          totalGross,
+          totalDeductions,
+          totalNet,
+          totalCharges,
+          snapshot: snapshot as Prisma.InputJsonValue,
+        },
+      });
+    });
+  }
+
+  async updatePayrollStatus(id: string, dto: UpdatePayrollStatusDto, user: JwtPayload) {
+    const payroll = await this.prisma.payrollRun.findFirst({
+      where: { id, mantenedoraId: user.mantenedoraId },
+    });
+    if (!payroll) throw new NotFoundException('Folha não encontrada');
+    const allowed = PAYROLL_TRANSITIONS[payroll.status] || [];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(`Transição inválida: ${payroll.status} → ${dto.status}`);
+    }
+    const now = new Date();
+    return this.prisma.payrollRun.update({
+      where: { id },
+      data: {
+        status: dto.status,
+        ...(dto.status === FinancePayrollStatus.APROVADA ? { approvedBy: user.sub, approvedAt: now } : {}),
+        ...(dto.status === FinancePayrollStatus.FECHADA ? { closedBy: user.sub, closedAt: now } : {}),
+      },
+    });
+  }
+
+  async listPayables(user: JwtPayload, query: ListPayableQueryDto) {
+    const unitId = await this.resolveUnitId(user, query.unitId);
+    return this.prisma.payable.findMany({
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        ...(unitId ? { unitId } : {}),
+        ...(query.periodId ? { periodId: query.periodId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      },
+      orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
+    });
+  }
+
+  async createPayable(dto: CreatePayableDto, user: JwtPayload) {
+    const unitId = dto.unitId ? await this.resolveUnitId(user, dto.unitId) : undefined;
+    if (dto.periodId) await this.assertPeriodScope(user, dto.periodId);
+    return this.prisma.payable.create({
+      data: {
+        mantenedoraId: user.mantenedoraId,
+        unitId,
+        periodId: dto.periodId,
+        supplierId: dto.supplierId,
+        beneficiary: dto.beneficiary.trim(),
+        description: dto.description.trim(),
+        category: dto.category.trim(),
+        sourceType: dto.sourceType.trim(),
+        sourceId: dto.sourceId,
+        dueDate: new Date(dto.dueDate),
+        amount: new Prisma.Decimal(dto.amount),
+        documentRef: dto.documentRef?.trim() || undefined,
+        createdBy: user.sub,
+      },
+    });
+  }
+
+  async updatePayableStatus(id: string, dto: UpdatePayableStatusDto, user: JwtPayload) {
+    const payable = await this.prisma.payable.findFirst({
+      where: { id, mantenedoraId: user.mantenedoraId },
+    });
+    if (!payable) throw new NotFoundException('Conta a pagar não encontrada');
+    const allowed = PAYABLE_TRANSITIONS[payable.status] || [];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(`Transição inválida: ${payable.status} → ${dto.status}`);
+    }
+    if (dto.status === FinancePayableStatus.PAGA && !dto.paymentRef?.trim()) {
+      throw new BadRequestException('paymentRef é obrigatório para marcar uma conta como paga');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.payable.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          ...(dto.status === FinancePayableStatus.APROVADA
+            ? { approvedBy: user.sub, approvedAt: new Date() }
+            : {}),
+          ...(dto.status === FinancePayableStatus.PAGA
+            ? { paidBy: user.sub, paidAt: new Date(), paymentRef: dto.paymentRef?.trim() }
+            : {}),
+        },
+      });
+      if (dto.status === FinancePayableStatus.EM_APROVACAO || dto.status === FinancePayableStatus.APROVADA) {
+        await tx.payableApproval.create({
+          data: {
+            payableId: id,
+            actorId: user.sub,
+            status: dto.status === FinancePayableStatus.APROVADA
+              ? FinanceApprovalStatus.APROVADA
+              : FinanceApprovalStatus.PENDENTE,
+            comment: dto.comment?.trim() || undefined,
+          },
+        });
+      }
+      return updated;
+    });
+  }
+
+  async listStockItems(user: JwtPayload, query: ListStockQueryDto) {
+    const unitId = await this.resolveUnitId(user, query.unitId);
+    return this.prisma.stockItem.findMany({
+      where: {
+        ...(unitId ? { unitId } : { unit: { mantenedoraId: user.mantenedoraId } }),
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async createStockItem(dto: CreateStockItemDto, user: JwtPayload) {
+    const unitId = await this.assertUnitScope(user, dto.unitId);
+    return this.prisma.stockItem.create({
+      data: {
+        unitId,
+        code: dto.code.trim().toUpperCase(),
+        name: dto.name.trim(),
+        description: dto.description?.trim() || undefined,
+        minimumQuantity: dto.minimumQuantity ?? 0,
+        location: dto.location?.trim() || undefined,
+      },
+    });
+  }
+
+  async listStockMovements(user: JwtPayload, query: ListStockQueryDto) {
+    const unitId = await this.resolveUnitId(user, query.unitId);
+    return this.prisma.stockMovement.findMany({
+      where: { mantenedoraId: user.mantenedoraId, ...(unitId ? { unitId } : {}) },
+      orderBy: { createdAt: 'desc' },
+      take: 300,
+    });
+  }
+
+  async createStockMovement(dto: CreateStockMovementDto, user: JwtPayload) {
+    const unitId = await this.assertUnitScope(user, dto.unitId);
+    const item = await this.prisma.stockItem.findFirst({ where: { id: dto.stockItemId, unitId } });
+    if (!item) throw new NotFoundException('Item de estoque não encontrado na unidade');
+    if (dto.movementType === FinanceStockMovementType.TRANSFERENCIA) {
+      throw new BadRequestException('Transferência exige endpoint de transferência entre unidades');
+    }
+    const delta = dto.movementType === FinanceStockMovementType.SAIDA ? -dto.quantity : dto.quantity;
+    const nextQuantity = item.quantity + delta;
+    if (nextQuantity < 0) throw new BadRequestException('Estoque insuficiente para esta saída');
+    return this.prisma.$transaction(async (tx) => {
+      const movement = await tx.stockMovement.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId,
+          stockItemId: item.id,
+          movementType: dto.movementType,
+          quantity: dto.quantity,
+          unitCost: dto.unitCost === undefined ? undefined : new Prisma.Decimal(dto.unitCost),
+          sourceType: dto.sourceType.trim(),
+          sourceId: dto.sourceId,
+          reason: dto.reason?.trim() || undefined,
+          createdBy: user.sub,
+        },
+      });
+      await tx.stockItem.update({ where: { id: item.id }, data: { quantity: nextQuantity } });
+      return movement;
+    });
+  }
+
+  async listPurchaseQuotes(user: JwtPayload, query: ListPurchaseQueryDto) {
+    const unitId = await this.resolveUnitId(user, query.unitId);
+    return this.prisma.purchaseQuote.findMany({
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        ...(unitId ? { unitId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      },
+      orderBy: { quotedAt: 'desc' },
+    });
+  }
+
+  async createPurchaseQuote(dto: CreatePurchaseQuoteDto, user: JwtPayload) {
+    const unitId = await this.assertUnitScope(user, dto.unitId);
+    return this.prisma.purchaseQuote.create({
+      data: {
+        mantenedoraId: user.mantenedoraId,
+        unitId,
+        purchaseId: dto.purchaseId,
+        supplierId: dto.supplierId,
+        status: dto.status,
+        totalAmount: new Prisma.Decimal(dto.totalAmount),
+        documentRef: dto.documentRef?.trim() || undefined,
+        notes: dto.notes?.trim() || undefined,
+        createdBy: user.sub,
+      },
+    });
+  }
+
+  async listGoodsReceipts(user: JwtPayload, query: ListStockQueryDto) {
+    const unitId = await this.resolveUnitId(user, query.unitId);
+    return this.prisma.goodsReceipt.findMany({
+      where: { mantenedoraId: user.mantenedoraId, ...(unitId ? { unitId } : {}) },
+      orderBy: { receivedAt: 'desc' },
+    });
+  }
+
+  async createGoodsReceipt(dto: CreateGoodsReceiptDto, user: JwtPayload) {
+    const unitId = await this.assertUnitScope(user, dto.unitId);
+    if (!dto.items.length) throw new BadRequestException('Recebimento precisa conter itens');
+    const purchase = await this.prisma.pedidoCompra.findFirst({
+      where: { id: dto.purchaseId, mantenedoraId: user.mantenedoraId, unitId },
+      select: { id: true },
+    });
+    if (!purchase) throw new NotFoundException('Pedido de compra não encontrado na unidade');
+
+    const status = dto.status || FinancePurchaseStatus.RECEBIDA;
+    if (status === FinancePurchaseStatus.CANCELADA) {
+      throw new BadRequestException('Recebimento cancelado não pode movimentar estoque');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const receipt = await tx.goodsReceipt.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId,
+          purchaseId: purchase.id,
+          status,
+          receivedBy: user.sub,
+          items: dto.items as unknown as Prisma.InputJsonValue,
+          documentRef: dto.documentRef?.trim() || undefined,
+          notes: dto.notes?.trim() || undefined,
+        },
+      });
+
+      if (status !== FinancePurchaseStatus.RECEBIDA) return receipt;
+      for (const itemDto of dto.items) {
+        const stockItem = await tx.stockItem.findFirst({
+          where: { id: itemDto.stockItemId, unitId },
+        });
+        if (!stockItem) throw new NotFoundException('Item de estoque do recebimento não encontrado');
+        await tx.stockItem.update({
+          where: { id: stockItem.id },
+          data: { quantity: { increment: itemDto.quantity } },
+        });
+        await tx.stockMovement.create({
+          data: {
+            mantenedoraId: user.mantenedoraId,
+            unitId,
+            stockItemId: stockItem.id,
+            movementType: FinanceStockMovementType.ENTRADA,
+            quantity: itemDto.quantity,
+            unitCost: itemDto.unitCost === undefined ? undefined : new Prisma.Decimal(itemDto.unitCost),
+            sourceType: 'GOODS_RECEIPT',
+            sourceId: receipt.id,
+            reason: 'Entrada de mercadoria recebida',
+            createdBy: user.sub,
+          },
+        });
+      }
+      return receipt;
     });
   }
 }
