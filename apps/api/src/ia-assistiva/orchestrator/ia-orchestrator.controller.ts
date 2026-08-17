@@ -44,7 +44,7 @@ export class IaOrchestratorController {
       prompt: dto.prompt,
       systemInstruction: dto.systemInstruction,
       promptId: dto.promptId,
-    });
+    }, user);
   }
 
   /**
@@ -52,8 +52,8 @@ export class IaOrchestratorController {
    * Busca uma requisição por ID com resposta e logs.
    */
   @Get('request/:id')
-  findOne(@Param('id') id: string) {
-    return this.orchestrator.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.orchestrator.findOne(id, user);
   }
 
   /**
@@ -76,7 +76,7 @@ export class IaOrchestratorController {
       status,
       page: page ? parseInt(page, 10) : 1,
       limit: limit ? parseInt(limit, 10) : 20,
-    });
+    }, user);
   }
 
   /**
@@ -94,7 +94,7 @@ export class IaOrchestratorController {
       userId: user.sub,
       rating: dto.rating,
       comment: dto.comment,
-    });
+    }, user);
   }
 
   /**
@@ -111,6 +111,6 @@ export class IaOrchestratorController {
       responseId: id,
       reviewedBy: user.sub,
       approved: dto.approved,
-    });
+    }, user);
   }
 }

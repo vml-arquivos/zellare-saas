@@ -3,9 +3,12 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { canAccessUnit } from '../../common/utils/can-access-unit';
+import type { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { IaExecutorService } from '../executor/ia-executor.service';
 import { PromptService } from '../prompt/prompt.service';
 
@@ -50,18 +53,21 @@ export class IaOrchestratorService {
    * Ponto de entrada central para todas as requisições de IA.
    *
    * Fluxo:
-   * 1. Valida os dados de entrada
+   * 1. Valida os dados de entrada e, quando há usuário, seu escopo
    * 2. Cria o registro IaRequest com status PENDENTE
    * 3. Registra o log "queued"
    * 4. Executa sincronamente via IaExecutor (sem fila por ora — Fase 1)
    * 5. Retorna o requestId e o resultado (se disponível)
    */
-  async solicitar(dto: SolicitarIaDto): Promise<{
+  async solicitar(dto: SolicitarIaDto, user?: JwtPayload): Promise<{
     requestId: string;
     status: string;
     result?: Record<string, unknown>;
   }> {
     this.validateDto(dto);
+    if (user) {
+      await this.assertUnitAccess(user, dto.mantenedoraId, dto.unitId);
+    }
 
     // 1. Criar IaRequest
     const request = await this.prisma.iaRequest.create({
@@ -117,7 +123,7 @@ export class IaOrchestratorService {
   /**
    * Busca uma requisição por ID com sua resposta e logs.
    */
-  async findOne(requestId: string) {
+  async findOne(requestId: string, user?: JwtPayload) {
     const request = await this.prisma.iaRequest.findUnique({
       where: { id: requestId },
       include: {
@@ -128,21 +134,35 @@ export class IaOrchestratorService {
     if (!request) {
       throw new NotFoundException(`IaRequest "${requestId}" não encontrada.`);
     }
+    if (user) {
+      await this.assertUnitAccess(user, request.mantenedoraId, request.unitId);
+    }
     return request;
   }
 
   /**
    * Lista requisições com filtros.
    */
-  async findAll(filters: {
-    mantenedoraId?: string;
-    unitId?: string;
-    requesterId?: string;
-    type?: IaRequestType;
-    status?: string;
-    page?: number;
-    limit?: number;
-  }) {
+  async findAll(
+    filters: {
+      mantenedoraId?: string;
+      unitId?: string;
+      requesterId?: string;
+      type?: IaRequestType;
+      status?: string;
+      page?: number;
+      limit?: number;
+    },
+    user?: JwtPayload,
+  ) {
+    if (user && filters.unitId) {
+      await this.assertUnitAccess(
+        user,
+        filters.mantenedoraId ?? user.mantenedoraId,
+        filters.unitId,
+      );
+    }
+
     const page = filters.page ?? 1;
     const limit = Math.min(filters.limit ?? 20, 100);
     const skip = (page - 1) * limit;
@@ -172,21 +192,28 @@ export class IaOrchestratorService {
   /**
    * Registra feedback do usuário sobre uma resposta.
    */
-  async registrarFeedback(params: {
-    responseId: string;
-    userId: string;
-    rating: number;
-    comment?: string;
-  }) {
+  async registrarFeedback(
+    params: {
+      responseId: string;
+      userId: string;
+      rating: number;
+      comment?: string;
+    },
+    user?: JwtPayload,
+  ) {
     if (params.rating < 1 || params.rating > 5) {
       throw new BadRequestException('O rating deve ser entre 1 e 5.');
     }
 
     const response = await this.prisma.iaResponse.findUnique({
       where: { id: params.responseId },
+      include: { request: true },
     });
     if (!response) {
       throw new NotFoundException(`IaResponse "${params.responseId}" não encontrada.`);
+    }
+    if (user) {
+      await this.assertUnitAccess(user, response.request.mantenedoraId, response.request.unitId);
     }
 
     return this.prisma.iaFeedback.create({
@@ -202,16 +229,23 @@ export class IaOrchestratorService {
   /**
    * Aprova ou rejeita uma resposta de IA (revisão humana obrigatória).
    */
-  async revisarResposta(params: {
-    responseId: string;
-    reviewedBy: string;
-    approved: boolean;
-  }) {
+  async revisarResposta(
+    params: {
+      responseId: string;
+      reviewedBy: string;
+      approved: boolean;
+    },
+    user?: JwtPayload,
+  ) {
     const response = await this.prisma.iaResponse.findUnique({
       where: { id: params.responseId },
+      include: { request: true },
     });
     if (!response) {
       throw new NotFoundException(`IaResponse "${params.responseId}" não encontrada.`);
+    }
+    if (user) {
+      await this.assertUnitAccess(user, response.request.mantenedoraId, response.request.unitId);
     }
 
     return this.prisma.iaResponse.update({
@@ -222,6 +256,30 @@ export class IaOrchestratorService {
         status: params.approved ? 'APROVADO' : 'REJEITADO',
       },
     });
+  }
+
+  private async assertUnitAccess(
+    user: JwtPayload,
+    targetMantenedoraId: string,
+    targetUnitId: string,
+  ): Promise<void> {
+    if (!user.mantenedoraId || user.mantenedoraId !== targetMantenedoraId) {
+      throw new ForbiddenException('Acesso negado ao escopo da mantenedora.');
+    }
+
+    const allowed = await canAccessUnit(user, targetUnitId, async ({ userId }) => {
+      const scopes = await this.prisma.userRoleUnitScope.findMany({
+        where: {
+          userRole: { userId, isActive: true },
+        },
+        select: { unitId: true },
+      });
+      return scopes.map((scope) => scope.unitId);
+    });
+
+    if (!allowed) {
+      throw new ForbiddenException('Acesso negado ao escopo da unidade.');
+    }
   }
 
   private validateDto(dto: SolicitarIaDto): void {
