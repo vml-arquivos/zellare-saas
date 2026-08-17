@@ -136,6 +136,20 @@ export class FamilyService {
     const child = await this.assertChildScope(user, childId, 'timeline');
     const from = query.from ? new Date(query.from) : new Date(Date.now() - 90 * 86_400_000);
     const to = query.to ? new Date(query.to) : new Date();
+    let familyCanViewDevelopment = true;
+    if (this.isFamily(user)) {
+      const guardian = await this.prisma.childGuardian.findFirst({
+        where: {
+          childId,
+          userId: user.sub,
+          revokedAt: null,
+          canViewTimeline: true,
+        },
+        select: { canViewDevelopment: true },
+      });
+      familyCanViewDevelopment = guardian?.canViewDevelopment === true;
+    }
+
     const [diaryEvents, posts, observations, messages] = await Promise.all([
       this.prisma.diaryEvent.findMany({
         where: { childId, eventDate: { gte: from, lte: to }, ...(this.isFamily(user) ? { status: { in: ['PUBLICADO', 'REVISADO'] } } : {}) },
@@ -147,14 +161,29 @@ export class FamilyService {
         select: { id: true, performance: true, notes: true, createdAt: true, post: { select: { id: true, title: true, content: true, type: true, createdAt: true, dueDate: true } } },
         orderBy: { createdAt: 'desc' },
       }),
-      this.isFamily(user) ? this.prisma.developmentObservation.findMany({
-        where: { childId, date: { gte: from, lte: to }, createdBy: { not: user.sub } },
-        select: { id: true, category: true, date: true, learningProgress: true, socialInteraction: true, emotionalState: true, recommendations: true },
-        orderBy: { date: 'desc' },
-      }) : this.prisma.developmentObservation.findMany({
-        where: { childId, date: { gte: from, lte: to } },
-        orderBy: { date: 'desc' },
-      }),
+      familyCanViewDevelopment
+        ? this.prisma.developmentObservation.findMany({
+            where: {
+              childId,
+              date: { gte: from, lte: to },
+              ...(this.isFamily(user) ? { createdBy: { not: user.sub } } : {}),
+            },
+            ...(this.isFamily(user)
+              ? {
+                  select: {
+                    id: true,
+                    category: true,
+                    date: true,
+                    learningProgress: true,
+                    socialInteraction: true,
+                    emotionalState: true,
+                    recommendations: true,
+                  },
+                }
+              : {}),
+            orderBy: { date: 'desc' },
+          })
+        : Promise.resolve([]),
       this.listMessages(user, { childId }),
     ]);
     const items = [
