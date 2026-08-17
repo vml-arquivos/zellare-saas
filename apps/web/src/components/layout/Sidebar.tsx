@@ -23,6 +23,7 @@ interface MenuItem {
 
 // PROFESSOR / PROFESSOR_AUXILIAR ──────────────────────────────────────────────
 const PROFESSOR_PRINCIPAL: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/teacher-dashboard', label: 'Painel do Professor', icon: <GraduationCap className="h-4 w-4" /> },
   { path: '/app/mobile',            label: 'App Mobile (PWA)',    icon: <Smartphone className="h-4 w-4" />, badge: 'Mobile' },
   { path: '/app/material-requests', label: 'Requisições de Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
@@ -53,6 +54,7 @@ const COORD_GESTAO: MenuItem[] = [
   { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
 ];
 const COORD_PEDAGOGICO: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diario-calendario', label: 'Diário',             icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/atendimentos-pais', label: 'Atendimentos Pais',  icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
@@ -64,6 +66,7 @@ const COORD_PEDAGOGICO: MenuItem[] = [
 
 // UNIDADE — Diretor ────────────────────────────────────────────────────────────
 const DIRETOR_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diretor',           label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
   { path: '/app/pedidos-compra',    label: 'Aprovar Pedidos',        icon: <ShoppingBag className="h-4 w-4" />, badge: 'Aprovação' },
   { path: '/app/coordenacao',       label: 'Turmas & Equipe',        icon: <Users className="h-4 w-4" /> },
@@ -78,6 +81,7 @@ const DIRETOR_ITEMS: MenuItem[] = [
 // Navegação completa do módulo via query param ?s=<secao>
 // A sidebar global escura é o único menu do módulo (sem sidebar interna)
 const NUTRI_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/nutricionista',                      label: 'Painel da Nutricionista', icon: <Utensils className="h-4 w-4" /> },
   { path: '/app/nutricionista?s=cardapios',          label: 'Cardápios',               icon: <BookOpen className="h-4 w-4" /> },
   { path: '/app/nutricionista?s=cardapios-nutricao', label: 'Cálculo Nutricional',     icon: <BarChart2 className="h-4 w-4" /> },
@@ -93,6 +97,7 @@ const NUTRI_ITEMS: MenuItem[] = [
 
 // UNIDADE — Administrativo (Secretaria) ─────────────────────────────────────
 const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/secretaria',                    label: 'Painel da Secretaria',         icon: <Home className="h-4 w-4" /> },
   { path: '/app/secretaria/matriculas',         label: 'Matrículas e Fichas',          icon: <UserCheck className="h-4 w-4" /> },
   { path: '/app/secretaria/matriculas/nova',    label: 'Nova Matrícula',               icon: <UserPlus className="h-4 w-4" />, badge: 'Essencial' },
@@ -109,6 +114,7 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
 
 // UNIDADE — Genérico (sem roleType específico) ─────────────────────────────────
 const UNIDADE_GESTAO: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/unidade',                       label: 'Painel da Unidade',      icon: <Home className="h-4 w-4" /> },
   { path: '/app/coordenacao-pedagogica',        label: 'Coord. Pedagógica',      icon: <Building2 className="h-4 w-4" /> },
   { path: '/app/coordenacao',                   label: 'Turmas & Reuniões',      icon: <Users className="h-4 w-4" />, badge: 'Novo' },
@@ -120,6 +126,7 @@ const UNIDADE_GESTAO: MenuItem[] = [
   { path: '/app/financeiro',              label: 'Financeiro e Ponto',       icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
 ];
 const UNIDADE_PEDAGOGICO: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão e Aprovação', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
   { path: '/app/rdic-crianca',      label: 'Desenvolvimento por Criança',           icon: <Brain className="h-4 w-4" /> },
   { path: '/app/inteligencia',      label: 'Painel de Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
@@ -130,6 +137,7 @@ const UNIDADE_PEDAGOGICO: MenuItem[] = [
 ];
 // STAFF_CENTRAL_PSICOLOGIA ──────────────────────────────────────────────────────────────────────────────────
 const PSICOLOGA_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/psicologo',                label: 'Psicologia Central',      icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento Infantil', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdic-geral',               label: 'Relatórios Publicados',         icon: <FileText className="h-4 w-4" /> },
@@ -138,6 +146,7 @@ const PSICOLOGA_ITEMS: MenuItem[] = [
 ];
 // STAFF_CENTRAL ──────────────────────────────────────────────────────────────────────────────────
 const CENTRAL_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/central',                  label: 'Análises Centrais',        icon: <TrendingUp className="h-4 w-4" /> },
   { path: '/app/inteligencia',             label: 'Painel de Inteligência',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coordenacao-geral',        label: 'Coordenação Geral',        icon: <Network className="h-4 w-4" /> },
@@ -149,6 +158,7 @@ const CENTRAL_ITEMS: MenuItem[] = [
 
 // MANTENEDORA ──────────────────────────────────────────────────────────────────
 const MANTENEDORA_ITEMS: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/dashboard',         label: 'Painel Global',       icon: <LayoutDashboard className="h-4 w-4" /> },
   { path: '/app/coordenacao-geral', label: 'Coordenação Geral',   icon: <Network className="h-4 w-4" /> },
   { path: '/app/central',           label: 'Análises Centrais',   icon: <TrendingUp className="h-4 w-4" /> },
@@ -162,6 +172,7 @@ const MANTENEDORA_ITEMS: MenuItem[] = [
 
 // DEVELOPER — acesso completo ──────────────────────────────────────────────────
 const DEV_EXTRA: MenuItem[] = [
+  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/sala-de-aula-virtual', label: 'Sala de Aula Virtual',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdic-ria',             label: 'Desenvolvimento — Registros (RIA)', icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/planejamentos',        label: 'Planejamentos',          icon: <FileText className="h-4 w-4" /> },

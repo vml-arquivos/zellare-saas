@@ -81,6 +81,7 @@ import AtestadosDocumentosPage from '../pages/AtestadosDocumentosPage';
 import FinanceDashboardPage from '../pages/FinanceDashboardPage';
 import TeacherRankingPage from '../pages/TeacherRankingPage';
 import FamilyTimelinePage from '../pages/FamilyTimelinePage';
+import CareOverviewPage from '../pages/CareOverviewPage';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleProtectedRoute } from './RoleProtectedRoute';
@@ -703,6 +704,25 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['FAMILIA', 'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <FamilyTimelinePage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Cuidado integrado por criança — somente leitura e escopo real ─────
+      {
+        path: 'cuidado',
+        element: (
+          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <CareOverviewPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'cuidado/:childId',
+        element: (
+          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <CareOverviewPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
