@@ -83,6 +83,7 @@ import TeacherRankingPage from '../pages/TeacherRankingPage';
 import FamilyTimelinePage from '../pages/FamilyTimelinePage';
 import CareOverviewPage from '../pages/CareOverviewPage';
 import FamilyGuardiansPage from '../pages/FamilyGuardiansPage';
+import MetricsCoveragePage from '../pages/MetricsCoveragePage';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleProtectedRoute } from './RoleProtectedRoute';
@@ -705,6 +706,16 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['FAMILIA', 'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <FamilyTimelinePage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Cobertura e observabilidade agregada ────────────────────────────────
+      {
+        path: 'metricas-cobertura',
+        element: (
+          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <MetricsCoveragePage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,

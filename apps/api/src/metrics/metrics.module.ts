@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MetricsListener } from './metrics.listener';
+import { MetricsService } from './metrics.service';
+import { MetricsController } from './metrics.controller';
 
 @Module({
-  providers: [MetricsListener],
+  controllers: [MetricsController],
+  providers: [MetricsListener, MetricsService],
+  exports: [MetricsService],
 })
 export class MetricsModule {}

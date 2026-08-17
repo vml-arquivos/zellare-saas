@@ -48,6 +48,7 @@ const FAMILY_ITEMS: MenuItem[] = [
 
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
 const COORD_GESTAO: MenuItem[] = [
+  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/coordenacao-pedagogica', label: 'Painel da Coordenação',    icon: <Home className="h-4 w-4" /> },
   { path: '/app/coordenacao',            label: 'Turmas & Reuniões',        icon: <Users className="h-4 w-4" /> },
@@ -117,6 +118,7 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
 
 // UNIDADE — Genérico (sem roleType específico) ─────────────────────────────────
 const UNIDADE_GESTAO: MenuItem[] = [
+  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/unidade',                       label: 'Painel da Unidade',      icon: <Home className="h-4 w-4" /> },
@@ -151,6 +153,7 @@ const PSICOLOGA_ITEMS: MenuItem[] = [
 ];
 // STAFF_CENTRAL ──────────────────────────────────────────────────────────────────────────────────
 const CENTRAL_ITEMS: MenuItem[] = [
+  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/central',                  label: 'Análises Centrais',        icon: <TrendingUp className="h-4 w-4" /> },
@@ -164,6 +167,7 @@ const CENTRAL_ITEMS: MenuItem[] = [
 
 // MANTENEDORA ──────────────────────────────────────────────────────────────────
 const MANTENEDORA_ITEMS: MenuItem[] = [
+  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/dashboard',         label: 'Painel Global',       icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -179,6 +183,7 @@ const MANTENEDORA_ITEMS: MenuItem[] = [
 
 // DEVELOPER — acesso completo ──────────────────────────────────────────────────
 const DEV_EXTRA: MenuItem[] = [
+  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/sala-de-aula-virtual', label: 'Sala de Aula Virtual',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
