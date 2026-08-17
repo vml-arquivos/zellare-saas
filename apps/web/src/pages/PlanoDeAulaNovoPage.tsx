@@ -24,6 +24,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Badge } from '../components/ui/badge';
 // Tarefa 3.1 — IA no planejamento
 import { GeradorAtividadeIA } from '../components/planejamento/GeradorAtividadeIA';
+import { RevisarPlanejamentoIA } from '../components/planejamento/RevisarPlanejamentoIA';
 import {
   Save,
   Send,
@@ -1206,6 +1207,10 @@ export default function PlanoDeAulaNovoPage() {
               Selecione a turma e a data de início para ver os cards de planejamento.
             </div>
           )
+        )}
+
+        {planningId && (
+          <RevisarPlanejamentoIA planningId={planningId} />
         )}
 
         {/* ─── Ações ─── */}
