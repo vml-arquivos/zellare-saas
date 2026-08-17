@@ -322,3 +322,44 @@ export async function createGoodsReceipt(payload: {
   const response = await http.post<GoodsReceipt>('/finance/goods-receipts', payload);
   return response.data;
 }
+
+export interface FinanceOverview {
+  scope: { mantenedoraId: string; unitId: string | null };
+  periods: {
+    total: number;
+    open: number;
+    inConference: number;
+    approved: number;
+    closed: number;
+    latest: FinancialPeriod | null;
+  };
+  payroll: {
+    runs: number;
+    latestStatus: FinancePayrollStatus | null;
+    latestNet: number;
+    latestGross: number;
+  };
+  payables: {
+    total: number;
+    pending: number;
+    overdue: number;
+    pendingAmount: number;
+    overdueAmount: number;
+  };
+  stock: {
+    items: number;
+    lowStock: number;
+    totalQuantity: number;
+    lowStockItems: Array<Pick<StockItem, 'id' | 'name' | 'unitId' | 'quantity' | 'minimumQuantity'>>;
+  };
+  purchasing: { quotes: number; openQuotes: number; receipts: number };
+  time: { entries: number; byStatus: Record<string, number> };
+  generatedAt: string;
+}
+
+export async function getFinanceOverview(unitId?: string) {
+  const response = await http.get<FinanceOverview>('/finance/overview', {
+    params: unitId ? { unitId } : undefined,
+  });
+  return response.data;
+}
