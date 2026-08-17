@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import http from '../../api/http';
 
 interface Material {
   id: string;
@@ -69,44 +70,31 @@ export default function MaterialSelector({ onSelect, initialSelections = [] }: M
   const fetchMaterials = async () => {
     try {
       setLoading(true);
-      // TODO: Chamar API real
-      const mockMaterials: Material[] = [
-        // Higiene
-        { id: '1', name: 'Papel Higiênico', category: 'HIGIENE', icon: '🧻', unit: 'rolo', description: 'Papel higiênico folha dupla' },
-        { id: '2', name: 'Sabonete Líquido', category: 'HIGIENE', icon: '🧼', unit: 'litro', description: 'Sabonete líquido neutro' },
-        { id: '3', name: 'Álcool Gel', category: 'HIGIENE', icon: '🧴', unit: 'litro', description: 'Álcool gel 70%' },
-        { id: '4', name: 'Toalha de Papel', category: 'HIGIENE', icon: '📄', unit: 'pacote', description: 'Toalha de papel interfolhada' },
-        { id: '5', name: 'Fralda Descartável', category: 'HIGIENE', icon: '🧷', unit: 'pacote', description: 'Fralda descartável tamanho M' },
-        { id: '6', name: 'Lenço Umedecido', category: 'HIGIENE', icon: '🧽', unit: 'pacote', description: 'Lenço umedecido sem álcool' },
-        
-        // Pedagógico
-        { id: '7', name: 'Lápis de Cor', category: 'PEDAGOGICO', icon: '✏️', unit: 'caixa', description: 'Caixa com 12 cores' },
-        { id: '8', name: 'Tinta Guache', category: 'PEDAGOGICO', icon: '🎨', unit: 'pote', description: 'Tinta guache 250ml' },
-        { id: '9', name: 'Papel Sulfite A4', category: 'PEDAGOGICO', icon: '📃', unit: 'resma', description: 'Resma com 500 folhas' },
-        { id: '10', name: 'Cola Branca', category: 'PEDAGOGICO', icon: '🧪', unit: 'frasco', description: 'Cola branca 90g' },
-        { id: '11', name: 'Massinha de Modelar', category: 'PEDAGOGICO', icon: '🎭', unit: 'caixa', description: 'Caixa com 12 cores' },
-        { id: '12', name: 'Pincel', category: 'PEDAGOGICO', icon: '🖌️', unit: 'unidade', description: 'Pincel nº 12' },
-        
-        // Limpeza
-        { id: '13', name: 'Detergente', category: 'LIMPEZA', icon: '🧴', unit: 'litro', description: 'Detergente neutro' },
-        { id: '14', name: 'Desinfetante', category: 'LIMPEZA', icon: '🧪', unit: 'litro', description: 'Desinfetante multiuso' },
-        { id: '15', name: 'Pano de Limpeza', category: 'LIMPEZA', icon: '🧽', unit: 'unidade', description: 'Pano de microfibra' },
-        { id: '16', name: 'Saco de Lixo', category: 'LIMPEZA', icon: '🗑️', unit: 'pacote', description: 'Saco de lixo 100L' },
-        { id: '17', name: 'Vassoura', category: 'LIMPEZA', icon: '🧹', unit: 'unidade', description: 'Vassoura de nylon' },
-        { id: '18', name: 'Rodo', category: 'LIMPEZA', icon: '🧽', unit: 'unidade', description: 'Rodo 40cm' },
-        
-        // Alimentação
-        { id: '19', name: 'Copo Descartável', category: 'ALIMENTACAO', icon: '🥤', unit: 'pacote', description: 'Copo 200ml - pacote com 100' },
-        { id: '20', name: 'Prato Descartável', category: 'ALIMENTACAO', icon: '🍽️', unit: 'pacote', description: 'Prato fundo - pacote com 50' },
-        { id: '21', name: 'Guardanapo', category: 'ALIMENTACAO', icon: '🧻', unit: 'pacote', description: 'Guardanapo de papel' },
-        { id: '22', name: 'Talher Descartável', category: 'ALIMENTACAO', icon: '🍴', unit: 'pacote', description: 'Kit com 50 unidades' },
-        { id: '23', name: 'Touca Descartável', category: 'ALIMENTACAO', icon: '👒', unit: 'pacote', description: 'Touca descartável - pacote com 100' },
-        { id: '24', name: 'Luva Descartável', category: 'ALIMENTACAO', icon: '🧤', unit: 'caixa', description: 'Luva descartável tamanho M' },
-      ];
-      setMaterials(mockMaterials);
-      setFilteredMaterials(mockMaterials.filter((m) => m.category === selectedCategory));
+      const response = await http.get('/materials/catalog');
+      const payload = response.data;
+      const rawMaterials = Array.isArray(payload) ? payload : (payload?.data ?? []);
+      const allowedCategories = new Set(Object.keys(MATERIAL_CATEGORIES));
+      const realMaterials: Material[] = rawMaterials
+        .filter((material: any) => material?.id && material?.name)
+        .map((material: any) => {
+          const category = allowedCategories.has(String(material.category).toUpperCase())
+            ? String(material.category).toUpperCase()
+            : 'PEDAGOGICO';
+          return {
+            id: material.id,
+            name: material.name,
+            category: category as Material['category'],
+            icon: MATERIAL_CATEGORIES[category as keyof typeof MATERIAL_CATEGORIES].icon,
+            unit: material.unit ?? 'unidade',
+            description: material.description ?? undefined,
+          };
+        });
+      setMaterials(realMaterials);
+      setFilteredMaterials(realMaterials.filter((material) => material.category === selectedCategory));
     } catch (error) {
       console.error('Erro ao buscar materiais:', error);
+      setMaterials([]);
+      setFilteredMaterials([]);
     } finally {
       setLoading(false);
     }
