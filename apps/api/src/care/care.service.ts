@@ -38,6 +38,14 @@ export class CareService {
           orderBy: { geradoEm: 'desc' },
           take: 20,
         },
+        atendimentosPais: {
+          orderBy: { dataAtendimento: 'desc' },
+          take: 10,
+        },
+        developmentReports: {
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
       },
     });
 
@@ -148,6 +156,25 @@ export class CareService {
         geradoEm: alert.geradoEm,
         lidoEm: alert.lidoEm,
         resolvidoEm: alert.resolvidoEm,
+      })),
+      familyCare: child.atendimentosPais.map((meeting) => ({
+        id: meeting.id,
+        tipo: meeting.tipo,
+        status: meeting.status,
+        dataAtendimento: meeting.dataAtendimento,
+        assunto: meeting.assunto,
+        retornoNecessario: meeting.retornoNecessario,
+        dataRetorno: meeting.dataRetorno,
+        descricao: privileged ? meeting.descricao : null,
+        encaminhamento: privileged ? meeting.encaminhamento : null,
+      })),
+      reports: child.developmentReports.map((report) => ({
+        id: report.id,
+        period: report.period,
+        status: report.status,
+        publishedAt: report.publishedAt,
+        createdAt: report.createdAt,
+        content: privileged ? report.content : null,
       })),
       governance: {
         generatedAt: new Date().toISOString(),

@@ -31,6 +31,8 @@ function baseChild(overrides: Record<string, unknown> = {}) {
     developmentObs: [],
     acompanhamentosNutricionais: [],
     alertasAluno: [],
+    atendimentosPais: [],
+    developmentReports: [],
     ...overrides,
   };
 }
