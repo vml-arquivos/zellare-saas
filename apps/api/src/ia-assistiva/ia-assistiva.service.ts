@@ -586,9 +586,22 @@ ${materialBase}
       const conteudo = resposta.choices[0]?.message?.content;
       if (!conteudo) throw new ServiceUnavailableException('A IA não retornou conteúdo. Tente novamente.');
       const jsonLimpo = conteudo.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const plano = JSON.parse(jsonLimpo);
+      const plano = JSON.parse(jsonLimpo) as {
+        tituloDoPlano?: unknown;
+        dias?: Array<Record<string, unknown>>;
+      };
+      const objetivosPermitidos = new Set(
+        objetivos.map((objetivo) => objetivo.text.trim()),
+      );
+      const diasValidados = this.validarPlanoGerado(
+        plano,
+        dto.quantidadeDias,
+        objetivosPermitidos,
+      );
+
       return {
         ...plano,
+        dias: diasValidados,
         frameworkObjectiveIds: dto.frameworkObjectiveIds,
         geradoPorIA: true,
       };
@@ -597,6 +610,59 @@ ${materialBase}
       if (error instanceof ServiceUnavailableException || error instanceof BadRequestException) throw error;
       throw new ServiceUnavailableException('Serviço de IA temporariamente indisponível. Tente novamente em instantes.');
     }
+  }
+
+  private validarPlanoGerado(
+    plano: { tituloDoPlano?: unknown; dias?: Array<Record<string, unknown>> },
+    quantidadeDias: number,
+    objetivosPermitidos: Set<string>,
+  ): Array<Record<string, unknown>> {
+    if (typeof plano.tituloDoPlano !== 'string' || !plano.tituloDoPlano.trim()) {
+      throw new ServiceUnavailableException(
+        'A IA retornou um plano sem título válido. Tente novamente.',
+      );
+    }
+
+    if (!Array.isArray(plano.dias) || plano.dias.length !== quantidadeDias) {
+      throw new ServiceUnavailableException(
+        `A IA retornou ${plano.dias?.length ?? 0} dias, mas eram esperados ${quantidadeDias}. Tente novamente.`,
+      );
+    }
+
+    return plano.dias.map((dia, index) => {
+      const objetivo = dia.objetivoTrabalhando;
+      const titulo = dia.titulo;
+      const descricao = dia.descricao;
+      const materiais = dia.materiais;
+      const duracao = dia.duracao;
+
+      if (
+        typeof objetivo !== 'string' ||
+        !objetivosPermitidos.has(objetivo.trim()) ||
+        typeof titulo !== 'string' ||
+        !titulo.trim() ||
+        typeof descricao !== 'string' ||
+        !descricao.trim() ||
+        !Array.isArray(materiais) ||
+        materiais.some((item) => typeof item !== 'string') ||
+        typeof duracao !== 'string' ||
+        !duracao.trim()
+      ) {
+        throw new ServiceUnavailableException(
+          `A IA retornou dados inválidos no dia ${index + 1}. Tente novamente.`,
+        );
+      }
+
+      return {
+        ...dia,
+        dia: index + 1,
+        objetivoTrabalhando: objetivo.trim(),
+        titulo: titulo.trim(),
+        descricao: descricao.trim(),
+        materiais: materiais.map((item) => item.trim()),
+        duracao: duracao.trim(),
+      };
+    });
   }
 
   /**
