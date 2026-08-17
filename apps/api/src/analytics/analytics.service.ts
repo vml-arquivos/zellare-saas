@@ -1,5 +1,6 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DiaryEventStatus, RequestStatus } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,38 +31,42 @@ export class AnalyticsService {
 
     const key = `analytics:global:${user.mantenedoraId}`;
     return this.cached(key, 60, async () => {
-      // Unidades da mantenedora
-      const units = await this.prisma.unit.count({
-        where: { mantenedoraId: user.mantenedoraId },
-      });
-
-      // Alunos ativos (Enrollment ATIVA) — mantendo escopo por mantenedora via Classroom.Unit
-      const activeStudents = await this.prisma.enrollment.count({
-        where: {
-          status: 'ATIVA',
-          classroom: {
-            unit: { mantenedoraId: user.mantenedoraId },
-          },
-        },
-      });
-
-      // Alertas críticos (exemplo seguro/rápido): eventos com trocaFraldaStatus "ALERTA" nas últimas 48h
-      const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
-      const criticalAlerts = await this.prisma.diaryEvent.count({
-        where: {
-          mantenedoraId: user.mantenedoraId,
-          createdAt: { gte: since },
-          // JSONB => filtragem em nível app é cara; aqui só filtra se existir campo (não perfeito, mas barato)
-          // Se precisar precisão, usar queryRaw com jsonb_extract_path_text (fora do escopo aqui).
-          // trocaFraldaStatus: { not: null }, // Comentado: não suportado pelo Prisma
-        },
-      });
-
+      const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const [unitRows, activeStudents, totalTeachers, criticalAlerts, completedActivities, pendingRequests, attendancePresent, attendanceTotal] = await Promise.all([
+        this.prisma.unit.findMany({
+          where: { mantenedoraId: user.mantenedoraId, isActive: true },
+          select: { id: true, name: true },
+          orderBy: { name: 'asc' },
+        }),
+        this.prisma.enrollment.count({ where: { status: 'ATIVA', classroom: { unit: { mantenedoraId: user.mantenedoraId } } } }),
+        this.prisma.classroomTeacher.count({ where: { isActive: true, classroom: { unit: { mantenedoraId: user.mantenedoraId } } } }),
+        this.prisma.diaryEvent.count({ where: { mantenedoraId: user.mantenedoraId, createdAt: { gte: since48h }, status: { in: [DiaryEventStatus.PUBLICADO, DiaryEventStatus.REVISADO] } } }),
+        this.prisma.diaryEvent.count({ where: { mantenedoraId: user.mantenedoraId, createdAt: { gte: monthStart }, status: { in: [DiaryEventStatus.PUBLICADO, DiaryEventStatus.REVISADO] } } }),
+        this.prisma.materialRequest.count({ where: { mantenedoraId: user.mantenedoraId, status: RequestStatus.SOLICITADO } }),
+        this.prisma.attendance.count({ where: { mantenedoraId: user.mantenedoraId, date: { gte: monthStart }, status: 'PRESENTE' } }),
+        this.prisma.attendance.count({ where: { mantenedoraId: user.mantenedoraId, date: { gte: monthStart } } }),
+      ]);
+      const unitStats = await Promise.all(unitRows.map(async (unit) => ({
+        name: unit.name,
+        students: await this.prisma.enrollment.count({ where: { status: 'ATIVA', classroom: { unitId: unit.id } } }),
+      })));
       return {
         scope: 'MANTENEDORA',
-        units,
-        activeStudents,
+        totalUnits: unitRows.length,
+        totalStudents: activeStudents,
+        totalTeachers,
+        activeEnrollments: activeStudents,
+        monthlyRevenue: null,
+        pendingRequests,
+        completedActivities,
+        avgAttendance: attendanceTotal ? Math.round((attendancePresent / attendanceTotal) * 1000) / 10 : 0,
         criticalAlerts,
+        units: unitStats,
+        monthlyData: [{ month: monthStart.toISOString().slice(0, 7), students: activeStudents, revenue: null, activities: completedActivities }],
+        revenueAvailable: false,
         generatedAt: new Date().toISOString(),
       };
     });
