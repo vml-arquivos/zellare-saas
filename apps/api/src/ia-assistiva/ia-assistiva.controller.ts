@@ -108,9 +108,9 @@ export class IaAssistivaController {
   @HttpCode(HttpStatus.OK)
   gerarPlanoDeAula(
     @Body() dto: GerarPlanoDeAulaDto,
-    @CurrentUser() _user: JwtPayload,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.iaService.gerarPlanoDeAula(dto);
+    return this.iaService.gerarPlanoDeAula(dto, user);
   }
 
   /**

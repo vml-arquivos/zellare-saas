@@ -4,6 +4,7 @@ import { GerarAtividadeDto, FaixaEtaria, TipoAtividade } from './dto/gerar-ativi
 import { GerarPlanoDeAulaDto } from './dto/gerar-plano-de-aula.dto';
 import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 export interface AtividadeGerada {
   titulo: string;
@@ -515,11 +516,22 @@ Responda em JSON:
    * instituição. É o gerador "de verdade" — não uma atividade solta, mas
    * o planejamento inteiro de uma semana, pronto pra virar Planning.
    */
-  async gerarPlanoDeAula(dto: GerarPlanoDeAulaDto) {
+  async gerarPlanoDeAula(dto: GerarPlanoDeAulaDto, user?: JwtPayload) {
     const cliente = this.getCliente();
 
     const objetivos = await this.prisma.frameworkObjective.findMany({
-      where: { id: { in: dto.frameworkObjectiveIds } },
+      where: {
+        id: { in: dto.frameworkObjectiveIds },
+        ...(user && {
+          framework: {
+            isActive: true,
+            OR: [
+              { mantenedoraId: user.mantenedoraId },
+              { mantenedoraId: null },
+            ],
+          },
+        }),
+      },
       include: { dimension: true, framework: true },
     });
     if (objetivos.length === 0) {
@@ -528,8 +540,14 @@ Responda em JSON:
 
     let materialBase = '';
     if (dto.contentUploadId) {
-      const upload = await this.prisma.institutionContentUpload.findUnique({
-        where: { id: dto.contentUploadId },
+      const upload = await this.prisma.institutionContentUpload.findFirst({
+        where: {
+          id: dto.contentUploadId,
+          ...(user && {
+            mantenedoraId: user.mantenedoraId,
+            status: 'APROVADO',
+          }),
+        },
       });
       if (upload?.extractedData) {
         materialBase = `\n## MATERIAL DE REFERÊNCIA DA PRÓPRIA INSTITUIÇÃO (use como inspiração de estilo e conteúdo)\n${JSON.stringify(upload.extractedData)}\n`;
