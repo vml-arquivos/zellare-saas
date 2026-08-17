@@ -15,6 +15,7 @@ const ROLE_TYPE_TO_LEVEL: Record<RoleType, RoleLevel> = {
   UNIDADE_NUTRICIONISTA: 'UNIDADE',
   PROFESSOR: 'PROFESSOR',
   PROFESSOR_AUXILIAR: 'PROFESSOR',
+  FAMILIA_RESPONSAVEL: 'FAMILIA',
 };
 
 /**
@@ -32,6 +33,7 @@ const ROLE_TYPE_NAMES: Record<RoleType, string> = {
   UNIDADE_NUTRICIONISTA: 'Nutricionista de Unidade',
   PROFESSOR: 'Professor',
   PROFESSOR_AUXILIAR: 'Professor Auxiliar',
+  FAMILIA_RESPONSAVEL: 'Responsável Familiar',
 };
 
 /**
