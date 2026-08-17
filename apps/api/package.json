@@ -32,7 +32,9 @@
     "typecheck": "tsc --noEmit",
     "prepush": "npm run typecheck",
     "seed:completar-maio-hoje": "node scripts/seed-completar-maio-hoje-unidades.js",
-    "seed:completar-maio-hoje:dry": "DRY_RUN=true node scripts/seed-completar-maio-hoje-unidades.js"
+    "seed:completar-maio-hoje:dry": "DRY_RUN=true node scripts/seed-completar-maio-hoje-unidades.js",
+    "seed:test-users": "node scripts/seed-test-users.js",
+    "seed:test-users:dry": "DRY_RUN=true TEST_SEED_CONFIRMATION=ZELARE_FAKE_USERS_ONLY node scripts/seed-test-users.js"
   },
   "repository": {
     "type": "git",

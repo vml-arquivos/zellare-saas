@@ -16,18 +16,17 @@ export async function setupVite(app: Express, server: Server) {
   const { createServer: createViteServer } = await import("vite");
 
   const vite = await createViteServer({
-    configFile: true,
     server: {
       middlewareMode: true,
       hmr: { server },
-      allowedHosts: true as const,
+      allowedHosts: ['localhost', '127.0.0.1'],
     },
     appType: "custom",
   });
 
   app.use(vite.middlewares);
 
-  app.use("*", async (req, res, next) => {
+  app.use(async (req, res, next) => {
     const url = req.originalUrl;
     try {
       const clientTemplate = path.resolve(

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { type RequestHandler } from "express";
 import { createServer } from "http";
 import net from "net";
 import path from "path";
@@ -33,7 +33,7 @@ function serveStatic(app: express.Express) {
   app.use(express.static(distPath));
 
   // Fallback SPA — todas as rotas retornam index.html
-  app.use("*", (_req, res) => {
+  app.use((_req, res) => {
     const indexPath = path.resolve(distPath, "index.html");
     if (fs.existsSync(indexPath)) {
       res.sendFile(indexPath);
@@ -92,7 +92,7 @@ async function startServer() {
     createExpressMiddleware({
       router: appRouter,
       createContext,
-    })
+    }) as unknown as RequestHandler
   );
 
   // IMPORTANTE: usar new Function para o import dinâmico de vite.ts

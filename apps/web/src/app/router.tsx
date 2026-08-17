@@ -78,6 +78,7 @@ import PedidosAdministrativosPage from '../pages/PedidosAdministrativosPage';
 // FIX: páginas de Transporte/Retirada e Atestados/Documentos (antes causavam 404)
 import TransporteRetiradaPage from '../pages/TransporteRetiradaPage';
 import AtestadosDocumentosPage from '../pages/AtestadosDocumentosPage';
+import FinanceDashboardPage from '../pages/FinanceDashboardPage';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleProtectedRoute } from './RoleProtectedRoute';
@@ -672,6 +673,16 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <PedidosAdministrativosPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Financeiro e gestão de pessoas ────────────────────────────────────
+      {
+        path: 'financeiro',
+        element: (
+          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <FinanceDashboardPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,

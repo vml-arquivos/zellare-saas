@@ -2868,3 +2868,378 @@ model IaFeedback {
   @@index([userId])
   @@map("ia_feedback")
 }
+
+
+// ============================================================================
+// 15. NÚCLEO FINANCEIRO E ADMINISTRATIVO DO ZELARE
+// ============================================================================
+// Estas entidades mantêm IDs de escopo explícitos para preservar compatibilidade
+// com o schema multi-tenant existente. As regras de autorização são aplicadas no
+// serviço antes de qualquer escrita; migrações e FKs serão geradas em homologação.
+
+enum FinancePeriodStatus {
+  ABERTA
+  EM_CONFERENCIA
+  APROVADA
+  FECHADA
+  REABERTA
+}
+
+enum FinanceEmploymentStatus {
+  ATIVO
+  AFASTADO
+  FERIAS
+  ENCERRADO
+}
+
+enum FinanceTimeEntryStatus {
+  RASCUNHO
+  ENVIADO
+  EM_ANALISE
+  APROVADO
+  REJEITADO
+}
+
+enum FinancePayrollStatus {
+  RASCUNHO
+  CALCULADA
+  EM_CONFERENCIA
+  APROVADA
+  FECHADA
+  RETIFICADA
+}
+
+enum FinancePayrollItemKind {
+  PROVENTO
+  DESCONTO
+  ENCARGO
+  BENEFICIO
+  AJUSTE
+}
+
+enum FinancePayableStatus {
+  RASCUNHO
+  EM_APROVACAO
+  APROVADA
+  AGENDADA
+  PAGA
+  CONCILIADA
+  CANCELADA
+}
+
+enum FinanceApprovalStatus {
+  PENDENTE
+  APROVADA
+  REJEITADA
+  CANCELADA
+}
+
+enum FinanceStockMovementType {
+  ENTRADA
+  SAIDA
+  AJUSTE
+  TRANSFERENCIA
+}
+
+enum FinancePurchaseStatus {
+  ABERTA
+  RECEBIDA
+  CANCELADA
+}
+
+model FinancialPeriod {
+  id            String              @id @default(cuid())
+  mantenedoraId String
+  referenceMonth String             @db.VarChar(7)
+  status        FinancePeriodStatus @default(ABERTA)
+  closedAt      DateTime?
+  closedBy      String?
+  reopenedAt    DateTime?
+  reopenedBy    String?
+  reopenReason  String?             @db.Text
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@unique([mantenedoraId, referenceMonth])
+  @@index([mantenedoraId])
+  @@index([status])
+  @@map("financial_period")
+}
+
+model EmployeeProfile {
+  id                 String                  @id @default(cuid())
+  mantenedoraId      String
+  unitId             String?
+  userId             String?
+  employeeCode       String                  @db.VarChar(50)
+  firstName          String                  @db.VarChar(100)
+  lastName           String                  @db.VarChar(100)
+  cpf                String?                 @unique @db.VarChar(14)
+  roleType           String?                 @db.VarChar(80)
+  employmentStatus   FinanceEmploymentStatus @default(ATIVO)
+  hireDate           DateTime?
+  terminationDate    DateTime?
+  baseSalary         Decimal?                @db.Decimal(12, 2)
+  weeklyHours        Decimal?                @db.Decimal(6, 2)
+  costCenter         String?                 @db.VarChar(100)
+  bankAccountMasked  String?                 @db.VarChar(80)
+  createdBy          String?
+  updatedBy          String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@unique([mantenedoraId, employeeCode])
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([userId])
+  @@index([employmentStatus])
+  @@map("employee_profile")
+}
+
+model WorkSchedule {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String?
+  employeeId    String
+  weekday       Int
+  startMinute   Int
+  endMinute     Int
+  breakMinutes  Int      @default(0)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([employeeId])
+  @@index([effectiveFrom])
+  @@map("work_schedule")
+}
+
+model TimeEntry {
+  id            String                  @id @default(cuid())
+  mantenedoraId String
+  unitId        String?
+  periodId      String?
+  employeeId    String
+  workDate      DateTime
+  clockIn       DateTime?
+  clockOut      DateTime?
+  breakMinutes  Int                     @default(0)
+  workedMinutes Int?
+  status        FinanceTimeEntryStatus  @default(RASCUNHO)
+  source        String                  @default("MANUAL") @db.VarChar(30)
+  notes         String?                 @db.Text
+  createdBy     String?
+  approvedBy    String?
+  approvedAt    DateTime?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@unique([employeeId, workDate, clockIn])
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([periodId])
+  @@index([employeeId, workDate])
+  @@index([status])
+  @@map("time_entry")
+}
+
+model TimeAdjustment {
+  id            String                 @id @default(cuid())
+  mantenedoraId String
+  unitId        String?
+  periodId      String?
+  employeeId    String
+  timeEntryId   String?
+  requestedBy   String
+  approvedBy    String?
+  status        FinanceApprovalStatus @default(PENDENTE)
+  previousData  Json
+  proposedData  Json
+  reason        String                 @db.Text
+  decidedAt     DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([periodId])
+  @@index([employeeId])
+  @@index([status])
+  @@map("time_adjustment")
+}
+
+model PayrollRun {
+  id              String             @id @default(cuid())
+  mantenedoraId   String
+  periodId        String
+  status          FinancePayrollStatus @default(RASCUNHO)
+  rulesVersion    String             @default("initial") @db.VarChar(50)
+  totalGross      Decimal            @default(0) @db.Decimal(14, 2)
+  totalDeductions Decimal            @default(0) @db.Decimal(14, 2)
+  totalNet        Decimal            @default(0) @db.Decimal(14, 2)
+  totalCharges    Decimal            @default(0) @db.Decimal(14, 2)
+  snapshot        Json?
+  createdBy       String
+  computedAt      DateTime?
+  approvedBy      String?
+  approvedAt      DateTime?
+  closedBy        String?
+  closedAt        DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([periodId])
+  @@index([mantenedoraId])
+  @@index([status])
+  @@map("payroll_run")
+}
+
+model PayrollEmployee {
+  id              String   @id @default(cuid())
+  payrollRunId    String
+  employeeId      String
+  gross           Decimal  @default(0) @db.Decimal(14, 2)
+  deductions     Decimal  @default(0) @db.Decimal(14, 2)
+  net             Decimal  @default(0) @db.Decimal(14, 2)
+  employerCharges Decimal  @default(0) @db.Decimal(14, 2)
+  snapshot        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([payrollRunId, employeeId])
+  @@index([employeeId])
+  @@map("payroll_employee")
+}
+
+model PayrollItem {
+  id                String                 @id @default(cuid())
+  payrollEmployeeId String
+  kind              FinancePayrollItemKind
+  code              String                 @db.VarChar(50)
+  description       String                 @db.VarChar(255)
+  quantity          Decimal?               @db.Decimal(12, 4)
+  rate              Decimal?               @db.Decimal(12, 6)
+  amount            Decimal                @db.Decimal(14, 2)
+  reference         String?                @db.VarChar(100)
+  createdAt         DateTime               @default(now())
+
+  @@index([payrollEmployeeId])
+  @@index([kind])
+  @@map("payroll_item")
+}
+
+model Payable {
+  id            String               @id @default(cuid())
+  mantenedoraId String
+  unitId        String?
+  periodId      String?
+  supplierId    String?
+  beneficiary   String               @db.VarChar(255)
+  description   String               @db.Text
+  category      String               @db.VarChar(100)
+  sourceType    String               @db.VarChar(50)
+  sourceId      String?
+  dueDate       DateTime
+  amount        Decimal              @db.Decimal(14, 2)
+  status        FinancePayableStatus @default(RASCUNHO)
+  documentRef   String?              @db.VarChar(100)
+  approvedBy    String?
+  approvedAt    DateTime?
+  paidBy        String?
+  paidAt        DateTime?
+  paymentRef    String?              @db.VarChar(150)
+  createdBy     String
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([periodId])
+  @@index([supplierId])
+  @@index([dueDate])
+  @@index([status])
+  @@map("payable")
+}
+
+model PayableApproval {
+  id         String                 @id @default(cuid())
+  payableId  String
+  actorId    String
+  status     FinanceApprovalStatus @default(PENDENTE)
+  comment    String?                @db.Text
+  createdAt  DateTime               @default(now())
+
+  @@index([payableId])
+  @@index([actorId])
+  @@index([status])
+  @@map("payable_approval")
+}
+
+model StockMovement {
+  id            String                  @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  stockItemId   String
+  movementType  FinanceStockMovementType
+  quantity      Int
+  unitCost      Decimal?                @db.Decimal(12, 2)
+  sourceType    String                  @db.VarChar(50)
+  sourceId      String?
+  reason        String?                 @db.Text
+  createdBy     String
+  createdAt     DateTime                @default(now())
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([stockItemId, createdAt])
+  @@index([movementType])
+  @@map("stock_movement")
+}
+
+model PurchaseQuote {
+  id            String                @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  purchaseId    String?
+  supplierId    String?
+  status        FinancePurchaseStatus @default(ABERTA)
+  quotedAt      DateTime              @default(now())
+  totalAmount   Decimal               @default(0) @db.Decimal(14, 2)
+  documentRef   String?               @db.VarChar(150)
+  notes         String?               @db.Text
+  createdBy     String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([purchaseId])
+  @@index([supplierId])
+  @@index([status])
+  @@map("purchase_quote")
+}
+
+model GoodsReceipt {
+  id            String                @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  purchaseId    String
+  status        FinancePurchaseStatus @default(ABERTA)
+  receivedAt    DateTime              @default(now())
+  receivedBy    String
+  items         Json
+  documentRef   String?               @db.VarChar(150)
+  notes         String?               @db.Text
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([mantenedoraId])
+  @@index([unitId])
+  @@index([purchaseId])
+  @@index([status])
+  @@map("goods_receipt")
+}

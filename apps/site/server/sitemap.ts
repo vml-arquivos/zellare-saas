@@ -1,3 +1,5 @@
+import { desc, eq } from 'drizzle-orm';
+import { blogPosts, projects, units } from '../drizzle/schema';
 import { getDb } from './db';
 
 interface SitemapUrl {
@@ -44,9 +46,12 @@ export async function generateSitemap(baseUrl: string): Promise<string> {
     }
 
     // Buscar unidades ativas
-    const units = await db.$client.execute('SELECT slug, updatedAt FROM units WHERE active = true');
-    if (units && Array.isArray(units) && units.length > 0) {
-      units.forEach((unit: any) => {
+    const unitRows = await db
+      .select({ slug: units.slug, updatedAt: units.updatedAt })
+      .from(units)
+      .where(eq(units.active, true));
+    if (unitRows.length > 0) {
+      unitRows.forEach((unit) => {
         urls.push({
           loc: `${baseUrl}/unidades/${unit.slug}`,
           lastmod: unit.updatedAt ? new Date(unit.updatedAt).toISOString() : now,
@@ -57,11 +62,14 @@ export async function generateSitemap(baseUrl: string): Promise<string> {
     }
 
     // Buscar posts do blog publicados
-    const posts = await db.$client.execute(
-      'SELECT slug, updatedAt FROM blogPosts WHERE published = true ORDER BY publishedAt DESC LIMIT 100'
-    );
-    if (posts && Array.isArray(posts) && posts.length > 0) {
-      posts.forEach((post: any) => {
+    const posts = await db
+      .select({ slug: blogPosts.slug, updatedAt: blogPosts.updatedAt })
+      .from(blogPosts)
+      .where(eq(blogPosts.published, true))
+      .orderBy(desc(blogPosts.publishedAt))
+      .limit(100);
+    if (posts.length > 0) {
+      posts.forEach((post) => {
         urls.push({
           loc: `${baseUrl}/blog/${post.slug}`,
           lastmod: post.updatedAt ? new Date(post.updatedAt).toISOString() : now,
@@ -72,9 +80,12 @@ export async function generateSitemap(baseUrl: string): Promise<string> {
     }
 
     // Buscar projetos ativos
-    const projects = await db.$client.execute('SELECT slug, updatedAt FROM projects WHERE active = true');
-    if (projects && Array.isArray(projects) && projects.length > 0) {
-      projects.forEach((project: any) => {
+    const projectRows = await db
+      .select({ slug: projects.slug, updatedAt: projects.updatedAt })
+      .from(projects)
+      .where(eq(projects.active, true));
+    if (projectRows.length > 0) {
+      projectRows.forEach((project) => {
         urls.push({
           loc: `${baseUrl}/projetos/${project.slug}`,
           lastmod: project.updatedAt ? new Date(project.updatedAt).toISOString() : now,
