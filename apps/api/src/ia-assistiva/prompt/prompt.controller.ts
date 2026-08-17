@@ -17,11 +17,16 @@ import {
   UpdatePromptTemplateDtoClass,
 } from '../dto/prompt-template.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { RequireRoles } from '../../common/decorators/roles.decorator';
+import { RoleLevel } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
+const PROMPT_GOVERNANCE_ROLES = [RoleLevel.DEVELOPER, RoleLevel.STAFF_CENTRAL];
+
 @Controller('ia/prompts')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PromptController {
   constructor(private readonly promptService: PromptService) {}
 
@@ -30,6 +35,7 @@ export class PromptController {
    * Cria um novo template de prompt.
    */
   @Post()
+  @RequireRoles(...PROMPT_GOVERNANCE_ROLES)
   @HttpCode(HttpStatus.CREATED)
   create(
     @Body() dto: CreatePromptTemplateDtoClass,
@@ -49,6 +55,7 @@ export class PromptController {
    * Lista templates com filtros opcionais.
    */
   @Get()
+  @RequireRoles(...PROMPT_GOVERNANCE_ROLES)
   findAll(
     @Query('active') active?: string,
     @Query('name') name?: string,
@@ -64,6 +71,7 @@ export class PromptController {
    * Busca um template por ID.
    */
   @Get(':id')
+  @RequireRoles(...PROMPT_GOVERNANCE_ROLES)
   findOne(@Param('id') id: string) {
     return this.promptService.findOne(id);
   }
@@ -73,6 +81,7 @@ export class PromptController {
    * Atualiza um template (incrementa versão automaticamente).
    */
   @Patch(':id')
+  @RequireRoles(...PROMPT_GOVERNANCE_ROLES)
   update(
     @Param('id') id: string,
     @Body() dto: UpdatePromptTemplateDtoClass,
@@ -91,6 +100,7 @@ export class PromptController {
    * Desativa um template (soft delete — não remove do banco).
    */
   @Delete(':id')
+  @RequireRoles(...PROMPT_GOVERNANCE_ROLES)
   @HttpCode(HttpStatus.OK)
   deactivate(@Param('id') id: string) {
     return this.promptService.deactivate(id);
