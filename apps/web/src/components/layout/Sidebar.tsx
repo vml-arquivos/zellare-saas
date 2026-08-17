@@ -7,7 +7,7 @@ import {
   FileText, Home, MessageCircle, Camera, UserCheck, Building2,
   Network, Brain, Layers, Settings, Sparkles, UserCircle, Calendar,
   Apple, Utensils, Shield, X, Eye, FileEdit, AlertTriangle, UserPlus, Bell, FolderCheck, Bus, Stethoscope,
-  Smartphone,
+  Smartphone, Trophy,
 } from 'lucide-react';
 import { useAuth } from '../../app/AuthProvider';
 import { normalizeRoles, normalizeRoleTypes } from '../../app/RoleProtectedRoute';
@@ -38,6 +38,7 @@ const PROFESSOR_FERRAMENTAS: MenuItem[] = [
   { path: '/app/atendimentos-pais',   label: 'Atendimentos Pais',      icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/matriz-pedagogica',   label: 'Matriz 2026',            icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/painel-alergias',     label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" />, badge: 'Atenção' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
@@ -66,6 +67,7 @@ const DIRETOR_ITEMS: MenuItem[] = [
   { path: '/app/planejamentos',     label: 'Planejamentos',          icon: <BookOpen className="h-4 w-4" /> },
   { path: '/app/painel-alergias',   label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" /> },
   { path: '/app/financeiro',          label: 'Financeiro e Ponto',      icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // UNIDADE — Nutricionista ──────────────────────────────────────────────────────
@@ -149,6 +151,7 @@ const MANTENEDORA_ITEMS: MenuItem[] = [
   { path: '/app/rdic-geral',        label: 'Relatórios Publicados',    icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/pedidos-compra',    label: 'Pedidos de Compra',   icon: <ShoppingBag className="h-4 w-4" /> },
   { path: '/app/financeiro',         label: 'Financeiro e Ponto',    icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/matriz-pedagogica', label: 'Matriz 2026',         icon: <Layers className="h-4 w-4" /> },
   { path: '/app/reports',           label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
 ];
@@ -161,6 +164,7 @@ const DEV_EXTRA: MenuItem[] = [
   { path: '/app/nutricionista',        label: 'Painel da Nutricionista',icon: <Utensils className="h-4 w-4" /> },
   { path: '/app/diretor',              label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
   { path: '/app/configuracoes',        label: 'Configurações',          icon: <Settings className="h-4 w-4" /> },
+  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // ─── Componentes de navegação ─────────────────────────────────────────────────

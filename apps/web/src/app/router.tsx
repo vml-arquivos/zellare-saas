@@ -79,6 +79,7 @@ import PedidosAdministrativosPage from '../pages/PedidosAdministrativosPage';
 import TransporteRetiradaPage from '../pages/TransporteRetiradaPage';
 import AtestadosDocumentosPage from '../pages/AtestadosDocumentosPage';
 import FinanceDashboardPage from '../pages/FinanceDashboardPage';
+import TeacherRankingPage from '../pages/TeacherRankingPage';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleProtectedRoute } from './RoleProtectedRoute';
@@ -683,6 +684,15 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <FinanceDashboardPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: 'ranking-preenchimento',
+        element: (
+          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <TeacherRankingPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
