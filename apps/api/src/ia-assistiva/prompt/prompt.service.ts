@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export interface CreatePromptTemplateDto {
@@ -67,21 +68,48 @@ export class PromptService {
     if (!existing) {
       throw new NotFoundException(`PromptTemplate "${id}" não encontrado.`);
     }
+    if (dto.name !== undefined && !dto.name.trim()) {
+      throw new BadRequestException('O nome do template não pode ficar vazio.');
+    }
+    if (dto.template !== undefined && !dto.template.trim()) {
+      throw new BadRequestException('O corpo do template não pode ficar vazio.');
+    }
 
-    const updated = await this.prisma.promptTemplate.update({
-      where: { id },
-      data: {
-        ...(dto.name !== undefined && { name: dto.name.trim() }),
-        ...(dto.description !== undefined && { description: dto.description?.trim() }),
-        ...(dto.template !== undefined && { template: dto.template.trim() }),
-        ...(dto.variables !== undefined && { variables: dto.variables }),
-        ...(dto.active !== undefined && { active: dto.active }),
-        version: existing.version + 1,
-      },
+    const contentChanged = [dto.name, dto.description, dto.template, dto.variables]
+      .some((value) => value !== undefined);
+
+    if (!contentChanged) {
+      const statusUpdated = await this.prisma.promptTemplate.update({
+        where: { id },
+        data: dto.active === undefined ? {} : { active: dto.active },
+      });
+      this.logger.log(`PromptTemplate ${id} — status ativo=${statusUpdated.active}`);
+      return statusUpdated;
+    }
+
+    const nextVersion = existing.version + 1;
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await tx.promptTemplate.update({
+        where: { id },
+        data: { active: false },
+      });
+      return tx.promptTemplate.create({
+        data: {
+          name: dto.name?.trim() ?? existing.name,
+          description: dto.description === undefined ? existing.description : dto.description?.trim(),
+          template: dto.template?.trim() ?? existing.template,
+          variables: dto.variables ?? (existing.variables === null
+            ? Prisma.JsonNull
+            : existing.variables as Prisma.InputJsonValue),
+          version: nextVersion,
+          active: dto.active ?? true,
+          createdBy: existing.createdBy,
+        },
+      });
     });
 
     this.logger.log(
-      `PromptTemplate atualizado: ${id} — versão ${updated.version}`,
+      `PromptTemplate versionado: ${id} → ${updated.id} — versão ${updated.version}`,
     );
     return updated;
   }
