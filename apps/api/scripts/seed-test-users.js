@@ -1,246 +1,314 @@
+#!/usr/bin/env node
 /**
- * Script para criar usuários de teste com todos os níveis de acesso
- * 
- * Níveis de Acesso:
- * 1. DEVELOPER - Acesso total ao sistema
- * 2. MANTENEDORA - Gestão administrativa global (relatórios, compras, unidades, funcionários)
- * 3. STAFF_CENTRAL - Coordenação pedagógica geral (todas as unidades, RDI, RIA, diários)
- * 4. UNIDADE - Gestão local (diretor, coordenador, administrativo, nutricionista)
- * 5. PROFESSOR - Acesso à turma (diário de bordo, micro-gestos, relatórios, templates IA)
- * 
- * Uso:
+ * Seed idempotente de contas fictícias para homologação do Zelare.
+ *
+ * Segurança operacional:
+ *   - nunca executa por padrão;
+ *   - exige APPLY_TEST_SEED=true;
+ *   - em produção exige ALLOW_PRODUCTION_TEST_SEED=true;
+ *   - exige TEST_SEED_CONFIRMATION=ZELARE_FAKE_USERS_ONLY;
+ *   - cria somente endereços do domínio .test;
+ *   - não remove usuários, papéis ou escopos existentes.
+ *
+ * Uso seguro em homologação:
+ *   APPLY_TEST_SEED=true \
+ *   TEST_SEED_CONFIRMATION=ZELARE_FAKE_USERS_ONLY \
+ *   TEST_USERS_PASSWORD='defina-uma-senha-de-teste' \
  *   node scripts/seed-test-users.js
+ *
+ * Para produção, a mesma execução também exige:
+ *   ALLOW_PRODUCTION_TEST_SEED=true
+ *
+ * O script não executa migrações, não cria crianças e não insere dados pedagógicos.
  */
 
-const { PrismaClient } = require('@prisma/client');
+const {
+  PrismaClient,
+  RoleLevel,
+  RoleType,
+  UserStatus,
+} = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
+const CONFIRMATION = 'ZELARE_FAKE_USERS_ONLY';
+const TEST_DOMAIN = '.test';
+const DEFAULT_PASSWORD = process.env.TEST_USERS_PASSWORD || 'Zelare@Teste2026!';
+const isProduction = process.env.NODE_ENV === 'production';
+const shouldApply = process.env.APPLY_TEST_SEED === 'true';
+const isDryRun = process.env.DRY_RUN === 'true';
 
-// Senha padrão para todos os usuários de teste
-const DEFAULT_PASSWORD = 'Teste@123';
+const TEST_MANTENEDORA_EMAIL = process.env.TEST_MANTENEDORA_EMAIL || 'mantenedora@zelare.test';
+const TEST_MANTENEDORA_NAME = process.env.TEST_MANTENEDORA_NAME || 'Zelare — Instituição Fictícia de Teste';
+const TEST_UNIT_CODE = process.env.TEST_UNIT_CODE || 'ZELARE-TESTE-01';
+const TEST_UNIT_NAME = process.env.TEST_UNIT_NAME || 'Unidade Piloto Fictícia';
 
-// Usuários de teste
 const TEST_USERS = [
-  // ============================================================================
-  // NÍVEL 1: DEVELOPER (Acesso Total)
-  // ============================================================================
   {
-    email: 'developer@conexa.com',
-    password: DEFAULT_PASSWORD,
+    key: 'developer',
+    email: 'developer@zelare.test',
     firstName: 'Developer',
-    lastName: 'Sistema',
-    roleLevel: 'DEVELOPER',
-    specificRole: null,
-    description: 'Acesso sistêmico total - Desenvolvimento e manutenção',
-  },
-
-  // ============================================================================
-  // NÍVEL 2: MANTENEDORA (Gestão Administrativa Global)
-  // ============================================================================
-  {
-    email: 'admin@mantenedora.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Administrador',
-    lastName: 'Geral',
-    roleLevel: 'MANTENEDORA',
-    specificRole: 'ADMIN',
-    description: 'Gestão administrativa completa - Relatórios, compras, unidades, funcionários',
+    lastName: 'Zelare — Teste',
+    roleType: RoleType.DEVELOPER,
+    roleLevel: RoleLevel.DEVELOPER,
+    unitScoped: false,
+    description: 'Acesso total para homologação técnica controlada.',
   },
   {
-    email: 'financeiro@mantenedora.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Financeiro',
-    lastName: 'Mantenedora',
-    roleLevel: 'MANTENEDORA',
-    specificRole: 'FINANCEIRO',
-    description: 'Gestão financeira - Pedidos de compra, fornecedores, orçamentos',
-  },
-
-  // ============================================================================
-  // NÍVEL 3: STAFF_CENTRAL (Coordenação Pedagógica Geral)
-  // ============================================================================
-  {
-    email: 'coordenacao@central.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Coordenadora',
-    lastName: 'Geral',
-    roleLevel: 'STAFF_CENTRAL',
-    specificRole: 'PEDAGOGICO',
-    description: 'Coordenação pedagógica de todas as unidades - RDI, RIA, diários, relatórios',
+    key: 'mantenedora-geral',
+    email: 'mantenedora.geral@zelare.test',
+    firstName: 'Mantenedora',
+    lastName: 'Geral — Teste',
+    roleType: RoleType.MANTENEDORA_ADMIN,
+    roleLevel: RoleLevel.MANTENEDORA,
+    unitScoped: false,
+    description: 'Gestão administrativa global da instituição fictícia.',
   },
   {
-    email: 'psicologia@central.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Psicóloga',
-    lastName: 'Central',
-    roleLevel: 'STAFF_CENTRAL',
-    specificRole: 'PSICOLOGIA',
-    description: 'Apoio psicológico - Acompanhamento de desenvolvimento, padrões comportamentais',
+    key: 'coordenacao-geral',
+    email: 'coordenacao.geral@zelare.test',
+    firstName: 'Coordenação',
+    lastName: 'Geral — Teste',
+    roleType: RoleType.STAFF_CENTRAL_PEDAGOGICO,
+    roleLevel: RoleLevel.STAFF_CENTRAL,
+    unitScoped: false,
+    description: 'Coordenação pedagógica central da instituição fictícia.',
   },
-
-  // ============================================================================
-  // NÍVEL 4: UNIDADE (Gestão Local)
-  // ============================================================================
   {
-    email: 'diretor@unidade1.com',
-    password: DEFAULT_PASSWORD,
+    key: 'psicologia',
+    email: 'psicologia@zelare.test',
+    firstName: 'Psicologia',
+    lastName: 'Escolar — Teste',
+    roleType: RoleType.STAFF_CENTRAL_PSICOLOGIA,
+    roleLevel: RoleLevel.STAFF_CENTRAL,
+    unitScoped: false,
+    description: 'Acompanhamento psicológico escolar com escopo central.',
+  },
+  {
+    key: 'diretor-unidade',
+    email: 'diretor.unidade@zelare.test',
     firstName: 'Diretor',
-    lastName: 'Unidade 1',
-    roleLevel: 'UNIDADE',
-    specificRole: 'DIRETOR',
-    description: 'Direção da unidade - Gestão geral, relatórios, equipe',
+    lastName: 'de Unidade — Teste',
+    roleType: RoleType.UNIDADE_DIRETOR,
+    roleLevel: RoleLevel.UNIDADE,
+    unitScoped: true,
+    description: 'Direção da unidade piloto fictícia.',
   },
   {
-    email: 'coordenador@unidade1.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Coordenadora',
-    lastName: 'Pedagógica',
-    roleLevel: 'UNIDADE',
-    specificRole: 'COORDENADOR_PEDAGOGICO',
-    description: 'Coordenação pedagógica da unidade - Planejamentos, diários, professores',
+    key: 'secretaria',
+    email: 'secretaria@zelare.test',
+    firstName: 'Secretaria',
+    lastName: 'Escolar — Teste',
+    roleType: RoleType.UNIDADE_ADMINISTRATIVO,
+    roleLevel: RoleLevel.UNIDADE,
+    unitScoped: true,
+    description: 'Secretaria e administração da unidade piloto fictícia.',
   },
   {
-    email: 'administrativo@unidade1.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Secretário',
-    lastName: 'Administrativo',
-    roleLevel: 'UNIDADE',
-    specificRole: 'ADMINISTRATIVO',
-    description: 'Secretaria administrativa - Matrículas, documentos, atendimento aos pais',
-  },
-  {
-    email: 'nutricionista@unidade1.com',
-    password: DEFAULT_PASSWORD,
+    key: 'nutricionista',
+    email: 'nutricionista@zelare.test',
     firstName: 'Nutricionista',
-    lastName: 'Unidade 1',
-    roleLevel: 'UNIDADE',
-    specificRole: 'NUTRICIONISTA',
-    description: 'Nutrição - Cardápios, dietas restritivas, pedidos de alimentos',
-  },
-
-  // ============================================================================
-  // NÍVEL 5: PROFESSOR (Acesso à Turma)
-  // ============================================================================
-  {
-    email: 'professor1@unidade1.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Professora',
-    lastName: 'Turma A',
-    roleLevel: 'PROFESSOR',
-    specificRole: 'PROFESSOR',
-    description: 'Professor - Diário de bordo, micro-gestos, relatórios, templates IA, modo offline',
+    lastName: 'Escolar — Teste',
+    roleType: RoleType.UNIDADE_NUTRICIONISTA,
+    roleLevel: RoleLevel.UNIDADE,
+    unitScoped: true,
+    description: 'Nutrição, cardápios e restrições alimentares da unidade piloto.',
   },
   {
-    email: 'professor2@unidade1.com',
-    password: DEFAULT_PASSWORD,
+    key: 'coordenador-unidade',
+    email: 'coordenador.unidade@zelare.test',
+    firstName: 'Coordenador',
+    lastName: 'de Unidade — Teste',
+    roleType: RoleType.UNIDADE_COORDENADOR_PEDAGOGICO,
+    roleLevel: RoleLevel.UNIDADE,
+    unitScoped: true,
+    description: 'Coordenação pedagógica da unidade piloto fictícia.',
+  },
+  {
+    key: 'professor',
+    email: 'professor@zelare.test',
     firstName: 'Professor',
-    lastName: 'Turma B',
-    roleLevel: 'PROFESSOR',
-    specificRole: 'PROFESSOR',
-    description: 'Professor - Diário de bordo, micro-gestos, relatórios, templates IA, modo offline',
+    lastName: 'de Teste',
+    roleType: RoleType.PROFESSOR,
+    roleLevel: RoleLevel.PROFESSOR,
+    unitScoped: true,
+    description: 'Professor vinculado à unidade piloto fictícia.',
   },
   {
-    email: 'professor3@unidade1.com',
-    password: DEFAULT_PASSWORD,
-    firstName: 'Professora',
-    lastName: 'Turma C',
-    roleLevel: 'PROFESSOR',
-    specificRole: 'PROFESSOR',
-    description: 'Professor - Diário de bordo, micro-gestos, relatórios, templates IA, modo offline',
+    key: 'financeiro',
+    email: 'financeiro@zelare.test',
+    firstName: 'Financeiro',
+    lastName: 'Escolar — Teste',
+    roleType: RoleType.MANTENEDORA_FINANCEIRO,
+    roleLevel: RoleLevel.MANTENEDORA,
+    unitScoped: false,
+    description: 'Perfil adicional para homologar folha, pagamentos e compras.',
   },
 ];
 
-async function seedTestUsers() {
-  try {
-    console.log('🌱 Iniciando seed de usuários de teste...\n');
+function assertSafeConfiguration() {
+  if (process.env.TEST_SEED_CONFIRMATION !== CONFIRMATION) {
+    throw new Error(`Defina TEST_SEED_CONFIRMATION=${CONFIRMATION} para confirmar que todos os usuários são fictícios.`);
+  }
 
-    // Hash da senha padrão
-    const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  if (!shouldApply && !isDryRun) {
+    throw new Error('Seed bloqueado. Use APPLY_TEST_SEED=true ou DRY_RUN=true.');
+  }
 
-    let created = 0;
-    let skipped = 0;
+  if (isProduction && process.env.ALLOW_PRODUCTION_TEST_SEED !== 'true' && !isDryRun) {
+    throw new Error('Seed bloqueado em produção. Use ALLOW_PRODUCTION_TEST_SEED=true somente após aprovação explícita.');
+  }
 
-    for (const userData of TEST_USERS) {
-      // Verificar se usuário já existe
-      const existingUser = await prisma.user.findUnique({
-        where: { email: userData.email },
-      });
+  if (!TEST_MANTENEDORA_EMAIL.endsWith(TEST_DOMAIN)) {
+    throw new Error(`TEST_MANTENEDORA_EMAIL deve terminar em ${TEST_DOMAIN}.`);
+  }
 
-      if (existingUser) {
-        console.log(`⏭️  Usuário já existe: ${userData.email}`);
-        skipped++;
-        continue;
-      }
-
-      // Criar usuário
-      const user = await prisma.user.create({
-        data: {
-          email: userData.email,
-          password: hashedPassword,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          roleLevel: userData.roleLevel,
-          specificRole: userData.specificRole,
-          isActive: true,
-        },
-      });
-
-      console.log(`✅ Criado: ${userData.email}`);
-      console.log(`   Nome: ${user.firstName} ${user.lastName}`);
-      console.log(`   Nível: ${user.roleLevel}`);
-      console.log(`   Papel: ${user.specificRole || 'N/A'}`);
-      console.log(`   Descrição: ${userData.description}`);
-      console.log('');
-
-      created++;
+  for (const user of TEST_USERS) {
+    if (!user.email.endsWith(TEST_DOMAIN)) {
+      throw new Error(`Usuário de teste fora do domínio permitido: ${user.email}`);
     }
+  }
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`✅ Seed concluído!`);
-    console.log(`   Criados: ${created}`);
-    console.log(`   Já existiam: ${skipped}`);
-    console.log(`   Total: ${TEST_USERS.length}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    console.log('📋 CREDENCIAIS DE ACESSO:\n');
-    console.log('   Senha padrão para todos: Teste@123\n');
-    console.log('   NÍVEL 1 - DEVELOPER:');
-    console.log('   • developer@conexa.com\n');
-    console.log('   NÍVEL 2 - MANTENEDORA:');
-    console.log('   • admin@mantenedora.com (Admin)');
-    console.log('   • financeiro@mantenedora.com (Financeiro)\n');
-    console.log('   NÍVEL 3 - STAFF_CENTRAL:');
-    console.log('   • coordenacao@central.com (Pedagógico)');
-    console.log('   • psicologia@central.com (Psicologia)\n');
-    console.log('   NÍVEL 4 - UNIDADE:');
-    console.log('   • diretor@unidade1.com (Diretor)');
-    console.log('   • coordenador@unidade1.com (Coordenador Pedagógico)');
-    console.log('   • administrativo@unidade1.com (Administrativo)');
-    console.log('   • nutricionista@unidade1.com (Nutricionista)\n');
-    console.log('   NÍVEL 5 - PROFESSOR:');
-    console.log('   • professor1@unidade1.com (Turma A)');
-    console.log('   • professor2@unidade1.com (Turma B)');
-    console.log('   • professor3@unidade1.com (Turma C)\n');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-    console.log('⚠️  IMPORTANTE:');
-    console.log('   1. Altere as senhas após o primeiro login');
-    console.log('   2. Estes usuários são apenas para TESTE');
-    console.log('   3. NÃO use em produção com dados reais');
-    console.log('   4. Crie usuários reais com dados verdadeiros\n');
-
-  } catch (error) {
-    console.error('❌ Erro ao criar usuários de teste:', error.message);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
+  if (DEFAULT_PASSWORD.length < 12) {
+    throw new Error('TEST_USERS_PASSWORD deve ter pelo menos 12 caracteres.');
   }
 }
 
-// Executar seed
-seedTestUsers()
+async function ensureTenant() {
+  return prisma.mantenedora.upsert({
+    where: { email: TEST_MANTENEDORA_EMAIL },
+    update: { isActive: true, name: TEST_MANTENEDORA_NAME },
+    create: {
+      name: TEST_MANTENEDORA_NAME,
+      email: TEST_MANTENEDORA_EMAIL,
+      country: 'BR',
+      plan: 'professional',
+      maxUnits: 10,
+      maxUsers: 100,
+      isActive: true,
+    },
+  });
+}
+
+async function ensureUnit(mantenedoraId) {
+  return prisma.unit.upsert({
+    where: { mantenedoraId_code: { mantenedoraId, code: TEST_UNIT_CODE } },
+    update: { name: TEST_UNIT_NAME, isActive: true },
+    create: {
+      mantenedoraId,
+      name: TEST_UNIT_NAME,
+      code: TEST_UNIT_CODE,
+      city: 'Brasília',
+      state: 'DF',
+      capacity: 100,
+      ageGroupsServed: '0-5',
+      isActive: true,
+    },
+  });
+}
+
+async function ensureRole(mantenedoraId, userData) {
+  return prisma.role.upsert({
+    where: { mantenedoraId_type: { mantenedoraId, type: userData.roleType } },
+    update: {
+      name: userData.roleType,
+      description: userData.description,
+      level: userData.roleLevel,
+      isActive: true,
+    },
+    create: {
+      mantenedoraId,
+      name: userData.roleType,
+      description: userData.description,
+      level: userData.roleLevel,
+      type: userData.roleType,
+      isActive: true,
+      isCustom: false,
+    },
+  });
+}
+
+async function ensureUser(mantenedoraId, unitId, role, userData, passwordHash) {
+  const user = await prisma.user.upsert({
+    where: { email: userData.email },
+    update: {
+      mantenedoraId,
+      unitId: userData.unitScoped ? unitId : null,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      password: passwordHash,
+      status: UserStatus.ATIVO,
+      emailVerified: true,
+    },
+    create: {
+      mantenedoraId,
+      unitId: userData.unitScoped ? unitId : null,
+      email: userData.email,
+      password: passwordHash,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      status: UserStatus.ATIVO,
+      emailVerified: true,
+    },
+  });
+
+  const userRole = await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: user.id, roleId: role.id } },
+    update: { scopeLevel: userData.roleLevel, isActive: true },
+    create: {
+      userId: user.id,
+      roleId: role.id,
+      scopeLevel: userData.roleLevel,
+      isActive: true,
+    },
+  });
+
+  if (userData.unitScoped) {
+    await prisma.userRoleUnitScope.upsert({
+      where: { userRoleId_unitId: { userRoleId: userRole.id, unitId } },
+      update: {},
+      create: { userRoleId: userRole.id, unitId },
+    });
+  } else {
+    await prisma.userRoleUnitScope.deleteMany({ where: { userRoleId: userRole.id } });
+  }
+
+  return user;
+}
+
+async function main() {
+  assertSafeConfiguration();
+
+  console.log(`Modo: ${isDryRun ? 'DRY-RUN — nenhuma escrita' : 'APLICAÇÃO CONTROLADA'}`);
+  console.log(`Ambiente: ${process.env.NODE_ENV || 'não informado'}`);
+  console.log(`Perfis: ${TEST_USERS.length}`);
+
+  if (isDryRun) {
+    console.table(TEST_USERS.map(({ key, email, roleType, unitScoped }) => ({ key, email, roleType, unitScoped })));
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
+  const tenant = await ensureTenant();
+  const unit = await ensureUnit(tenant.id);
+  const results = [];
+
+  for (const userData of TEST_USERS) {
+    const role = await ensureRole(tenant.id, userData);
+    const user = await ensureUser(tenant.id, unit.id, role, userData, passwordHash);
+    results.push({ email: user.email, roleType: userData.roleType, unit: userData.unitScoped ? unit.code : 'REDE' });
+  }
+
+  console.table(results);
+  console.log(`\nSenha comum dos testes: ${process.env.TEST_USERS_PASSWORD ? '[fornecida por variável]' : DEFAULT_PASSWORD}`);
+  console.log('Essas contas são fictícias e devem permanecer restritas à homologação.');
+}
+
+main()
   .catch((error) => {
-    console.error(error);
-    process.exit(1);
+    console.error('Seed de usuários de teste abortado:', error.message);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

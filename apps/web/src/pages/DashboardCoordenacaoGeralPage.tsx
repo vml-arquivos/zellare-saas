@@ -1038,7 +1038,7 @@ export default function DashboardCoordenacaoGeralPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-red-50 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="p-1.5 bg-white/60 rounded-lg"><HeartPulse className="h-4 w-4 text-red-500" /></div>
+                <div className="p-1.5 bg-white/60 rounded-lg"><Activity className="h-4 w-4 text-red-500" /></div>
               </div>
               <p className="text-2xl font-semibold text-red-700 tabular-nums">
                 {saudeAlertas.filter((a) => a.severidade === 'ALTA' || a.severidade === 'CRITICA').length}
@@ -1047,7 +1047,7 @@ export default function DashboardCoordenacaoGeralPage() {
             </div>
             <div className="bg-amber-50 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className="p-1.5 bg-white/60 rounded-lg"><AlertTriangle className="h-4 w-4 text-amber-500" /></div>
+                <div className="p-1.5 bg-white/60 rounded-lg"><TriangleAlert className="h-4 w-4 text-amber-500" /></div>
               </div>
               <p className="text-2xl font-semibold text-amber-700 tabular-nums">
                 {saudeAlertas.filter((a) => a.severidade === 'MEDIA').length}

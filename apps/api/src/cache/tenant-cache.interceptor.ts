@@ -15,7 +15,7 @@ export class TenantCacheInterceptor extends CacheInterceptor {
 
     // CacheInterceptor base gera key pela URL (path + query)
     const baseKey = super.trackBy(context);
-    if (!baseKey) return baseKey;
+    if (!baseKey) return undefined;
 
     const user = req?.user;
     const mantenedoraId = user?.mantenedoraId ?? 'no-mant';

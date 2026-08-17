@@ -32,6 +32,7 @@ import { ClassroomsModule } from './classrooms/classrooms.module';
 import { AtendimentoPaisModule } from './atendimento-pais/atendimento-pais.module';
 import { ChildrenModule } from './children/children.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { FinanceModule } from './finance/finance.module';
 import { CoordenacaoModule } from './coordenacao/coordenacao.module';
 import { RdxModule } from './rdx/rdx.module';
 import { RdicModule } from './rdic/rdic.module';
@@ -88,6 +89,7 @@ import { EmpresasTransporteModule } from './empresas-transporte/empresas-transpo
     AtendimentoPaisModule,
     ChildrenModule,
     AttendanceModule,
+    FinanceModule,
     CoordenacaoModule,
     RdxModule,
     RdicModule,

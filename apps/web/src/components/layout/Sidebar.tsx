@@ -65,6 +65,7 @@ const DIRETOR_ITEMS: MenuItem[] = [
   { path: '/app/reports',           label: 'Relatórios',             icon: <BarChart2 className="h-4 w-4" /> },
   { path: '/app/planejamentos',     label: 'Planejamentos',          icon: <BookOpen className="h-4 w-4" /> },
   { path: '/app/painel-alergias',   label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" /> },
+  { path: '/app/financeiro',          label: 'Financeiro e Ponto',      icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // UNIDADE — Nutricionista ──────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
   { path: '/app/atendimentos-pais',             label: 'Atendimento aos Pais',         icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/secretaria/transporte',         label: 'Transporte e Retirada',        icon: <Bus className="h-4 w-4" /> },
   { path: '/app/secretaria/funcionarios',       label: 'Funcionários da Unidade',      icon: <Building2 className="h-4 w-4" /> },
+  { path: '/app/financeiro',                     label: 'Financeiro e Ponto',            icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/secretaria/comunicacao',        label: 'Comunicados Administrativos',  icon: <Bell className="h-4 w-4" /> },
 ];
 
@@ -108,7 +110,8 @@ const UNIDADE_GESTAO: MenuItem[] = [
   { path: '/app/relatorio-consumo-materiais',   label: 'Consumo de Materiais',   icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/dashboard-consumo-materiais',   label: 'Consumo — Gráficos',      icon: <TrendingUp className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/painel-alergias',               label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/pedidos-compra',                label: 'Pedidos de Compra',      icon: <ShoppingBag className="h-4 w-4" /> },
+    { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
+  { path: '/app/financeiro',              label: 'Financeiro e Ponto',       icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
 ];
 const UNIDADE_PEDAGOGICO: MenuItem[] = [
   { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão e Aprovação', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
@@ -145,6 +148,7 @@ const MANTENEDORA_ITEMS: MenuItem[] = [
   { path: '/app/central',           label: 'Análises Centrais',   icon: <TrendingUp className="h-4 w-4" /> },
   { path: '/app/rdic-geral',        label: 'Relatórios Publicados',    icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/pedidos-compra',    label: 'Pedidos de Compra',   icon: <ShoppingBag className="h-4 w-4" /> },
+  { path: '/app/financeiro',         label: 'Financeiro e Ponto',    icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/matriz-pedagogica', label: 'Matriz 2026',         icon: <Layers className="h-4 w-4" /> },
   { path: '/app/reports',           label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
 ];
