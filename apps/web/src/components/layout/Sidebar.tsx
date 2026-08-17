@@ -41,6 +41,10 @@ const PROFESSOR_FERRAMENTAS: MenuItem[] = [
   { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
+const FAMILY_ITEMS: MenuItem[] = [
+  { path: '/app/timeline-familiar', label: 'Timeline da Criança', icon: <HeartPulse className="h-4 w-4" />, badge: 'Privado' },
+];
+
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
 const COORD_GESTAO: MenuItem[] = [
   { path: '/app/coordenacao-pedagogica', label: 'Painel da Coordenação',    icon: <Home className="h-4 w-4" /> },
@@ -258,6 +262,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const isCentral     = userLevels.some((r) => r === 'STAFF_CENTRAL' || r.startsWith('STAFF_CENTRAL_'));
   const isMantenedora = userLevels.some((r) => r === 'MANTENEDORA' || r.startsWith('MANTENEDORA_'));
   const isDeveloper   = userLevels.includes('DEVELOPER');
+  const isFamily      = userLevels.includes('FAMILIA') || userTypes.includes('FAMILIA_RESPONSAVEL');
 
   // Flags de tipo (sub-papel dentro de UNIDADE)
   const isDiretor         = userTypes.includes('UNIDADE_DIRETOR');
@@ -280,6 +285,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     : isAdministrativo                   ? 'Secretaria'
     : isUnidade                          ? 'Unidade'
     : isProfessor                        ? 'Professor(a)'
+    : isFamily                           ? 'Família'
     : 'Usuário';
 
   const configItem: MenuItem = { path: '/app/configuracoes', label: 'Configurações', icon: <Settings className="h-4 w-4" /> };
@@ -420,8 +426,13 @@ export function Sidebar({ onClose }: SidebarProps) {
           </>
         )}
 
+        {/* FAMÍLIA / RESPONSÁVEL */}
+        {!isDeveloper && isFamily && (
+          <NavSection titulo="Família" items={FAMILY_ITEMS} location={location} onItemClick={onClose} />
+        )}
+
         {/* Fallback */}
-        {!isDeveloper && !isAdministrativo && !isMantenedora && !isCentral && !isUnidade && !isProfessor && (
+        {!isDeveloper && !isAdministrativo && !isMantenedora && !isCentral && !isUnidade && !isProfessor && !isFamily && (
           <NavSection titulo="Menu" items={UNIDADE_GESTAO} location={location} onItemClick={onClose} />
         )}
 
