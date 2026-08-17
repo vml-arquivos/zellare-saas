@@ -56,6 +56,7 @@ import { AuditLogInterceptor } from './audit-log/audit-log.interceptor';
 import { EmpresasTransporteModule } from './empresas-transporte/empresas-transporte.module';
 import { TeacherRankingModule } from './teacher-ranking/teacher-ranking.module';
 import { FamilyModule } from './family/family.module';
+import { CareModule } from './care/care.module';
 
 @Module({
   imports: [
@@ -114,6 +115,7 @@ import { FamilyModule } from './family/family.module';
     EmpresasTransporteModule,
     TeacherRankingModule,
     FamilyModule,
+    CareModule,
   ],
   controllers: [AppController],
   providers: [

@@ -16,6 +16,7 @@ import {
 import { PageShell } from '../components/ui/PageShell';
 import {
   calculatePayroll,
+  getFinanceOverview,
   createFinancialPeriod,
   createGoodsReceipt,
   createPayable,
@@ -41,6 +42,7 @@ import {
   type FinancePurchaseStatus,
   type FinanceStockMovementType,
   type FinancialPeriod,
+  type FinanceOverview,
   type GoodsReceipt,
   type Payable,
   type PayrollRun,
@@ -130,6 +132,7 @@ export default function FinanceDashboardPage() {
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [quotes, setQuotes] = useState<PurchaseQuote[]>([]);
   const [receipts, setReceipts] = useState<GoodsReceipt[]>([]);
+  const [overview, setOverview] = useState<FinanceOverview | null>(null);
   const [selectedPeriodId, setSelectedPeriodId] = useState('');
   const [newMonth, setNewMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const [paymentRefs, setPaymentRefs] = useState<Record<string, string>>({});
@@ -152,7 +155,8 @@ export default function FinanceDashboardPage() {
     try {
       const periodData = await listFinancialPeriods();
       const periodId = selectedPeriodId || periodData[0]?.id;
-      const [employeeData, timeData, payrollData, payableData, stockData, movementData, quoteData, receiptData] = await Promise.all([
+      const [overviewData, employeeData, timeData, payrollData, payableData, stockData, movementData, quoteData, receiptData] = await Promise.all([
+        getFinanceOverview(),
         listEmployees(),
         listTimeEntries(periodId ? { periodId } : undefined),
         listPayrolls(),
@@ -162,6 +166,7 @@ export default function FinanceDashboardPage() {
         listPurchaseQuotes(),
         listGoodsReceipts(),
       ]);
+      setOverview(overviewData);
       setPeriods(periodData);
       setSelectedPeriodId((current) => current || periodId || '');
       setEmployees(employeeData);
@@ -245,6 +250,15 @@ export default function FinanceDashboardPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><Clock3 className="h-5 w-5 text-indigo-600" /><p className="mt-3 text-2xl font-semibold text-slate-900">{timeEntries.length}</p><p className="text-xs text-slate-500">Registros de ponto</p></div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><WalletCards className="h-5 w-5 text-indigo-600" /><p className="mt-3 text-2xl font-semibold text-slate-900">{money(payables.reduce((sum, item) => sum + Number(item.amount), 0))}</p><p className="text-xs text-slate-500">Contas a pagar listadas</p></div>
         </section>
+
+        {overview && (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm"><Receipt className="h-5 w-5 text-rose-600" /><p className="mt-3 text-2xl font-semibold text-rose-900">{money(overview.payables.overdueAmount)}</p><p className="text-xs text-rose-700">Contas vencidas · {overview.payables.overdue}</p></div>
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm"><WalletCards className="h-5 w-5 text-emerald-600" /><p className="mt-3 text-2xl font-semibold text-emerald-900">{money(overview.payroll.latestNet)}</p><p className="text-xs text-emerald-700">Última folha líquida · {overview.payroll.latestStatus ?? 'Sem cálculo'}</p></div>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm"><Boxes className="h-5 w-5 text-amber-600" /><p className="mt-3 text-2xl font-semibold text-amber-900">{overview.stock.lowStock}</p><p className="text-xs text-amber-700">Itens abaixo do mínimo</p></div>
+            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 shadow-sm"><ShoppingCart className="h-5 w-5 text-sky-600" /><p className="mt-3 text-2xl font-semibold text-sky-900">{overview.purchasing.openQuotes}</p><p className="text-xs text-sky-700">Cotações abertas · {overview.purchasing.receipts} recebimentos</p></div>
+          </section>
+        )}
 
         <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
           {([['controle', 'Ponto e competências', Clock3], ['folha', 'Folha', FileCheck2], ['contas', 'Contas a pagar', Receipt], ['estoque', 'Compras e estoque', Boxes]] as const).map(([tab, label, Icon]) => (

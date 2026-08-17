@@ -106,3 +106,34 @@ export const LABELS_TIPO_ATIVIDADE: Record<TipoAtividade, string> = {
   SEQUENCIA_DIDATICA: 'Sequência Didática',
   LIVRE: 'Livre',
 };
+
+export interface RevisaoPlanejamento {
+  planningId: string;
+  planningStatus: string;
+  reviewedAt: string;
+  fonte: {
+    classroomId: string;
+    curriculumMatrixId: string | null;
+    objectivesCount: number;
+  };
+  revisao: {
+    resumo: string;
+    pontosFortes: string[];
+    lacunas: string[];
+    sugestoes: string[];
+    perguntasParaProfessor: string[];
+    alertas: string[];
+  };
+  geradoPorIA: true;
+  requerRevisaoHumana: true;
+}
+
+/**
+ * Revisa um planejamento salvo sem alterar seu conteúdo ou status.
+ */
+export async function revisarPlanejamento(
+  planningId: string,
+): Promise<RevisaoPlanejamento> {
+  const response = await http.post('/ia/revisar-planejamento', { planningId });
+  return response.data;
+}

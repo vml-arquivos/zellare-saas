@@ -65,6 +65,15 @@ const FINANCE_EMPLOYEE_ROLES = [
 export class FinanceController {
   constructor(private readonly service: FinanceService) {}
 
+  @Get('overview')
+  @RequireRoles(...FINANCE_READ_ROLES)
+  getOverview(
+    @Query('unitId') unitId: string | undefined,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.getOverview(user, unitId);
+  }
+
   @Get('periods')
   @RequireRoles(...FINANCE_READ_ROLES)
   listPeriods(@CurrentUser() user: JwtPayload) {

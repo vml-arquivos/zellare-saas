@@ -166,6 +166,116 @@ export class FinanceService {
     });
   }
 
+  async getOverview(user: JwtPayload, requestedUnitId?: string) {
+    const unitId = await this.resolveUnitId(user, requestedUnitId);
+    const [periods, payrolls, payables, stockItems, purchaseQuotes, goodsReceipts, timeEntries] = await Promise.all([
+      this.prisma.financialPeriod.findMany({
+        where: { mantenedoraId: user.mantenedoraId },
+        orderBy: { referenceMonth: 'desc' },
+        take: 12,
+      }),
+      this.prisma.payrollRun.findMany({
+        where: { mantenedoraId: user.mantenedoraId },
+        orderBy: { createdAt: 'desc' },
+        take: 12,
+      }),
+      this.prisma.payable.findMany({
+        where: {
+          mantenedoraId: user.mantenedoraId,
+          ...(unitId ? { unitId } : {}),
+        },
+        orderBy: { dueDate: 'asc' },
+        take: 500,
+      }),
+      this.prisma.stockItem.findMany({
+        where: unitId ? { unitId } : { unit: { mantenedoraId: user.mantenedoraId } },
+        select: { id: true, name: true, unitId: true, quantity: true, minimumQuantity: true },
+      }),
+      this.prisma.purchaseQuote.findMany({
+        where: {
+          mantenedoraId: user.mantenedoraId,
+          ...(unitId ? { unitId } : {}),
+        },
+        orderBy: { quotedAt: 'desc' },
+        take: 200,
+      }),
+      this.prisma.goodsReceipt.findMany({
+        where: {
+          mantenedoraId: user.mantenedoraId,
+          ...(unitId ? { unitId } : {}),
+        },
+        orderBy: { receivedAt: 'desc' },
+        take: 200,
+      }),
+      this.prisma.timeEntry.findMany({
+        where: {
+          mantenedoraId: user.mantenedoraId,
+          ...(unitId ? { unitId } : {}),
+        },
+        orderBy: { workDate: 'desc' },
+        take: 500,
+      }),
+    ]);
+
+    const finalPayableStatuses = new Set<FinancePayableStatus>([
+      FinancePayableStatus.PAGA,
+      FinancePayableStatus.CONCILIADA,
+      FinancePayableStatus.CANCELADA,
+    ]);
+    const payablePending = payables.filter(
+      (payable) => !finalPayableStatuses.has(payable.status),
+    );
+    const now = Date.now();
+    const overdue = payablePending.filter((payable) => payable.dueDate.getTime() < now);
+    const lowStock = stockItems.filter((item) => item.quantity <= item.minimumQuantity);
+    const amount = (value: Prisma.Decimal | number | null | undefined) => Number(value ?? 0);
+
+    return {
+      scope: { mantenedoraId: user.mantenedoraId, unitId: unitId ?? null },
+      periods: {
+        total: periods.length,
+        open: periods.filter((period) => period.status === FinancePeriodStatus.ABERTA).length,
+        inConference: periods.filter((period) => period.status === FinancePeriodStatus.EM_CONFERENCIA).length,
+        approved: periods.filter((period) => period.status === FinancePeriodStatus.APROVADA).length,
+        closed: periods.filter((period) => period.status === FinancePeriodStatus.FECHADA).length,
+        latest: periods[0] ?? null,
+      },
+      payroll: {
+        runs: payrolls.length,
+        latestStatus: payrolls[0]?.status ?? null,
+        latestNet: amount(payrolls[0]?.totalNet),
+        latestGross: amount(payrolls[0]?.totalGross),
+      },
+      payables: {
+        total: payables.length,
+        pending: payablePending.length,
+        overdue: overdue.length,
+        pendingAmount: payablePending.reduce((total, payable) => total + amount(payable.amount), 0),
+        overdueAmount: overdue.reduce((total, payable) => total + amount(payable.amount), 0),
+      },
+      stock: {
+        items: stockItems.length,
+        lowStock: lowStock.length,
+        totalQuantity: stockItems.reduce((total, item) => total + item.quantity, 0),
+        lowStockItems: lowStock.slice(0, 20),
+      },
+      purchasing: {
+        quotes: purchaseQuotes.length,
+        openQuotes: purchaseQuotes.filter((quote) => quote.status === FinancePurchaseStatus.ABERTA).length,
+        receipts: goodsReceipts.length,
+      },
+      time: {
+        entries: timeEntries.length,
+        byStatus: timeEntries.reduce<Record<string, number>>((summary, entry) => {
+          const status = String(entry.status);
+          summary[status] = (summary[status] ?? 0) + 1;
+          return summary;
+        }, {}),
+      },
+      generatedAt: new Date().toISOString(),
+    };
+  }
+
   async createPeriod(dto: CreateFinancialPeriodDto, user: JwtPayload) {
     if (!this.canManageNetwork(user)) {
       throw new ForbiddenException('Somente a mantenedora pode abrir competência financeira');

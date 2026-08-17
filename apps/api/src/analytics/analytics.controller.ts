@@ -1,12 +1,15 @@
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { RequireRoles } from '../common/decorators/roles.decorator';
 import { RoleLevel } from '@prisma/client';
 import { AuditDashboardAccessInterceptor } from '../common/interceptors/audit-dashboard-access.interceptor';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(AuditDashboardAccessInterceptor)
 export class AnalyticsController {
   constructor(private readonly analytics: AnalyticsService) {}

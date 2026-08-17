@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import http from '../../api/http';
 
 interface Child {
   id: string;
@@ -46,55 +47,27 @@ export default function ChildSelector({
   const fetchChildren = async () => {
     try {
       setLoading(true);
-      // TODO: Chamar API real
-      const mockChildren: Child[] = [
-        {
-          id: '1',
-          firstName: 'Ana',
-          lastName: 'Silva',
-          dateOfBirth: '2024-03-15',
-          classroomName: 'Berçário I',
-        },
-        {
-          id: '2',
-          firstName: 'João',
-          lastName: 'Santos',
-          dateOfBirth: '2024-05-20',
-          classroomName: 'Berçário I',
-        },
-        {
-          id: '3',
-          firstName: 'Maria',
-          lastName: 'Oliveira',
-          dateOfBirth: '2024-01-10',
-          classroomName: 'Berçário I',
-        },
-        {
-          id: '4',
-          firstName: 'Pedro',
-          lastName: 'Costa',
-          dateOfBirth: '2024-07-08',
-          classroomName: 'Berçário I',
-        },
-        {
-          id: '5',
-          firstName: 'Julia',
-          lastName: 'Ferreira',
-          dateOfBirth: '2024-02-25',
-          classroomName: 'Berçário I',
-        },
-        {
-          id: '6',
-          firstName: 'Lucas',
-          lastName: 'Almeida',
-          dateOfBirth: '2024-04-12',
-          classroomName: 'Berçário I',
-        },
-      ];
-      setChildren(mockChildren);
-      setFilteredChildren(mockChildren);
+      const response = classroomId
+        ? await http.get(`/lookup/classrooms/${classroomId}/children`)
+        : await http.get('/children');
+      const payload = response.data;
+      const rawChildren = Array.isArray(payload) ? payload : (payload?.children ?? payload?.data ?? []);
+      const realChildren: Child[] = rawChildren
+        .filter((child: any) => child?.id && child?.firstName && child?.lastName)
+        .map((child: any) => ({
+          id: child.id,
+          firstName: child.firstName,
+          lastName: child.lastName,
+          photoUrl: child.photoUrl ?? undefined,
+          dateOfBirth: child.dateOfBirth,
+          classroomName: child.classroomName ?? child.enrollments?.[0]?.classroom?.name,
+        }));
+      setChildren(realChildren);
+      setFilteredChildren(realChildren);
     } catch (error) {
       console.error('Erro ao buscar crianças:', error);
+      setChildren([]);
+      setFilteredChildren([]);
     } finally {
       setLoading(false);
     }

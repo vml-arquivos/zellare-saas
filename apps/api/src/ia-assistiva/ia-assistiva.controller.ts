@@ -108,9 +108,23 @@ export class IaAssistivaController {
   @HttpCode(HttpStatus.OK)
   gerarPlanoDeAula(
     @Body() dto: GerarPlanoDeAulaDto,
-    @CurrentUser() _user: JwtPayload,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.iaService.gerarPlanoDeAula(dto);
+    return this.iaService.gerarPlanoDeAula(dto, user);
+  }
+
+  /**
+   * POST /ia/revisar-planejamento
+   * Revisa um planejamento real em modo somente leitura.
+   * A resposta é uma recomendação estruturada e requer revisão humana.
+   */
+  @Post('revisar-planejamento')
+  @HttpCode(HttpStatus.OK)
+  revisarPlanejamento(
+    @Body() body: { planningId: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.iaService.revisarPlanejamento(body.planningId, user);
   }
 
   /**
