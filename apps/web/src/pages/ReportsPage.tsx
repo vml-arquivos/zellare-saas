@@ -578,7 +578,8 @@ export function ReportsPage() {
         </div>
       )}
 
-      {!loading && !error && reportData && reportType && (
+      {/* A visão pedagógica usa pedagogicalData; os relatórios legados usam reportData. */}
+      {!loading && !error && (reportData || pedagogicalData) && reportType && (
         <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800">{titulos[reportType]}</h2>
