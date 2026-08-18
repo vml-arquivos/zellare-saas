@@ -228,6 +228,9 @@ enum AuditLogEntity {
   TENANT_BRANDING
   FEATURE_FLAG
   INSTITUTION_CONTENT_UPLOAD
+  RDIC_PROFILE
+  RDIX_TEMPLATE
+  RDIX_INSTANCE
 }
 
 /// Papel do professor na turma
@@ -289,6 +292,9 @@ model Mantenedora {
   pedagogicalFrameworks       PedagogicalFramework[]
   contentUploads              InstitutionContentUpload[]
   units                       Unit[]
+  rdicProfiles                RdicDocumentProfile[]       @relation("MantenedoraRdicProfiles")
+  defaultRdicProfileId        String?                     @unique
+  defaultRdicProfile          RdicDocumentProfile?        @relation("MantenedoraDefaultRdicProfile", fields: [defaultRdicProfileId], references: [id], onDelete: SetNull)
   users                       User[]
   roles                       Role[]
   children                    Child[]
@@ -299,6 +305,7 @@ model Mantenedora {
   materialRequests            MaterialRequest[]
   reportBases                 ReportBase[]
   aiContexts                  AIContext[]
+  rdicDocumentEvents          RdicDocumentEvent[]
   auditLogs                   AuditLog[]
   pedidosCompra               PedidoCompra[]
   solicitacoesCorrecao        SolicitacaoCorrecao[]
@@ -582,6 +589,9 @@ model Unit {
   pedidosCompra        PedidoCompra[]
   solicitacoesCorrecao SolicitacaoCorrecao[]
   aiContexts           AIContext[]
+  rdicProfileId        String?
+  rdicProfile          RdicDocumentProfile?  @relation("UnitRdicProfile", fields: [rdicProfileId], references: [id], onDelete: SetNull)
+  rdicDocumentEvents   RdicDocumentEvent[]
 
   dailyMetrics          DailyMetric[]
   cardapios             Cardapio[]
@@ -1979,6 +1989,33 @@ enum StatusRDIX {
   DEVOLVIDO
   FINALIZADO
   PUBLICADO
+  ARQUIVADO
+}
+
+enum RdicInstitutionType {
+  PUBLICA
+  PRIVADA
+  REDE_PUBLICA
+  OUTRA
+}
+
+enum RdicProfileStatus {
+  RASCUNHO
+  ATIVO
+  ARQUIVADO
+}
+
+enum RdicDocumentEventType {
+  CRIADO
+  ATUALIZADO
+  ENVIADO_REVISAO
+  DEVOLVIDO
+  APROVADO
+  FINALIZADO
+  PUBLICADO
+  CIENCIA_FAMILIA
+  ARQUIVADO
+  EXPORTADO
 }
 
 /// Período letivo do RDIC (SEDF 2026: Trimestral | legado: Bimestral)
@@ -1992,55 +2029,132 @@ enum RdicPeriodo {
   TERCEIRO_TRIMESTRE
 }
 
+model RdicDocumentProfile {
+  id                  String              @id @default(cuid())
+  mantenedoraId       String?
+  code                String              @db.VarChar(100)
+  name                String              @db.VarChar(255)
+  documentLabel       String              @db.VarChar(255)
+  institutionType     RdicInstitutionType
+  authorityName       String?             @db.VarChar(255)
+  authorityReference  String?             @db.VarChar(255)
+  curriculumReference String?             @db.VarChar(255)
+  sourceUrl           String?             @db.VarChar(500)
+  version             Int                 @default(1)
+  status              RdicProfileStatus   @default(ATIVO)
+  isCurated           Boolean             @default(false)
+  periodicity         String              @db.VarChar(50)
+  requiredFields      Json                @default("[]")
+  signaturePolicy     Json                @default("{}")
+  familyPolicy        Json                @default("{}")
+  archivePolicy       Json                @default("{}")
+  templateSchema      Json                @default("{}")
+  createdById         String?             @db.VarChar(255)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  mantenedora           Mantenedora?    @relation("MantenedoraRdicProfiles", fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  templates             RDIXTemplate[]
+  instances             RDIXInstancia[]
+  units                 Unit[]          @relation("UnitRdicProfile")
+  defaultForMantenedora Mantenedora?    @relation("MantenedoraDefaultRdicProfile")
+
+  @@unique([mantenedoraId, code, version])
+  @@index([mantenedoraId])
+  @@index([institutionType])
+  @@index([status])
+  @@index([isCurated])
+}
+
 model RDIXTemplate {
-  id            String          @id @default(cuid())
-  mantenedoraId String
-  segmento      String          @db.VarChar(50)
-  titulo        String          @db.VarChar(255)
-  estruturaJson Json
-  ativo         Boolean         @default(true)
-  criadoPorId   String          @db.VarChar(255)
-  criadoEm      DateTime        @default(now())
-  atualizadoEm  DateTime        @updatedAt
-  mantenedora   Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
-  instancias    RDIXInstancia[]
+  id             String               @id @default(cuid())
+  mantenedoraId  String
+  profileId      String?
+  profileVersion Int?
+  segmento       String               @db.VarChar(50)
+  titulo         String               @db.VarChar(255)
+  estruturaJson  Json
+  ativo          Boolean              @default(true)
+  criadoPorId    String               @db.VarChar(255)
+  criadoEm       DateTime             @default(now())
+  atualizadoEm   DateTime             @updatedAt
+  mantenedora    Mantenedora          @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  profile        RdicDocumentProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  instancias     RDIXInstancia[]
 
   @@index([mantenedoraId])
+  @@index([profileId])
   @@index([segmento])
 }
 
 model RDIXInstancia {
-  id            String       @id @default(cuid())
-  mantenedoraId String
-  unitId        String
-  templateId    String
-  childId       String
-  classroomId   String
-  periodo       String       @db.VarChar(50)
-  periodoEnum   RdicPeriodo?
-  anoLetivo     Int
-  status        StatusRDIX   @default(RASCUNHO)
-  rascunhoJson  Json?
-  conteudoFinal Json?
-  criadoPorId   String       @db.VarChar(255)
-  revisadoPorId String?      @db.VarChar(255)
-  submittedAt   DateTime? // Data de envio para revisão
-  reviewedAt    DateTime? // Data de aprovação ou devolução
-  reviewComment String?      @db.Text // Comentário da devolução
-  finalizadoEm  DateTime?
-  publicadoEm   DateTime?
-  criadoEm      DateTime     @default(now())
-  atualizadoEm  DateTime     @updatedAt
-  mantenedora   Mantenedora  @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
-  template      RDIXTemplate @relation(fields: [templateId], references: [id])
-  child         Child        @relation(fields: [childId], references: [id], onDelete: Cascade)
+  id                     String               @id @default(cuid())
+  mantenedoraId          String
+  unitId                 String
+  templateId             String
+  profileId              String?
+  profileVersion         Int?
+  profileSnapshot        Json?
+  childId                String
+  classroomId            String
+  periodo                String               @db.VarChar(50)
+  periodoEnum            RdicPeriodo?
+  anoLetivo              Int
+  status                 StatusRDIX           @default(RASCUNHO)
+  rascunhoJson           Json?
+  conteudoFinal          Json?
+  signatureManifest      Json?
+  familyAcknowledgedAt   DateTime?
+  familyAcknowledgedById String?              @db.VarChar(255)
+  archivedAt             DateTime?
+  archivedById           String?              @db.VarChar(255)
+  documentHash           String?              @db.VarChar(128)
+  criadoPorId            String               @db.VarChar(255)
+  revisadoPorId          String?              @db.VarChar(255)
+  submittedAt            DateTime? // Data de envio para revisão
+  reviewedAt             DateTime? // Data de aprovação ou devolução
+  reviewComment          String?              @db.Text // Comentário da devolução
+  finalizadoEm           DateTime?
+  publicadoEm            DateTime?
+  criadoEm               DateTime             @default(now())
+  atualizadoEm           DateTime             @updatedAt
+  mantenedora            Mantenedora          @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  template               RDIXTemplate         @relation(fields: [templateId], references: [id])
+  profile                RdicDocumentProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  child                  Child                @relation(fields: [childId], references: [id], onDelete: Cascade)
+  events                 RdicDocumentEvent[]
 
   @@unique([childId, classroomId, periodo, anoLetivo])
   @@index([mantenedoraId])
   @@index([unitId])
+  @@index([profileId])
   @@index([classroomId])
   @@index([status])
   @@index([periodoEnum])
+}
+
+model RdicDocumentEvent {
+  id            String                @id @default(cuid())
+  mantenedoraId String
+  unitId        String?
+  instanciaId   String
+  actorId       String                @db.VarChar(255)
+  eventType     RdicDocumentEventType
+  fromStatus    StatusRDIX?
+  toStatus      StatusRDIX?
+  comment       String?               @db.Text
+  metadata      Json?
+  createdAt     DateTime              @default(now())
+
+  mantenedora Mantenedora   @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  instancia   RDIXInstancia @relation(fields: [instanciaId], references: [id], onDelete: Cascade)
+  unit        Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  @@index([mantenedoraId, createdAt])
+  @@index([unitId, createdAt])
+  @@index([instanciaId, createdAt])
+  @@index([eventType])
+  @@map("rdic_document_event")
 }
 
 // ============================================================================

@@ -210,3 +210,195 @@ describe('RdicService.resumoExpress', () => {
     expect(prisma.classroomTeacher.findFirst).not.toHaveBeenCalled();
   });
 });
+
+
+const mantenedoraAdmin = {
+  sub: 'admin-1',
+  mantenedoraId: 'mantenedora-1',
+  roles: [{ level: 'MANTENEDORA', type: 'MANTENEDORA_ADMIN' }],
+} as any;
+
+function createProfilePrisma() {
+  return {
+    rdicDocumentProfile: {
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+    },
+    mantenedora: {
+      findFirst: jest.fn(),
+      update: jest.fn(),
+    },
+    unit: {
+      findFirst: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+}
+
+describe('RdicService.perfisDocumentais', () => {
+  it('lista perfis curados e garante os dois perfis-base sem dados simulados de documentos', async () => {
+    const prisma = createProfilePrisma();
+    prisma.rdicDocumentProfile.findFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    prisma.rdicDocumentProfile.create
+      .mockResolvedValueOnce({ id: 'seed-df', code: 'SEEDF_RDIC_1_CICLO', version: 1, status: 'ATIVO' })
+      .mockResolvedValueOnce({ id: 'seed-generic', code: 'ZELARE_RELATORIO_DESCRITIVO_INFANTIL', version: 1, status: 'ATIVO' });
+    prisma.rdicDocumentProfile.findMany.mockResolvedValue([]);
+
+    const result = await new RdicService(prisma as any).listarPerfis(mantenedoraAdmin);
+
+    expect(result).toEqual([]);
+    expect(prisma.rdicDocumentProfile.create).toHaveBeenCalledTimes(2);
+    expect(prisma.rdicDocumentProfile.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        status: 'ATIVO',
+        OR: expect.arrayContaining([
+          { mantenedoraId: 'mantenedora-1' },
+          { mantenedoraId: null, isCurated: true },
+        ]),
+      }),
+    }));
+  });
+
+  it('bloqueia professor de criar perfil normativo da mantenedora', async () => {
+    const prisma = createProfilePrisma();
+    const service = new RdicService(prisma as any);
+
+    await expect(service.criarPerfil({
+      code: 'PRIVADO',
+      name: 'Perfil privado',
+      documentLabel: 'Relatório',
+      institutionType: 'PRIVADA',
+      periodicity: 'SEMESTRAL',
+    }, professor)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.rdicDocumentProfile.create).not.toHaveBeenCalled();
+  });
+
+  it('clona um perfil curado para a mantenedora como perfil próprio não curado', async () => {
+    const prisma = createProfilePrisma();
+    prisma.rdicDocumentProfile.findFirst.mockResolvedValue({
+      id: 'seed-df',
+      code: 'SEEDF_RDIC_1_CICLO',
+      name: 'RDIC DF',
+      documentLabel: 'RDIC',
+      institutionType: 'PUBLICA',
+      authorityName: 'SEEDF',
+      authorityReference: 'SEEDF',
+      curriculumReference: 'Currículo DF',
+      sourceUrl: 'https://example.gov.br/rdic',
+      version: 1,
+      periodicity: 'SEMESTRAL',
+      requiredFields: [],
+      signaturePolicy: {},
+      familyPolicy: {},
+      archivePolicy: {},
+      templateSchema: {},
+    });
+    prisma.rdicDocumentProfile.create.mockResolvedValue({ id: 'custom-1', isCurated: false });
+
+    const result = await new RdicService(prisma as any).clonarPerfil('seed-df', mantenedoraAdmin);
+
+    expect(result).toEqual({ id: 'custom-1', isCurated: false });
+    expect(prisma.rdicDocumentProfile.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ mantenedoraId: 'mantenedora-1', isCurated: false, version: 1 }),
+    }));
+  });
+
+  it('define perfil na mantenedora ou em unidade pertencente ao mesmo tenant', async () => {
+    const prisma = createProfilePrisma();
+    prisma.rdicDocumentProfile.findFirst.mockResolvedValue({ id: 'profile-1', version: 2, status: 'ATIVO' });
+    prisma.mantenedora.update.mockResolvedValue({ id: 'mantenedora-1' });
+    prisma.unit.findFirst.mockResolvedValue({ id: 'unit-1' });
+    prisma.unit.update.mockResolvedValue({ id: 'unit-1' });
+    const service = new RdicService(prisma as any);
+
+    await expect(service.definirPerfilPadrao({ profileId: 'profile-1' }, mantenedoraAdmin)).resolves.toEqual({
+      scope: 'MANTENEDORA', profileId: 'profile-1', profileVersion: 2,
+    });
+    await expect(service.definirPerfilPadrao({ profileId: 'profile-1', unitId: 'unit-1' }, mantenedoraAdmin)).resolves.toEqual({
+      scope: 'UNIT', unitId: 'unit-1', profileId: 'profile-1', profileVersion: 2,
+    });
+    expect(prisma.mantenedora.update).toHaveBeenCalled();
+    expect(prisma.unit.update).toHaveBeenCalledWith({ where: { id: 'unit-1' }, data: { rdicProfileId: 'profile-1' } });
+  });
+});
+
+
+function createGovernancePrisma() {
+  const instance = {
+    id: 'rdic-1',
+    mantenedoraId: 'mantenedora-1',
+    unitId: 'unit-1',
+    childId: 'child-1',
+    status: 'PUBLICADO',
+    profileSnapshot: {
+      archivePolicy: { required: true },
+    },
+    signatureManifest: {},
+  };
+  const prisma: any = {
+    rDIXInstancia: {
+      findUnique: jest.fn().mockResolvedValue(instance),
+      update: jest.fn().mockResolvedValue({ ...instance, status: 'ARQUIVADO' }),
+    },
+    rdicDocumentEvent: {
+      create: jest.fn().mockResolvedValue({ id: 'event-1' }),
+      findMany: jest.fn().mockResolvedValue([{ id: 'event-1', eventType: 'PUBLICADO' }]),
+    },
+    childGuardian: {
+      findFirst: jest.fn(),
+    },
+  };
+  prisma.$transaction = jest.fn(async (callback: (tx: any) => Promise<unknown>) => callback(prisma));
+  return { prisma, instance };
+}
+
+describe('RdicService.governancaDocumental', () => {
+  it('registra ciência familiar somente com vínculo e consentimento de desenvolvimento', async () => {
+    const { prisma } = createGovernancePrisma();
+    prisma.childGuardian.findFirst.mockResolvedValue({ id: 'guardian-1' });
+    const service = new RdicService(prisma);
+
+    await service.registrarCienciaFamilia(
+      'rdic-1',
+      { sub: 'family-1', mantenedoraId: 'mantenedora-1', roles: [{ level: 'FAMILIA' }] } as any,
+    );
+
+    expect(prisma.childGuardian.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ childId: 'child-1', userId: 'family-1', canViewDevelopment: true }),
+    }));
+    expect(prisma.rDIXInstancia.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ familyAcknowledgedById: 'family-1' }),
+    }));
+    expect(prisma.rdicDocumentEvent.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ eventType: 'CIENCIA_FAMILIA' }),
+    }));
+  });
+
+  it('impede arquivamento quando o perfil exige ciência familiar ausente', async () => {
+    const { prisma } = createGovernancePrisma();
+    const service = new RdicService(prisma);
+
+    await expect(service.arquivar(
+      'rdic-1',
+      { sub: 'unit-1', mantenedoraId: 'mantenedora-1', unitId: 'unit-1', roles: [{ level: 'UNIDADE' }] } as any,
+    )).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.rDIXInstancia.update).not.toHaveBeenCalled();
+  });
+
+  it('consulta a trilha documental em ordem cronológica e no escopo da mantenedora', async () => {
+    const { prisma } = createGovernancePrisma();
+    const service = new RdicService(prisma);
+
+    await expect(service.eventos(
+      'rdic-1',
+      { sub: 'admin-1', mantenedoraId: 'mantenedora-1', roles: [{ level: 'MANTENEDORA' }] } as any,
+    )).resolves.toEqual([{ id: 'event-1', eventType: 'PUBLICADO' }]);
+    expect(prisma.rdicDocumentEvent.findMany).toHaveBeenCalledWith({
+      where: { instanciaId: 'rdic-1', mantenedoraId: 'mantenedora-1' },
+      orderBy: { createdAt: 'asc' },
+    });
+  });
+});

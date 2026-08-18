@@ -330,6 +330,9 @@ export function Sidebar({ onClose }: SidebarProps) {
     ...(isMantenedora || isCentral || isDeveloper
       ? [{ path: '/app/admin/unidades', label: 'Unidades', icon: <Building2 className="h-4 w-4" /> }]
       : []),
+    ...(isMantenedora || isDeveloper
+      ? [{ path: '/app/rdic-perfis', label: 'Perfis Documentais', icon: <FileText className="h-4 w-4" />, badge: 'Oficial' }]
+      : []),
   ];
 
   return (

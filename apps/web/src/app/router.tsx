@@ -47,6 +47,7 @@ import RdicCriancaPage from '../pages/RdicCriancaPage';
 import SalaDeAulaVirtualPage from '../pages/SalaDeAulaVirtualPage';
 import RdicCoordPage from '../pages/RdicCoordPage';
 import RdicGeralPage from '../pages/RdicGeralPage';
+import RdicProfilesPage from '../pages/RdicProfilesPage';
 // ─── Fases 1, 2 e 3 — Central Desenvolvimento, Painel Analítico e Painel da Turma ────────────────────
 import CentralRdicCriancaPage from '../pages/CentralRdicCriancaPage';
 import PainelAnaliticoCriancaPage from '../pages/PainelAnaliticoCriancaPage';
@@ -235,6 +236,16 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <RdicGeralPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Perfis documentais oficiais e institucionais ─────────────────────────────────
+      {
+        path: 'rdic-perfis',
+        element: (
+          <RoleProtectedRoute allowedRoles={['MANTENEDORA', 'DEVELOPER']}>
+            <RdicProfilesPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,

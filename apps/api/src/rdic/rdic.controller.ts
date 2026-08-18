@@ -43,6 +43,40 @@ export class RdicController {
     return this.svc.criar(dto, user);
   }
 
+  /** Catálogo de perfis documentais disponíveis no escopo da mantenedora */
+  @Get('profiles')
+  @RequireRoles(
+    RoleLevel.PROFESSOR,
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  listarPerfis(@CurrentUser() user: JwtPayload) {
+    return this.svc.listarPerfis(user);
+  }
+
+  /** Criar perfil documental próprio da mantenedora */
+  @Post('profiles')
+  @RequireRoles(RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  criarPerfil(@Body() dto: any, @CurrentUser() user: JwtPayload) {
+    return this.svc.criarPerfil(dto, user);
+  }
+
+  /** Clonar um perfil curado ou próprio para customização da mantenedora */
+  @Post('profiles/:profileId/clone')
+  @RequireRoles(RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  clonarPerfil(@Param('profileId') profileId: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.clonarPerfil(profileId, user);
+  }
+
+  /** Definir perfil padrão da mantenedora ou de uma unidade específica */
+  @Post('profiles/default')
+  @RequireRoles(RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  definirPerfilPadrao(@Body() dto: { profileId: string; unitId?: string | null }, @CurrentUser() user: JwtPayload) {
+    return this.svc.definirPerfilPadrao(dto, user);
+  }
+
   /** Status de completude da turma por bimestre/período (DEVE vir antes de :id) */
   @Get('turma/status')
   @RequireRoles(
@@ -155,6 +189,32 @@ export class RdicController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.svc.centralDaCrianca(childId, user);
+  }
+
+  /** Trilha append-only de eventos do documento */
+  @Get(':id/eventos')
+  @RequireRoles(
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  eventos(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.eventos(id, user);
+  }
+
+  /** Ciência explícita do responsável familiar após publicação */
+  @Post(':id/ciencia-familia')
+  @RequireRoles(RoleLevel.FAMILIA)
+  registrarCienciaFamilia(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.registrarCienciaFamilia(id, user);
+  }
+
+  /** Arquivamento pela secretaria/unidade, mantenedora ou Developer */
+  @Post(':id/arquivar')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  arquivar(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.arquivar(id, user);
   }
 
   /** Detalhe de um RDIC */
