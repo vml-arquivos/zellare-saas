@@ -93,6 +93,42 @@ describe('IaAssistivaService — validação de plano gerado', () => {
     ).toThrow(ServiceUnavailableException);
   });
 
+  it('usa o modo aberto quando a data não possui objetivo curricular', async () => {
+    const prisma = {
+      frameworkObjective: {
+        findUnique: jest.fn(),
+      },
+    };
+    const gemini = {
+      isEnabled: jest.fn().mockReturnValue(true),
+      generateJSON: jest.fn().mockResolvedValue({
+        titulo: 'Descobertas em roda',
+        descricao: 'A turma explora uma proposta livre adequada à faixa etária.',
+        intencionalidade: 'Favorecer interação e curiosidade.',
+        materiais: ['objetos do cotidiano'],
+        etapas: ['Explorar', 'Compartilhar'],
+        duracao: '20 minutos',
+        adaptacoes: 'Oferecer mediação visual.',
+        registroSugerido: 'Registrar falas e participação.',
+      }),
+    };
+    const scopedService = new IaAssistivaService(prisma as any, gemini as any);
+
+    const result = await scopedService.gerarAtividade({
+      faixaEtaria: 'EI02' as any,
+      contextoAdicional: 'Poucos materiais disponíveis.',
+    });
+
+    expect(gemini.generateJSON).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      titulo: 'Descobertas em roda',
+      campoDeExperiencia: '',
+      objetivoBNCC: '',
+      objetivoCurriculo: '',
+      geradoPorIA: true,
+    });
+  });
+
   it('usa o Gemini nativo para gerar atividade e preserva o objetivo curricular', async () => {
     const prisma = {
       frameworkObjective: {

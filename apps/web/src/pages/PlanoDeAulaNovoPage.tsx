@@ -1147,14 +1147,21 @@ export default function PlanoDeAulaNovoPage() {
                         </p>
                       </div>
 
-                      {/* Tarefa 3.1 — Sugestão de atividade via IA (opcional e editável) */}
-                      {day.objectives.length > 0 && (() => {
+                      {/* Tarefa 3.1 — Sugestão de atividade via IA (opcional e editável).
+                          Fica disponível mesmo quando a data ainda não tem objetivo
+                          curricular; nesse caso a API trabalha em modo aberto e não
+                          inventa códigos ou referências oficiais. */}
+                      {(() => {
                         const obj = day.objectives[0];
+                        const segmentoTurma = turmaSelecionada
+                          ? inferirSegmento(turmaSelecionada)
+                          : null;
                         return (
                           <GeradorAtividadeIA
-                            campoDeExperiencia={obj.campoExperiencia}
-                            objetivoBNCC={obj.objetivoBNCC}
-                            objetivoCurriculo={obj.objetivoCurriculoDF}
+                            campoDeExperiencia={obj?.campoExperiencia ?? ''}
+                            objetivoBNCC={obj?.objetivoBNCC ?? ''}
+                            objetivoCurriculo={obj?.objetivoCurriculoDF ?? ''}
+                            faixaEtariaPadrao={segmentoTurma ?? 'EI03'}
                             onAtividadeGerada={(atividade) => {
                               // Preenche o campo de atividade como rascunho editável
                               // O professor sempre revisa antes de salvar

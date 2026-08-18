@@ -180,16 +180,25 @@ export class IaAssistivaService {
         objetivoCurriculo: `${objetivo.framework.name}${objetivo.code ? ` (${objetivo.code})` : ''}`,
       };
     }
-    if (dto.campoDeExperiencia && dto.objetivoBNCC && dto.objetivoCurriculo) {
+    // Modo legado: aceita objetivo curricular parcial quando a matriz do dia
+    // não possui referência DF/institucional cadastrada. Nenhum código ou
+    // objetivo curricular é inventado; o prompt sinaliza o modo aberto.
+    if (dto.campoDeExperiencia || dto.objetivoBNCC || dto.objetivoCurriculo) {
       return {
-        campoDeExperiencia: dto.campoDeExperiencia,
-        objetivoBNCC: dto.objetivoBNCC,
-        objetivoCurriculo: dto.objetivoCurriculo,
+        campoDeExperiencia: dto.campoDeExperiencia?.trim() ?? '',
+        objetivoBNCC: dto.objetivoBNCC?.trim() ?? '',
+        objetivoCurriculo: dto.objetivoCurriculo?.trim() ?? '',
       };
     }
-    throw new BadRequestException(
-      'Informe frameworkObjectiveId, ou os três campos campoDeExperiencia/objetivoBNCC/objetivoCurriculo.',
-    );
+
+    // Modo de planejamento aberto: permitido quando a data ainda não tem
+    // objetivo curricular cadastrado. A IA cria apenas uma sugestão didática
+    // por faixa etária/contexto, sem atribuir BNCC ou código inexistente.
+    return {
+      campoDeExperiencia: '',
+      objetivoBNCC: '',
+      objetivoCurriculo: '',
+    };
   }
 
   async gerarAtividade(dto: GerarAtividadeDto): Promise<AtividadeGerada> {
@@ -203,16 +212,29 @@ export class IaAssistivaService {
       ? LABELS_TIPO[dto.tipoAtividade]
       : 'à sua escolha (sugira o mais adequado)';
 
+    const possuiObjetivoCurricular = Boolean(
+      objetivo.campoDeExperiencia && objetivo.objetivoBNCC,
+    );
+    const contextoCurricular = possuiObjetivoCurricular
+      ? `## OBJETIVO PEDAGÓGICO A CUMPRIR (NÃO ALTERE — vem do currículo escolhido pela instituição)
+- **Área/Campo:** ${objetivo.campoDeExperiencia}
+- **Objetivo:** ${objetivo.objetivoBNCC}
+- **Referência curricular:** ${objetivo.objetivoCurriculo || 'Não informado pela instituição'}
+
+## DADOS DA TURMA`
+      : `## MODO DE PLANEJAMENTO ABERTO
+A data não possui objetivo curricular cadastrado. Crie uma sugestão pedagógica
+adequada à faixa etária e ao contexto informado, mas NÃO invente códigos BNCC,
+nomes de currículo ou objetivos oficiais. Deixe as referências curriculares
+em branco na resposta.
+
+## DADOS DA TURMA`;
+
     const prompt = `Você é uma especialista em Educação Infantil (0 a 6 anos).
 
 Sua tarefa é criar UMA atividade pedagógica completa e detalhada para professores de Educação Infantil.
 
-## OBJETIVO PEDAGÓGICO A CUMPRIR (NÃO ALTERE — vem do currículo escolhido pela instituição)
-- **Área/Campo:** ${objetivo.campoDeExperiencia}
-- **Objetivo:** ${objetivo.objetivoBNCC}
-- **Referência curricular:** ${objetivo.objetivoCurriculo}
-
-## DADOS DA TURMA
+${contextoCurricular}
 - **Faixa Etária:** ${faixaLabel}
 - **Tipo de Atividade:** ${tipoLabel}
 - **Número de Crianças:** ${dto.numeroCriancas ? dto.numeroCriancas + ' crianças' : 'não informado'}
@@ -288,7 +310,8 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
         atividade = JSON.parse(jsonLimpo) as AtividadeGeradaPayload;
       }
 
-      // Garantir que os campos fixos do objetivo pedagógico sejam preservados
+      // Garantir que referências curriculares existentes sejam preservadas;
+      // no modo aberto, elas permanecem vazias para evitar falsa atribuição.
       return {
         ...atividade,
         campoDeExperiencia: objetivo.campoDeExperiencia,

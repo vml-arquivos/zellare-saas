@@ -50,6 +50,7 @@ export function GeradorAtividadeIA({
   const [atividade, setAtividade] = useState<AtividadeGerada | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [expandido, setExpandido] = useState(true);
+  const modoAberto = !campoDeExperiencia.trim() && !objetivoBNCC.trim();
 
   const handleGerar = async () => {
     setGerando(true);
@@ -128,7 +129,9 @@ ${atividade.registroSugerido}
               Gerar Atividade com Inteligência Artificial
             </h3>
             <p className="text-xs text-gray-500">
-              A IA cria a atividade alinhada ao objetivo do dia
+              {modoAberto
+                ? 'A IA sugere uma atividade por faixa etária e contexto'
+                : 'A IA cria a atividade alinhada ao objetivo do dia'}
             </p>
           </div>
         </div>
@@ -141,24 +144,33 @@ ${atividade.registroSugerido}
 
       {expandido && (
         <div className="p-4 border-t border-purple-100 space-y-4">
-          {/* Dados fixos da Sequência Piloto */}
+          {/* Contexto curricular: somente leitura quando existe; em modo aberto,
+              a ausência da matriz fica explícita e não vira referência inventada. */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
             <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide">
-              Dados Fixos — Sequência Piloto 2026 (não editáveis)
+              {modoAberto ? 'Planejamento aberto — sem objetivo curricular cadastrado' : 'Dados curriculares — não editáveis'}
             </p>
             <div className="space-y-1">
-              <p className="text-xs text-amber-900">
-                <span className="font-medium">Campo de Experiência:</span>{' '}
-                {campoDeExperiencia}
-              </p>
-              <p className="text-xs text-amber-900">
-                <span className="font-medium">Objetivo BNCC:</span>{' '}
-                {objetivoBNCC}
-              </p>
-              <p className="text-xs text-amber-900">
-                <span className="font-medium">Objetivo Currículo DF:</span>{' '}
-                {objetivoCurriculo}
-              </p>
+              {modoAberto ? (
+                <p className="text-xs text-amber-900">
+                  A sugestão será criada apenas com base na faixa etária, no tipo de atividade e no contexto informado. A IA não atribui códigos ou referências oficiais.
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs text-amber-900">
+                    <span className="font-medium">Campo de Experiência:</span>{' '}
+                    {campoDeExperiencia}
+                  </p>
+                  <p className="text-xs text-amber-900">
+                    <span className="font-medium">Objetivo BNCC:</span>{' '}
+                    {objetivoBNCC}
+                  </p>
+                  <p className="text-xs text-amber-900">
+                    <span className="font-medium">Objetivo Currículo DF:</span>{' '}
+                    {objetivoCurriculo || 'Não informado pela instituição'}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
