@@ -111,6 +111,71 @@ export class AlertasService {
   }
 
   /**
+   * No fim do dia, verifica cobertura mínima do diário por turma ativa.
+   * A regra é determinística, escopada por unidade e idempotente: ela cria ou
+   * atualiza uma pendência operacional, mas nunca altera eventos pedagógicos.
+   * A decisão sobre o encaminhamento permanece humana no painel de cuidado.
+   */
+  @Cron('0 18 * * 1-5')
+  async analisarCoberturaDiario() {
+    this.logger.log('CronJob: analisando cobertura diária do diário...');
+
+    try {
+      const hoje = new Date();
+      const inicio = new Date(hoje);
+      inicio.setHours(0, 0, 0, 0);
+      const fim = new Date(hoje);
+      fim.setHours(23, 59, 59, 999);
+
+      const turmas = await this.prisma.classroom.findMany({
+        where: {
+          isActive: true,
+          enrollments: { some: { status: 'ATIVA' } },
+        },
+        select: {
+          id: true,
+          name: true,
+          unitId: true,
+          unit: { select: { mantenedoraId: true } },
+          _count: { select: { enrollments: true } },
+        },
+      });
+
+      for (const turma of turmas) {
+        const eventos = await this.prisma.diaryEvent.count({
+          where: {
+            classroomId: turma.id,
+            eventDate: { gte: inicio, lte: fim },
+          },
+        });
+
+        if (eventos > 0) continue;
+
+        await this.upsertAlertaOperacional({
+          childId: '',
+          classroomId: turma.id,
+          unitId: turma.unitId,
+          mantenedoraId: turma.unit.mantenedoraId,
+          tipo: TipoAlerta.AUSENCIA_REGISTRO_DIARIO,
+          severidade: SeveridadeAlerta.MEDIA,
+          titulo: `${turma.name} — diário sem registro hoje`,
+          descricao: 'A turma não possui evento de diário registrado na data corrente. Conferir se houve atividade, sincronização offline ou necessidade de registro retroativo.',
+          metadados: {
+            regra: 'COBERTURA_DIARIO_TURMA',
+            data: inicio.toISOString().slice(0, 10),
+            alunosAtivos: turma._count.enrollments,
+            eventosEncontrados: eventos,
+          },
+        });
+      }
+
+      this.logger.log('CronJob cobertura diária concluído.');
+    } catch (err) {
+      this.logger.error('Erro no CronJob de cobertura diária:', err as any);
+    }
+  }
+
+  /**
    * Mantido como ponto de extensão, mas sem acesso a modelos inexistentes.
    * O schema atual não possui microgestoRegistro/childProfileStats; portanto
    * esta rotina não executa gravações até existir modelo oficial ou análise via DiaryEvent.
