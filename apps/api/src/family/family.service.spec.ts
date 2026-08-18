@@ -63,7 +63,7 @@ describe('FamilyService — privacy timeline', () => {
 
     expect(prisma.developmentObservation.findMany).not.toHaveBeenCalled();
     expect(result.items).toEqual([]);
-    expect(result.privacy).toMatchObject({ familyDataFiltered: true, healthDataVisible: false });
+    expect(result.privacy).toMatchObject({ familyDataFiltered: true, healthDataVisible: false, developmentVisible: false });
   });
 
   it('inclui observações filtradas quando o responsável possui consentimento explícito', async () => {
@@ -73,6 +73,7 @@ describe('FamilyService — privacy timeline', () => {
     const result = await service.timeline('child-1', {}, familyUser());
 
     expect(prisma.developmentObservation.findMany).toHaveBeenCalledTimes(1);
+    expect(result.privacy).toMatchObject({ developmentVisible: true, healthDataVisible: false });
     expect(result.items).toEqual([
       expect.objectContaining({ kind: 'OBSERVACAO', title: 'Observação · GERAL' }),
     ]);
