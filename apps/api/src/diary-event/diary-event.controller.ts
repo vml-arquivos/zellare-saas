@@ -178,6 +178,22 @@ export class DiaryEventController {
   }
 
   /**
+   * GET /diary-events/quality
+   * Agregado de qualidade e completude, sem conteúdo ou PII.
+   */
+  @Get('quality')
+  @RequireRoles(
+    RoleLevel.PROFESSOR,
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  quality(@Query() query: QueryDiaryEventDto, @CurrentUser() user: JwtPayload) {
+    return this.diaryEventService.quality(query, user);
+  }
+
+  /**
    * GET /diary-events/:id
    * Busca um evento específico por ID
    */

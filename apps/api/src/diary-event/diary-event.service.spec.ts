@@ -315,3 +315,127 @@ describe('DiaryEventService - Ocorrências', () => {
     });
   });
 });
+
+
+describe('DiaryEventService.quality', () => {
+  function makeQualityService(events: any[]) {
+    const prisma = {
+      classroomTeacher: {
+        findMany: jest.fn().mockResolvedValue([{ classroomId: 'class-1' }]),
+      },
+      diaryEvent: {
+        findMany: jest.fn().mockResolvedValue(events),
+      },
+    };
+    const service = new DiaryEventService(prisma as any, {} as any);
+    return { prisma, service };
+  }
+
+  const teacher = {
+    sub: 'teacher-1',
+    mantenedoraId: 'mant-1',
+    unitId: 'unit-1',
+    roles: [{ level: RoleLevel.PROFESSOR, unitScopes: [] }],
+  } as any;
+
+  it('agrega autoria, documentação, estrutura e publicação sem retornar conteúdo', async () => {
+    const { service } = makeQualityService([
+      {
+        id: 'event-1',
+        childId: 'child-1',
+        classroomId: 'class-1',
+        createdBy: 'teacher-1',
+        eventDate: new Date('2026-08-17T12:00:00.000Z'),
+        createdAt: new Date('2026-08-17T12:01:00.000Z'),
+        type: 'DESENVOLVIMENTO',
+        status: 'PUBLICADO',
+        title: 'Título privado',
+        description: 'Descrição privada',
+        observations: null,
+        developmentNotes: 'Marco observado',
+        behaviorNotes: null,
+        medicaoAlimentar: null,
+        sonoMinutos: null,
+        trocaFraldaStatus: null,
+        tags: ['coleta_estruturada'],
+        aiContext: { microgestos: [{ microgestoId: 'EXPRESSAO_ORAL', nivel: 'ALCANCADO' }] },
+      },
+      {
+        id: 'event-2',
+        childId: 'child-2',
+        classroomId: 'class-1',
+        createdBy: null,
+        eventDate: new Date('2026-08-17T13:00:00.000Z'),
+        createdAt: new Date('2026-08-17T13:01:00.000Z'),
+        type: 'OBSERVACAO',
+        status: 'RASCUNHO',
+        title: 'Outro título privado',
+        description: '',
+        observations: null,
+        developmentNotes: null,
+        behaviorNotes: null,
+        medicaoAlimentar: null,
+        sonoMinutos: null,
+        trocaFraldaStatus: null,
+        tags: [],
+        aiContext: null,
+      },
+    ]);
+
+    const result = await service.quality({
+      startDate: '2026-08-17T00:00:00.000Z',
+      endDate: '2026-08-17T23:59:59.999Z',
+      classroomId: 'class-1',
+    } as any, teacher);
+
+    expect(result.totals).toEqual({
+      events: 2,
+      distinctChildren: 2,
+      distinctClassrooms: 1,
+      documented: 1,
+      structured: 1,
+      authored: 1,
+      published: 1,
+    });
+    expect(result.coverage).toEqual({
+      documentationPercent: 50,
+      structuredPercent: 50,
+      authorshipPercent: 50,
+      publicationPercent: 50,
+    });
+    expect(result.daily).toEqual([
+      { date: '2026-08-17', total: 2, documented: 1, structured: 1, authored: 1 },
+    ]);
+    expect(result).not.toHaveProperty('title');
+    expect(result).not.toHaveProperty('description');
+  });
+
+  it('aplica o escopo real das turmas do professor e da própria autoria', async () => {
+    const { prisma, service } = makeQualityService([]);
+
+    await service.quality({
+      startDate: '2026-08-17T00:00:00.000Z',
+      endDate: '2026-08-17T23:59:59.999Z',
+    } as any, teacher);
+
+    const where = prisma.diaryEvent.findMany.mock.calls[0][0].where;
+    expect(where.AND).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        OR: [
+          { classroomId: { in: ['class-1'] } },
+          { createdBy: 'teacher-1' },
+        ],
+      }),
+    ]));
+  });
+
+  it('recusa janelas maiores que 90 dias antes de consultar o banco', async () => {
+    const { prisma, service } = makeQualityService([]);
+
+    await expect(service.quality({
+      startDate: '2026-01-01T00:00:00.000Z',
+      endDate: '2026-04-02T23:59:59.999Z',
+    } as any, teacher)).rejects.toThrow('não pode exceder 90 dias');
+    expect(prisma.diaryEvent.findMany).not.toHaveBeenCalled();
+  });
+});

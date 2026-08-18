@@ -13,7 +13,9 @@ import { QuickMicrogestoPanel } from '../components/diary/QuickMicrogestoPanel';
 import {
   flushOfflineQueue,
   getDiaryEvents,
+  getDiaryQuality,
   registerStructuredDailyObservation,
+  type DiaryQuality,
 } from '../api/diary.api';
 import http from '../api/http';
 
@@ -59,6 +61,7 @@ export default function DailyCollectionPage() {
   const [children, setChildren] = useState<Child[]>([]);
   const [eventDate, setEventDate] = useState(todayInputValue);
   const [events, setEvents] = useState<DailyEventSummary[]>([]);
+  const [quality, setQuality] = useState<DiaryQuality | null>(null);
   const [loadingClassrooms, setLoadingClassrooms] = useState(true);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(false);
@@ -158,8 +161,26 @@ export default function DailyCollectionPage() {
     void loadChildren();
   }, [classroomId]);
 
+  async function loadQuality() {
+    if (!classroomId || !eventDate) {
+      setQuality(null);
+      return;
+    }
+    try {
+      const response = await getDiaryQuality({
+        classroomId,
+        startDate: `${eventDate}T00:00:00.000Z`,
+        endDate: `${eventDate}T23:59:59.999Z`,
+      });
+      setQuality(response);
+    } catch {
+      setQuality(null);
+    }
+  }
+
   useEffect(() => {
     void loadEvents();
+    void loadQuality();
   }, [classroomId, eventDate, children.length]);
 
   useEffect(() => {
@@ -277,7 +298,7 @@ export default function DailyCollectionPage() {
             </label>
             <button
               type="button"
-              onClick={() => { void loadClassrooms(); void loadChildren(); void loadEvents(); }}
+              onClick={() => { void loadClassrooms(); void loadChildren(); void loadEvents(); void loadQuality(); }}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               <RefreshCw className="h-4 w-4" /> Atualizar
@@ -322,6 +343,22 @@ export default function DailyCollectionPage() {
                 <p className="text-xs text-emerald-700/70">registros no dia</p>
               </div>
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+              <ClipboardCheck className="h-4 w-4 text-indigo-600" /> Qualidade do preenchimento
+            </div>
+            {quality ? (
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg bg-indigo-50 p-2"><strong className="text-indigo-700">{quality.coverage.structuredPercent}%</strong><span className="block text-indigo-700/70">estruturados</span></div>
+                <div className="rounded-lg bg-emerald-50 p-2"><strong className="text-emerald-700">{quality.coverage.documentationPercent}%</strong><span className="block text-emerald-700/70">documentados</span></div>
+                <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.distinctChildren}</strong><span className="block text-slate-500">crianças alcançadas</span></div>
+                <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.authored}</strong><span className="block text-slate-500">com autoria</span></div>
+              </div>
+            ) : (
+              <p className="text-xs leading-5 text-slate-500">Sem dados agregados para esta turma e data ou sem permissão para a métrica.</p>
+            )}
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

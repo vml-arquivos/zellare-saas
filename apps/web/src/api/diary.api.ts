@@ -138,6 +138,30 @@ function cleanPayload<T extends Record<string, unknown>>(payload: T): Record<str
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
+export type DiaryQuality = {
+  scope: 'real';
+  window: { start: string; end: string; days: number };
+  capped: boolean;
+  totals: {
+    events: number;
+    distinctChildren: number;
+    distinctClassrooms: number;
+    documented: number;
+    structured: number;
+    authored: number;
+    published: number;
+  };
+  coverage: {
+    documentationPercent: number;
+    structuredPercent: number;
+    authorshipPercent: number;
+    publicationPercent: number;
+  };
+  byType: Record<string, number>;
+  byStatus: Record<string, number>;
+  daily: Array<{ date: string; total: number; documented: number; structured: number; authored: number }>;
+};
+
 export async function getDiaryEvents(params?: {
   childId?: string;
   classroomId?: string;
@@ -145,6 +169,16 @@ export async function getDiaryEvents(params?: {
   endDate?: string;
 }): Promise<DiaryEvent[]> {
   const response = await http.get('/diary-events', { params });
+  return response.data;
+}
+
+export async function getDiaryQuality(params?: {
+  classroomId?: string;
+  childId?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<DiaryQuality> {
+  const response = await http.get('/diary-events/quality', { params });
   return response.data;
 }
 
