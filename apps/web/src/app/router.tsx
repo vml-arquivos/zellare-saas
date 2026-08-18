@@ -82,6 +82,7 @@ import FinanceDashboardPage from '../pages/FinanceDashboardPage';
 import TeacherRankingPage from '../pages/TeacherRankingPage';
 import FamilyTimelinePage from '../pages/FamilyTimelinePage';
 import CareOverviewPage from '../pages/CareOverviewPage';
+import DailyCollectionPage from '../pages/DailyCollectionPage';
 import FamilyGuardiansPage from '../pages/FamilyGuardiansPage';
 import MetricsCoveragePage from '../pages/MetricsCoveragePage';
 import { AppLayout } from '../components/layout/AppLayout';
@@ -726,6 +727,16 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <FamilyGuardiansPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Coleta diária estruturada — escrita real e escopo da turma ─────────
+      {
+        path: 'coleta-diaria',
+        element: (
+          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <DailyCollectionPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
