@@ -174,7 +174,10 @@ export function ReportsPage() {
           return;
         }
         const selectedClassroom = turmas.find((turma) => turma.id === classroomId);
-        const scopedUnitId = selectedUnitId || selectedClassroom?.unitId;
+        // Perfis de unidade não precisam selecionar a unidade no contexto global:
+        // o próprio usuário já carrega o unitId autorizado. Sem este fallback,
+        // a visão consolidada chamava /reports/central/coverage e recebia 403.
+        const scopedUnitId = selectedUnitId || (!isCentral ? user?.unitId : undefined) || selectedClassroom?.unitId;
         const coverage = scopedUnitId
           ? await getUnitCoverage({ unitId: scopedUnitId, startDate, endDate })
           : await getCentralCoverage({ startDate, endDate, daysWithout: 1 });
