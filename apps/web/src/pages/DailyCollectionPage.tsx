@@ -113,14 +113,23 @@ export default function DailyCollectionPage() {
     }
     try {
       setLoadingChildren(true);
-      const response = await http.get(`/lookup/classrooms/${targetClassroomId}/children`);
-      const normalized = normalizeList(response.data)
-        .filter((item) => item?.id && item?.firstName && item?.lastName)
-        .map((item) => ({
-          id: String(item.id),
-          firstName: String(item.firstName),
-          lastName: String(item.lastName),
-        }));
+      let normalized: Child[] = [];
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await http.get(`/lookup/classrooms/${targetClassroomId}/children`);
+          normalized = normalizeList(response.data)
+            .filter((item) => item?.id && item?.firstName && item?.lastName)
+            .map((item) => ({
+              id: String(item.id),
+              firstName: String(item.firstName),
+              lastName: String(item.lastName),
+            }));
+          if (normalized.length > 0 || attempt === 1) break;
+        } catch (error) {
+          if (attempt === 1) throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      }
       if (requestId === childrenRequestRef.current) {
         setChildren(normalized);
       }
