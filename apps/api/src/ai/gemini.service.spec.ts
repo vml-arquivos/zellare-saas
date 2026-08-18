@@ -18,7 +18,10 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServiceUnavailableException } from '@nestjs/common';
-import { GeminiService } from './services/gemini.service';
+import {
+  GeminiRateLimitError,
+  GeminiService,
+} from './services/gemini.service';
 import { AiController } from './ai.controller';
 import geminiConfig from '../config/gemini.config';
 
@@ -242,6 +245,34 @@ describe('GeminiService — com API key (mock SDK)', () => {
       'Retorne um JSON',
     );
     expect(result).toEqual({ nome: 'Maria', score: 95 });
+  });
+
+  it('generateJSON deve fazer retry em caso de rate limit (429)', async () => {
+    const rateLimitError = Object.assign(new Error('Too Many Requests'), {
+      status: 429,
+    });
+    mockGenerateContent
+      .mockRejectedValueOnce(rateLimitError)
+      .mockResolvedValueOnce({
+        response: { text: () => '{"ok":true}' },
+      });
+
+    const result = await service.generateJSON<{ ok: boolean }>('query');
+
+    expect(result).toEqual({ ok: true });
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+  });
+
+  it('generateJSON deve preservar erro tipado após esgotar retries de 429', async () => {
+    const rateLimitError = Object.assign(new Error('Too Many Requests'), {
+      status: 429,
+    });
+    mockGenerateContent.mockRejectedValue(rateLimitError);
+
+    await expect(service.generateJSON('query')).rejects.toBeInstanceOf(
+      GeminiRateLimitError,
+    );
+    expect(mockGenerateContent).toHaveBeenCalledTimes(3);
   });
 
   it('generateJSON deve lançar erro amigável quando JSON é completamente inválido', async () => {

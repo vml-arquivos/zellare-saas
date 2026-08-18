@@ -1,4 +1,9 @@
-import { ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { GeminiRateLimitError } from '../ai/services/gemini.service';
 import { IaAssistivaService } from './ia-assistiva.service';
 
 describe('IaAssistivaService — validação de plano gerado', () => {
@@ -127,6 +132,29 @@ describe('IaAssistivaService — validação de plano gerado', () => {
       objetivoCurriculo: '',
       geradoPorIA: true,
     });
+  });
+
+  it('retorna 429 com mensagem operacional quando a quota do Gemini é atingida', async () => {
+    const prisma = {
+      frameworkObjective: {
+        findUnique: jest.fn(),
+      },
+    };
+    const gemini = {
+      isEnabled: jest.fn().mockReturnValue(true),
+      generateJSON: jest.fn().mockRejectedValue(new GeminiRateLimitError()),
+    };
+    const scopedService = new IaAssistivaService(prisma as any, gemini as any);
+
+    const error = await scopedService.gerarAtividade({
+      faixaEtaria: 'EI02' as any,
+    }).catch((caught) => caught);
+
+    expect(error).toBeInstanceOf(HttpException);
+    expect(error.getStatus()).toBe(429);
+    expect(error.message).toBe(
+      'Limite de uso da IA atingido. Aguarde alguns minutos e tente novamente.',
+    );
   });
 
   it('usa o Gemini nativo para gerar atividade e preserva o objetivo curricular', async () => {

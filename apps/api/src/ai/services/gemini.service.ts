@@ -8,6 +8,16 @@ import {
 } from '@google/generative-ai';
 import geminiConfig from '../../config/gemini.config';
 
+/** Erro operacional preservado quando o provedor Gemini responde com HTTP 429. */
+export class GeminiRateLimitError extends Error {
+  readonly status = 429;
+
+  constructor() {
+    super('Limite de uso da IA atingido.');
+    this.name = 'GeminiRateLimitError';
+  }
+}
+
 @Injectable()
 export class GeminiService implements OnModuleInit {
   private readonly logger = new Logger(GeminiService.name);
@@ -22,6 +32,64 @@ export class GeminiService implements OnModuleInit {
     @Inject(geminiConfig.KEY)
     private config: ConfigType<typeof geminiConfig>,
   ) {}
+
+  /**
+   * Detecta rate limit tanto no formato do SDK Gemini quanto no formato de
+   * clientes HTTP compatíveis, sem depender de uma classe específica do SDK.
+   */
+  private isRateLimitError(error: unknown): boolean {
+    const candidate = error as {
+      status?: number | string;
+      statusText?: string;
+      message?: string;
+      response?: {
+        status?: number | string;
+        statusText?: string;
+      };
+    };
+    const status = candidate?.status ?? candidate?.response?.status;
+    const statusText = candidate?.statusText ?? candidate?.response?.statusText;
+    const message = candidate?.message ?? '';
+
+    return (
+      String(status) === '429' ||
+      statusText === 'Too Many Requests' ||
+      /\b429\b|too many requests|rate limit/i.test(message)
+    );
+  }
+
+  /**
+   * Reexecuta somente erros transitórios de quota, com no máximo duas
+   * tentativas adicionais. Erros de validação, autenticação e conteúdo não
+   * são repetidos para evitar custo e latência desnecessários.
+   */
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    maxRetries = 2,
+  ): Promise<T> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        if (!this.isRateLimitError(error) || attempt >= maxRetries) {
+          throw error;
+        }
+
+        const delayMs = 1000 * 2 ** attempt;
+        this.logger.warn(
+          `Rate limit do Gemini detectado; nova tentativa em ${delayMs}ms (tentativa ${attempt + 1}/${maxRetries}).`,
+        );
+        await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('Falha transitória ao comunicar com o Gemini.');
+  }
 
   onModuleInit() {
     if (this.isEnabled()) {
@@ -145,10 +213,12 @@ export class GeminiService implements OnModuleInit {
         });
       }
 
-      const result = await model.generateContent(prompt);
+      const result = await this.withRetry(() => model.generateContent(prompt));
       return result.response.text();
     } catch (error) {
       this.logger.error('Erro em generateText', error);
+      if (error instanceof GeminiRateLimitError) throw error;
+      if (this.isRateLimitError(error)) throw new GeminiRateLimitError();
       throw new Error('Falha ao gerar texto via IA.');
     }
   }
@@ -182,12 +252,14 @@ export class GeminiService implements OnModuleInit {
         },
       });
 
-      const result = await model.generateContent(prompt);
+      const result = await this.withRetry(() => model.generateContent(prompt));
       const text = result.response.text();
 
       return this.parseRobustJSON<T>(text);
     } catch (error) {
       this.logger.error('Erro em generateJSON', error);
+      if (error instanceof GeminiRateLimitError) throw error;
+      if (this.isRateLimitError(error)) throw new GeminiRateLimitError();
       throw new Error('Falha ao gerar ou processar JSON via IA.');
     }
   }

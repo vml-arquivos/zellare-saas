@@ -6,6 +6,8 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import OpenAI from 'openai';
 import { GerarAtividadeDto, FaixaEtaria, TipoAtividade } from './dto/gerar-atividade.dto';
@@ -14,7 +16,10 @@ import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { canAccessUnit } from '../common/utils/can-access-unit';
-import { GeminiService } from '../ai/services/gemini.service';
+import {
+  GeminiRateLimitError,
+  GeminiService,
+} from '../ai/services/gemini.service';
 
 export interface AtividadeGerada {
   titulo: string;
@@ -322,6 +327,12 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
       };
     } catch (error) {
       this.logger.error('Erro ao gerar atividade com IA:', error);
+      if (error instanceof GeminiRateLimitError) {
+        throw new HttpException(
+          'Limite de uso da IA atingido. Aguarde alguns minutos e tente novamente.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
       if (error instanceof ServiceUnavailableException) throw error;
       throw new ServiceUnavailableException(
         'Serviço de IA temporariamente indisponível. Tente novamente em instantes.',
