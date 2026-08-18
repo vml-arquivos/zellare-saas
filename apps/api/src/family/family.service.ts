@@ -192,7 +192,17 @@ export class FamilyService {
       ...observations.map((item) => ({ id: item.id, kind: 'OBSERVACAO', date: item.date, title: `Observação · ${item.category}`, body: item.learningProgress || item.socialInteraction || item.emotionalState || item.recommendations || null, data: item })),
       ...messages.map((message) => ({ id: message.id, kind: 'COMUNICACAO', date: message.createdAt, title: message.subject, body: message.body, data: message })),
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return { child: { id: child.id, firstName: child.firstName, lastName: child.lastName, photoUrl: child.photoUrl }, from, to, privacy: { familyDataFiltered: this.isFamily(user), healthDataVisible: false }, items };
+    return {
+      child: { id: child.id, firstName: child.firstName, lastName: child.lastName, photoUrl: child.photoUrl },
+      from,
+      to,
+      privacy: {
+        familyDataFiltered: this.isFamily(user),
+        healthDataVisible: false,
+        developmentVisible: familyCanViewDevelopment,
+      },
+      items,
+    };
   }
 
   async listMessages(user: JwtPayload, query: FamilyQueryDto) {

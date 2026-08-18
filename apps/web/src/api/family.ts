@@ -23,7 +23,7 @@ export interface FamilyTimelineResponse {
   child: FamilyChild;
   from: string;
   to: string;
-  privacy: { familyDataFiltered: boolean; healthDataVisible: boolean };
+  privacy: { familyDataFiltered: boolean; healthDataVisible: boolean; developmentVisible?: boolean };
   items: FamilyTimelineItem[];
 }
 

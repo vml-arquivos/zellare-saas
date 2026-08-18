@@ -38,6 +38,16 @@ export interface CreateDiaryEventDto {
   classroomId: string;
   planningId?: string;
   curriculumEntryId?: string;
+  observations?: string;
+  developmentNotes?: string;
+  behaviorNotes?: string;
+  medicaoAlimentar?: Record<string, unknown>;
+  sonoMinutos?: number;
+  trocaFraldaStatus?: string;
+  microgestos?: Array<Record<string, unknown>>;
+  tags?: string[];
+  aiContext?: Record<string, unknown>;
+  status?: 'RASCUNHO' | 'PUBLICADO' | 'REVISADO' | 'ARQUIVADO';
 }
 
 export interface MicroGesturePayload {
@@ -128,6 +138,30 @@ function cleanPayload<T extends Record<string, unknown>>(payload: T): Record<str
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
+export type DiaryQuality = {
+  scope: 'real';
+  window: { start: string; end: string; days: number };
+  capped: boolean;
+  totals: {
+    events: number;
+    distinctChildren: number;
+    distinctClassrooms: number;
+    documented: number;
+    structured: number;
+    authored: number;
+    published: number;
+  };
+  coverage: {
+    documentationPercent: number;
+    structuredPercent: number;
+    authorshipPercent: number;
+    publicationPercent: number;
+  };
+  byType: Record<string, number>;
+  byStatus: Record<string, number>;
+  daily: Array<{ date: string; total: number; documented: number; structured: number; authored: number }>;
+};
+
 export async function getDiaryEvents(params?: {
   childId?: string;
   classroomId?: string;
@@ -135,6 +169,16 @@ export async function getDiaryEvents(params?: {
   endDate?: string;
 }): Promise<DiaryEvent[]> {
   const response = await http.get('/diary-events', { params });
+  return response.data;
+}
+
+export async function getDiaryQuality(params?: {
+  classroomId?: string;
+  childId?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<DiaryQuality> {
+  const response = await http.get('/diary-events/quality', { params });
   return response.data;
 }
 
@@ -155,6 +199,53 @@ export async function createDiaryEvent(data: CreateDiaryEventDto): Promise<Diary
  * Se offline → enfileira no IndexedDB e retorna um evento otimista.
  * Se online  → envia direto e retorna o evento real.
  */
+export async function registerStructuredDailyObservation(payload: {
+  childId: string;
+  classroomId: string;
+  eventDate: string;
+  categoria: string;
+  microgestoId: string;
+  nivel: string;
+  descricao?: string;
+  campoExperiencia?: string;
+}): Promise<DiaryEvent & { _optimistic?: boolean }> {
+  const description = payload.descricao?.trim() || `Nível observado: ${payload.nivel}`;
+  const dto: CreateDiaryEventDto = {
+    type: 'DESENVOLVIMENTO',
+    title: `Coleta estruturada: ${payload.microgestoId}`,
+    description,
+    eventDate: new Date(`${payload.eventDate}T12:00:00`).toISOString(),
+    childId: payload.childId,
+    classroomId: payload.classroomId,
+    developmentNotes: description,
+    microgestos: [{
+      categoria: payload.categoria,
+      microgestoId: payload.microgestoId,
+      nivel: payload.nivel,
+      campoExperiencia: payload.campoExperiencia,
+    }],
+    tags: ['coleta_estruturada', payload.categoria.toLowerCase(), payload.microgestoId.toLowerCase()],
+    aiContext: {
+      source: 'daily-collection',
+      categoria: payload.categoria,
+      microgestoId: payload.microgestoId,
+      nivel: payload.nivel,
+      campoExperiencia: payload.campoExperiencia,
+    },
+  };
+
+  if (!navigator.onLine) {
+    await enqueueOffline(dto);
+    return {
+      id: `optimistic_${Date.now()}_${payload.childId}`,
+      ...dto,
+      _optimistic: true,
+    };
+  }
+
+  return createDiaryEvent(dto);
+}
+
 export async function registerMicroGesture(
   payload: MicroGesturePayload
 ): Promise<DiaryEvent & { _optimistic?: boolean }> {

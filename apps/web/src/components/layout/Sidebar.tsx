@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  BookOpen, ClipboardList, BarChart2, ShoppingCart, GraduationCap,
+  BookOpen, ClipboardList,   BarChart2, ShoppingCart, GraduationCap, ClipboardCheck,
   FileArchive, HeartPulse,
   ChevronRight, ChevronDown, TrendingUp, Users, LayoutDashboard, ShoppingBag,
   FileText, Home, MessageCircle, Camera, UserCheck, Building2,
@@ -33,6 +33,7 @@ const PROFESSOR_FERRAMENTAS: MenuItem[] = [
   { path: '/app/planejamentos',       label: 'Plano de Aula',          icon: <BookOpen className="h-4 w-4" />, badge: 'Novo' },
   // Diário: entrada única → calendário de dias letivos (PR 1/PR 2)
   { path: '/app/diario-calendario',   label: 'Diário',                 icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/coleta-diaria',       label: 'Coleta Diária',           icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
   // Chamada Diária removida do menu principal (incorporada ao fluxo do Diário)
   { path: '/app/rdic-crianca',        label: 'Desenvolvimento por Criança',       icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdx',                 label: 'Fotos da Turma',         icon: <Camera className="h-4 w-4" /> },
@@ -58,6 +59,7 @@ const COORD_GESTAO: MenuItem[] = [
 const COORD_PEDAGOGICO: MenuItem[] = [
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diario-calendario', label: 'Diário',             icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/coleta-diaria',     label: 'Coleta Diária',       icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
   { path: '/app/atendimentos-pais', label: 'Atendimentos Pais',  icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
   { path: '/app/rdic-crianca',    label: 'Desenvolvimento por Criança',    icon: <Brain className="h-4 w-4" /> },
@@ -133,6 +135,7 @@ const UNIDADE_GESTAO: MenuItem[] = [
 ];
 const UNIDADE_PEDAGOGICO: MenuItem[] = [
   { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/coleta-diaria',     label: 'Coleta Diária',              icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
   { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão e Aprovação', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
   { path: '/app/rdic-crianca',      label: 'Desenvolvimento por Criança',           icon: <Brain className="h-4 w-4" /> },
   { path: '/app/inteligencia',      label: 'Painel de Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },

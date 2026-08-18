@@ -419,6 +419,145 @@ export class DiaryEventService {
   }
 
   /**
+   * Agrega a qualidade de preenchimento do diário sem expor conteúdo ou PII.
+   * O cálculo usa somente os eventos reais do escopo do usuário e uma janela
+   * limitada para manter latência previsível em produção.
+   */
+  async quality(query: QueryDiaryEventDto, user: JwtPayload) {
+    const end = query.endDate ? new Date(query.endDate) : new Date();
+    const start = query.startDate
+      ? new Date(query.startDate)
+      : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new BadRequestException('Janela de qualidade inválida');
+    }
+    if (start > end) {
+      throw new BadRequestException('A data inicial deve ser anterior à data final');
+    }
+    const windowDays = Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+    if (windowDays > 90) {
+      throw new BadRequestException('A janela de qualidade não pode exceder 90 dias');
+    }
+
+    const scopedWhere = getScopedWhereForDiaryEvent(user);
+    const andConditions: any[] = [
+      scopedWhere,
+      { eventDate: { gte: start, lte: end } },
+    ];
+    if (query.classroomId) andConditions.push({ classroomId: query.classroomId });
+    if (query.childId) andConditions.push({ childId: query.childId });
+    if (query.type) andConditions.push({ type: query.type });
+
+    if (user.roles.some((role) => role.level === RoleLevel.PROFESSOR)) {
+      const classrooms = await this.prisma.classroomTeacher.findMany({
+        where: { teacherId: user.sub, isActive: true },
+        select: { classroomId: true },
+      });
+      const classroomIds = classrooms.map((item) => item.classroomId);
+      andConditions.push({
+        OR: [
+          ...(classroomIds.length > 0 ? [{ classroomId: { in: classroomIds } }] : []),
+          { createdBy: user.sub },
+        ],
+      });
+    }
+
+    const events = await this.prisma.diaryEvent.findMany({
+      where: { AND: andConditions },
+      select: {
+        id: true,
+        childId: true,
+        classroomId: true,
+        createdBy: true,
+        eventDate: true,
+        createdAt: true,
+        type: true,
+        status: true,
+        title: true,
+        description: true,
+        observations: true,
+        developmentNotes: true,
+        behaviorNotes: true,
+        medicaoAlimentar: true,
+        sonoMinutos: true,
+        trocaFraldaStatus: true,
+        tags: true,
+        aiContext: true,
+      },
+      orderBy: { eventDate: 'desc' },
+      take: 5000,
+    });
+
+    const hasText = (value: unknown) => typeof value === 'string' && value.trim().length > 0;
+    const hasJson = (value: unknown) => {
+      if (value == null) return false;
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'object') return Object.keys(value as Record<string, unknown>).length > 0;
+      return true;
+    };
+    const isStructured = (event: (typeof events)[number]) => {
+      const context = event.aiContext && typeof event.aiContext === 'object'
+        ? event.aiContext as Record<string, unknown>
+        : undefined;
+      return (Array.isArray(context?.microgestos) && context.microgestos.length > 0) ||
+        hasJson(event.medicaoAlimentar) || hasJson(event.sonoMinutos) || hasJson(event.trocaFraldaStatus);
+    };
+    const isDocumented = (event: (typeof events)[number]) =>
+      hasText(event.description) || hasText(event.observations) || hasText(event.developmentNotes) ||
+      hasText(event.behaviorNotes) || isStructured(event) || hasJson(event.aiContext);
+
+    const byDay = new Map<string, { total: number; documented: number; structured: number; authored: number }>();
+    const byType = new Map<string, number>();
+    const byStatus = new Map<string, number>();
+    let documented = 0;
+    let structured = 0;
+    let authored = 0;
+    let published = 0;
+
+    for (const event of events) {
+      const day = new Date(event.eventDate).toISOString().slice(0, 10);
+      const dayMetric = byDay.get(day) ?? { total: 0, documented: 0, structured: 0, authored: 0 };
+      dayMetric.total += 1;
+      if (isDocumented(event)) { documented += 1; dayMetric.documented += 1; }
+      if (isStructured(event)) { structured += 1; dayMetric.structured += 1; }
+      if (event.createdBy) { authored += 1; dayMetric.authored += 1; }
+      if (event.status === 'PUBLICADO') published += 1;
+      byDay.set(day, dayMetric);
+      byType.set(event.type, (byType.get(event.type) ?? 0) + 1);
+      byStatus.set(event.status, (byStatus.get(event.status) ?? 0) + 1);
+    }
+
+    const total = events.length;
+    const percent = (value: number) => total === 0 ? 0 : Math.round((value / total) * 100);
+    return {
+      scope: 'real',
+      window: { start: start.toISOString(), end: end.toISOString(), days: windowDays },
+      capped: events.length >= 5000,
+      totals: {
+        events: total,
+        distinctChildren: new Set(events.map((event) => event.childId)).size,
+        distinctClassrooms: new Set(events.map((event) => event.classroomId)).size,
+        documented,
+        structured,
+        authored,
+        published,
+      },
+      coverage: {
+        documentationPercent: percent(documented),
+        structuredPercent: percent(structured),
+        authorshipPercent: percent(authored),
+        publicationPercent: percent(published),
+      },
+      byType: Object.fromEntries(byType),
+      byStatus: Object.fromEntries(byStatus),
+      daily: Array.from(byDay.entries())
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([date, metrics]) => ({ date, ...metrics })),
+    };
+  }
+
+  /**
    * Busca um evento por ID
    */
   async findOne(id: string, user: JwtPayload) {
