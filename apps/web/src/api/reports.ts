@@ -76,3 +76,133 @@ export async function getTeacherDashboard(params: {
   const response = await http.get('/reports/dashboard/teacher', { params });
   return response.data;
 }
+
+
+export interface DiarySummaryData {
+  mes: string;
+  unitId: string | null;
+  classroomId: string | null;
+  totalDiarios: number;
+  publicados: number;
+  rascunhos: number;
+  presencaMedia: number | null;
+  climaEmocional: Record<string, number>;
+  execucaoPlano: Record<string, number>;
+  microgestosTipos: Record<string, number>;
+  momentosDestaque: string[];
+}
+
+export interface UnitCoverageData {
+  unitId: string;
+  startDate: string;
+  endDate: string;
+  totalCriancas: number;
+  totalComRegistro: number;
+  percentualGeral: number;
+  turmas: Array<{
+    classroomId: string;
+    classroomName: string;
+    totalCriancas: number;
+    criancasComRegistro: number;
+    percentual: number;
+  }>;
+}
+
+export interface UnitPendingsData {
+  unitId: string;
+  daysWithout: number;
+  cutoffDate: string;
+  totalPendentes: number;
+  pendentes: Array<{
+    childId: string;
+    nome: string;
+    classroomId: string;
+    classroomName: string;
+  }>;
+}
+
+export interface CentralCoverageData {
+  startDate: string;
+  endDate: string;
+  daysWithout: number;
+  totalUnidades: number;
+  totalCriancas?: number;
+  totalComRegistro?: number;
+  percentualGeral?: number;
+  unidades: Array<{
+    unitId: string;
+    unitName: string;
+    totalCriancas: number;
+    totalComRegistro: number;
+    percentualCobertura: number;
+    totalPendentes: number;
+    turmas: UnitCoverageData['turmas'];
+  }>;
+}
+
+export async function getDiarySummary(params: {
+  unitId?: string;
+  classroomId?: string;
+  mes?: string;
+}): Promise<DiarySummaryData> {
+  const response = await http.get('/reports/diary/summary', { params });
+  return response.data;
+}
+
+export async function getUnitCoverage(params: {
+  unitId?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<UnitCoverageData> {
+  const response = await http.get('/reports/unit/coverage', { params });
+  return response.data;
+}
+
+export async function getUnitPendings(params: {
+  unitId?: string;
+  daysWithout?: number;
+}): Promise<UnitPendingsData> {
+  const response = await http.get('/reports/unit/pendings', { params });
+  return response.data;
+}
+
+export async function getCentralCoverage(params: {
+  startDate?: string;
+  endDate?: string;
+  daysWithout?: number;
+}): Promise<CentralCoverageData> {
+  const response = await http.get('/reports/central/coverage', { params });
+  return response.data;
+}
+
+
+export interface ClassroomExpressSummary {
+  classroom: { id: string; name: string };
+  periodo: { startDate: string; endDate: string };
+  totalCriancas: number;
+  cobertura: { comRegistros: number; semRegistros: number; percentual: number };
+  totalDiarios: number;
+  totalObservacoes: number;
+  totalMicrogestos: number;
+  totalPontosAtencao: number;
+  criancas: Array<{
+    childId: string;
+    nome: string;
+    diarios: number;
+    observacoes: number;
+    microgestos: number;
+    diasComRegistro: number;
+    porNivel: Record<string, number>;
+    pontosAtencao: number;
+    tendencia: 'SEM_DADOS' | 'ATENCAO' | 'FAVORAVEL' | 'EM_DESENVOLVIMENTO' | string;
+  }>;
+}
+
+export async function getClassroomExpressSummary(params: {
+  classroomId: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<ClassroomExpressSummary> {
+  const response = await http.get('/rdic/turma/express-summary', { params });
+  return response.data;
+}

@@ -1,6 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getDiaryByClassroom, getDiaryByPeriod, getDiaryUnplanned } from '../api/reports';
+import {
+  getClassroomExpressSummary,
+  getCentralCoverage,
+  getDiaryByClassroom,
+  getDiaryByPeriod,
+  getDiarySummary,
+  getDiaryUnplanned,
+  getUnitCoverage,
+  getUnitPendings,
+  type ClassroomExpressSummary,
+  type CentralCoverageData,
+  type DiarySummaryData,
+  type UnitCoverageData,
+  type UnitPendingsData,
+} from '../api/reports';
 import { getAccessibleClassrooms } from '../api/lookup';
 import { getErrorMessage } from '../utils/errorMessage';
 import type { AccessibleClassroom } from '../types/lookup';
@@ -44,7 +58,14 @@ function formatarValor(valor: unknown): string {
   return String(valor);
 }
 
-type ReportType = 'by-classroom' | 'by-period' | 'unplanned';
+type ReportType = 'pedagogical' | 'by-classroom' | 'by-period' | 'unplanned';
+
+interface PedagogicalReportData {
+  coverage: UnitCoverageData | CentralCoverageData;
+  pendings: UnitPendingsData | null;
+  diarySummary: DiarySummaryData | null;
+  classroomSummary: ClassroomExpressSummary | null;
+}
 interface ReportData { [key: string]: unknown; }
 interface UnitOption { id: string; name: string; }
 
@@ -59,6 +80,7 @@ export function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [pedagogicalData, setPedagogicalData] = useState<PedagogicalReportData | null>(null);
 
   // Contexto global de escopo de unidade
   const { accessibleUnits, selectedUnitId: ctxUnitId, setUnit: ctxSetUnit } = useUnitScope();
@@ -125,6 +147,7 @@ export function ReportsPage() {
   const handleUnitChange = (unitId: string) => {
     setSelectedUnitId(unitId);
     setReportData(null);
+    setPedagogicalData(null);
     setError(null);
     // Sempre recarregar turmas quando unidade muda (para by-classroom)
     carregarTurmas(unitId || undefined);
@@ -134,14 +157,35 @@ export function ReportsPage() {
     setReportType(tipo);
     setError(null);
     setReportData(null);
-    if (tipo === 'by-classroom') {
+    if (tipo === 'by-classroom' || tipo === 'pedagogical') {
       carregarTurmas(selectedUnitId || undefined);
     }
   };
 
   const carregarRelatorio = async () => {
-    setError(null); setLoading(true); setReportData(null);
+    setError(null); setLoading(true); setReportData(null); setPedagogicalData(null);
     try {
+      if (reportType === 'pedagogical') {
+        if (!startDate || !endDate) {
+          setError('Preencha a Data de Início e a Data de Término antes de gerar a visão pedagógica.');
+          setLoading(false);
+          return;
+        }
+        const selectedClassroom = turmas.find((turma) => turma.id === classroomId);
+        const scopedUnitId = selectedUnitId || selectedClassroom?.unitId;
+        const coverage = scopedUnitId
+          ? await getUnitCoverage({ unitId: scopedUnitId, startDate, endDate })
+          : await getCentralCoverage({ startDate, endDate, daysWithout: 1 });
+        const [pendings, diarySummary, classroomSummary] = await Promise.all([
+          scopedUnitId ? getUnitPendings({ unitId: scopedUnitId, daysWithout: 1 }) : Promise.resolve(null),
+          getDiarySummary({ unitId: scopedUnitId, classroomId: classroomId || undefined, mes: endDate.slice(0, 7) }),
+          classroomId ? getClassroomExpressSummary({ classroomId, startDate, endDate }) : Promise.resolve(null),
+        ]);
+        setPedagogicalData({ coverage, pendings, diarySummary, classroomSummary });
+        setLoading(false);
+        return;
+      }
+
       let data: ReportData;
       if (reportType === 'by-classroom') {
         if (!classroomId || !startDate || !endDate) {
@@ -168,9 +212,68 @@ export function ReportsPage() {
   };
 
   const titulos: Record<ReportType, string> = {
+    pedagogical: 'Visão Pedagógica Consolidada',
     'by-classroom': 'Relatório de Diário por Turma',
     'by-period': 'Relatório de Diário por Período',
     'unplanned': 'Relatório de Eventos Não Planejados',
+  };
+
+  const renderizarVisaoPedagogica = () => {
+    if (!pedagogicalData) return null;
+    const { coverage, pendings, diarySummary, classroomSummary } = pedagogicalData;
+    const isUnitCoverage = 'turmas' in coverage;
+    const unitCoverage = isUnitCoverage ? coverage : null;
+    const centralCoverage = !isUnitCoverage ? coverage : null;
+    const percentual = unitCoverage?.percentualGeral ?? centralCoverage?.percentualGeral ?? 0;
+    const totalCriancas = unitCoverage?.totalCriancas ?? centralCoverage?.totalCriancas ?? 0;
+    const totalComRegistro = unitCoverage?.totalComRegistro ?? centralCoverage?.totalComRegistro ?? 0;
+    const totalPendentes = pendings?.totalPendentes ?? centralCoverage?.unidades.reduce((sum, unidade) => sum + unidade.totalPendentes, 0) ?? 0;
+    const totalAtencao = classroomSummary?.totalPontosAtencao ?? 0;
+
+    return (
+      <div className="space-y-6">
+        <div className="rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          <strong>Leitura operacional:</strong> esta visão cruza registros estruturados reais. Ela não substitui o RDIC oficial nem expõe texto clínico, psicológico ou dados administrativos da criança.
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Cobertura</p><p className="mt-1 text-2xl font-bold text-indigo-700">{percentual}%</p><p className="text-xs text-slate-500">{totalComRegistro} de {totalCriancas} crianças</p></div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Diários do mês</p><p className="mt-1 text-2xl font-bold text-emerald-700">{diarySummary?.totalDiarios ?? classroomSummary?.totalDiarios ?? '—'}</p><p className="text-xs text-slate-500">{diarySummary?.publicados ?? 0} publicados · {diarySummary?.rascunhos ?? 0} rascunhos</p></div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Pendências recentes</p><p className="mt-1 text-2xl font-bold text-amber-700">{totalPendentes}</p><p className="text-xs text-slate-500">sem registro no último dia</p></div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Pontos de atenção</p><p className="mt-1 text-2xl font-bold text-rose-700">{totalAtencao}</p><p className="text-xs text-slate-500">na turma selecionada</p></div>
+        </div>
+
+        {unitCoverage && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="font-semibold text-slate-800">Cobertura por turma</h3>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {unitCoverage.turmas.map((turma) => (
+                <div key={turma.classroomId} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between gap-3"><span className="font-medium text-slate-800">{turma.classroomName}</span><span className="font-semibold text-indigo-700">{turma.percentual}%</span></div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-indigo-500" style={{ width: `${Math.min(100, turma.percentual)}%` }} /></div>
+                  <p className="mt-1 text-xs text-slate-500">{turma.criancasComRegistro} de {turma.totalCriancas} crianças com registro</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {centralCoverage && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="font-semibold text-slate-800">Cobertura por unidade</h3>
+            <div className="mt-4 overflow-x-auto"><table className="min-w-full text-left text-sm"><thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-3 py-2">Unidade</th><th className="px-3 py-2">Cobertura</th><th className="px-3 py-2">Crianças</th><th className="px-3 py-2">Pendências</th></tr></thead><tbody className="divide-y divide-slate-100">{centralCoverage.unidades.map((unidade) => <tr key={unidade.unitId}><td className="px-3 py-3 font-medium">{unidade.unitName}</td><td className="px-3 py-3 font-semibold text-indigo-700">{unidade.percentualCobertura}%</td><td className="px-3 py-3 text-slate-600">{unidade.totalComRegistro} / {unidade.totalCriancas}</td><td className="px-3 py-3 text-amber-700">{unidade.totalPendentes}</td></tr>)}</tbody></table></div>
+          </section>
+        )}
+
+        {classroomSummary && (
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-semibold text-slate-800">Evidências por criança — {classroomSummary.classroom.name}</h3><p className="text-xs text-slate-500">{formatarValor(classroomSummary.periodo.startDate)} a {formatarValor(classroomSummary.periodo.endDate)}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{classroomSummary.cobertura.percentual}% de cobertura</span></div>
+            <div className="mt-4 overflow-x-auto"><table className="min-w-full text-left text-sm"><thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-3 py-2">Criança</th><th className="px-3 py-2">Diários</th><th className="px-3 py-2">Observações</th><th className="px-3 py-2">Microgestos</th><th className="px-3 py-2">Dias</th><th className="px-3 py-2">Tendência</th></tr></thead><tbody className="divide-y divide-slate-100">{classroomSummary.criancas.map((crianca) => <tr key={crianca.childId}><td className="px-3 py-3 font-medium">{crianca.nome}</td><td className="px-3 py-3">{crianca.diarios}</td><td className="px-3 py-3">{crianca.observacoes}</td><td className="px-3 py-3">{crianca.microgestos}</td><td className="px-3 py-3">{crianca.diasComRegistro}</td><td className={`px-3 py-3 font-semibold ${crianca.tendencia === 'ATENCAO' ? 'text-rose-700' : crianca.tendencia === 'FAVORAVEL' ? 'text-emerald-700' : 'text-slate-700'}`}>{crianca.tendencia.replaceAll('_', ' ')}</td></tr>)}</tbody></table></div>
+          </section>
+        )}
+
+        {pendings && pendings.pendentes.length > 0 && <section className="rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-semibold text-amber-900">Fila de atenção operacional</h3><p className="mt-1 text-sm text-amber-800">Crianças sem registro recente. A fila serve para orientar o cuidado da equipe, não para punir o professor.</p><div className="mt-3 flex flex-wrap gap-2">{pendings.pendentes.slice(0, 12).map((pending) => <span key={pending.childId} className="rounded-full bg-white px-3 py-1 text-xs text-amber-900">{pending.nome} · {pending.classroomName}</span>)}</div></section>}
+      </div>
+    );
   };
 
   const renderizarTabela = (dados: ReportData[]) => {
@@ -202,6 +305,7 @@ export function ReportsPage() {
   };
 
   const renderizarResultado = () => {
+    if (reportType === 'pedagogical') return renderizarVisaoPedagogica();
     if (!reportData) return null;
     if (reportType === 'by-classroom') {
       const eventos = Array.isArray(reportData.events) ? reportData.events as ReportData[] : [];
@@ -308,6 +412,10 @@ export function ReportsPage() {
 
       {/* Seletor de tipo de relatório */}
       <div className="mb-6 flex flex-wrap gap-3">
+        <button onClick={() => handleReportTypeChange('pedagogical')}
+          className={`px-5 py-2 rounded-lg font-medium transition-colors ${reportType === 'pedagogical' ? 'bg-indigo-700 text-white ring-2 ring-indigo-400' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
+          Inteligência Pedagógica
+        </button>
         <button onClick={() => handleReportTypeChange('by-classroom')}
           className={`px-5 py-2 rounded-lg font-medium transition-colors ${reportType === 'by-classroom' ? 'bg-blue-700 text-white ring-2 ring-blue-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
           Por Turma
@@ -321,6 +429,34 @@ export function ReportsPage() {
           Não Planejado
         </button>
       </div>
+
+      {reportType === 'pedagogical' && (
+        <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
+          <h2 className="text-lg font-semibold mb-2 text-gray-700">Filtros — Visão Pedagógica Consolidada</h2>
+          <p className="mb-4 text-sm text-gray-500">Escolha uma turma para ver evidências por criança. Sem turma, a visão mostra cobertura por unidade ou por toda a rede, conforme seu escopo.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Turma <span className="text-gray-400 text-xs">(opcional)</span></label>
+              <select value={classroomId} onChange={e => setClassroomId(e.target.value)} disabled={turmasCarregando}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                <option value="">Todas as turmas do escopo</option>
+                {turmas.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Data de Início <span className="text-red-500">*</span></label>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Data de Término <span className="text-red-500">*</span></label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            </div>
+          </div>
+          <button onClick={carregarRelatorio} disabled={loading} className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+            {loading ? 'Consolidando...' : 'Gerar Visão Pedagógica'}
+          </button>
+        </div>
+      )}
 
       {reportType === 'by-classroom' && (
         <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">

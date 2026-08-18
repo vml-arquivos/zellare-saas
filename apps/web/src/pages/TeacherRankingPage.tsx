@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BarChart3, Info, RefreshCw, Trophy } from 'lucide-react';
 import { PageShell } from '../components/ui/PageShell';
 import { getTeacherRanking, type TeacherRankingResponse } from '../api/teacher-ranking';
+import { useUnitScope } from '../contexts/UnitScopeContext';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(value));
@@ -15,26 +16,42 @@ export default function TeacherRankingPage() {
   const [data, setData] = useState<TeacherRankingResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const { accessibleUnits, selectedUnitId, setUnit } = useUnitScope();
+  const [unitId, setUnitId] = useState(selectedUnitId ?? '');
 
-  async function load() {
+  useEffect(() => {
+    if (selectedUnitId && !unitId) setUnitId(selectedUnitId);
+  }, [selectedUnitId, unitId]);
+
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setData(await getTeacherRanking());
+      setData(await getTeacherRanking({ from: from || undefined, to: to || undefined, unitId: unitId || undefined }));
     } catch (loadError) {
       const message = (loadError as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(message || (loadError instanceof Error ? loadError.message : 'Não foi possível carregar o ranking.'));
     } finally {
       setLoading(false);
     }
-  }
+  }, [from, to, unitId]);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [load]);
 
   return (
     <PageShell title="Ranking de preenchimento" subtitle="Indicador formativo, auditável e baseado nos registros reais do período selecionado.">
       <div className="space-y-6">
         {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div><label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Unidade</label><select value={unitId} onChange={(event) => { const value = event.target.value; setUnitId(value); setUnit(value || null); }} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"><option value="">Todas as unidades do escopo</option>{accessibleUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></div>
+            <div><label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">De</label><input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></div>
+            <div><label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">Até</label><input type="date" value={to} onChange={(event) => setTo(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></div>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">Sem datas, o sistema usa a janela padrão de 30 dias. A pontuação não substitui avaliação pedagógica ou gestão de pessoas.</p>
+        </section>
         <section className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5">
           <div className="flex items-start gap-3"><Info className="mt-0.5 h-5 w-5 text-indigo-700" /><div><h2 className="font-semibold text-indigo-950">Como a pontuação é formada</h2><p className="mt-1 text-sm text-indigo-900">{data?.formula.total || '60% completude + 40% qualidade.'}</p><p className="mt-1 text-xs text-indigo-800">{data?.formula.note || 'O indicador não substitui avaliação pedagógica ou gestão de pessoas.'}</p></div></div>
         </section>
