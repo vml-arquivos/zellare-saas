@@ -92,4 +92,41 @@ describe('IaAssistivaService — validação de plano gerado', () => {
       ),
     ).toThrow(ServiceUnavailableException);
   });
+
+  it('usa o Gemini nativo para gerar atividade e preserva o objetivo curricular', async () => {
+    const prisma = {
+      frameworkObjective: {
+        findUnique: jest.fn(),
+      },
+    };
+    const gemini = {
+      isEnabled: jest.fn().mockReturnValue(true),
+      generateJSON: jest.fn().mockResolvedValue({
+        titulo: 'Sons do quintal',
+        descricao: 'A turma explora sons próximos.',
+        intencionalidade: 'Ampliar a escuta e a curiosidade.',
+        materiais: ['potes', 'folhas'],
+        etapas: ['Explorar', 'Compartilhar'],
+        duracao: '30 minutos',
+        adaptacoes: 'Oferecer apoio visual.',
+        registroSugerido: 'Registrar falas e descobertas.',
+      }),
+    };
+    const scopedService = new IaAssistivaService(prisma as any, gemini as any);
+
+    const result = await scopedService.gerarAtividade({
+      campoDeExperiencia: 'Traços, sons, cores e formas',
+      objetivoBNCC: 'Explorar sons do ambiente',
+      objetivoCurriculo: 'Currículo institucional 2026',
+      faixaEtaria: 'EI03' as any,
+    });
+
+    expect(gemini.generateJSON).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      titulo: 'Sons do quintal',
+      objetivoBNCC: 'Explorar sons do ambiente',
+      objetivoCurriculo: 'Currículo institucional 2026',
+      geradoPorIA: true,
+    });
+  });
 });

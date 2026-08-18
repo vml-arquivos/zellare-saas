@@ -1,6 +1,7 @@
 import {
   Injectable,
   Logger,
+  Optional,
   ServiceUnavailableException,
   BadRequestException,
   ForbiddenException,
@@ -13,6 +14,7 @@ import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { canAccessUnit } from '../common/utils/can-access-unit';
+import { GeminiService } from '../ai/services/gemini.service';
 
 export interface AtividadeGerada {
   titulo: string;
@@ -74,7 +76,10 @@ export class IaAssistivaService {
   // Isso garante que o servidor sobe normalmente mesmo sem chave de IA configurada.
   private _cliente: OpenAI | null = null;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly gemini?: GeminiService,
+  ) {
     const geminiKey = process.env.GEMINI_API_KEY;
     const openaiKey = process.env.OPENAI_API_KEY;
 
@@ -188,7 +193,6 @@ export class IaAssistivaService {
   }
 
   async gerarAtividade(dto: GerarAtividadeDto): Promise<AtividadeGerada> {
-    const cliente = this.getCliente();
     const objetivo = await this.resolverObjetivoPedagogico(dto);
     const faixaLabel = dto.faixaEtaria
       ? LABELS_FAIXA[dto.faixaEtaria] || dto.faixaEtaria
@@ -238,34 +242,51 @@ ${dto.contextoAdicional ? `- **Contexto Adicional:** ${dto.contextoAdicional}` :
 }`;
 
     try {
-      const resposta = await cliente.chat.completions.create({
-        model: this.getModelo(),
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Você é uma especialista em Educação Infantil. Responda APENAS com JSON válido, sem markdown, sem texto adicional.',
-          },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 1500,
-      });
+      type AtividadeGeradaPayload = Pick<
+        AtividadeGerada,
+        'titulo' | 'descricao' | 'intencionalidade' | 'materiais' | 'etapas' |
+        'duracao' | 'adaptacoes' | 'registroSugerido'
+      >;
+      let atividade: AtividadeGeradaPayload;
 
-      const conteudo = resposta.choices[0]?.message?.content;
-      if (!conteudo) {
-        throw new ServiceUnavailableException(
-          'A IA não retornou conteúdo. Tente novamente.',
+      if (this.gemini?.isEnabled()) {
+        // Caminho principal: SDK nativo do Gemini com resposta JSON estruturada.
+        // A chave permanece exclusivamente no servidor e evitamos divergência
+        // entre o modelo nativo e o endpoint OpenAI-compatible.
+        atividade = await this.gemini.generateJSON<AtividadeGeradaPayload>(
+          prompt,
+          'Você é uma especialista em Educação Infantil. Retorne apenas um JSON válido, sem markdown e sem texto adicional.',
         );
+      } else {
+        // Fallback legado para ambientes que ainda usam OpenAI-compatible.
+        const cliente = this.getCliente();
+        const resposta = await cliente.chat.completions.create({
+          model: this.getModelo(),
+          messages: [
+            {
+              role: 'system',
+              content:
+                'Você é uma especialista em Educação Infantil. Responda APENAS com JSON válido, sem markdown, sem texto adicional.',
+            },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.7,
+          max_tokens: 1500,
+        });
+
+        const conteudo = resposta.choices[0]?.message?.content;
+        if (!conteudo) {
+          throw new ServiceUnavailableException(
+            'A IA não retornou conteúdo. Tente novamente.',
+          );
+        }
+
+        const jsonLimpo = conteudo
+          .replace(/```json\n?/g, '')
+          .replace(/```\n?/g, '')
+          .trim();
+        atividade = JSON.parse(jsonLimpo) as AtividadeGeradaPayload;
       }
-
-      // Extrair JSON mesmo que venha com markdown
-      const jsonLimpo = conteudo
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
-
-      const atividade = JSON.parse(jsonLimpo);
 
       // Garantir que os campos fixos do objetivo pedagógico sejam preservados
       return {

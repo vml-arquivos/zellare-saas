@@ -341,8 +341,10 @@ export default function PlanoDeAulaNovoPage() {
   const { user } = useAuth();
   const userRoles = normalizeRoles(user);
 
-  // ─── Roles de coordenação/direção — não criam nem enviam planejamento ────────
-  // Coordenação acessa o planejamento para revisar (aprovar/devolver), não para criar.
+  // ─── Papéis e escopo da oficina de planejamento ────────────────────────────
+  // A IA é uma ferramenta pedagógica de apoio e pode ser usada por todos os
+  // perfis educacionais autorizados na rota. As regras de salvar/enviar continuam
+  // alinhadas ao backend e ao status do planejamento.
   const userRoleTypes: string[] = (() => {
     if (!user || typeof user !== 'object') return [];
     const u = user as Record<string, unknown>;
@@ -359,8 +361,13 @@ export default function PlanoDeAulaNovoPage() {
     'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER',
   ];
   const allRolesPlan = [...new Set([...userRoles, ...userRoleTypes])];
-  // isCoordRole: true quando o usuário é coordenação/direção/central — não deve criar/enviar
   const isCoordRole = allRolesPlan.some((r) => COORD_ROLES_PLAN.includes(r));
+  const podeCriarPlanejamento = [
+    'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL',
+    'MANTENEDORA', 'DEVELOPER',
+  ].some((role) => allRolesPlan.includes(role));
+  const podeEnviarParaRevisao = ['PROFESSOR', 'UNIDADE', 'DEVELOPER']
+    .some((role) => allRolesPlan.includes(role));
 
   // Coordenadores podem aprovar/devolver planejamentos em revisão
   const canApprove = ['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER'].some(r => userRoles.includes(r));
@@ -799,9 +806,9 @@ export default function PlanoDeAulaNovoPage() {
     CANCELADO: { label: 'Cancelado', icon: <AlertCircle className="h-3 w-3" />, className: 'bg-gray-100 text-gray-500' },
   };
   const statusInfo = statusConfig[status] ?? statusConfig.RASCUNHO;
-  // Bloqueado: não pode editar quando em revisão, aprovado, em execução ou concluído
-  // Coordenação também é sempre bloqueada para edição — acessa apenas para revisão
-  const bloqueado = isCoordRole || ['EM_REVISAO', 'APROVADO', 'EM_EXECUCAO', 'CONCLUIDO', 'PUBLICADO', 'CANCELADO'].includes(status);
+  // Bloqueado: o status imutável impede edição e envio, independentemente do perfil.
+  // A coordenação pode criar/editar rascunhos conforme o escopo real do backend.
+  const bloqueado = ['EM_REVISAO', 'APROVADO', 'EM_EXECUCAO', 'CONCLUIDO', 'PUBLICADO', 'CANCELADO'].includes(status);
 
   if (loading) {
     return (
@@ -1141,7 +1148,7 @@ export default function PlanoDeAulaNovoPage() {
                       </div>
 
                       {/* Tarefa 3.1 — Sugestão de atividade via IA (opcional e editável) */}
-                      {!bloqueado && day.objectives.length > 0 && (() => {
+                      {day.objectives.length > 0 && (() => {
                         const obj = day.objectives[0];
                         return (
                           <GeradorAtividadeIA
@@ -1151,7 +1158,7 @@ export default function PlanoDeAulaNovoPage() {
                             onAtividadeGerada={(atividade) => {
                               // Preenche o campo de atividade como rascunho editável
                               // O professor sempre revisa antes de salvar
-                              if (!day.teacher.atividade.trim()) {
+                              if (!bloqueado && !day.teacher.atividade.trim()) {
                                 updateTeacherField(day.date, 'atividade', atividade.descricao ?? '');
                                 if (atividade.materiais?.length) {
                                   updateTeacherField(day.date, 'recursos', atividade.materiais.join(', '));
@@ -1215,7 +1222,7 @@ export default function PlanoDeAulaNovoPage() {
 
         {/* ─── Ações ─── */}
         {/* Professor: pode salvar rascunho e enviar para revisão */}
-        {!bloqueado && !isCoordRole && (
+        {!bloqueado && podeCriarPlanejamento && (
           <div className="flex flex-col sm:flex-row gap-3 pb-8">
             <Button
               variant="outline"
@@ -1229,21 +1236,23 @@ export default function PlanoDeAulaNovoPage() {
                 <><Save className="h-4 w-4 mr-2" /> Salvar Rascunho</>
               )}
             </Button>
-            <Button
-              onClick={enviarParaRevisao}
-              disabled={saving || submitting}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-            >
-              {submitting ? (
-                <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Enviando...</>
-              ) : (
-                <><Send className="h-4 w-4 mr-2" /> Enviar para Revisão</>
-              )}
-            </Button>
+            {podeEnviarParaRevisao && (
+              <Button
+                onClick={enviarParaRevisao}
+                disabled={saving || submitting}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+              >
+                {submitting ? (
+                  <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Enviando...</>
+                ) : (
+                  <><Send className="h-4 w-4 mr-2" /> Enviar para Revisão</>
+                )}
+              </Button>
+            )}
           </div>
         )}
-        {/* Coordenação: apenas botão Voltar na área de ações (aprovação/devolução já está acima) */}
-        {isCoordRole && (
+        {/* Perfis sem envio para revisão retornam após salvar o rascunho */}
+        {!bloqueado && !podeCriarPlanejamento && isCoordRole && (
           <div className="flex pb-8">
             <Button
               variant="outline"

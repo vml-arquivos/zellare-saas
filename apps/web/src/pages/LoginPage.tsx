@@ -4,6 +4,7 @@ import { useAuth } from '../app/AuthProvider';
 import { getRedirectPathByRoles } from '../hooks/useRedirectByRole';
 import { getErrorMessage } from '../utils/errorMessage';
 import { getAccessToken } from '../api/tokenStorage';
+import { useTheme } from '../app/ThemeProvider';
 import { Eye, EyeOff, BookOpen, Sparkles, Smartphone } from 'lucide-react';
 
 // Detecta se o app está rodando como PWA instalado
@@ -23,6 +24,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { resolvedTheme, toggleTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     if (e && typeof (e as React.FormEvent).preventDefault === 'function') {
@@ -61,7 +63,7 @@ export function LoginPage() {
   if (isPWAMode()) {
     return (
       <div style={{
-        minHeight: '100dvh', display: 'flex', flexDirection: 'column',
+        minHeight: '100dvh', display: 'flex', flexDirection: 'column', position: 'relative',
         background: 'linear-gradient(160deg, #062b34 0%, #003f4d 50%, #008f5a 100%)',
         fontFamily: '"Inter","system-ui",sans-serif',
         padding: '0 24px',
@@ -69,6 +71,18 @@ export function LoginPage() {
         paddingBottom: 'max(32px, env(safe-area-inset-bottom))',
         justifyContent: 'space-between',
       }}>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={`Ativar tema ${resolvedTheme === 'dark' ? 'claro' : 'escuro'}`}
+          style={{
+            position: 'absolute', top: 16, right: 16, borderRadius: 9999,
+            border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(1,4,9,0.24)',
+            color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 12,
+          }}
+        >
+          {resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+        </button>
 
         {/* Topo: logo e título */}
         <div style={{ textAlign: 'center', color: '#fff' }}>
@@ -99,18 +113,18 @@ export function LoginPage() {
 
         {/* Formulário */}
         <div style={{
-          background: '#fff', borderRadius: 24, padding: 24,
+          background: 'var(--surface-base)', border: '1px solid var(--border-default)', borderRadius: 24, padding: 24,
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
         }}>
-          <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 600, color: '#0f172a' }}>
+          <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
             Entrar
           </h2>
 
           {error && (
             <div style={{
               padding: '10px 14px', borderRadius: 12, marginBottom: 16,
-              background: '#fef2f2', border: '0.5px solid #fecaca',
-              fontSize: 13, color: '#dc2626',
+              background: 'var(--error-bg)', border: '0.5px solid var(--error-border)',
+              fontSize: 13, color: 'var(--error)',
             }}>
               {error}
             </div>
@@ -118,7 +132,7 @@ export function LoginPage() {
 
           {/* Email */}
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 6 }}>
               E-mail
             </label>
             <input
@@ -130,15 +144,15 @@ export function LoginPage() {
               autoCorrect="off"
               style={{
                 width: '100%', padding: '13px 14px', borderRadius: 12, boxSizing: 'border-box',
-                border: '0.5px solid #e2e8f0', background: '#f8fafc',
-                fontSize: 16, color: '#0f172a', outline: 'none',
+                border: '0.5px solid var(--border-default)', background: 'var(--surface-subtle)',
+                fontSize: 16, color: 'var(--text-primary)', outline: 'none',
               }}
             />
           </div>
 
           {/* Senha */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#475569', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 6 }}>
               Senha
             </label>
             <div style={{ position: 'relative' }}>
@@ -159,7 +173,7 @@ export function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 4,
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 4,
                 }}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -202,7 +216,15 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #062b34 0%, #003f4d 45%, #009f62 100%)' }}>
+    <div className="min-h-screen flex relative" style={{ background: 'linear-gradient(135deg, #062b34 0%, #003f4d 45%, #009f62 100%)' }}>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={`Ativar tema ${resolvedTheme === 'dark' ? 'claro' : 'escuro'}`}
+        className="absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium text-white backdrop-blur transition hover:bg-black/35"
+      >
+        {resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+      </button>
       {/* Painel esquerdo — identidade visual */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden">
         {/* Círculos decorativos */}
@@ -286,20 +308,20 @@ export function LoginPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10">
+          <div className="bg-[var(--surface-base)] border border-[var(--border-default)] rounded-3xl shadow-2xl p-8 lg:p-10">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-5 w-5 text-emerald-600" />
                 <span className="text-sm font-semibold text-emerald-600 uppercase tracking-wide">Bem-vindo de volta</span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Acesse sua conta</h2>
-              <p className="text-gray-500 text-sm mt-1">Entre com seu e-mail e senha cadastrados</p>
+              <h2 className="text-2xl font-bold text-[var(--text-primary)]">Acesse sua conta</h2>
+              <p className="text-[var(--text-secondary)] text-sm mt-1">Entre com seu e-mail e senha cadastrados</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* E-mail */}
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                   E-mail
                 </label>
                 <input
@@ -309,13 +331,13 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="seu@email.com"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all text-gray-900 placeholder-gray-400"
+                  className="w-full px-4 py-3 border-2 border-[var(--border-default)] bg-[var(--surface-subtle)] rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-[var(--surface-brand)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                 />
               </div>
 
               {/* Senha */}
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                   Senha
                 </label>
                 <div className="relative">
@@ -331,7 +353,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -340,7 +362,7 @@ export function LoginPage() {
 
               {/* Erro */}
               {error && (
-                <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                <div className="flex items-start gap-3 p-4 bg-[var(--error-bg)] border border-[var(--error-border)] text-[var(--error)] rounded-xl text-sm">
                   <span className="text-red-500 mt-0.5 flex-shrink-0">⚠️</span>
                   <span>{error}</span>
                 </div>
@@ -366,8 +388,8 @@ export function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-              <p className="text-xs text-gray-400">
+            <div className="mt-8 pt-6 border-t border-[var(--border-subtle)] text-center">
+              <p className="text-xs text-[var(--text-tertiary)]">
                 {import.meta.env.VITE_APP_NAME || 'Zelare'} © 2026 — cuidado, pedagogia e gestão inteligente
               </p>
             </div>

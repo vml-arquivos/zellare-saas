@@ -535,6 +535,111 @@
   border-color: var(--border-default) !important;
 }
 
+/* ── Zelare Night: compatibilidade completa para componentes legados ── */
+.dark .bg-slate-200,
+.dark .bg-gray-200,
+.dark .bg-zinc-200,
+.dark .bg-neutral-200 { background-color: var(--surface-muted) !important; }
+
+.dark .bg-blue-100,
+.dark .bg-sky-100,
+.dark .bg-cyan-100 { background-color: var(--info-bg) !important; }
+.dark .bg-indigo-100,
+.dark .bg-violet-100,
+.dark .bg-purple-100 { background-color: var(--purple-bg) !important; }
+.dark .bg-emerald-100,
+.dark .bg-green-100,
+.dark .bg-teal-100 { background-color: var(--success-bg) !important; }
+.dark .bg-amber-100,
+.dark .bg-yellow-100,
+.dark .bg-orange-100 { background-color: var(--warning-bg) !important; }
+.dark .bg-red-100,
+.dark .bg-rose-100 { background-color: var(--error-bg) !important; }
+
+.dark .bg-white\/80,
+.dark .bg-white\/90,
+.dark .bg-slate-50\/90,
+.dark .bg-gray-50\/90 { background-color: color-mix(in srgb, var(--surface-base) 92%, transparent) !important; }
+
+.dark .text-slate-300,
+.dark .text-slate-200,
+.dark .text-gray-300 { color: var(--text-secondary) !important; }
+.dark .text-blue-500,
+.dark .text-blue-600,
+.dark .text-sky-600,
+.dark .text-cyan-600 { color: var(--accent-cyan) !important; }
+.dark .text-indigo-500,
+.dark .text-indigo-600,
+.dark .text-indigo-800,
+.dark .text-indigo-900,
+.dark .text-violet-600,
+.dark .text-violet-800,
+.dark .text-purple-500,
+.dark .text-purple-600,
+.dark .text-purple-800 { color: var(--text-brand) !important; }
+.dark .text-emerald-500,
+.dark .text-emerald-600,
+.dark .text-emerald-800,
+.dark .text-green-500,
+.dark .text-green-600,
+.dark .text-green-800,
+.dark .text-teal-600,
+.dark .text-teal-700 { color: var(--success) !important; }
+.dark .text-amber-500,
+.dark .text-amber-600,
+.dark .text-amber-800,
+.dark .text-yellow-600,
+.dark .text-yellow-700,
+.dark .text-orange-500,
+.dark .text-orange-600,
+.dark .text-orange-800 { color: var(--warning) !important; }
+.dark .text-red-400,
+.dark .text-red-500,
+.dark .text-red-600,
+.dark .text-red-800,
+.dark .text-rose-600,
+.dark .text-rose-700 { color: var(--error) !important; }
+
+.dark .border-slate-300,
+.dark .border-gray-300,
+.dark .border-blue-100,
+.dark .border-blue-200,
+.dark .border-indigo-100,
+.dark .border-indigo-200,
+.dark .border-violet-100,
+.dark .border-violet-200,
+.dark .border-purple-100,
+.dark .border-purple-200,
+.dark .border-emerald-100,
+.dark .border-emerald-200,
+.dark .border-green-100,
+.dark .border-green-200,
+.dark .border-amber-100,
+.dark .border-amber-200,
+.dark .border-yellow-200,
+.dark .border-orange-100,
+.dark .border-orange-200,
+.dark .border-red-100,
+.dark .border-red-200 { border-color: var(--border-default) !important; }
+
+.dark input,
+.dark textarea,
+.dark select {
+  color-scheme: dark;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: var(--text-tertiary); }
+.dark option { background-color: var(--surface-base); color: var(--text-primary); }
+.dark .ring-emerald-50,
+.dark .ring-blue-400,
+.dark .ring-blue-500,
+.dark .ring-orange-300 { --tw-ring-color: var(--surface-brand) !important; }
+.dark .shadow-emerald-200,
+.dark .shadow-blue-200 { --tw-shadow-color: rgba(99,102,241,0.24) !important; }
+
 /* ═══════════════════════════════════════════════════════════════════
    ANIMAÇÕES GLOBAIS
 ═══════════════════════════════════════════════════════════════════ */

@@ -6,7 +6,25 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Zelare — cuidado, pedagogia e gestão inteligente" />
-    <meta name="theme-color" content="#003f4d" />
+    <meta id="zelare-theme-color" name="theme-color" content="#0d1117" />
+    <script>
+      (() => {
+        try {
+          const stored = localStorage.getItem('zelare-theme');
+          const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = stored === 'light' || (stored === 'system' && !systemDark) ? 'light' : 'dark';
+          const root = document.documentElement;
+          root.classList.toggle('dark', theme === 'dark');
+          root.dataset.theme = theme;
+          root.style.colorScheme = theme;
+          document.getElementById('zelare-theme-color')?.setAttribute('content', theme === 'dark' ? '#0d1117' : '#f6f8fc');
+        } catch {
+          document.documentElement.classList.add('dark');
+          document.documentElement.dataset.theme = 'dark';
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      })();
+    </script>
     <title>Zelare</title>
   </head>
   <body>
