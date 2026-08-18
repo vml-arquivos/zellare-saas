@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,23 +9,35 @@ export default {
     extend: {
       colors: {
         brand: {
-          50:  '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50:  '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+          950: '#1e1b4b',
         },
         surface: {
-          base:     '#ffffff',
-          subtle:   '#f8fafc',
-          muted:    '#f1f5f9',
-          elevated: '#ffffff',
+          page:     'var(--surface-page)',
+          base:     'var(--surface-base)',
+          subtle:   'var(--surface-subtle)',
+          muted:    'var(--surface-muted)',
+          elevated: 'var(--surface-floating)',
+        },
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        border: 'var(--border)',
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        primary: {
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
       },
       borderRadius: {
@@ -39,8 +52,10 @@ export default {
         'ds-sm':    '0 1px 3px 0 rgba(0,0,0,0.07),0 1px 2px -1px rgba(0,0,0,0.04)',
         'ds-md':    '0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.04)',
         'ds-lg':    '0 10px 15px -3px rgba(0,0,0,0.07),0 4px 6px -4px rgba(0,0,0,0.04)',
-        'ds-brand': '0 0 0 3px rgba(37,99,235,0.15)',
-        'ds-focus': '0 0 0 2px rgba(37,99,235,0.4)',
+        'ds-brand': '0 0 0 3px rgba(79,70,229,0.15)',
+        'ds-focus': '0 0 0 2px rgba(79,70,229,0.32)',
+        'ds-glow': 'var(--shadow-glow)',
+
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

@@ -13,12 +13,12 @@ export function AppLayout() {
   return (
     <UnitScopeProvider>
       {/* Wrapper raiz: sem scroll no body, layout fixo */}
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-screen overflow-hidden bg-[var(--surface-page)] text-[var(--text-primary)] transition-colors duration-slow">
 
         {/* ── Overlay mobile ── */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-black/60 md:hidden"
+            className="fixed inset-0 z-30 bg-[var(--surface-overlay)] backdrop-blur-sm md:hidden"
             onClick={closeSidebar}
             aria-hidden="true"
           />
