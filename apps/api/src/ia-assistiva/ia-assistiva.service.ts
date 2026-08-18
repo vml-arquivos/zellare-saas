@@ -61,7 +61,7 @@ const LABELS_TIPO: Record<TipoAtividade, string> = {
 // Variáveis de ambiente:
 //   GEMINI_API_KEY  → Chave da API do Google AI Studio (obrigatória para IA)
 //   GEMINI_BASE_URL → URL base (padrão: https://generativelanguage.googleapis.com/v1beta/openai/)
-//   GEMINI_MODEL    → Modelo (padrão: gemini-2.5-flash)
+//   GEMINI_MODEL    → Modelo (padrão: gemini-3.6-flash)
 //
 // Compatibilidade retroativa (se GEMINI_API_KEY não estiver definida, tenta OPENAI_API_KEY):
 //   OPENAI_API_KEY  → Chave da OpenAI (fallback)
@@ -138,13 +138,13 @@ export class IaAssistivaService {
 
   /**
    * Retorna o nome do modelo a ser usado.
-   * Prioridade: GEMINI_MODEL > OPENAI_MODEL > gemini-2.5-flash (padrão)
+   * Prioridade: GEMINI_MODEL > OPENAI_MODEL > gemini-3.6-flash (padrão)
    */
   private getModelo(): string {
     return (
       process.env.GEMINI_MODEL ||
       process.env.OPENAI_MODEL ||
-      'gemini-2.5-flash'
+      'gemini-3.6-flash'
     );
   }
 

@@ -12,14 +12,14 @@ export default registerAs('gemini', () => ({
   apiKey: process.env.GEMINI_API_KEY ?? '',
 
   /** Modelo padrão para geração de texto e JSON. */
-  textModel: process.env.GEMINI_TEXT_MODEL ?? 'gemini-2.0-flash',
+  textModel: process.env.GEMINI_TEXT_MODEL ?? 'gemini-3.6-flash',
 
   /** Modelo padrão para análise de imagens (vision). */
-  visionModel: process.env.GEMINI_VISION_MODEL ?? 'gemini-2.0-flash',
+  visionModel: process.env.GEMINI_VISION_MODEL ?? 'gemini-3.6-flash',
 
   /** Modelo para raciocínio profundo (thinking). */
   thinkingModel:
-    process.env.GEMINI_THINKING_MODEL ?? 'gemini-2.5-flash-preview-04-17',
+    process.env.GEMINI_THINKING_MODEL ?? 'gemini-3.6-flash',
 
   /** Temperatura de geração (0 = determinístico, 1 = criativo). */
   temperature: parseFloat(process.env.GEMINI_TEMPERATURE ?? '0.3'),

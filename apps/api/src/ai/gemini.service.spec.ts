@@ -53,9 +53,9 @@ async function createModule(apiKey: string) {
         provide: geminiConfig.KEY,
         useValue: {
           apiKey,
-          textModel: 'gemini-2.0-flash-exp',
-          visionModel: 'gemini-2.0-flash-exp',
-          thinkingModel: 'gemini-2.0-flash-thinking-exp-1219',
+          textModel: 'gemini-3.6-flash',
+          visionModel: 'gemini-3.6-flash',
+          thinkingModel: 'gemini-3.6-flash',
           temperature: 0.3,
         },
       },
@@ -166,6 +166,18 @@ describe('GeminiService — com API key (mock SDK)', () => {
 
   it('isEnabled() deve retornar true quando há API key', () => {
     expect(service.isEnabled()).toBe(true);
+  });
+
+  it('usa o modelo Gemini atual na geração de texto', async () => {
+    mockGenerateContent.mockResolvedValueOnce({
+      response: { text: () => 'Resposta atualizada' },
+    });
+
+    await service.generateText('Teste de modelo');
+
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gemini-3.6-flash' }),
+    );
   });
 
   it('generateText deve retornar o texto da resposta do SDK', async () => {
