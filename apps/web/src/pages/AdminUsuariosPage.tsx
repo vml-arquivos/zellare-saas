@@ -50,6 +50,7 @@ const ROLE_CONFIG: Record<string, { label: string; cor: string; icon: React.Reac
   UNIDADE_NUTRICIONISTA: { label: 'Nutricionista', cor: 'bg-orange-100 text-orange-700 border-orange-200', icon: <Stethoscope className="h-3 w-3" />, nivel: 4 },
   PROFESSOR: { label: 'Professor(a)', cor: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: <GraduationCap className="h-3 w-3" />, nivel: 5 },
   PROFESSOR_AUXILIAR: { label: 'Professor(a) Auxiliar', cor: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: <User className="h-3 w-3" />, nivel: 5 },
+  FAMILIA_RESPONSAVEL: { label: 'Responsável familiar', cor: 'bg-pink-100 text-pink-700 border-pink-200', icon: <User className="h-3 w-3" />, nivel: 6 },
 };
 
 const STATUS_CONFIG = {
@@ -286,18 +287,9 @@ export default function AdminUsuariosPage() {
       const unitList = Array.isArray(un) ? un : (un?.data ?? un?.units ?? un?.items ?? []);
       setUnidades(unitList);
     } catch {
-      // Dados de demonstração
-      setUsuarios([
-        { id: '1', firstName: 'Bruna', lastName: 'Vaz', email: 'bruna.vaz@zelare.org', status: 'ATIVO', emailVerified: true, createdAt: '2026-01-01', roles: [{ roleType: 'STAFF_CENTRAL_PEDAGOGICO' }] },
-        { id: '2', firstName: 'Carla', lastName: 'Psicóloga', email: 'carla.psicologa@zelare.org', status: 'ATIVO', emailVerified: true, createdAt: '2026-01-01', roles: [{ roleType: 'STAFF_CENTRAL_PSICOLOGIA' }] },
-        { id: '3', firstName: 'Ana', lastName: 'Carolina', email: 'ana.carolina@zelare.org', status: 'ATIVO', emailVerified: true, createdAt: '2026-01-01', roles: [{ roleType: 'UNIDADE_COORDENADOR_PEDAGOGICO', unit: { name: 'CEPI Arara Canindé', unitCode: 'ARARA-CAN' } }], unit: { name: 'CEPI Arara Canindé', unitCode: 'ARARA-CAN' } },
-        { id: '4', firstName: 'Maria', lastName: 'Professora', email: 'professor1@unidade1.com', status: 'ATIVO', emailVerified: true, createdAt: '2026-01-01', roles: [{ roleType: 'PROFESSOR', unit: { name: 'CEPI Arara Canindé', unitCode: 'ARARA-CAN' } }], unit: { name: 'CEPI Arara Canindé', unitCode: 'ARARA-CAN' } },
-      ]);
-      setUnidades([
-        { id: '1', name: 'CEPI Arara Canindé', unitCode: 'ARARA-CAN' },
-        { id: '2', name: 'CEPI Beija-Flor', unitCode: 'BEIJA-FLO' },
-        { id: '3', name: 'CEPI Sabiá do Campo', unitCode: 'SABIA-CAM' },
-      ]);
+      setUsuarios([]);
+      setUnidades([]);
+      toast.error('Não foi possível carregar usuários e unidades reais. Tente atualizar novamente.');
     } finally { setLoading(false); }
   }
 

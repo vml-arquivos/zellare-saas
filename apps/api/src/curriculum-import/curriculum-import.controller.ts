@@ -54,6 +54,50 @@ export class CurriculumImportController {
   }
 
   /**
+   * Preview/dry-run da importação CSV. Não cria matriz nem altera entries.
+   *
+   * POST /curriculum-matrices/import/csv/preview
+   */
+  @Post('import/csv/preview')
+  @RequireRoles(RoleLevel.MANTENEDORA, RoleLevel.STAFF_CENTRAL, RoleLevel.DEVELOPER)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (!file.originalname.match(/\.(csv|txt)$/i)) {
+          return cb(new BadRequestException('Apenas arquivos .csv são aceitos'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async previewCsv(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
+    @Body('year') yearStr: string,
+    @Body('segment') segment: string,
+    @Body('version') versionStr: string,
+    @Body('mantenedoraId') mantenedoraIdBody: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    if (!file) throw new BadRequestException('Arquivo CSV não enviado');
+    const mantenedoraId = mantenedoraIdBody?.trim() || user.mantenedoraId;
+    if (!mantenedoraId) throw new BadRequestException('mantenedoraId é obrigatório');
+    return this.importService.previewCsv(
+      file.buffer,
+      {
+        mantenedoraId,
+        name: name?.trim() || 'Matriz importada',
+        year: parseInt(yearStr, 10),
+        segment: segment?.trim(),
+        version: parseInt(versionStr, 10),
+      },
+      user,
+    );
+  }
+
+  /**
    * Tarefa 3.3 — Importação via CSV
    *
    * POST /curriculum-matrices/import/csv
