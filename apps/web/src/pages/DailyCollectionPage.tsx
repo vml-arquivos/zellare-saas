@@ -18,6 +18,7 @@ import {
   type DiaryQuality,
 } from '../api/diary.api';
 import http from '../api/http';
+import { useApiCache } from '../hooks/useApiCache';
 
 type Child = {
   id: string;
@@ -68,6 +69,7 @@ export default function DailyCollectionPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [offlineCount, setOfflineCount] = useState(0);
+  const apiCache = useApiCache(10_000);
 
   const selectedClassroom = useMemo(
     () => classrooms.find((classroom) => classroom.id === classroomId),
@@ -128,11 +130,12 @@ export default function DailyCollectionPage() {
     }
     try {
       setLoadingEvents(true);
-      const response = await getDiaryEvents({
+      const params = {
         classroomId,
         startDate: `${eventDate}T00:00:00.000Z`,
         endDate: `${eventDate}T23:59:59.999Z`,
-      });
+      };
+      const response = await apiCache.get('/diary-events', params, () => getDiaryEvents(params));
       const normalized = response.map((event) => ({
         id: event.id,
         childId: event.childId,
@@ -167,11 +170,12 @@ export default function DailyCollectionPage() {
       return;
     }
     try {
-      const response = await getDiaryQuality({
+      const params = {
         classroomId,
         startDate: `${eventDate}T00:00:00.000Z`,
         endDate: `${eventDate}T23:59:59.999Z`,
-      });
+      };
+      const response = await apiCache.get('/diary-events/quality', params, () => getDiaryQuality(params));
       setQuality(response);
     } catch {
       setQuality(null);
@@ -227,6 +231,7 @@ export default function DailyCollectionPage() {
           ? `${created} registro(s) ficaram na fila offline e serão sincronizados automaticamente.`
           : `${created} registro(s) estruturado(s) salvo(s) com sucesso.`
       );
+      apiCache.invalidateAll();
       await loadEvents();
     } catch {
       setMessage(
