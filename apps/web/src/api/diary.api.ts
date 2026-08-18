@@ -29,6 +29,32 @@ export interface DiaryEvent {
   [key: string]: unknown;
 }
 
+export interface StructuredObservationAbc {
+  antecedent?: string;
+  behavior: string;
+  consequence?: string;
+  intensity?: number;
+  frequency?: number;
+}
+
+export interface StructuredObservationContext {
+  source: 'daily-collection';
+  schemaVersion: 2;
+  context: string;
+  opportunity: string;
+  domain: string;
+  indicatorId: string;
+  level: string;
+  support: string;
+  response: string;
+  durationSeconds?: number;
+  frequency?: number;
+  objectiveNote?: string;
+  teacherConcern?: boolean;
+  recordedAt?: string;
+  abc?: StructuredObservationAbc;
+}
+
 export interface CreateDiaryEventDto {
   type: string;
   title: string;
@@ -157,6 +183,15 @@ export type DiaryQuality = {
     authorshipPercent: number;
     publicationPercent: number;
   };
+  collection?: {
+    events: number;
+    observedOpportunityPercent: number;
+    noOpportunity: number;
+    abc: number;
+    teacherConcerns: number;
+    byDomain: Record<string, number>;
+    byContext: Record<string, number>;
+  };
   byType: Record<string, number>;
   byStatus: Record<string, number>;
   daily: Array<{ date: string; total: number; documented: number; structured: number; authored: number }>;
@@ -208,8 +243,33 @@ export async function registerStructuredDailyObservation(payload: {
   nivel: string;
   descricao?: string;
   campoExperiencia?: string;
+  context?: string;
+  opportunity?: string;
+  support?: string;
+  response?: string;
+  durationSeconds?: number;
+  frequency?: number;
+  teacherConcern?: boolean;
+  abc?: StructuredObservationAbc;
 }): Promise<DiaryEvent & { _optimistic?: boolean }> {
   const description = payload.descricao?.trim() || `Nível observado: ${payload.nivel}`;
+  const structuredObservation: StructuredObservationContext = {
+    source: 'daily-collection',
+    schemaVersion: 2,
+    context: payload.context ?? 'LIVRE',
+    opportunity: payload.opportunity ?? 'OBSERVADA',
+    domain: payload.categoria,
+    indicatorId: payload.microgestoId,
+    level: payload.nivel,
+    support: payload.support ?? 'NENHUM',
+    response: payload.response ?? 'NAO_CONCLUSIVO',
+    ...(payload.durationSeconds !== undefined ? { durationSeconds: payload.durationSeconds } : {}),
+    ...(payload.frequency !== undefined ? { frequency: payload.frequency } : {}),
+    ...(payload.descricao?.trim() ? { objectiveNote: payload.descricao.trim() } : {}),
+    teacherConcern: payload.teacherConcern ?? false,
+    recordedAt: new Date().toISOString(),
+    ...(payload.abc ? { abc: payload.abc } : {}),
+  };
   const dto: CreateDiaryEventDto = {
     type: 'DESENVOLVIMENTO',
     title: `Coleta estruturada: ${payload.microgestoId}`,
@@ -226,7 +286,7 @@ export async function registerStructuredDailyObservation(payload: {
     }],
     tags: ['coleta_estruturada', payload.categoria.toLowerCase(), payload.microgestoId.toLowerCase()],
     aiContext: {
-      source: 'daily-collection',
+      ...structuredObservation,
       categoria: payload.categoria,
       microgestoId: payload.microgestoId,
       nivel: payload.nivel,

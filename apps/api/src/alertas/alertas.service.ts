@@ -176,13 +176,148 @@ export class AlertasService {
   }
 
   /**
-   * Mantido como ponto de extensão, mas sem acesso a modelos inexistentes.
-   * O schema atual não possui microgestoRegistro/childProfileStats; portanto
-   * esta rotina não executa gravações até existir modelo oficial ou análise via DiaryEvent.
+   * Analisa a coleta estruturada real gravada em DiaryEvent.aiContext.
+   * A rotina cria somente sinais de acompanhamento; nunca infere diagnóstico.
+   * É idempotente por criança/domínio/regra e mantém a resolução humana no painel.
    */
   @Cron('30 6 * * 1-5')
   async analisarMicrogestos() {
-    this.logger.log('CronJob microgestos ignorado: schema atual não possui modelo microgestoRegistro.');
+    this.logger.log('CronJob desenvolvimento: analisando observações estruturadas...');
+
+    try {
+      const fim = new Date();
+      fim.setHours(23, 59, 59, 999);
+      const inicio = new Date(fim);
+      inicio.setDate(inicio.getDate() - 13);
+      inicio.setHours(0, 0, 0, 0);
+
+      const eventos = await this.prisma.diaryEvent.findMany({
+        where: {
+          eventDate: { gte: inicio, lte: fim },
+          aiContext: {
+            path: ['structuredObservation', 'source'],
+            equals: 'daily-collection',
+          },
+        },
+        select: {
+          id: true,
+          childId: true,
+          classroomId: true,
+          eventDate: true,
+          aiContext: true,
+          child: { select: { id: true, firstName: true, lastName: true } },
+          classroom: {
+            select: {
+              id: true,
+              name: true,
+              unitId: true,
+              unit: { select: { mantenedoraId: true } },
+            },
+          },
+        },
+        orderBy: { eventDate: 'desc' },
+        take: 10000,
+      });
+
+      const grupos = new Map<string, {
+        childId: string;
+        childName: string;
+        classroomId: string;
+        classroomName: string;
+        unitId: string;
+        mantenedoraId: string;
+        domain: string;
+        negativeCount: number;
+        teacherConcerns: number;
+        highIntensityCount: number;
+        contexts: Set<string>;
+        indicators: Set<string>;
+        lastObservedAt: Date;
+      }>();
+
+      for (const evento of eventos) {
+        const context = evento.aiContext && typeof evento.aiContext === 'object'
+          ? evento.aiContext as Record<string, any>
+          : null;
+        const observation = context?.structuredObservation as Record<string, any> | undefined;
+        if (!observation || observation.source !== 'daily-collection') continue;
+        if (observation.opportunity === 'NAO_HOUVE_OPORTUNIDADE') continue;
+
+        const level = String(observation.level ?? '');
+        const teacherConcern = observation.teacherConcern === true;
+        const intensity = Number(observation.abc?.intensity ?? 0);
+        const negative = level === 'REQUER_ATENCAO' || teacherConcern || intensity >= 4;
+        if (!negative) continue;
+
+        const childId = evento.childId ?? '';
+        const classroomId = evento.classroomId ?? '';
+        const domain = String(observation.domain ?? 'GERAL');
+        const key = `${childId}|${classroomId}|${domain}`;
+        const current = grupos.get(key) ?? {
+          childId,
+          childName: evento.child ? `${evento.child.firstName} ${evento.child.lastName}`.trim() : childId,
+          classroomId,
+          classroomName: evento.classroom?.name ?? classroomId,
+          unitId: evento.classroom?.unitId ?? '',
+          mantenedoraId: evento.classroom?.unit?.mantenedoraId ?? '',
+          domain,
+          negativeCount: 0,
+          teacherConcerns: 0,
+          highIntensityCount: 0,
+          contexts: new Set<string>(),
+          indicators: new Set<string>(),
+          lastObservedAt: new Date(evento.eventDate),
+        };
+
+        current.negativeCount += 1;
+        if (teacherConcern) current.teacherConcerns += 1;
+        if (intensity >= 4) current.highIntensityCount += 1;
+        if (observation.context) current.contexts.add(String(observation.context));
+        if (observation.indicatorId) current.indicators.add(String(observation.indicatorId));
+        if (new Date(evento.eventDate) > current.lastObservedAt) current.lastObservedAt = new Date(evento.eventDate);
+        grupos.set(key, current);
+      }
+
+      for (const grupo of grupos.values()) {
+        const pattern = grupo.negativeCount >= 3;
+        const concernSignal = grupo.teacherConcerns > 0;
+        if (!pattern && !concernSignal) continue;
+
+        const severidade = grupo.highIntensityCount >= 2 || grupo.negativeCount >= 5
+          ? SeveridadeAlerta.ALTA
+          : pattern
+            ? SeveridadeAlerta.MEDIA
+            : SeveridadeAlerta.BAIXA;
+        const regra = `DESENVOLVIMENTO_ESTRUTURADO_${grupo.domain}`;
+
+        await this.upsertAlertaOperacional({
+          childId: grupo.childId,
+          classroomId: grupo.classroomId,
+          unitId: grupo.unitId,
+          mantenedoraId: grupo.mantenedoraId,
+          tipo: TipoAlerta.OUTRO,
+          severidade,
+          titulo: `${grupo.childName} — padrão de acompanhamento em ${grupo.domain}`,
+          descricao: `Foram registradas ${grupo.negativeCount} observações de acompanhamento em ${grupo.contexts.size || 1} contexto(s) nos últimos 14 dias. Revisar as evidências, os suportes oferecidos e a necessidade de acompanhamento. Este sinal não é diagnóstico.`,
+          metadados: {
+            regra,
+            origem: 'coleta-estruturada',
+            janelaDias: 14,
+            observacoesAtencao: grupo.negativeCount,
+            preocupacoesProfessor: grupo.teacherConcerns,
+            observacoesAltaIntensidade: grupo.highIntensityCount,
+            contextos: Array.from(grupo.contexts),
+            indicadores: Array.from(grupo.indicators),
+            ultimaObservacao: grupo.lastObservedAt.toISOString(),
+            acaoSugerida: pattern ? 'REVISAO_COORDENACAO' : 'NOVA_OBSERVACAO',
+          },
+        });
+      }
+
+      this.logger.log(`CronJob desenvolvimento concluído: ${grupos.size} grupo(s) com sinais avaliados.`);
+    } catch (err) {
+      this.logger.error('Erro no CronJob de desenvolvimento:', err as any);
+    }
   }
 
   private async upsertAlertaOperacional(params: {

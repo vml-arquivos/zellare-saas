@@ -10,7 +10,7 @@ import { CreateDiaryEventDto } from './dto/create-diary-event.dto';
 import { UpdateDiaryEventDto } from './dto/update-diary-event.dto';
 import { QueryDiaryEventDto } from './dto/query-diary-event.dto';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
-import { RoleLevel, PlanningStatus, AuditLogEntity } from '@prisma/client';
+import { Prisma, RoleLevel, PlanningStatus, AuditLogEntity } from '@prisma/client';
 import {
   getPedagogicalDay,
   formatPedagogicalDate,
@@ -18,6 +18,7 @@ import {
   isSchoolDay,
 } from '../common/utils/date.utils';
 import { getScopedWhereForDiaryEvent } from './diary-event-scope.helper';
+import { normalizeStructuredObservationContext } from './dto/structured-observation';
 
 @Injectable()
 export class DiaryEventService {
@@ -241,6 +242,11 @@ export class DiaryEventService {
         );
       }
     }
+    const structuredObservation = normalizeStructuredObservationContext(createDto.aiContext);
+    const structuredObservationJson = structuredObservation
+      ? ({ ...structuredObservation } as Record<string, unknown>)
+      : undefined;
+
     // Criar o evento
     const eventData = {
       type: createDto.type,
@@ -263,10 +269,11 @@ export class DiaryEventService {
       tags: createDto.tags || [],
       aiContext: {
         ...(createDto.aiContext || {}),
+        ...(structuredObservationJson ? { structuredObservation: structuredObservationJson } : {}),
         microgestos: createDto.microgestos || [],
         presencas: createDto.presencas ?? 0,
         ausencias: createDto.ausencias ?? 0,
-      },
+      } as Prisma.InputJsonValue,
       mediaUrls: createDto.mediaUrls || [],
       // PR 2: status explícito — default PUBLICADO (professor salva = publica)
       // Se o cliente enviar RASCUNHO explicitamente, respeita.
@@ -496,11 +503,22 @@ export class DiaryEventService {
       if (typeof value === 'object') return Object.keys(value as Record<string, unknown>).length > 0;
       return true;
     };
+    const getStructuredObservation = (event: (typeof events)[number]) => {
+      const context = event.aiContext && typeof event.aiContext === 'object'
+        ? event.aiContext as Record<string, any>
+        : undefined;
+      const structuredObservation = context?.structuredObservation;
+      return structuredObservation && typeof structuredObservation === 'object'
+        && structuredObservation.source === 'daily-collection'
+        ? structuredObservation as Record<string, any>
+        : undefined;
+    };
     const isStructured = (event: (typeof events)[number]) => {
       const context = event.aiContext && typeof event.aiContext === 'object'
         ? event.aiContext as Record<string, unknown>
         : undefined;
-      return (Array.isArray(context?.microgestos) && context.microgestos.length > 0) ||
+      return Boolean(getStructuredObservation(event)) ||
+        (Array.isArray(context?.microgestos) && context.microgestos.length > 0) ||
         hasJson(event.medicaoAlimentar) || hasJson(event.sonoMinutos) || hasJson(event.trocaFraldaStatus);
     };
     const isDocumented = (event: (typeof events)[number]) =>
@@ -514,6 +532,15 @@ export class DiaryEventService {
     let structured = 0;
     let authored = 0;
     let published = 0;
+    const collection = {
+      events: 0,
+      observedOpportunities: 0,
+      noOpportunity: 0,
+      abc: 0,
+      teacherConcerns: 0,
+      byDomain: new Map<string, number>(),
+      byContext: new Map<string, number>(),
+    };
 
     for (const event of events) {
       const day = new Date(event.eventDate).toISOString().slice(0, 10);
@@ -523,6 +550,21 @@ export class DiaryEventService {
       if (isStructured(event)) { structured += 1; dayMetric.structured += 1; }
       if (event.createdBy) { authored += 1; dayMetric.authored += 1; }
       if (event.status === 'PUBLICADO') published += 1;
+
+      const structuredObservation = getStructuredObservation(event);
+      if (structuredObservation) {
+        collection.events += 1;
+        const opportunity = String(structuredObservation.opportunity ?? 'NAO_CONCLUSIVO');
+        if (opportunity === 'NAO_HOUVE_OPORTUNIDADE') collection.noOpportunity += 1;
+        else collection.observedOpportunities += 1;
+        if (structuredObservation.abc && typeof structuredObservation.abc === 'object') collection.abc += 1;
+        if (structuredObservation.teacherConcern === true) collection.teacherConcerns += 1;
+        const domain = String(structuredObservation.domain ?? 'GERAL');
+        const context = String(structuredObservation.context ?? 'NAO_INFORMADO');
+        collection.byDomain.set(domain, (collection.byDomain.get(domain) ?? 0) + 1);
+        collection.byContext.set(context, (collection.byContext.get(context) ?? 0) + 1);
+      }
+
       byDay.set(day, dayMetric);
       byType.set(event.type, (byType.get(event.type) ?? 0) + 1);
       byStatus.set(event.status, (byStatus.get(event.status) ?? 0) + 1);
@@ -548,6 +590,17 @@ export class DiaryEventService {
         structuredPercent: percent(structured),
         authorshipPercent: percent(authored),
         publicationPercent: percent(published),
+      },
+      collection: {
+        events: collection.events,
+        observedOpportunityPercent: collection.events === 0
+          ? 0
+          : Math.round((collection.observedOpportunities / collection.events) * 100),
+        noOpportunity: collection.noOpportunity,
+        abc: collection.abc,
+        teacherConcerns: collection.teacherConcerns,
+        byDomain: Object.fromEntries(collection.byDomain),
+        byContext: Object.fromEntries(collection.byContext),
       },
       byType: Object.fromEntries(byType),
       byStatus: Object.fromEntries(byStatus),
