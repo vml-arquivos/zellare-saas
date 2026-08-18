@@ -88,8 +88,12 @@ export default function DailyCollectionPage() {
       const normalized = normalizeList(response.data)
         .filter((item) => item?.id && item?.name)
         .map((item) => ({ id: String(item.id), name: String(item.name) }));
+      const nextClassroomId = classroomId || normalized[0]?.id || '';
       setClassrooms(normalized);
-      setClassroomId((current) => current || normalized[0]?.id || '');
+      setClassroomId(nextClassroomId);
+      if (nextClassroomId && nextClassroomId !== classroomId) {
+        await loadChildren(nextClassroomId);
+      }
     } catch {
       setClassrooms([]);
       setClassroomId('');
@@ -99,14 +103,14 @@ export default function DailyCollectionPage() {
     }
   }
 
-  async function loadChildren() {
-    if (!classroomId) {
+  async function loadChildren(targetClassroomId = classroomId) {
+    if (!targetClassroomId) {
       setChildren([]);
       return;
     }
     try {
       setLoadingChildren(true);
-      const response = await http.get(`/lookup/classrooms/${classroomId}/children`);
+      const response = await http.get(`/lookup/classrooms/${targetClassroomId}/children`);
       const normalized = normalizeList(response.data)
         .filter((item) => item?.id && item?.firstName && item?.lastName)
         .map((item) => ({
@@ -315,7 +319,7 @@ export default function DailyCollectionPage() {
             </label>
             <button
               type="button"
-              onClick={() => { void loadClassrooms(); void loadChildren(); void loadEvents(); void loadQuality(); }}
+              onClick={() => { void loadClassrooms(); void loadChildren(classroomId); void loadEvents(); void loadQuality(); }}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               <RefreshCw className="h-4 w-4" /> Atualizar
