@@ -4,8 +4,9 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { DiaryEventStatus } from '@prisma/client';
+import { DiaryEventStatus, RdicDocumentEventType, StatusRDIX } from '@prisma/client';
 import { MICROGESTO_CATALOGO } from '../common/constants/microgestos.constants';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
@@ -24,9 +25,319 @@ import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
  *
  *  MANTENEDORA/DEV    → leitura completa (sem ações de aprovação)
  */
+const SEEDF_RDIC_PROFILE = {
+  code: 'SEEDF_RDIC_1_CICLO',
+  name: 'RDIC — Relatório do Desenvolvimento Individual da Criança',
+  documentLabel: 'Relatório do Desenvolvimento Individual da Criança - RDIC',
+  institutionType: 'PUBLICA',
+  authorityName: 'Secretaria de Estado de Educação do Distrito Federal',
+  authorityReference: 'SEEDF / SUBEB / Diretoria de Educação Infantil',
+  curriculumReference: 'Currículo em Movimento do Distrito Federal — Educação Infantil (2018)',
+  sourceUrl: 'https://www.educacao.df.gov.br/documents/d/seedf/construcao-do-relatorio-do-desenvolvimento-individual-da-crianca_rdic-1-pdf',
+  version: 1,
+  status: 'ATIVO',
+  isCurated: true,
+  periodicity: 'SEMESTRAL',
+  requiredFields: [
+    'identificacao_institucional', 'dados_crianca', 'periodo_letivo',
+    'desenvolvimento_integral', 'direitos_aprendizagem', 'campos_experiencia',
+    'providencias_encaminhamentos', 'assinaturas_professores',
+    'assinatura_coordenacao', 'ciencia_secretaria', 'ciencia_familia',
+  ],
+  signaturePolicy: {
+    required: ['PROFESSOR', 'COORDENACAO', 'SECRETARIA_ESCOLAR'],
+    optional: ['FAMILIA_RESPONSAVEL'],
+    jointTeacherSignature: true,
+  },
+  familyPolicy: { acknowledgmentRequired: true, visibleAfter: 'PUBLICADO', channel: 'PORTAL_FAMILIA' },
+  archivePolicy: { required: true, destination: 'DOSSIER_CHILD', retentionYears: null },
+  templateSchema: {
+    sections: [
+      { key: 'identificacao', label: 'Identificação', input: 'structured' },
+      { key: 'desenvolvimento_integral', label: 'Desenvolvimento integral', input: 'structured_and_short_text' },
+      { key: 'direitos_aprendizagem', label: 'Direitos de aprendizagem', input: 'markers' },
+      { key: 'campos_experiencia', label: 'Campos de experiências', input: 'markers' },
+      { key: 'evidencias', label: 'Evidências do cotidiano', input: 'evidence_links' },
+      { key: 'providencias_encaminhamentos', label: 'Providências e encaminhamentos', input: 'short_text' },
+      { key: 'assinaturas', label: 'Assinaturas e ciência', input: 'signatures' },
+    ],
+  },
+} as const;
+
+const GENERIC_CHILD_DEVELOPMENT_PROFILE = {
+  code: 'ZELARE_RELATORIO_DESCRITIVO_INFANTIL',
+  name: 'Relatório Descritivo de Desenvolvimento Infantil',
+  documentLabel: 'Relatório Descritivo de Desenvolvimento Infantil',
+  institutionType: 'OUTRA',
+  authorityName: null,
+  authorityReference: null,
+  curriculumReference: 'Referência curricular configurável da instituição',
+  sourceUrl: null,
+  version: 1,
+  status: 'ATIVO',
+  isCurated: true,
+  periodicity: 'CONFIGURAVEL',
+  requiredFields: ['identificacao_institucional', 'dados_crianca', 'periodo_letivo', 'desenvolvimento_integral'],
+  signaturePolicy: { required: ['AUTOR_RESPONSAVEL', 'REVISOR_INSTITUCIONAL'], optional: ['FAMILIA_RESPONSAVEL'] },
+  familyPolicy: { acknowledgmentRequired: false, visibleAfter: 'PUBLICADO', channel: 'PORTAL_FAMILIA' },
+  archivePolicy: { required: false, destination: 'INSTITUTION_STORAGE', retentionYears: null },
+  templateSchema: {
+    sections: [
+      { key: 'identificacao', label: 'Identificação', input: 'structured' },
+      { key: 'desenvolvimento_integral', label: 'Desenvolvimento integral', input: 'structured_and_short_text' },
+      { key: 'evidencias', label: 'Evidências do cotidiano', input: 'evidence_links' },
+      { key: 'proximos_passos', label: 'Próximos passos', input: 'short_text' },
+      { key: 'assinaturas', label: 'Assinaturas e ciência', input: 'signatures' },
+    ],
+  },
+} as const;
+
 @Injectable()
 export class RdicService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private roleTypes(user: JwtPayload): string[] {
+    return (user.roles ?? []).map((role) => String(role.type ?? ''));
+  }
+
+  private canManageProfiles(user: JwtPayload): boolean {
+    return user.roles?.some((role) => role.level === 'DEVELOPER' || role.type === 'MANTENEDORA_ADMIN') ?? false;
+  }
+
+  private assertCanManageProfiles(user: JwtPayload) {
+    if (!this.canManageProfiles(user)) {
+      throw new ForbiddenException('Somente Developer ou Mantenedora Administrador pode configurar perfis documentais.');
+    }
+  }
+
+  private jsonInput(value: unknown) {
+    return JSON.parse(JSON.stringify(value ?? {})) as any;
+  }
+
+  private signatureManifest(current: unknown, key: string, value: Record<string, unknown>) {
+    const base = current && typeof current === 'object' ? current as Record<string, unknown> : {};
+    return this.jsonInput({ ...base, [key]: value });
+  }
+
+  private profileSnapshot(profile: any) {
+    return {
+      id: profile.id,
+      code: profile.code,
+      name: profile.name,
+      documentLabel: profile.documentLabel,
+      institutionType: profile.institutionType,
+      authorityName: profile.authorityName,
+      authorityReference: profile.authorityReference,
+      curriculumReference: profile.curriculumReference,
+      sourceUrl: profile.sourceUrl,
+      version: profile.version,
+      periodicity: profile.periodicity,
+      requiredFields: profile.requiredFields,
+      signaturePolicy: profile.signaturePolicy,
+      familyPolicy: profile.familyPolicy,
+      archivePolicy: profile.archivePolicy,
+      templateSchema: profile.templateSchema,
+    };
+  }
+
+  private async ensureGlobalProfile(seed: typeof SEEDF_RDIC_PROFILE | typeof GENERIC_CHILD_DEVELOPMENT_PROFILE, actorId: string) {
+    const existing = await this.prisma.rdicDocumentProfile.findFirst({
+      where: { mantenedoraId: null, code: seed.code, version: seed.version, status: 'ATIVO' },
+    });
+    if (existing) return existing;
+    return this.prisma.rdicDocumentProfile.create({
+      data: { ...seed, mantenedoraId: null, createdById: actorId },
+    });
+  }
+
+  private async resolveProfile(dto: any, user: JwtPayload) {
+    if (dto?.profileId) {
+      const selected = await this.prisma.rdicDocumentProfile.findFirst({
+        where: {
+          id: String(dto.profileId),
+          status: 'ATIVO',
+          OR: [{ mantenedoraId: user.mantenedoraId }, { mantenedoraId: null, isCurated: true }],
+        },
+      });
+      if (!selected) throw new NotFoundException('Perfil documental não encontrado ou fora do escopo.');
+      return selected;
+    }
+
+    if (user.unitId) {
+      const unit = await this.prisma.unit.findFirst({
+        where: { id: user.unitId, mantenedoraId: user.mantenedoraId },
+        select: { rdicProfile: true },
+      });
+      if (unit?.rdicProfile?.status === 'ATIVO') return unit.rdicProfile;
+    }
+
+    const tenant = await this.prisma.mantenedora.findFirst({
+      where: { id: user.mantenedoraId },
+      select: { defaultRdicProfile: true },
+    });
+    if (tenant?.defaultRdicProfile?.status === 'ATIVO') return tenant.defaultRdicProfile;
+
+    const global = await this.ensureGlobalProfile(GENERIC_CHILD_DEVELOPMENT_PROFILE, user.sub);
+    return global;
+  }
+
+  private async registerEvent(
+    instancia: { id: string; mantenedoraId: string; unitId: string },
+    actorId: string,
+    eventType: RdicDocumentEventType,
+    fromStatus?: StatusRDIX | null,
+    toStatus?: StatusRDIX | null,
+    comment?: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    return this.prisma.rdicDocumentEvent.create({
+      data: {
+        mantenedoraId: instancia.mantenedoraId,
+        unitId: instancia.unitId,
+        instanciaId: instancia.id,
+        actorId,
+        eventType,
+        fromStatus: fromStatus ?? undefined,
+        toStatus: toStatus ?? undefined,
+        comment: comment ?? undefined,
+        metadata: metadata ? this.jsonInput(metadata) : undefined,
+      },
+    });
+  }
+
+  private documentHash(content: unknown, profileSnapshot: unknown) {
+    return createHash('sha256')
+      .update(JSON.stringify({ content, profileSnapshot }))
+      .digest('hex');
+  }
+
+  private async transitionWithEvent(
+    instancia: any,
+    actorId: string,
+    eventType: RdicDocumentEventType,
+    data: Record<string, unknown>,
+    toStatus?: StatusRDIX,
+    comment?: string,
+    include?: Record<string, unknown>,
+  ) {
+    const operation = async (tx: any) => {
+      const updated = await tx.rDIXInstancia.update({
+        where: { id: instancia.id },
+        data,
+        ...(include ? { include } : {}),
+      });
+      await tx.rdicDocumentEvent.create({
+        data: {
+          mantenedoraId: instancia.mantenedoraId,
+          unitId: instancia.unitId,
+          instanciaId: instancia.id,
+          actorId,
+          eventType,
+          fromStatus: instancia.status,
+          toStatus: toStatus ?? instancia.status,
+          comment: comment ?? undefined,
+        },
+      });
+      return updated;
+    };
+    const transaction = (this.prisma as any).$transaction;
+    return typeof transaction === 'function' ? transaction.call(this.prisma, operation) : operation(this.prisma);
+  }
+
+  async listarPerfis(user: JwtPayload) {
+    if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+    await this.ensureGlobalProfile(SEEDF_RDIC_PROFILE, user.sub);
+    await this.ensureGlobalProfile(GENERIC_CHILD_DEVELOPMENT_PROFILE, user.sub);
+    return this.prisma.rdicDocumentProfile.findMany({
+      where: {
+        status: 'ATIVO',
+        OR: [{ mantenedoraId: user.mantenedoraId }, { mantenedoraId: null, isCurated: true }],
+      },
+      orderBy: [{ isCurated: 'desc' }, { name: 'asc' }, { version: 'desc' }],
+    });
+  }
+
+  async criarPerfil(dto: any, user: JwtPayload) {
+    this.assertCanManageProfiles(user);
+    if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+    if (!dto?.code || !dto?.name || !dto?.documentLabel || !dto?.institutionType || !dto?.periodicity) {
+      throw new BadRequestException('code, name, documentLabel, institutionType e periodicity são obrigatórios');
+    }
+    if (dto.isCurated) throw new ForbiddenException('Perfis curados pertencem à plataforma e não podem ser criados pelo tenant.');
+    return this.prisma.rdicDocumentProfile.create({
+      data: {
+        mantenedoraId: user.mantenedoraId,
+        code: String(dto.code).trim().toUpperCase(),
+        name: String(dto.name).trim(),
+        documentLabel: String(dto.documentLabel).trim(),
+        institutionType: dto.institutionType,
+        authorityName: dto.authorityName ?? undefined,
+        authorityReference: dto.authorityReference ?? undefined,
+        curriculumReference: dto.curriculumReference ?? undefined,
+        sourceUrl: dto.sourceUrl ?? undefined,
+        version: Number(dto.version ?? 1),
+        status: 'ATIVO',
+        isCurated: false,
+        periodicity: String(dto.periodicity).trim().toUpperCase(),
+        requiredFields: dto.requiredFields ?? [],
+        signaturePolicy: dto.signaturePolicy ?? {},
+        familyPolicy: dto.familyPolicy ?? {},
+        archivePolicy: dto.archivePolicy ?? {},
+        templateSchema: dto.templateSchema ?? {},
+        createdById: user.sub,
+      },
+    });
+  }
+
+  async clonarPerfil(profileId: string, user: JwtPayload) {
+    this.assertCanManageProfiles(user);
+    if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+    const base = await this.prisma.rdicDocumentProfile.findFirst({
+      where: { id: profileId, status: 'ATIVO', OR: [{ mantenedoraId: null, isCurated: true }, { mantenedoraId: user.mantenedoraId }] },
+    });
+    if (!base) throw new NotFoundException('Perfil documental não encontrado ou fora do escopo.');
+    const code = `${base.code}_CUSTOM_${Date.now()}`.slice(0, 100);
+    return this.prisma.rdicDocumentProfile.create({
+      data: {
+        mantenedoraId: user.mantenedoraId,
+        code,
+        name: `${base.name} — personalizado`,
+        documentLabel: base.documentLabel,
+        institutionType: base.institutionType,
+        authorityName: base.authorityName,
+        authorityReference: base.authorityReference,
+        curriculumReference: base.curriculumReference,
+        sourceUrl: base.sourceUrl,
+        version: 1,
+        status: 'ATIVO',
+        isCurated: false,
+        periodicity: base.periodicity,
+        requiredFields: this.jsonInput(base.requiredFields),
+        signaturePolicy: this.jsonInput(base.signaturePolicy),
+        familyPolicy: this.jsonInput(base.familyPolicy),
+        archivePolicy: this.jsonInput(base.archivePolicy),
+        templateSchema: this.jsonInput(base.templateSchema),
+        createdById: user.sub,
+      },
+    });
+  }
+
+  async definirPerfilPadrao(dto: { profileId: string; unitId?: string | null }, user: JwtPayload) {
+    this.assertCanManageProfiles(user);
+    if (!user?.mantenedoraId || !dto?.profileId) throw new BadRequestException('profileId é obrigatório');
+    const profile = await this.prisma.rdicDocumentProfile.findFirst({
+      where: { id: dto.profileId, status: 'ATIVO', OR: [{ mantenedoraId: user.mantenedoraId }, { mantenedoraId: null, isCurated: true }] },
+    });
+    if (!profile) throw new NotFoundException('Perfil documental não encontrado ou fora do escopo.');
+    if (dto.unitId) {
+      const unit = await this.prisma.unit.findFirst({ where: { id: dto.unitId, mantenedoraId: user.mantenedoraId }, select: { id: true } });
+      if (!unit) throw new NotFoundException('Unidade não encontrada ou fora do escopo.');
+      await this.prisma.unit.update({ where: { id: dto.unitId }, data: { rdicProfileId: profile.id } });
+      return { scope: 'UNIT', unitId: dto.unitId, profileId: profile.id, profileVersion: profile.version };
+    }
+    await this.prisma.mantenedora.update({ where: { id: user.mantenedoraId }, data: { defaultRdicProfileId: profile.id } });
+    return { scope: 'MANTENEDORA', profileId: profile.id, profileVersion: profile.version };
+  }
 
   // ─── Criar RDIC (professor) ───────────────────────────────────────────────
   async criar(dto: any, user: JwtPayload) {
@@ -38,23 +349,32 @@ export class RdicService {
       throw new BadRequestException('childId, classroomId, periodo e anoLetivo são obrigatórios');
     }
 
-    // Verificar se a turma pertence à unidade do professor
+    // Verificar se a turma pertence à unidade do professor e se a criança está matriculada nela.
     const classroom = await this.prisma.classroom.findFirst({
       where: { id: classroomId, unitId: user.unitId },
     });
     if (!classroom) throw new NotFoundException('Turma não encontrada ou fora do escopo');
+    const enrollment = await this.prisma.enrollment.findFirst({
+      where: { childId, classroomId, status: 'ATIVA' },
+      select: { childId: true },
+    });
+    if (!enrollment) throw new NotFoundException('Criança não matriculada na turma informada');
 
-    // Buscar ou criar template padrão para a mantenedora
+    const profile = await this.resolveProfile(dto, user);
+    // Templates são derivados do perfil e não sobrescrevem templates históricos.
     let template = await this.prisma.rDIXTemplate.findFirst({
-      where: { mantenedoraId: user.mantenedoraId, ativo: true },
+      where: { mantenedoraId: user.mantenedoraId, profileId: profile.id, ativo: true },
+      orderBy: { atualizadoEm: 'desc' },
     });
     if (!template) {
       template = await this.prisma.rDIXTemplate.create({
         data: {
           mantenedoraId: user.mantenedoraId,
+          profileId: profile.id,
+          profileVersion: profile.version,
           segmento: 'EDUCACAO_INFANTIL',
-          titulo: 'RDIC — Relatório de Desenvolvimento Individual da Criança',
-          estruturaJson: {},
+          titulo: profile.documentLabel,
+          estruturaJson: this.jsonInput(profile.templateSchema),
           criadoPorId: user.sub,
         },
       });
@@ -83,22 +403,36 @@ export class RdicService {
       ? (periodoEnumMap[dto.periodoEnum] ?? null)
       : null;
 
-    return this.prisma.rDIXInstancia.create({
+    const profileSnapshot = this.profileSnapshot(profile);
+    const rascunho = rascunhoJson ?? {};
+    const created = await this.prisma.rDIXInstancia.create({
       data: {
         mantenedoraId: user.mantenedoraId,
         unitId:        user.unitId,
         templateId:    template.id,
+        profileId:     profile.id,
+        profileVersion: profile.version,
+        profileSnapshot,
         childId,
         classroomId,
         periodo,
         periodoEnum:   periodoEnumResolvido as any ?? undefined,
         anoLetivo:     Number(anoLetivo),
         status:        'RASCUNHO',
-        rascunhoJson:  rascunhoJson ?? {},
+        rascunhoJson:  rascunho,
+        documentHash:  this.documentHash(rascunho, profileSnapshot),
         criadoPorId:   user.sub,
       },
-      include: { child: { select: { firstName: true, lastName: true } } },
+      include: {
+        child: { select: { firstName: true, lastName: true } },
+        profile: true,
+      },
     });
+    await this.registerEvent(created, user.sub, 'CRIADO', null, 'RASCUNHO', undefined, {
+      profileCode: profile.code,
+      profileVersion: profile.version,
+    });
+    return created;
   }
 
   // ─── Atualizar rascunho ───────────────────────────────────────────────────
@@ -134,11 +468,16 @@ export class RdicService {
       }
     }
 
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: { rascunhoJson: dto.rascunhoJson ?? instancia.rascunhoJson },
-      include: { child: { select: { firstName: true, lastName: true } } },
-    });
+    const rascunhoJson = dto.rascunhoJson ?? instancia.rascunhoJson ?? {};
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.ATUALIZADO,
+      { rascunhoJson, documentHash: this.documentHash(rascunhoJson, instancia.profileSnapshot) },
+      instancia.status as StatusRDIX,
+      undefined,
+      { child: { select: { firstName: true, lastName: true } } },
+    );
   }
 
   // ─── Enviar para revisão (professor → EM_REVISAO) ─────────────────────────
@@ -150,13 +489,21 @@ export class RdicService {
     if (instancia.criadoPorId !== user.sub) {
       throw new ForbiddenException('Apenas o professor que criou o RDIC pode enviá-lo para revisão.');
     }
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: {
-        status: 'EM_REVISAO',
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.ENVIADO_REVISAO,
+      {
+        status: StatusRDIX.EM_REVISAO,
         submittedAt: new Date(),
+        signatureManifest: this.signatureManifest(instancia.signatureManifest, 'teacher', {
+          submittedAt: new Date().toISOString(),
+          actorId: user.sub,
+          mode: 'HUMAN_REVIEW_REQUIRED',
+        }),
       },
-    });
+      StatusRDIX.EM_REVISAO,
+    );
   }
 
   // ─── Aprovar (coord. unidade → APROVADO) ─────────────────────────────────
@@ -168,16 +515,27 @@ export class RdicService {
     if (!['EM_REVISAO', 'RASCUNHO'].includes(instancia.status)) {
       throw new BadRequestException('Apenas RDICs em EM_REVISAO ou RASCUNHO podem ser aprovados.');
     }
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: {
-        status: 'APROVADO',
-        conteudoFinal: instancia.conteudoFinal ?? instancia.rascunhoJson ?? undefined,
+    const conteudoFinal = instancia.conteudoFinal ?? instancia.rascunhoJson ?? {};
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.APROVADO,
+      {
+        status: StatusRDIX.APROVADO,
+        conteudoFinal,
+        documentHash: this.documentHash(conteudoFinal, instancia.profileSnapshot),
         revisadoPorId: user.sub,
         reviewedAt: new Date(),
+        signatureManifest: this.signatureManifest(instancia.signatureManifest, 'coordination', {
+          approvedAt: new Date().toISOString(),
+          actorId: user.sub,
+          mode: 'HUMAN_REVIEW',
+        }),
       },
-      include: { child: { select: { firstName: true, lastName: true } } },
-    });
+      StatusRDIX.APROVADO,
+      undefined,
+      { child: { select: { firstName: true, lastName: true } } },
+    );
   }
 
   // ─── Devolver ao professor (coord. unidade → DEVOLVIDO) ───────────────────
@@ -192,15 +550,14 @@ export class RdicService {
     if (instancia.status !== 'EM_REVISAO') {
       throw new BadRequestException('Apenas RDICs em EM_REVISAO podem ser devolvidos.');
     }
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: {
-        status: 'DEVOLVIDO',
-        reviewComment: dto.comment,
-        revisadoPorId: user.sub,
-        reviewedAt: new Date(),
-      },
-    });
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.DEVOLVIDO,
+      { status: StatusRDIX.DEVOLVIDO, reviewComment: dto.comment, revisadoPorId: user.sub, reviewedAt: new Date() },
+      StatusRDIX.DEVOLVIDO,
+      dto.comment,
+    );
   }
 
   // ─── Finalizar/Aprovar legado (coord. pedagógica unidade → FINALIZADO) ────
@@ -213,17 +570,29 @@ export class RdicService {
     if (!['EM_REVISAO', 'RASCUNHO'].includes(instancia.status)) {
       throw new BadRequestException('RDIC já finalizado ou publicado.');
     }
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: {
-        status: 'FINALIZADO',
-        conteudoFinal: dto.conteudoFinal ?? instancia.rascunhoJson,
+    const conteudoFinal = dto.conteudoFinal ?? instancia.rascunhoJson ?? {};
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.FINALIZADO,
+      {
+        status: StatusRDIX.FINALIZADO,
+        conteudoFinal,
+        documentHash: this.documentHash(conteudoFinal, instancia.profileSnapshot),
         revisadoPorId: user.sub,
         finalizadoEm: new Date(),
         reviewedAt: new Date(),
+        signatureManifest: this.signatureManifest(instancia.signatureManifest, 'institutional_finalization', {
+          finalizedAt: new Date().toISOString(),
+          actorId: user.sub,
+          roleTypes: this.roleTypes(user),
+          mode: 'HUMAN_REVIEW',
+        }),
       },
-      include: { child: { select: { firstName: true, lastName: true } } },
-    });
+      StatusRDIX.FINALIZADO,
+      undefined,
+      { child: { select: { firstName: true, lastName: true } } },
+    );
   }
 
   // ─── Publicar (coord. pedagógica unidade → PUBLICADO) ────────────────────
@@ -235,13 +604,21 @@ export class RdicService {
     if (!['FINALIZADO', 'APROVADO'].includes(instancia.status)) {
       throw new BadRequestException('Apenas RDICs FINALIZADOS ou APROVADOS podem ser publicados.');
     }
-    return this.prisma.rDIXInstancia.update({
-      where: { id },
-      data: {
-        status: 'PUBLICADO',
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.PUBLICADO,
+      {
+        status: StatusRDIX.PUBLICADO,
         publicadoEm: new Date(),
+        signatureManifest: this.signatureManifest(instancia.signatureManifest, 'publication', {
+          publishedAt: new Date().toISOString(),
+          actorId: user.sub,
+          mode: 'INSTITUTIONAL_RELEASE',
+        }),
       },
-    });
+      StatusRDIX.PUBLICADO,
+    );
   }
 
   // ─── Status de completude da turma por bimestre ───────────────────────────
@@ -604,6 +981,77 @@ export class RdicService {
     return instancia;
   }
 
+  async registrarCienciaFamilia(id: string, user: JwtPayload) {
+    if (!user.roles?.some((role) => role.level === 'FAMILIA')) {
+      throw new ForbiddenException('Somente o responsável familiar pode registrar ciência neste fluxo.');
+    }
+    const instancia = await this._buscarEValidar(id, user);
+    if (instancia.status !== StatusRDIX.PUBLICADO) {
+      throw new BadRequestException('A ciência familiar só fica disponível após a publicação do documento.');
+    }
+    const guardian = await this.prisma.childGuardian.findFirst({
+      where: { childId: instancia.childId, userId: user.sub, revokedAt: null, canViewDevelopment: true },
+      select: { id: true },
+    });
+    if (!guardian) throw new ForbiddenException('Responsável sem vínculo ou consentimento de desenvolvimento ativo.');
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.CIENCIA_FAMILIA,
+      {
+        familyAcknowledgedAt: new Date(),
+        familyAcknowledgedById: user.sub,
+        signatureManifest: this.jsonInput({
+          ...(instancia.signatureManifest && typeof instancia.signatureManifest === 'object' ? instancia.signatureManifest : {}),
+          family: { acknowledgedAt: new Date().toISOString(), acknowledgedById: user.sub, mode: 'PORTAL_FAMILIA' },
+        }),
+      },
+      StatusRDIX.PUBLICADO,
+    );
+  }
+
+  async arquivar(id: string, user: JwtPayload) {
+    const allowed = user.roles?.some((role) => ['UNIDADE', 'MANTENEDORA', 'DEVELOPER'].includes(role.level));
+    if (!allowed) throw new ForbiddenException('Somente secretaria/unidade, mantenedora ou Developer pode arquivar o RDIC.');
+    const instancia = await this._buscarEValidar(id, user);
+    const level = user.roles?.[0]?.level;
+    if (level === 'UNIDADE' && user.unitId !== instancia.unitId) {
+      throw new ForbiddenException('Documento fora da unidade autorizada.');
+    }
+    if (instancia.status !== StatusRDIX.PUBLICADO) {
+      throw new BadRequestException('Somente documentos publicados podem ser arquivados.');
+    }
+    const policy = instancia.profileSnapshot && typeof instancia.profileSnapshot === 'object'
+      ? (instancia.profileSnapshot as Record<string, unknown>).archivePolicy
+      : null;
+    const archivePolicy = policy && typeof policy === 'object' ? policy as Record<string, unknown> : {};
+    if (archivePolicy.required === true && !instancia.familyAcknowledgedAt) {
+      throw new BadRequestException('Este perfil exige ciência da família antes do arquivamento.');
+    }
+    return this.transitionWithEvent(
+      instancia,
+      user.sub,
+      RdicDocumentEventType.ARQUIVADO,
+      { status: StatusRDIX.ARQUIVADO, archivedAt: new Date(), archivedById: user.sub },
+      StatusRDIX.ARQUIVADO,
+    );
+  }
+
+  async eventos(id: string, user: JwtPayload) {
+    const instancia = await this._buscarEValidar(id, user);
+    const level = user.roles?.[0]?.level;
+    if (level === 'STAFF_CENTRAL' && !([StatusRDIX.APROVADO, StatusRDIX.FINALIZADO, StatusRDIX.PUBLICADO, StatusRDIX.ARQUIVADO] as StatusRDIX[]).includes(instancia.status)) {
+      throw new ForbiddenException('A trilha só fica disponível à equipe central após aprovação.');
+    }
+    if (level === 'UNIDADE' && user.unitId !== instancia.unitId) {
+      throw new ForbiddenException('Documento fora da unidade autorizada.');
+    }
+    return this.prisma.rdicDocumentEvent.findMany({
+      where: { instanciaId: instancia.id, mantenedoraId: user.mantenedoraId },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
   // ─── Central da Criança ─────────────────────────────────────────────────
   /**
    * Diagnóstico operacional rápido para o professor/coordenação.
@@ -889,7 +1337,11 @@ export class RdicService {
   private async _buscarEValidar(id: string, user: JwtPayload) {
     const instancia = await this.prisma.rDIXInstancia.findUnique({
       where: { id },
-      include: { child: { select: { firstName: true, lastName: true } } },
+      include: {
+        child: { select: { firstName: true, lastName: true } },
+        profile: true,
+        events: { orderBy: { createdAt: 'asc' } },
+      },
     });
     if (!instancia) throw new NotFoundException('RDIC não encontrado');
     if (instancia.mantenedoraId !== user.mantenedoraId) {
