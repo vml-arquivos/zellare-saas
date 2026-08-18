@@ -46,6 +46,28 @@ interface CriancaStatus {
   status: 'PENDENTE' | 'RASCUNHO' | 'EM_REVISAO' | 'DEVOLVIDO' | 'APROVADO' | 'FINALIZADO' | 'PUBLICADO';
 }
 
+interface TurmaResumoExpress {
+  classroom: { id: string; name: string };
+  periodo: { startDate: string; endDate: string };
+  totalCriancas: number;
+  cobertura: { comRegistros: number; semRegistros: number; percentual: number };
+  totalDiarios: number;
+  totalObservacoes: number;
+  totalMicrogestos: number;
+  totalPontosAtencao: number;
+  criancas: Array<{
+    childId: string;
+    nome: string;
+    diarios: number;
+    observacoes: number;
+    microgestos: number;
+    diasComRegistro: number;
+    porNivel: Record<string, number>;
+    pontosAtencao: number;
+    tendencia: string;
+  }>;
+}
+
 interface TurmaStatusResponse {
   classroomId: string;
   classroomName: string;
@@ -64,6 +86,11 @@ const TRIMESTRES = [
 ] as const;
 
 const ANO_LETIVO = 2026;
+const PERIODOS_TRIMESTRE: Record<number, { startDate: string; endDate: string }> = {
+  1: { startDate: '2026-02-01T00:00:00.000Z', endDate: '2026-05-31T23:59:59.999Z' },
+  2: { startDate: '2026-06-01T00:00:00.000Z', endDate: '2026-09-30T23:59:59.999Z' },
+  3: { startDate: '2026-10-01T00:00:00.000Z', endDate: '2026-12-31T23:59:59.999Z' },
+};
 
 const KANBAN_COLUNAS = [
   {
@@ -249,6 +276,8 @@ export default function RdicCoordPage() {
   const [loadingTurmas, setLoadingTurmas]   = useState(true);
   const [turmaStatus, setTurmaStatus]       = useState<TurmaStatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus]   = useState(false);
+  const [turmaResumo, setTurmaResumo]       = useState<TurmaResumoExpress | null>(null);
+  const [loadingResumo, setLoadingResumo]   = useState(false);
   const [salvandoId, setSalvandoId]         = useState<string | null>(null);
   const [modalDevolucaoId, setModalDevolucaoId] = useState<string | null>(null);
 
@@ -291,7 +320,29 @@ export default function RdicCoordPage() {
     }
   }, [turmaId, trimestreId]);
 
-  useEffect(() => { carregarStatus(); }, [carregarStatus]);
+  const carregarResumo = useCallback(async () => {
+    if (!turmaId) {
+      setTurmaResumo(null);
+      return;
+    }
+    setLoadingResumo(true);
+    try {
+      const periodo = PERIODOS_TRIMESTRE[trimestreId];
+      const res = await http.get('/rdic/turma/express-summary', {
+        params: { classroomId: turmaId, ...periodo },
+      });
+      setTurmaResumo(res?.data ?? null);
+    } catch {
+      setTurmaResumo(null);
+    } finally {
+      setLoadingResumo(false);
+    }
+  }, [turmaId, trimestreId]);
+
+  useEffect(() => {
+    void carregarStatus();
+    void carregarResumo();
+  }, [carregarStatus, carregarResumo]);
 
   // ─── Aprovar Desenvolvimento ──────────────────────────────────────────────────────────
   const handleAprovar = async (id: string) => {
@@ -453,12 +504,42 @@ export default function RdicCoordPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={carregarStatus}
+                onClick={() => { void carregarStatus(); void carregarResumo(); }}
                 className="flex items-center gap-1 text-xs"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Atualizar
               </Button>
             </div>
+
+            {/* Leitura rápida da turma por registros reais */}
+            {(loadingResumo || turmaResumo) && (
+              <Card className="border-emerald-200 bg-emerald-50/30">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-semibold text-emerald-800 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-emerald-600" /> Leitura rápida do período
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingResumo ? (
+                    <div className="flex items-center gap-2 text-xs text-gray-500"><RefreshCw className="h-4 w-4 animate-spin" /> Cruzando registros reais da turma...</div>
+                  ) : turmaResumo ? (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{turmaResumo.cobertura.percentual}%</p><p className="text-[11px] text-gray-500">cobertura</p></div>
+                        <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{turmaResumo.cobertura.semRegistros}</p><p className="text-[11px] text-gray-500">sem registro</p></div>
+                        <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{turmaResumo.totalDiarios}</p><p className="text-[11px] text-gray-500">diários</p></div>
+                        <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{turmaResumo.totalMicrogestos}</p><p className="text-[11px] text-gray-500">marcações</p></div>
+                        <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-rose-600">{turmaResumo.totalPontosAtencao}</p><p className="text-[11px] text-gray-500">pontos de atenção</p></div>
+                      </div>
+                      {turmaResumo.criancas.some((crianca) => crianca.tendencia === 'ATENCAO') && (
+                        <p className="mt-3 text-xs text-rose-700">Há crianças com sinais pedagógicos para acompanhamento. Consulte o detalhe individual antes de qualquer encaminhamento.</p>
+                      )}
+                      <p className="mt-2 text-[11px] text-gray-400">Indicadores operacionais derivados do Diário e das observações; não constituem diagnóstico clínico.</p>
+                    </>
+                  ) : null}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Colunas Kanban */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

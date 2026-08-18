@@ -5,6 +5,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DiaryEventStatus } from '@prisma/client';
+import { MICROGESTO_CATALOGO } from '../common/constants/microgestos.constants';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 /**
@@ -321,6 +323,168 @@ export class RdicService {
     };
   }
 
+  // ─── Resumo express da turma por marcações reais ───────────────────────────
+  async turmaResumoExpress(query: any, user: JwtPayload) {
+    const level = user.roles?.find(r =>
+      ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL', 'UNIDADE', 'PROFESSOR']
+        .includes(r.level)
+    )?.level ?? user.roles[0]?.level;
+    if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+
+    const classroomId = query?.classroomId;
+    if (!classroomId) throw new BadRequestException('classroomId é obrigatório');
+
+    const classroom = await this.prisma.classroom.findFirst({
+      where: {
+        id: classroomId,
+        unit: { mantenedoraId: user.mantenedoraId },
+        ...(level === 'PROFESSOR' || level === 'UNIDADE' ? { unitId: user.unitId! } : {}),
+      },
+      select: { id: true, name: true, unitId: true },
+    });
+    if (!classroom) throw new NotFoundException('Turma não encontrada ou fora do escopo');
+    if (level === 'PROFESSOR') {
+      const vínculo = await this.prisma.classroomTeacher.findFirst({
+        where: { teacherId: user.sub, classroomId, isActive: true },
+        select: { classroomId: true },
+      });
+      if (!vínculo) throw new ForbiddenException('Você não está vinculado a esta turma.');
+    }
+
+    const endDate = query?.endDate ? new Date(query.endDate) : new Date();
+    const startDate = query?.startDate
+      ? new Date(query.startDate)
+      : new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || startDate > endDate) {
+      throw new BadRequestException('Período inválido para o resumo da turma');
+    }
+    if (endDate.getTime() - startDate.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      throw new BadRequestException('O período máximo do resumo é de 366 dias');
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { classroomId, status: 'ATIVA' },
+      select: { child: { select: { id: true, firstName: true, lastName: true } } },
+    });
+    const children = enrollments.map(({ child }) => ({
+      childId: child.id,
+      nome: `${child.firstName} ${child.lastName}`.trim(),
+    }));
+    const childIds = children.map((child) => child.childId);
+    if (childIds.length === 0) {
+      return {
+        classroom: { id: classroom.id, name: classroom.name },
+        periodo: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+        totalCriancas: 0,
+        cobertura: { comRegistros: 0, semRegistros: 0, percentual: 0 },
+        totalDiarios: 0,
+        totalObservacoes: 0,
+        totalMicrogestos: 0,
+        totalPontosAtencao: 0,
+        criancas: [],
+      };
+    }
+
+    const [events, observations] = await Promise.all([
+      this.prisma.diaryEvent.findMany({
+        where: {
+          classroomId,
+          childId: { in: childIds },
+          mantenedoraId: user.mantenedoraId,
+          eventDate: { gte: startDate, lte: endDate },
+          status: { in: [DiaryEventStatus.PUBLICADO, DiaryEventStatus.REVISADO, DiaryEventStatus.ARQUIVADO] },
+        },
+        select: { childId: true, eventDate: true, aiContext: true },
+      }),
+      this.prisma.developmentObservation.findMany({
+        where: { classroomId, childId: { in: childIds }, date: { gte: startDate, lte: endDate } },
+        select: { childId: true, developmentAlerts: true },
+      }),
+    ]);
+
+    type Row = {
+      childId: string;
+      nome: string;
+      diarios: number;
+      observacoes: number;
+      microgestos: number;
+      dias: Set<string>;
+      porNivel: Record<string, number>;
+      atencao: number;
+    };
+    const rows = new Map<string, Row>(children.map((child) => [child.childId, {
+      ...child,
+      diarios: 0,
+      observacoes: 0,
+      microgestos: 0,
+      dias: new Set<string>(),
+      porNivel: {},
+      atencao: 0,
+    }]));
+
+    for (const event of events) {
+      const row = rows.get(event.childId);
+      if (!row) continue;
+      row.diarios += 1;
+      row.dias.add(new Date(event.eventDate).toISOString().slice(0, 10));
+      const context = event.aiContext && typeof event.aiContext === 'object' ? event.aiContext as Record<string, unknown> : {};
+      const microgestos = Array.isArray(context.microgestos) ? context.microgestos : [];
+      for (const raw of microgestos) {
+        if (!raw || typeof raw !== 'object') continue;
+        const nivel = String((raw as Record<string, unknown>).nivel ?? '').trim();
+        if (!nivel) continue;
+        row.microgestos += 1;
+        row.porNivel[nivel] = (row.porNivel[nivel] ?? 0) + 1;
+        if (nivel === 'REQUER_ATENCAO') row.atencao += 1;
+      }
+    }
+    for (const observation of observations) {
+      const row = rows.get(observation.childId);
+      if (!row) continue;
+      row.observacoes += 1;
+      if (observation.developmentAlerts) row.atencao += 1;
+    }
+
+    const criancas = Array.from(rows.values()).map((row) => {
+      const totalRegistros = row.diarios + row.observacoes;
+      const tendencia = totalRegistros === 0
+        ? 'SEM_DADOS'
+        : row.atencao > 0
+          ? 'ATENCAO'
+          : (row.porNivel.ALCANCADO ?? 0) + (row.porNivel.CONSOLIDADO ?? 0) >= Math.max(1, row.microgestos / 2)
+            ? 'FAVORAVEL'
+            : 'EM_DESENVOLVIMENTO';
+      return {
+        childId: row.childId,
+        nome: row.nome,
+        diarios: row.diarios,
+        observacoes: row.observacoes,
+        microgestos: row.microgestos,
+        diasComRegistro: row.dias.size,
+        porNivel: row.porNivel,
+        pontosAtencao: row.atencao,
+        tendencia,
+      };
+    }).sort((a, b) => b.microgestos - a.microgestos || a.nome.localeCompare(b.nome));
+
+    const comRegistros = criancas.filter((child) => child.diarios + child.observacoes > 0).length;
+    return {
+      classroom: { id: classroom.id, name: classroom.name },
+      periodo: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+      totalCriancas: criancas.length,
+      cobertura: {
+        comRegistros,
+        semRegistros: criancas.length - comRegistros,
+        percentual: Math.round((comRegistros / criancas.length) * 100),
+      },
+      totalDiarios: events.length,
+      totalObservacoes: observations.length,
+      totalMicrogestos: criancas.reduce((sum, child) => sum + child.microgestos, 0),
+      totalPontosAtencao: criancas.reduce((sum, child) => sum + child.pontosAtencao, 0),
+      criancas,
+    };
+  }
+
   // ─── Consolidado da turma (dados para relatório) ──────────────────────────
   // GET /rdic/turma/consolidado?classroomId&periodo&anoLetivo
   async turmaConsolidado(query: any, user: JwtPayload) {
@@ -441,6 +605,147 @@ export class RdicService {
   }
 
   // ─── Central da Criança ─────────────────────────────────────────────────
+  /**
+   * Diagnóstico operacional rápido para o professor/coordenação.
+   * Usa somente eventos publicados/revisados do diário e observações reais,
+   * sem inferência clínica e sem criar uma segunda fonte de dados.
+   */
+  async resumoExpress(childId: string, query: any, user: JwtPayload) {
+    if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+
+    const child = await this.prisma.child.findFirst({
+      where: { id: childId, mantenedoraId: user.mantenedoraId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        enrollments: {
+          where: { status: 'ATIVA' },
+          select: { classroom: { select: { id: true, name: true, unitId: true } } },
+          take: 1,
+        },
+      },
+    });
+    if (!child) throw new NotFoundException('Criança não encontrada ou fora do escopo');
+
+    const level = user.roles?.[0]?.level;
+    const classroom = child.enrollments?.[0]?.classroom;
+    if (level === 'UNIDADE' && user.unitId && classroom && classroom.unitId !== user.unitId) {
+      throw new ForbiddenException('Criança fora da unidade autorizada');
+    }
+    if (level === 'PROFESSOR') {
+      if (!classroom) throw new ForbiddenException('Criança sem turma ativa');
+      const vínculo = await this.prisma.classroomTeacher.findFirst({
+        where: { teacherId: user.sub, classroomId: classroom.id, isActive: true },
+        select: { classroomId: true },
+      });
+      if (!vínculo) throw new ForbiddenException('Você não está vinculado à turma desta criança.');
+    }
+
+    const endDate = query?.endDate ? new Date(query.endDate) : new Date();
+    const startDate = query?.startDate
+      ? new Date(query.startDate)
+      : new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || startDate > endDate) {
+      throw new BadRequestException('Período inválido para o diagnóstico express');
+    }
+    const maxEnd = new Date(startDate.getTime() + 366 * 24 * 60 * 60 * 1000);
+    if (endDate > maxEnd) throw new BadRequestException('O período máximo do diagnóstico é de 366 dias');
+
+    const [diaryEvents, observations] = await Promise.all([
+      this.prisma.diaryEvent.findMany({
+        where: {
+          childId,
+          mantenedoraId: user.mantenedoraId,
+          eventDate: { gte: startDate, lte: endDate },
+          status: { in: [DiaryEventStatus.PUBLICADO, DiaryEventStatus.REVISADO, DiaryEventStatus.ARQUIVADO] },
+        },
+        select: { eventDate: true, aiContext: true },
+        orderBy: { eventDate: 'asc' },
+      }),
+      this.prisma.developmentObservation.findMany({
+        where: { childId, date: { gte: startDate, lte: endDate } },
+        select: { date: true, category: true, developmentAlerts: true, recommendations: true },
+        orderBy: { date: 'asc' },
+      }),
+    ]);
+
+    const porNivel: Record<string, number> = {};
+    const porCategoria: Record<string, number> = {};
+    const habilidades = new Map<string, { microgestoId: string; label: string; categoria: string; nivel: string; ocorrencias: number }>();
+    const dias = new Set<string>();
+    let totalMicrogestos = 0;
+
+    for (const event of diaryEvents) {
+      dias.add(new Date(event.eventDate).toISOString().slice(0, 10));
+      const context = event.aiContext && typeof event.aiContext === 'object' ? event.aiContext as Record<string, unknown> : {};
+      const microgestos = Array.isArray(context.microgestos) ? context.microgestos : [];
+      for (const raw of microgestos) {
+        if (!raw || typeof raw !== 'object') continue;
+        const item = raw as Record<string, unknown>;
+        const microgestoId = String(item.microgestoId ?? item.id ?? '').trim();
+        const nivel = String(item.nivel ?? '').trim();
+        if (!microgestoId || !nivel) continue;
+        const catalog = MICROGESTO_CATALOGO.find((entry) => entry.id === microgestoId);
+        const categoria = String(item.categoria ?? catalog?.categoria ?? 'OUTRO');
+        const label = String(item.label ?? catalog?.label ?? microgestoId);
+        const key = `${microgestoId}:${nivel}`;
+        const current = habilidades.get(key);
+        habilidades.set(key, {
+          microgestoId,
+          label,
+          categoria,
+          nivel,
+          ocorrencias: (current?.ocorrencias ?? 0) + 1,
+        });
+        porNivel[nivel] = (porNivel[nivel] ?? 0) + 1;
+        porCategoria[categoria] = (porCategoria[categoria] ?? 0) + 1;
+        totalMicrogestos += 1;
+      }
+    }
+
+    const observacoesComAlerta = observations.filter((item) => Boolean(item.developmentAlerts)).length;
+    const totalAtencao = porNivel.REQUER_ATENCAO ?? 0;
+    const tendencia = totalMicrogestos === 0 && observations.length === 0
+      ? 'SEM_DADOS'
+      : totalAtencao > 0 || observacoesComAlerta > 0
+        ? 'ATENCAO'
+        : (porNivel.ALCANCADO ?? 0) + (porNivel.CONSOLIDADO ?? 0) >= Math.max(1, totalMicrogestos / 2)
+          ? 'FAVORAVEL'
+          : 'EM_DESENVOLVIMENTO';
+
+    const pontosAtencao = Array.from(habilidades.values())
+      .filter((item) => item.nivel === 'REQUER_ATENCAO')
+      .sort((a, b) => b.ocorrencias - a.ocorrencias)
+      .slice(0, 5)
+      .map((item) => `${item.label} (${item.ocorrencias} registro${item.ocorrencias === 1 ? '' : 's'})`);
+    if (observacoesComAlerta > 0) pontosAtencao.push(`${observacoesComAlerta} observação(ões) com alerta de desenvolvimento`);
+
+    const proximosPassos = pontosAtencao.length > 0
+      ? pontosAtencao.slice(0, 3).map((item) => `Acompanhar ${item.toLowerCase()} nas próximas vivências e registrar a resposta da criança.`)
+      : totalMicrogestos > 0
+        ? ['Continuar a coleta estruturada nas vivências do cotidiano e comparar a evolução no próximo período.']
+        : ['Registrar pelo menos uma observação estruturada para iniciar a série de evolução.'];
+
+    return {
+      child: { id: child.id, firstName: child.firstName, lastName: child.lastName },
+      classroom: classroom ?? null,
+      periodo: { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+      fontes: {
+        diariosPublicados: diaryEvents.length,
+        observacoesDesenvolvimento: observations.length,
+        diasComRegistro: dias.size,
+        microgestos: totalMicrogestos,
+      },
+      porNivel,
+      porCategoria,
+      habilidades: Array.from(habilidades.values()).sort((a, b) => b.ocorrencias - a.ocorrencias),
+      tendencia,
+      pontosAtencao,
+      proximosPassos,
+    };
+  }
+
   async centralDaCrianca(childId: string, user: JwtPayload) {
     if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
     const level = user.roles?.[0]?.level;
@@ -462,6 +767,7 @@ export class RdicService {
           where: { status: 'ATIVA' },
           select: {
             classroom: { select: { id: true, name: true } },
+
           },
           take: 1,
         },

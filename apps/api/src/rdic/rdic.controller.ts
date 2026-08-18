@@ -56,6 +56,19 @@ export class RdicController {
     return this.svc.turmaStatus(query, user);
   }
 
+  /** Resumo express da turma por marcações reais (DEVE vir antes de :id) */
+  @Get('turma/express-summary')
+  @RequireRoles(
+    RoleLevel.PROFESSOR,
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  turmaResumoExpress(@Query() query: any, @CurrentUser() user: JwtPayload) {
+    return this.svc.turmaResumoExpress(query, user);
+  }
+
   /** Consolidado da turma para relatório print-friendly (DEVE vir antes de :id) */
   @Get('turma/consolidado')
   @RequireRoles(
@@ -101,6 +114,27 @@ export class RdicController {
       status: query.status ?? undefined, // respeita filtro explícito
     };
     return this.svc.listar(queryGeral, user);
+  }
+
+  /**
+   * GET /rdic/child/:childId/express-summary
+   * Diagnóstico operacional rápido por marcações e evidências reais.
+   * DEVE vir antes de :id para não ser capturado como param genérico.
+   */
+  @Get('child/:childId/express-summary')
+  @RequireRoles(
+    RoleLevel.PROFESSOR,
+    RoleLevel.UNIDADE,
+    RoleLevel.STAFF_CENTRAL,
+    RoleLevel.MANTENEDORA,
+    RoleLevel.DEVELOPER,
+  )
+  resumoExpress(
+    @Param('childId') childId: string,
+    @Query() query: any,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.svc.resumoExpress(childId, query, user);
   }
 
   /**
