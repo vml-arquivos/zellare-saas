@@ -640,6 +640,65 @@
 .dark .shadow-emerald-200,
 .dark .shadow-blue-200 { --tw-shadow-color: rgba(99,102,241,0.24) !important; }
 
+/* ── Gradientes legados: preservar a hierarquia, não a luminosidade ── */
+.dark .from-amber-50,
+.dark .from-yellow-50,
+.dark .from-orange-50,
+.dark .from-blue-50,
+.dark .from-indigo-50,
+.dark .from-purple-50,
+.dark .from-emerald-50,
+.dark .from-green-50 {
+  --tw-gradient-from: var(--surface-base) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--surface-base) 0%, transparent) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.dark .via-amber-50,
+.dark .via-yellow-50,
+.dark .via-orange-50,
+.dark .via-blue-50,
+.dark .via-indigo-50,
+.dark .via-purple-50,
+.dark .via-emerald-50,
+.dark .via-green-50 {
+  --tw-gradient-stops: var(--surface-base), var(--surface-subtle), var(--surface-muted) !important;
+}
+.dark .to-white,
+.dark .to-amber-50,
+.dark .to-yellow-50,
+.dark .to-orange-50,
+.dark .to-blue-50,
+.dark .to-indigo-50,
+.dark .to-purple-50,
+.dark .to-emerald-50,
+.dark .to-green-50 {
+  --tw-gradient-to: var(--surface-muted) !important;
+}
+
+.dark .bg-amber-50\/30,
+.dark .bg-amber-50\/60,
+.dark .bg-amber-50\/80,
+.dark .bg-yellow-50\/30,
+.dark .bg-yellow-50\/60,
+.dark .bg-yellow-50\/80,
+.dark .bg-orange-50\/30,
+.dark .bg-orange-50\/60,
+.dark .bg-orange-50\/80,
+.dark .bg-blue-50\/30,
+.dark .bg-blue-50\/60,
+.dark .bg-blue-50\/80,
+.dark .bg-indigo-50\/30,
+.dark .bg-indigo-50\/60,
+.dark .bg-indigo-50\/80,
+.dark .bg-purple-50\/30,
+.dark .bg-purple-50\/60,
+.dark .bg-purple-50\/80,
+.dark .bg-green-50\/30,
+.dark .bg-green-50\/60,
+.dark .bg-green-50\/80 {
+  background-color: color-mix(in srgb, var(--surface-subtle) 88%, transparent) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    ANIMAÇÕES GLOBAIS
 ═══════════════════════════════════════════════════════════════════ */
