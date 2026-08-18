@@ -220,6 +220,10 @@ export class CreatePayrollDto {
 export class UpdatePayrollStatusDto {
   @IsEnum(FinancePayrollStatus)
   status!: FinancePayrollStatus;
+
+  @IsOptional()
+  @IsString()
+  comment?: string;
 }
 
 export class ListPayrollQueryDto {

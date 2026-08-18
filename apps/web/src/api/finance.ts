@@ -67,6 +67,15 @@ export interface TimeEntry {
   notes?: string | null;
 }
 
+export interface PayrollApproval {
+  id: string;
+  actorId: string;
+  fromStatus: FinancePayrollStatus;
+  toStatus: FinancePayrollStatus;
+  comment?: string | null;
+  createdAt: string;
+}
+
 export interface PayrollRun {
   id: string;
   periodId: string;
@@ -78,6 +87,7 @@ export interface PayrollRun {
   computedAt?: string | null;
   approvedAt?: string | null;
   closedAt?: string | null;
+  approvalHistory?: PayrollApproval[];
 }
 
 export interface Payable {
@@ -206,8 +216,11 @@ export async function calculatePayroll(periodId: string) {
   return response.data;
 }
 
-export async function updatePayrollStatus(id: string, status: FinancePayrollStatus) {
-  const response = await http.patch<PayrollRun>(`/finance/payrolls/${id}/status`, { status });
+export async function updatePayrollStatus(id: string, status: FinancePayrollStatus, comment?: string) {
+  const response = await http.patch<PayrollRun>(`/finance/payrolls/${id}/status`, {
+    status,
+    comment: comment?.trim() || undefined,
+  });
   return response.data;
 }
 
