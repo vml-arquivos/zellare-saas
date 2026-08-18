@@ -3161,11 +3161,29 @@ model PayrollRun {
   closedAt        DateTime?
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
+  approvalHistory PayrollApproval[]
 
   @@unique([periodId])
   @@index([mantenedoraId])
   @@index([status])
   @@map("payroll_run")
+}
+
+model PayrollApproval {
+  id           String               @id @default(cuid())
+  payrollRunId String
+  actorId      String
+  fromStatus   FinancePayrollStatus
+  toStatus     FinancePayrollStatus
+  comment      String?              @db.Text
+  createdAt    DateTime             @default(now())
+
+  payrollRun PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+
+  @@index([payrollRunId, createdAt])
+  @@index([actorId])
+  @@index([toStatus])
+  @@map("payroll_approval")
 }
 
 model PayrollEmployee {

@@ -554,6 +554,11 @@ export class FinanceService {
         mantenedoraId: user.mantenedoraId,
         ...(query.periodId ? { periodId: query.periodId } : {}),
       },
+      include: {
+        approvalHistory: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -592,6 +597,18 @@ export class FinanceService {
               computedAt: new Date(),
             },
           });
+
+      if (existing && existing.status !== FinancePayrollStatus.CALCULADA) {
+        await tx.payrollApproval.create({
+          data: {
+            payrollRunId: run.id,
+            actorId: user.sub,
+            fromStatus: existing.status,
+            toStatus: FinancePayrollStatus.CALCULADA,
+            comment: 'Folha recalculada após retificação ou ajuste operacional.',
+          },
+        });
+      }
 
       const oldEmployees = await tx.payrollEmployee.findMany({
         where: { payrollRunId: run.id },
@@ -673,13 +690,25 @@ export class FinanceService {
       throw new BadRequestException(`Transição inválida: ${payroll.status} → ${dto.status}`);
     }
     const now = new Date();
-    return this.prisma.payrollRun.update({
-      where: { id },
-      data: {
-        status: dto.status,
-        ...(dto.status === FinancePayrollStatus.APROVADA ? { approvedBy: user.sub, approvedAt: now } : {}),
-        ...(dto.status === FinancePayrollStatus.FECHADA ? { closedBy: user.sub, closedAt: now } : {}),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.payrollRun.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          ...(dto.status === FinancePayrollStatus.APROVADA ? { approvedBy: user.sub, approvedAt: now } : {}),
+          ...(dto.status === FinancePayrollStatus.FECHADA ? { closedBy: user.sub, closedAt: now } : {}),
+        },
+      });
+      await tx.payrollApproval.create({
+        data: {
+          payrollRunId: id,
+          actorId: user.sub,
+          fromStatus: payroll.status,
+          toStatus: dto.status,
+          comment: dto.comment?.trim() || undefined,
+        },
+      });
+      return updated;
     });
   }
 

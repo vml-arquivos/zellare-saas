@@ -2,6 +2,7 @@ import { FinanceService } from './finance.service';
 import {
   FinanceApprovalStatus,
   FinancePeriodStatus,
+  FinancePayrollStatus,
   FinanceTimeEntryStatus,
   RoleLevel,
 } from '@prisma/client';
@@ -35,6 +36,13 @@ function makePrisma() {
       create: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
+    },
+    payrollRun: {
+      findFirst: jest.fn(),
+      update: jest.fn(),
+    },
+    payrollApproval: {
+      create: jest.fn(),
     },
     $transaction: jest.fn(),
   };
@@ -158,6 +166,63 @@ describe('FinanceService', () => {
         manager,
       ),
     ).rejects.toThrow('solicitante não pode aprovar');
+  });
+
+  it('registra o histórico ao avançar uma folha', async () => {
+    const prisma = makePrisma();
+    prisma.payrollRun.findFirst.mockResolvedValue({
+      id: 'payroll-1',
+      mantenedoraId: 'tenant-1',
+      status: FinancePayrollStatus.CALCULADA,
+    });
+    prisma.payrollRun.update.mockResolvedValue({
+      id: 'payroll-1',
+      status: FinancePayrollStatus.EM_CONFERENCIA,
+    });
+    prisma.$transaction.mockImplementation(async (callback: (tx: typeof prisma) => unknown) => callback(prisma));
+    const service = new FinanceService(prisma as any);
+
+    await service.updatePayrollStatus(
+      'payroll-1',
+      { status: FinancePayrollStatus.EM_CONFERENCIA, comment: 'Conferência inicial concluída.' },
+      manager,
+    );
+
+    expect(prisma.payrollRun.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'payroll-1' },
+        data: expect.objectContaining({ status: FinancePayrollStatus.EM_CONFERENCIA }),
+      }),
+    );
+    expect(prisma.payrollApproval.create).toHaveBeenCalledWith({
+      data: {
+        payrollRunId: 'payroll-1',
+        actorId: 'manager-1',
+        fromStatus: FinancePayrollStatus.CALCULADA,
+        toStatus: FinancePayrollStatus.EM_CONFERENCIA,
+        comment: 'Conferência inicial concluída.',
+      },
+    });
+  });
+
+  it('não registra histórico quando a transição da folha é inválida', async () => {
+    const prisma = makePrisma();
+    prisma.payrollRun.findFirst.mockResolvedValue({
+      id: 'payroll-1',
+      mantenedoraId: 'tenant-1',
+      status: FinancePayrollStatus.RASCUNHO,
+    });
+    const service = new FinanceService(prisma as any);
+
+    await expect(
+      service.updatePayrollStatus(
+        'payroll-1',
+        { status: FinancePayrollStatus.APROVADA },
+        manager,
+      ),
+    ).rejects.toThrow('Transição inválida');
+    expect(prisma.payrollRun.update).not.toHaveBeenCalled();
+    expect(prisma.payrollApproval.create).not.toHaveBeenCalled();
   });
 
   it('calcula minutos trabalhados no lançamento de ponto', async () => {
