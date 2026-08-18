@@ -208,6 +208,18 @@ export default function DailyCollectionPage() {
     nivel: string;
     descricao?: string;
     campoExperiencia?: string;
+    context?: string;
+    opportunity?: string;
+    support?: string;
+    response?: string;
+    teacherConcern?: boolean;
+    abc?: {
+      antecedent?: string;
+      behavior: string;
+      consequence?: string;
+      intensity?: number;
+      frequency?: number;
+    };
   }) {
     if (!classroomId || !eventDate) return;
     setSaving(true);
@@ -361,9 +373,15 @@ export default function DailyCollectionPage() {
                 <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.distinctChildren}</strong><span className="block text-slate-500">crianças alcançadas</span></div>
                 <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.authored}</strong><span className="block text-slate-500">com autoria</span></div>
               </div>
-            ) : (
-              <p className="text-xs leading-5 text-slate-500">Sem dados agregados para esta turma e data ou sem permissão para a métrica.</p>
-            )}
+            ) : null}
+            {quality?.collection ? (
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-lg bg-violet-50 p-2"><strong className="text-violet-700">{quality.collection.events}</strong><span className="block text-violet-700/70">coletas versionadas</span></div>
+                <div className="rounded-lg bg-cyan-50 p-2"><strong className="text-cyan-700">{quality.collection.observedOpportunityPercent}%</strong><span className="block text-cyan-700/70">com oportunidade</span></div>
+                <div className="rounded-lg bg-amber-50 p-2"><strong className="text-amber-700">{quality.collection.abc}</strong><span className="block text-amber-700/70">registros ABC</span></div>
+                <div className="rounded-lg bg-rose-50 p-2"><strong className="text-rose-700">{quality.collection.teacherConcerns}</strong><span className="block text-rose-700/70">para revisão</span></div>
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

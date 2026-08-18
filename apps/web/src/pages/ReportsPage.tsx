@@ -22,6 +22,7 @@ import http from '../api/http';
 import { useAuth } from '../app/AuthProvider';
 import { normalizeRoles } from '../app/RoleProtectedRoute';
 import { useUnitScope } from '../contexts/UnitScopeContext';
+import { getDiaryQuality, type DiaryQuality } from '../api/diary.api';
 import { UnitScopeSelector } from '../components/select/UnitScopeSelector';
 
 const LABELS_PT: Record<string, string> = {
@@ -65,6 +66,7 @@ interface PedagogicalReportData {
   pendings: UnitPendingsData | null;
   diarySummary: DiarySummaryData | null;
   classroomSummary: ClassroomExpressSummary | null;
+  diaryQuality: DiaryQuality | null;
 }
 interface ReportData { [key: string]: unknown; }
 interface UnitOption { id: string; name: string; }
@@ -176,12 +178,13 @@ export function ReportsPage() {
         const coverage = scopedUnitId
           ? await getUnitCoverage({ unitId: scopedUnitId, startDate, endDate })
           : await getCentralCoverage({ startDate, endDate, daysWithout: 1 });
-        const [pendings, diarySummary, classroomSummary] = await Promise.all([
+        const [pendings, diarySummary, classroomSummary, diaryQuality] = await Promise.all([
           scopedUnitId ? getUnitPendings({ unitId: scopedUnitId, daysWithout: 1 }) : Promise.resolve(null),
           getDiarySummary({ unitId: scopedUnitId, classroomId: classroomId || undefined, mes: endDate.slice(0, 7) }),
           classroomId ? getClassroomExpressSummary({ classroomId, startDate, endDate }) : Promise.resolve(null),
+          getDiaryQuality({ classroomId: classroomId || undefined, startDate, endDate }).catch(() => null),
         ]);
-        setPedagogicalData({ coverage, pendings, diarySummary, classroomSummary });
+        setPedagogicalData({ coverage, pendings, diarySummary, classroomSummary, diaryQuality });
         setLoading(false);
         return;
       }
@@ -220,7 +223,7 @@ export function ReportsPage() {
 
   const renderizarVisaoPedagogica = () => {
     if (!pedagogicalData) return null;
-    const { coverage, pendings, diarySummary, classroomSummary } = pedagogicalData;
+    const { coverage, pendings, diarySummary, classroomSummary, diaryQuality } = pedagogicalData;
     const isUnitCoverage = 'turmas' in coverage;
     const unitCoverage = isUnitCoverage ? coverage : null;
     const centralCoverage = !isUnitCoverage ? coverage : null;
@@ -241,6 +244,25 @@ export function ReportsPage() {
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Pendências recentes</p><p className="mt-1 text-2xl font-bold text-amber-700">{totalPendentes}</p><p className="text-xs text-slate-500">sem registro no último dia</p></div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-wide text-slate-500">Pontos de atenção</p><p className="mt-1 text-2xl font-bold text-rose-700">{totalAtencao}</p><p className="text-xs text-slate-500">na turma selecionada</p></div>
         </div>
+
+        {diaryQuality?.collection && (
+          <section className="rounded-xl border border-violet-100 bg-violet-50 p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="font-semibold text-violet-950">Qualidade da colheita estruturada</h3>
+                <p className="mt-1 text-sm text-violet-800">Indicadores reais de oportunidade, evidência ABC e revisão humana no período selecionado.</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800">{diaryQuality.collection.events} coletas versionadas</span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-cyan-700">{diaryQuality.collection.observedOpportunityPercent}%</p><p className="text-xs text-slate-500">com oportunidade observada</p></div>
+              <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-amber-700">{diaryQuality.collection.abc}</p><p className="text-xs text-slate-500">registros ABC</p></div>
+              <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-rose-700">{diaryQuality.collection.teacherConcerns}</p><p className="text-xs text-slate-500">marcados para revisão</p></div>
+              <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-slate-700">{diaryQuality.collection.noOpportunity}</p><p className="text-xs text-slate-500">sem oportunidade, não atraso</p></div>
+            </div>
+            <p className="mt-3 text-xs text-violet-800">Este bloco organiza evidências pedagógicas e não produz diagnóstico ou laudo clínico automático.</p>
+          </section>
+        )}
 
         {unitCoverage && (
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
