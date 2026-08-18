@@ -14,7 +14,10 @@ import {
   Utensils,
 } from 'lucide-react';
 import { PageShell } from '../components/ui/PageShell';
+import { useAuth } from '../app/AuthProvider';
+import { hasRole } from '../api/auth';
 import { getChildCareOverview, listCareChildren, type CareChildOption, type CareOverview } from '../api/care';
+import { getOperationalAlerts, resolveOperationalAlert, type OperationalAlert } from '../api/alerts';
 
 function formatDate(value?: string | null) {
   if (!value) return '—';
@@ -77,7 +80,12 @@ export default function CareOverviewPage() {
   const [selectedId, setSelectedId] = useState(routeChildId ?? '');
   const [loadingChildren, setLoadingChildren] = useState(true);
   const [loadingOverview, setLoadingOverview] = useState(false);
+  const [operationalAlerts, setOperationalAlerts] = useState<OperationalAlert[]>([]);
+  const [resolvingAlertId, setResolvingAlertId] = useState('');
+  const [alertNotice, setAlertNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const canResolveAlerts = ['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER'].some((role) => hasRole(user, role));
 
   const selectedChild = useMemo(() => children.find((child) => child.id === selectedId), [children, selectedId]);
 
@@ -102,22 +110,60 @@ export default function CareOverviewPage() {
   const loadOverview = useCallback(async (childId: string) => {
     setLoadingOverview(true);
     setError(null);
+    setAlertNotice(null);
     try {
       setOverview(await getChildCareOverview(childId));
     } catch (loadError) {
       setOverview(null);
+      setOperationalAlerts([]);
       setError(errorMessage(loadError));
     } finally {
       setLoadingOverview(false);
     }
   }, []);
 
+  const loadOperationalAlerts = useCallback(async () => {
+    if (!overview?.child?.activeClassrooms?.length || !selectedId) {
+      setOperationalAlerts([]);
+      return;
+    }
+    try {
+      const classroomId = overview.child.activeClassrooms[0]?.id;
+      const summary = await getOperationalAlerts({ classroomId, limit: 100, unread: true });
+      setOperationalAlerts(summary.alertas.filter((alert) => !alert.childId || alert.childId === selectedId));
+    } catch {
+      setOperationalAlerts([]);
+    }
+  }, [overview, selectedId]);
+
   useEffect(() => { void loadChildren(); }, [loadChildren]);
 
   useEffect(() => {
     if (selectedId) void loadOverview(selectedId);
-    else setOverview(null);
+    else {
+      setOverview(null);
+      setOperationalAlerts([]);
+    }
   }, [loadOverview, selectedId]);
+
+  useEffect(() => { void loadOperationalAlerts(); }, [loadOperationalAlerts]);
+
+  async function resolveAlert(alertId: string) {
+    if (!canResolveAlerts) return;
+    setResolvingAlertId(alertId);
+    setError(null);
+    setAlertNotice(null);
+    try {
+      await resolveOperationalAlert(alertId);
+      setOperationalAlerts((current) => current.filter((alert) => alert.id !== alertId));
+      setAlertNotice('Alerta marcado como resolvido com registro do responsável.');
+      if (selectedId) void loadOverview(selectedId);
+    } catch (resolveError) {
+      setError(errorMessage(resolveError));
+    } finally {
+      setResolvingAlertId('');
+    }
+  }
 
   function selectChild(childId: string) {
     setSelectedId(childId);
@@ -148,6 +194,7 @@ export default function CareOverviewPage() {
         </section>
 
         {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+        {alertNotice && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{alertNotice}</div>}
 
         {loadingChildren && <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Carregando crianças do seu escopo...</div>}
         {!loadingChildren && children.length === 0 && <EmptyState>Nenhuma criança disponível no escopo atual para a visão de cuidado.</EmptyState>}
@@ -189,6 +236,11 @@ export default function CareOverviewPage() {
                 <div className="space-y-3">{overview.alerts.map((alert) => <div key={alert.id} className="rounded-xl border border-amber-100 bg-white p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-medium text-slate-800">{alert.titulo}</p><p className="mt-1 text-sm text-slate-600">{text(alert.descricao)}</p></div><span className="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-800">{alert.status || 'Ativo'}</span></div><p className="mt-3 text-xs text-slate-400">Gerado em {formatDateTime(alert.geradoEm)}</p></div>)}</div>
               </SectionCard>
             </div>
+
+            <SectionCard title="Fila operacional — revisão humana" icon={AlertTriangle} tone="border-rose-200 bg-rose-50/40">
+              {operationalAlerts.length === 0 && <EmptyState>Nenhum alerta operacional ativo para esta criança.</EmptyState>}
+              <div className="space-y-3">{operationalAlerts.map((alert) => <article key={alert.id} className="rounded-xl border border-rose-100 bg-white p-4"><div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-slate-800">{alert.titulo}</p><span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${alert.severidade === 'CRITICA' || alert.severidade === 'ALTA' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>{alert.severidade}</span></div><p className="mt-1 text-sm text-slate-600">{text(alert.descricao)}</p><p className="mt-2 text-xs text-slate-400">Gerado em {formatDateTime(alert.criadoEm)} · decisão humana obrigatória</p></div>{canResolveAlerts && <button type="button" disabled={resolvingAlertId === alert.id} onClick={() => void resolveAlert(alert.id)} className="shrink-0 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50">{resolvingAlertId === alert.id ? 'Salvando...' : 'Resolver'}</button>}</div></article>)}</div>
+            </SectionCard>
 
             <SectionCard title="Desenvolvimento observado" icon={Activity}>
               {overview.development.length === 0 && <EmptyState>Nenhuma observação de desenvolvimento no período carregado.</EmptyState>}
