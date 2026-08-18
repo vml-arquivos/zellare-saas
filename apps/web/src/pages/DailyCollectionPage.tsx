@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -70,6 +70,7 @@ export default function DailyCollectionPage() {
   const [message, setMessage] = useState('');
   const [offlineCount, setOfflineCount] = useState(0);
   const apiCache = useApiCache(10_000);
+  const childrenRequestRef = useRef(0);
 
   const selectedClassroom = useMemo(
     () => classrooms.find((classroom) => classroom.id === classroomId),
@@ -104,8 +105,10 @@ export default function DailyCollectionPage() {
   }
 
   async function loadChildren(targetClassroomId = classroomId) {
+    const requestId = ++childrenRequestRef.current;
     if (!targetClassroomId) {
       setChildren([]);
+      setLoadingChildren(false);
       return;
     }
     try {
@@ -118,12 +121,18 @@ export default function DailyCollectionPage() {
           firstName: String(item.firstName),
           lastName: String(item.lastName),
         }));
-      setChildren(normalized);
+      if (requestId === childrenRequestRef.current) {
+        setChildren(normalized);
+      }
     } catch {
-      setChildren([]);
-      setMessage('Não foi possível carregar as crianças da turma selecionada.');
+      if (requestId === childrenRequestRef.current) {
+        setChildren([]);
+        setMessage('Não foi possível carregar as crianças da turma selecionada.');
+      }
     } finally {
-      setLoadingChildren(false);
+      if (requestId === childrenRequestRef.current) {
+        setLoadingChildren(false);
+      }
     }
   }
 
