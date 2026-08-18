@@ -84,6 +84,7 @@ interface RdicSalvo {
   rascunhoJson?: {
     trimestre?: number;
     dimensoes?: DimensaoAvaliacao[];
+    diagnosticoExpress?: DiagnosticoExpress | null;
     observacaoGeral?: string;
     proximosPassos?: string;
   } | null;
@@ -100,6 +101,45 @@ interface RelatorioIAConsolidado {
   anonimizado: boolean;
   totalObservacoes: number;
   codigoAnonimizado: string;
+}
+
+interface DiagnosticoExpress {
+  child: { id: string; firstName: string; lastName: string };
+  classroom: { id: string; name: string } | null;
+  periodo: { startDate: string; endDate: string };
+  fontes: {
+    diariosPublicados: number;
+    observacoesDesenvolvimento: number;
+    diasComRegistro: number;
+    microgestos: number;
+  };
+  porNivel: Record<string, number>;
+  porCategoria: Record<string, number>;
+  habilidades: Array<{
+    microgestoId: string;
+    label: string;
+    categoria: string;
+    nivel: string;
+    ocorrencias: number;
+  }>;
+  tendencia: 'SEM_DADOS' | 'ATENCAO' | 'FAVORAVEL' | 'EM_DESENVOLVIMENTO' | string;
+  pontosAtencao: string[];
+  proximosPassos: string[];
+}
+
+function gerarObservacaoExpress(diagnostico: DiagnosticoExpress | null): string {
+  if (!diagnostico) return '';
+  const { fontes, tendencia, pontosAtencao } = diagnostico;
+  const tendenciaLabel: Record<string, string> = {
+    SEM_DADOS: 'ainda sem registros suficientes para uma leitura do período',
+    ATENCAO: 'pontos que pedem acompanhamento pedagógico próximo',
+    FAVORAVEL: 'evidências predominantemente favoráveis',
+    EM_DESENVOLVIMENTO: 'habilidades em desenvolvimento e em acompanhamento',
+  };
+  const destaque = pontosAtencao.length > 0
+    ? ` Pontos para acompanhar: ${pontosAtencao.slice(0, 3).join('; ')}.`
+    : '';
+  return `Registro estruturado do período: ${fontes.microgestos} marcações de desenvolvimento em ${fontes.diasComRegistro} dia(s), com ${fontes.diariosPublicados} diário(s) publicado(s) e ${fontes.observacoesDesenvolvimento} observação(ões) de desenvolvimento. A leitura indica ${tendenciaLabel[tendencia] ?? 'uma trajetória em acompanhamento'}.${destaque}`;
 }
 
 // ─── Dimensões BNCC (5 Campos de Experiência) ─────────────────────────────────
@@ -417,7 +457,10 @@ export default function RdicCriancaPage() {
   // Tarefa 2.3 — recarregar evidências ao mudar trimestre
   const handleSetTrimestre = (t: TrimestreId) => {
     setTrimestre(t);
-    if (alunoSelecionado) carregarEvidencias(alunoSelecionado.id, t);
+    if (alunoSelecionado) {
+      carregarEvidencias(alunoSelecionado.id, t);
+      carregarDiagnosticoExpress(alunoSelecionado.id, t);
+    }
   };
   const [dimensoes, setDimensoes] = useState<DimensaoAvaliacao[]>(criarDimensoesVazias());
   const [observacaoGeral, setObservacaoGeral] = useState('');
@@ -456,6 +499,8 @@ export default function RdicCriancaPage() {
   // Tarefa 2.3 — Evidências do diário no período
   const [evidencias, setEvidencias] = useState<{ tipo: string; count: number; label: string; cor: string }[]>([]);
   const [loadingEvidencias, setLoadingEvidencias] = useState(false);
+  const [diagnosticoExpress, setDiagnosticoExpress] = useState<DiagnosticoExpress | null>(null);
+  const [loadingDiagnosticoExpress, setLoadingDiagnosticoExpress] = useState(false);
   const [evidenciasExpanded, setEvidenciasExpanded] = useState(true);
 
   // ─── Carregar turma e alunos ──────────────────────────────────────────────
@@ -479,6 +524,8 @@ export default function RdicCriancaPage() {
             if (aluno) {
               setAlunoSelecionado(aluno);
               setEtapa('formulario');
+              void carregarEvidencias(aluno.id, trimestre);
+              void carregarDiagnosticoExpress(aluno.id, trimestre);
               const rdicsRes = await http.get('/rdic', { params: { childId: aluno.id } }).catch(() => ({ data: [] }));
               setRdicsDoAluno(Array.isArray(rdicsRes.data) ? rdicsRes.data : rdicsRes.data?.data ?? []);
             }
@@ -563,6 +610,26 @@ export default function RdicCriancaPage() {
     }
   }
   // Tarefa 2.3 — Carregar evidências do diário para o período do trimestre selecionado
+  async function carregarDiagnosticoExpress(childId: string, trimestreId: TrimestreId) {
+    const PERIODOS: Record<TrimestreId, { start: string; end: string }> = {
+      1: { start: `${new Date().getFullYear()}-02-01`, end: `${new Date().getFullYear()}-05-31` },
+      2: { start: `${new Date().getFullYear()}-06-01`, end: `${new Date().getFullYear()}-09-30` },
+      3: { start: `${new Date().getFullYear()}-10-01`, end: `${new Date().getFullYear()}-12-31` },
+    };
+    const { start, end } = PERIODOS[trimestreId];
+    setLoadingDiagnosticoExpress(true);
+    try {
+      const res = await http.get(`/rdic/child/${childId}/express-summary`, {
+        params: { startDate: `${start}T00:00:00.000Z`, endDate: `${end}T23:59:59.999Z` },
+      });
+      setDiagnosticoExpress(res.data as DiagnosticoExpress);
+    } catch {
+      setDiagnosticoExpress(null);
+    } finally {
+      setLoadingDiagnosticoExpress(false);
+    }
+  }
+
   async function carregarEvidencias(childId: string, trimestreId: TrimestreId) {
     const PERIODOS: Record<TrimestreId, { start: string; end: string }> = {
       1: { start: `${new Date().getFullYear()}-02-01`, end: `${new Date().getFullYear()}-05-31` },
@@ -628,9 +695,11 @@ export default function RdicCriancaPage() {
     setProximosPassos('');
     setRelatorioIA(null);
     setMostrarRelatorioIA(false);
+    setDiagnosticoExpress(null);
     setEtapa('formulario');
     // Tarefa 2.3 — carregar evidências do período
     carregarEvidencias(aluno.id, trimestre);
+    carregarDiagnosticoExpress(aluno.id, trimestre);
 
     try {
       setLoadingRdics(true);
@@ -650,6 +719,7 @@ export default function RdicCriancaPage() {
       if (rascunhoExistente?.rascunhoJson) {
         const j = rascunhoExistente.rascunhoJson;
         if (j.dimensoes && j.dimensoes.length > 0) setDimensoes(j.dimensoes);
+        if (j.diagnosticoExpress) setDiagnosticoExpress(j.diagnosticoExpress);
         if (j.observacaoGeral) setObservacaoGeral(j.observacaoGeral);
         if (j.proximosPassos) setProximosPassos(j.proximosPassos);
       }
@@ -720,10 +790,14 @@ export default function RdicCriancaPage() {
   // ─── Salvar Desenvolvimento ──────────────────────────────────────────────────────────
   async function salvarRdic() {
     if (!alunoSelecionado) return;
-    if (!observacaoGeral.trim()) {
-      toast.error('Preencha a observação geral antes de salvar');
+    const observacaoFinal = observacaoGeral.trim() || gerarObservacaoExpress(diagnosticoExpress);
+    const proximosPassosFinal = proximosPassos.trim() || diagnosticoExpress?.proximosPassos.join('\n') || '';
+    if (!observacaoFinal) {
+      toast.error('Marque pelo menos uma evidência ou escreva uma observação antes de salvar');
       return;
     }
+    if (!observacaoGeral.trim()) setObservacaoGeral(observacaoFinal);
+    if (!proximosPassos.trim() && proximosPassosFinal) setProximosPassos(proximosPassosFinal);
     setSaving(true);
     try {
       const trimestreAtual = TRIMESTRES.find(t => t.id === trimestre);
@@ -735,7 +809,13 @@ export default function RdicCriancaPage() {
         periodo:      periodoLabel,
         periodoEnum:  trimestreAtual?.valor ?? null,
         anoLetivo:    ano,
-        rascunhoJson: { trimestre, dimensoes, observacaoGeral, proximosPassos },
+        rascunhoJson: {
+          trimestre,
+          dimensoes,
+          diagnosticoExpress,
+          observacaoGeral: observacaoFinal,
+          proximosPassos: proximosPassosFinal,
+        },
       };
       const existente = rdicsDoAluno.find(
         r => r.periodo === payload.periodo && r.anoLetivo === ano &&
@@ -1028,6 +1108,88 @@ export default function RdicCriancaPage() {
             )}
           </div>
 
+          {/* Diagnóstico rápido por marcações reais */}
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-4 shadow-sm">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-emerald-600" />
+                  <h3 className="text-sm font-semibold text-emerald-900">RDIC Express — leitura rápida do período</h3>
+                </div>
+                <p className="mt-1 text-xs text-emerald-700">
+                  Marcações do Diário de Bordo e observações reais cruzadas automaticamente. Use como base e revise antes de enviar.
+                </p>
+              </div>
+              {diagnosticoExpress && (
+                <span className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                  diagnosticoExpress.tendencia === 'ATENCAO'
+                    ? 'bg-rose-100 text-rose-700'
+                    : diagnosticoExpress.tendencia === 'FAVORAVEL'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : diagnosticoExpress.tendencia === 'SEM_DADOS'
+                        ? 'bg-slate-100 text-slate-600'
+                        : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {diagnosticoExpress.tendencia === 'ATENCAO' ? 'Acompanhar' : diagnosticoExpress.tendencia === 'FAVORAVEL' ? 'Evidências favoráveis' : diagnosticoExpress.tendencia === 'SEM_DADOS' ? 'Sem dados suficientes' : 'Em desenvolvimento'}
+                </span>
+              )}
+            </div>
+
+            {loadingDiagnosticoExpress ? (
+              <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                <RefreshCw className="h-4 w-4 animate-spin" /> Cruzando registros autorizados do período...
+              </div>
+            ) : diagnosticoExpress ? (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+                  {[
+                    ['Marcações', diagnosticoExpress.fontes.microgestos],
+                    ['Dias com registro', diagnosticoExpress.fontes.diasComRegistro],
+                    ['Diários publicados', diagnosticoExpress.fontes.diariosPublicados],
+                    ['Observações', diagnosticoExpress.fontes.observacoesDesenvolvimento],
+                  ].map(([label, value]) => (
+                    <div key={String(label)} className="rounded-xl border border-white bg-white/80 p-3 shadow-sm">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
+                      <p className="mt-1 text-xl font-bold tabular-nums text-slate-800">{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {diagnosticoExpress.habilidades.length > 0 ? (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Habilidades mais registradas</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {diagnosticoExpress.habilidades.slice(0, 6).map((habilidade) => (
+                        <span key={`${habilidade.microgestoId}-${habilidade.nivel}`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700">
+                          <strong>{habilidade.label}</strong> · {habilidade.nivel.replace(/_/g, ' ').toLowerCase()} · {habilidade.ocorrencias}x
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white/70 p-3 text-xs text-slate-500">
+                    Ainda não há marcações estruturadas neste período. O formulário continua disponível para registro direto.
+                  </p>
+                )}
+
+                {diagnosticoExpress.pontosAtencao.length > 0 && (
+                  <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Pontos para acompanhar</p>
+                    <p className="mt-1 text-sm text-rose-800">{diagnosticoExpress.pontosAtencao.join(' · ')}</p>
+                  </div>
+                )}
+
+                <p className="mt-3 text-[11px] text-slate-500">
+                  O resumo é pedagógico e operacional; não substitui observação direta, avaliação profissional ou diagnóstico clínico.
+                </p>
+              </>
+            ) : (
+              <p className="mt-4 rounded-xl border border-dashed border-emerald-200 bg-white/70 p-3 text-xs text-slate-500">
+                O resumo rápido não pôde ser carregado. Você pode continuar com o preenchimento manual sem perder o fluxo atual.
+              </p>
+            )}
+          </div>
+
           {/* Barra de progresso */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
@@ -1269,7 +1431,7 @@ export default function RdicCriancaPage() {
               )}
               <Button
                 onClick={salvarRdic}
-                disabled={saving || !observacaoGeral.trim()}
+                disabled={saving || (!observacaoGeral.trim() && !diagnosticoExpress)}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white min-w-[140px]"
               >
                 {saving ? (
@@ -1300,7 +1462,7 @@ export default function RdicCriancaPage() {
                     toast.error(err?.response?.data?.message || 'Erro ao enviar para revisão');
                   }
                 }}
-                disabled={saving || !observacaoGeral.trim()}
+                disabled={saving || (!observacaoGeral.trim() && !diagnosticoExpress)}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
               >
                 <Send className="h-4 w-4" /> Enviar para Revisão

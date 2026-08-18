@@ -30,6 +30,20 @@ interface RdicHistorico {
   criadoEm: string;
 }
 
+interface DiagnosticoExpressResumo {
+  fontes: {
+    diariosPublicados: number;
+    observacoesDesenvolvimento: number;
+    diasComRegistro: number;
+    microgestos: number;
+  };
+  porNivel: Record<string, number>;
+  habilidades: Array<{ label: string; nivel: string; ocorrencias: number }>;
+  tendencia: string;
+  pontosAtencao: string[];
+  proximosPassos: string[];
+}
+
 interface CentralData {
   child: {
     id: string;
@@ -101,6 +115,7 @@ export default function CentralRdicCriancaPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<CentralData | null>(null);
+  const [diagnosticoExpress, setDiagnosticoExpress] = useState<DiagnosticoExpressResumo | null>(null);
   const { user } = useAuth();
   const podeCriar = hasRole(user, 'PROFESSOR') || hasRole(user, 'PROFESSOR_AUXILIAR');
 
@@ -108,8 +123,12 @@ export default function CentralRdicCriancaPage() {
     if (!childId) return;
     setLoading(true);
     try {
-      const res = await http.get(`/rdic/child/${childId}/central`);
-      setData(res?.data ?? null);
+      const [centralRes, expressRes] = await Promise.all([
+        http.get(`/rdic/child/${childId}/central`),
+        http.get(`/rdic/child/${childId}/express-summary`).catch(() => ({ data: null })),
+      ]);
+      setData(centralRes?.data ?? null);
+      setDiagnosticoExpress(expressRes?.data ?? null);
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Erro ao carregar dados da criança.');
     } finally {
@@ -284,6 +303,46 @@ export default function CentralRdicCriancaPage() {
             </Card>
           </div>
         </div>
+
+        {diagnosticoExpress && (
+          <Card className="border-emerald-200 bg-emerald-50/30">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="text-sm font-semibold text-emerald-800 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" /> Leitura rápida do desenvolvimento
+                </CardTitle>
+                <span className={`text-xs font-semibold rounded-full px-2 py-1 ${
+                  diagnosticoExpress.tendencia === 'ATENCAO'
+                    ? 'bg-rose-100 text-rose-700'
+                    : diagnosticoExpress.tendencia === 'FAVORAVEL'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {diagnosticoExpress.tendencia === 'ATENCAO' ? 'Acompanhar' : diagnosticoExpress.tendencia === 'FAVORAVEL' ? 'Favorável' : diagnosticoExpress.tendencia === 'SEM_DADOS' ? 'Sem dados' : 'Em desenvolvimento'}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{diagnosticoExpress.fontes.microgestos}</p><p className="text-[11px] text-gray-500">marcações</p></div>
+                <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{diagnosticoExpress.fontes.diasComRegistro}</p><p className="text-[11px] text-gray-500">dias</p></div>
+                <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{diagnosticoExpress.fontes.diariosPublicados}</p><p className="text-[11px] text-gray-500">diários</p></div>
+                <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-gray-800">{diagnosticoExpress.fontes.observacoesDesenvolvimento}</p><p className="text-[11px] text-gray-500">observações</p></div>
+              </div>
+              {diagnosticoExpress.habilidades.length > 0 && (
+                <p className="mt-3 text-xs text-gray-600">
+                  Mais registradas: {diagnosticoExpress.habilidades.slice(0, 4).map((item) => `${item.label} (${item.ocorrencias}x)`).join(' · ')}.
+                </p>
+              )}
+              {diagnosticoExpress.pontosAtencao.length > 0 && (
+                <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700">
+                  <strong>Pontos para acompanhar:</strong> {diagnosticoExpress.pontosAtencao.slice(0, 3).join(' · ')}
+                </div>
+              )}
+              <p className="mt-2 text-[11px] text-gray-400">Resumo pedagógico operacional, sem diagnóstico clínico.</p>
+            </CardContent>
+          </Card>
+        )}
 
         {child?.acompanhamentoNutricional && (
           <Card className="border-amber-100 bg-amber-50/30">
