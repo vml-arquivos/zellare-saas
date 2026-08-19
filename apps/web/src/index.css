@@ -10,18 +10,18 @@
 
 @layer base {
   :root {
-    /* ── Brand (Indigo) ─────────────────────────────────────────── */
-    --brand-50:  #eef2ff;
-    --brand-100: #e0e7ff;
-    --brand-200: #c7d2fe;
-    --brand-300: #a5b4fc;
-    --brand-400: #818cf8;
-    --brand-500: #6366f1;
-    --brand-600: #4f46e5;
-    --brand-700: #4338ca;
-    --brand-800: #3730a3;
-    --brand-900: #312e81;
-    --brand-950: #1e1b4b;
+    /* ── Brand (azul-claro) ──────────────────────────────────────── */
+    --brand-50:  #eff9ff;
+    --brand-100: #dff2ff;
+    --brand-200: #bfe7ff;
+    --brand-300: #91d7ff;
+    --brand-400: #5ec2f5;
+    --brand-500: #2ea6e6;
+    --brand-600: #1683c1;
+    --brand-700: #116a9c;
+    --brand-800: #0e537a;
+    --brand-900: #0b3e5b;
+    --brand-950: #07283a;
 
     /* ── Superfícies ────────────────────────────────────────────── */
     --surface-page:     #f6f8fc;   /* fundo geral da página */
@@ -32,14 +32,14 @@
     --surface-sidebar:  #ffffff;   /* navegação lateral */
     --surface-topbar:   rgba(255,255,255,0.92); /* cabeçalho sticky */
     --surface-overlay:  rgba(15,23,42,0.55);
-    --surface-brand:    #eef2ff;
+    --surface-brand:    #e8f7ff;
 
     /* ── Bordas ─────────────────────────────────────────────────── */
     --border-subtle:  #f1f5f9;
     --border-default: #e2e8f0;
     --border-strong:  #cbd5e1;
-    --border-brand:   #4f46e5;
-    --border-focus:   #4f46e5;
+    --border-brand:   var(--brand-600);
+    --border-focus:   var(--brand-600);
 
     /* ── Texto ──────────────────────────────────────────────────── */
     --text-primary:   #0f172a;
@@ -47,10 +47,12 @@
     --text-tertiary:  #64748b;
     --text-disabled:  #cbd5e1;
     --text-inverse:   #ffffff;
-    --text-brand:     #4338ca;
-    --text-brand-soft:#4f46e5;
-    --accent-cyan:    #0891b2;
-    --accent-violet:  #7c3aed;
+    --text-brand:     #116a9c;
+    --text-brand-soft:#1683c1;
+    --accent-cyan:    #7dd3fc;
+    --accent-violet:  #16a34a;
+    --accent-mint:    #34d399;
+    --on-accent:      #062b34;
 
     /* ── Status semânticos ──────────────────────────────────────── */
     --success:       #16a34a;
@@ -65,9 +67,9 @@
     --info:          #0284c7;
     --info-bg:       #f0f9ff;
     --info-border:   #bae6fd;
-    --purple:        #7c3aed;
-    --purple-bg:     #f5f3ff;
-    --purple-border: #ddd6fe;
+    --purple:        var(--accent-violet);
+    --purple-bg:     var(--success-bg);
+    --purple-border: var(--success-border);
 
     /* ── Layout ─────────────────────────────────────────────────── */
     --sidebar-width:  15rem;
@@ -90,8 +92,8 @@
     --shadow-sm: 0 1px 3px 0 rgba(15,23,42,0.06),0 1px 2px -1px rgba(15,23,42,0.03);
     --shadow-md: 0 4px 12px -2px rgba(15,23,42,0.10),0 2px 5px -2px rgba(15,23,42,0.05);
     --shadow-lg: 0 16px 32px -12px rgba(15,23,42,0.16),0 6px 14px -8px rgba(15,23,42,0.08);
-    --shadow-focus: 0 0 0 3px rgba(79,70,229,0.18);
-    --shadow-glow: 0 0 0 1px rgba(99,102,241,0.10), 0 12px 32px -16px rgba(79,70,229,0.32);
+    --shadow-focus: 0 0 0 3px rgba(22,131,193,0.20);
+    --shadow-glow: 0 0 0 1px rgba(22,131,193,0.12), 0 12px 32px -16px rgba(22,131,193,0.30);
 
     /* ── Aliases para componentes legados e primitives ──────────── */
     --background: var(--surface-page);
@@ -133,23 +135,25 @@
     --surface-sidebar:  #0b0f14;
     --surface-topbar:   rgba(13,17,23,0.92);
     --surface-overlay:  rgba(1,4,9,0.72);
-    --surface-brand:    rgba(79,70,229,0.16);
+    --surface-brand:    rgba(125,211,252,0.14);
 
     --border-subtle:  #21262d;
     --border-default: #30363d;
     --border-strong:  #484f58;
-    --border-brand:   #6366f1;
-    --border-focus:   #818cf8;
+    --border-brand:   #7dd3fc;
+    --border-focus:   #bae6fd;
 
     --text-primary:   #e6edf3;
     --text-secondary: #8b949e;
     --text-tertiary:  #6e7681;
     --text-disabled:  #484f58;
     --text-inverse:   #ffffff;
-    --text-brand:     #a5b4fc;
-    --text-brand-soft:#818cf8;
-    --accent-cyan:    #22d3ee;
-    --accent-violet:  #a78bfa;
+    --text-brand:     #bae6fd;
+    --text-brand-soft:#7dd3fc;
+    --accent-cyan:    #7dd3fc;
+    --accent-violet:  #86efac;
+    --accent-mint:    #86efac;
+    --on-accent:      #062b34;
 
     --success-bg:    rgba(35,134,54,0.16);
     --success-border:#238636;
@@ -159,15 +163,15 @@
     --error-border:  #da3633;
     --info-bg:       rgba(56,139,253,0.16);
     --info-border:   #1f6feb;
-    --purple-bg:     rgba(137,87,229,0.16);
-    --purple-border: #8957e5;
+    --purple-bg:     var(--success-bg);
+    --purple-border: var(--success-border);
 
     --shadow-xs: 0 1px 2px 0 rgba(1,4,9,0.32);
     --shadow-sm: 0 1px 3px 0 rgba(1,4,9,0.40),0 1px 2px -1px rgba(1,4,9,0.30);
     --shadow-md: 0 8px 20px -10px rgba(1,4,9,0.72),0 2px 6px -3px rgba(1,4,9,0.52);
     --shadow-lg: 0 20px 42px -18px rgba(1,4,9,0.82),0 8px 18px -8px rgba(1,4,9,0.58);
-    --shadow-focus: 0 0 0 3px rgba(129,140,248,0.28);
-    --shadow-glow: 0 0 0 1px rgba(99,102,241,0.25), 0 14px 34px -18px rgba(99,102,241,0.50);
+    --shadow-focus: 0 0 0 3px rgba(125,211,252,0.30);
+    --shadow-glow: 0 0 0 1px rgba(125,211,252,0.22), 0 14px 34px -18px rgba(22,131,193,0.48);
 
     --background: var(--surface-page);
     --foreground: var(--text-primary);
@@ -245,7 +249,7 @@
     width: 2.75rem;
     height: 2px;
     border-radius: var(--r-full);
-    background: linear-gradient(90deg, var(--brand-600), var(--accent-cyan));
+    background: var(--brand-600);
   }
 
   .zelare-page-title {
@@ -322,7 +326,7 @@
   .ds-badge-amber  { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
   .ds-badge-red    { background: var(--error-bg);   color: var(--error);   border-color: var(--error-border); }
   .ds-badge-purple { background: var(--purple-bg);  color: var(--purple);  border-color: var(--purple-border); }
-  .ds-badge-brand  { background: var(--brand-50);   color: var(--brand-700); border-color: var(--brand-200); }
+  .ds-badge-brand  { background: var(--surface-brand); color: var(--brand-700); border-color: var(--brand-200); }
   .ds-badge-neutral{ background: var(--surface-subtle); color: var(--text-secondary); border-color: var(--border-default); }
 
   /* ── Botão primário ─────────────────────────────────────────── */
@@ -344,14 +348,14 @@
   }
   .ds-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .ds-btn-primary {
-    background: linear-gradient(135deg, var(--brand-600), var(--accent-violet));
+    background: var(--brand-600);
     color: var(--text-inverse);
     border-color: var(--brand-700);
-    box-shadow: 0 6px 14px -8px rgba(79,70,229,0.65);
+    box-shadow: 0 6px 14px -8px rgba(22,131,193,0.55);
   }
   .ds-btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--brand-700), var(--accent-violet));
-    box-shadow: 0 8px 18px -8px rgba(79,70,229,0.78);
+    background: var(--brand-700);
+    box-shadow: 0 8px 18px -8px rgba(22,131,193,0.65);
     transform: translateY(-1px);
   }
   .ds-btn-secondary {
@@ -709,7 +713,7 @@
 .dark .ring-blue-500,
 .dark .ring-orange-300 { --tw-ring-color: var(--surface-brand) !important; }
 .dark .shadow-emerald-200,
-.dark .shadow-blue-200 { --tw-shadow-color: rgba(99,102,241,0.24) !important; }
+.dark .shadow-blue-200 { --tw-shadow-color: rgba(125,211,252,0.24) !important; }
 
 /* ── Gradientes legados: preservar a hierarquia, não a luminosidade ── */
 .dark .from-amber-50,

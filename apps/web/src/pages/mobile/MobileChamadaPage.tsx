@@ -168,9 +168,9 @@ export default function MobileChamadaPage() {
           {/* Resumo */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
             {[
-              { label: 'Presentes', value: presentes, color: '#10b981' },
-              { label: 'Faltas', value: faltas, color: '#ef4444' },
-              { label: 'Pendente', value: naoBatidos, color: '#f59e0b' },
+              { label: 'Presentes', value: presentes, color: 'var(--success)' },
+              { label: 'Faltas', value: faltas, color: 'var(--error)' },
+              { label: 'Pendente', value: naoBatidos, color: 'var(--warning)' },
             ].map((item) => (
               <div key={item.label} style={{
                 background: 'var(--color-background-primary)', borderRadius: 12,
@@ -185,8 +185,8 @@ export default function MobileChamadaPage() {
           {/* Ações rápidas */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <button type="button" onClick={() => marcarTodos('P')} style={{
-              flex: 1, padding: '10px', borderRadius: 10, border: '0.5px solid #10b981',
-              background: '#f0fdf4', color: '#065f46', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              flex: 1, padding: '10px', borderRadius: 10, border: '0.5px solid var(--success-border)',
+              background: 'var(--success-bg)', color: 'var(--success)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
             }}>
               ✓ Todos presentes
             </button>
@@ -211,8 +211,8 @@ export default function MobileChamadaPage() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '12px 14px', borderRadius: 14,
-                    border: `0.5px solid ${status === 'P' ? '#10b981' : status === 'F' ? '#ef4444' : 'var(--color-border-tertiary)'}`,
-                    background: status === 'P' ? '#f0fdf4' : status === 'F' ? '#fef2f2' : 'var(--color-background-primary)',
+                    border: `0.5px solid ${status === 'P' ? 'var(--success)' : status === 'F' ? 'var(--error)' : 'var(--color-border-tertiary)'}`,
+                    background: status === 'P' ? 'var(--success-bg)' : status === 'F' ? 'var(--error-bg)' : 'var(--color-background-primary)',
                     cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
                     transition: 'all 0.15s',
                   }}
@@ -220,10 +220,10 @@ export default function MobileChamadaPage() {
                   {/* Avatar */}
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                    background: status === 'P' ? '#d1fae5' : status === 'F' ? '#fee2e2' : 'var(--color-background-secondary)',
+                    background: status === 'P' ? 'var(--success-bg)' : status === 'F' ? 'var(--error-bg)' : 'var(--color-background-secondary)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 14, fontWeight: 500,
-                    color: status === 'P' ? '#065f46' : status === 'F' ? '#991b1b' : 'var(--color-text-secondary)',
+                    color: status === 'P' ? 'var(--success)' : status === 'F' ? 'var(--error)' : 'var(--color-text-secondary)',
                   }}>
                     {status === 'P' ? <Check size={18} /> : status === 'F' ? <X size={18} /> : `${child.firstName[0]}${child.lastName?.[0] ?? ''}`}
                   </div>
@@ -234,15 +234,15 @@ export default function MobileChamadaPage() {
                       {child.firstName} {child.lastName}
                     </p>
                     {child.allergies && (
-                      <p style={{ fontSize: 11, color: '#d97706', margin: 0 }}>⚠ {child.allergies.slice(0, 30)}</p>
+                      <p style={{ fontSize: 11, color: 'var(--warning)', margin: 0 }}>⚠ {child.allergies.slice(0, 30)}</p>
                     )}
                   </div>
 
                   {/* Status badge */}
                   <span style={{
                     fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
-                    background: status === 'P' ? '#d1fae5' : status === 'F' ? '#fee2e2' : 'var(--color-background-secondary)',
-                    color: status === 'P' ? '#065f46' : status === 'F' ? '#991b1b' : 'var(--color-text-tertiary)',
+                    background: status === 'P' ? 'var(--success-bg)' : status === 'F' ? 'var(--error-bg)' : 'var(--color-background-secondary)',
+                    color: status === 'P' ? 'var(--success)' : status === 'F' ? 'var(--error)' : 'var(--color-text-tertiary)',
                     flexShrink: 0,
                   }}>
                     {status === 'P' ? 'Presente' : status === 'F' ? 'Falta' : '—'}
@@ -276,7 +276,7 @@ export default function MobileChamadaPage() {
             disabled={saving || naoBatidos === children.length}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: saved ? '#10b981' : '#4f46e5', color: '#fff',
+              background: saved ? 'var(--success)' : 'var(--brand-600)', color: 'var(--text-inverse)',
               fontSize: 15, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (saving || naoBatidos === children.length) ? 0.6 : 1,

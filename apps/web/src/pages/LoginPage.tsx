@@ -64,7 +64,7 @@ export function LoginPage() {
     return (
       <div style={{
         minHeight: '100dvh', display: 'flex', flexDirection: 'column', position: 'relative',
-        background: 'linear-gradient(160deg, #062b34 0%, #003f4d 50%, #008f5a 100%)',
+        background: 'var(--surface-page)',
         fontFamily: '"Inter","system-ui",sans-serif',
         padding: '0 24px',
         paddingTop: 'max(48px, env(safe-area-inset-top))',
@@ -77,17 +77,17 @@ export function LoginPage() {
           aria-label={`Ativar tema ${resolvedTheme === 'dark' ? 'claro' : 'escuro'}`}
           style={{
             position: 'absolute', top: 16, right: 16, borderRadius: 9999,
-            border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(1,4,9,0.24)',
-            color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 12,
+            border: '1px solid var(--border-strong)', background: 'var(--surface-subtle)',
+            color: 'var(--text-primary)', padding: '8px 12px', cursor: 'pointer', fontSize: 12,
           }}
         >
           {resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
         </button>
 
         {/* Topo: logo e título */}
-        <div style={{ textAlign: 'center', color: '#fff' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-primary)' }}>
           <div style={{
-            width: 72, height: 72, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
+            width: 72, height: 72, borderRadius: 22, background: 'var(--surface-base)',
             backdropFilter: 'blur(8px)', margin: '0 auto 16px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: '1px solid rgba(255,255,255,0.2)',
@@ -101,12 +101,12 @@ export function LoginPage() {
                 (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
               }}
             />
-            <span style={{ display: 'none', fontSize: 28, fontWeight: 800, color: '#fff' }}>Z</span>
+            <span style={{ display: 'none', fontSize: 28, fontWeight: 800, color: 'var(--text-brand)' }}>Z</span>
           </div>
           <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, letterSpacing: -0.5 }}>
             Zelare
           </h1>
-          <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
             cuidado, pedagogia e gestão inteligente
           </p>
         </div>
@@ -164,8 +164,8 @@ export function LoginPage() {
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e as any)}
                 style={{
                   width: '100%', padding: '13px 44px 13px 14px', borderRadius: 12, boxSizing: 'border-box',
-                  border: '0.5px solid #e2e8f0', background: '#f8fafc',
-                  fontSize: 16, color: '#0f172a', outline: 'none',
+                  border: '0.5px solid var(--border-default)', background: 'var(--surface-subtle)',
+                  fontSize: 16, color: 'var(--text-primary)', outline: 'none',
                 }}
               />
               <button
@@ -187,8 +187,8 @@ export function LoginPage() {
             disabled={loading || !email || !password}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: loading ? '#6ee7b7' : '#009f62',
-              color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer',
+              background: loading ? 'var(--accent-mint)' : 'var(--success)',
+              color: 'var(--on-accent)', fontSize: 16, fontWeight: 600, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!email || !password) ? 0.6 : 1,
               transition: 'all 0.15s',
@@ -205,7 +205,7 @@ export function LoginPage() {
 
         {/* Rodapé */}
         <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+          <p style={{ margin: 0, fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
             <Smartphone size={12} /> App instalado
           </p>
         </div>
@@ -216,7 +216,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex relative" style={{ background: 'linear-gradient(135deg, #062b34 0%, #003f4d 45%, #009f62 100%)' }}>
+    <div className="min-h-screen flex relative" style={{ background: 'var(--surface-page)' }}>
       <button
         type="button"
         onClick={toggleTheme}
@@ -228,8 +228,8 @@ export function LoginPage() {
       {/* Painel esquerdo — identidade visual */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden">
         {/* Círculos decorativos */}
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #60a5fa, transparent)', transform: 'translate(-30%, -30%)' }} />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #93c5fd, transparent)', transform: 'translate(30%, 30%)' }} />
+        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, var(--brand-500), transparent)', transform: 'translate(-30%, -30%)' }} />
+        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, var(--brand-300), transparent)', transform: 'translate(30%, 30%)' }} />
 
         <div className="relative z-10 max-w-md text-center">
           {/* Logo desktop — Zelare institucional */}

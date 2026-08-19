@@ -66,7 +66,7 @@ export default function MobileShell() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 10,
-            background: 'linear-gradient(135deg, var(--brand-600), var(--accent-violet))',
+            background: 'var(--brand-600)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>

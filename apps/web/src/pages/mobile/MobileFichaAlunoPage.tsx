@@ -206,12 +206,12 @@ export default function MobileFichaAlunoPage() {
                 <img
                   src={fotoUrl}
                   alt={nome}
-                  style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '3px solid #eef2ff' }}
+                  style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--surface-brand)' }}
                 />
               ) : (
                 <div style={{
                   width: 96, height: 96, borderRadius: '50%',
-                  background: 'linear-gradient(135deg,#e0e7ff,#ede9fe)',
+                  background: 'var(--surface-brand)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 30, fontWeight: 600, color: ACCENT,
                 }}>
@@ -229,14 +229,14 @@ export default function MobileFichaAlunoPage() {
                 style={{
                   position: 'absolute', bottom: 0, right: 0,
                   width: 34, height: 34, borderRadius: '50%',
-                  background: ACCENT, border: '3px solid #fff', cursor: 'pointer',
+                  background: ACCENT, border: '3px solid var(--text-inverse)', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                 }}
               >
                 {enviandoFoto
-                  ? <Loader2 size={15} color="#fff" style={{ animation: 'spin 1s linear infinite' }} />
-                  : <Camera size={15} color="#fff" />}
+                  ? <Loader2 size={15} color="var(--text-inverse)" style={{ animation: 'spin 1s linear infinite' }} />
+                  : <Camera size={15} color="var(--text-inverse)" />}
               </button>
 
               {/* input de câmera (mobile abre a câmera traseira) */}
@@ -260,39 +260,39 @@ export default function MobileFichaAlunoPage() {
             </div>
 
             {fotoErro && (
-              <p style={{ marginTop: 10, fontSize: 12, color: '#dc2626', textAlign: 'center' }}>{fotoErro}</p>
+              <p style={{ marginTop: 10, fontSize: 12, color: 'var(--error)', textAlign: 'center' }}>{fotoErro}</p>
             )}
             {!isOnline && (
-              <p style={{ marginTop: 8, fontSize: 11, color: '#92400e', textAlign: 'center' }}>
+              <p style={{ marginTop: 8, fontSize: 11, color: 'var(--warning)', textAlign: 'center' }}>
                 Offline — exibindo dados básicos salvos.
               </p>
             )}
           </div>
 
           {/* ── Saúde ───────────────────────────────────────────────── */}
-          <Secao titulo="Saúde" Icon={HeartPulse} cor="#dc2626">
+          <Secao titulo="Saúde" Icon={HeartPulse} cor="var(--error)">
             {ficha.alergias ? (
-              <Alerta cor="#dc2626" bg="#fef2f2">
-                <AlertTriangle size={15} color="#dc2626" style={{ flexShrink: 0, marginTop: 1 }} />
+              <Alerta cor="var(--error)" bg="var(--error-bg)">
+                <AlertTriangle size={15} color="var(--error)" style={{ flexShrink: 0, marginTop: 1 }} />
                 <div><strong>Alergias:</strong> {ficha.alergias}</div>
               </Alerta>
             ) : (
               <Campo label="Alergias" valor="Nenhuma registrada" />
             )}
             <Campo label="Condições médicas" valor={ficha.condicoesMedicas} />
-            <Campo label="Necessidade de medicação" valor={ficha.necessidadeMedicacao} icon={<Pill size={13} color="#94a3b8" />} />
+            <Campo label="Necessidade de medicação" valor={ficha.necessidadeMedicacao} icon={<Pill size={13} color="var(--text-tertiary)" />} />
             <Campo label="Possui laudo" valor={ficha.laudado ? 'Sim' : 'Não'} />
           </Secao>
 
           {/* ── Matrícula / Turma ───────────────────────────────────── */}
-          <Secao titulo="Matrícula" Icon={GraduationCap} cor="#0284c7">
+          <Secao titulo="Matrícula" Icon={GraduationCap} cor="var(--brand-600)">
             <Campo label="Turma" valor={ficha.turma?.name} />
             <Campo label="Unidade" valor={ficha.unidade?.name} />
             <Campo label="Matrícula (ID)" valor={ficha.id} mono />
           </Secao>
 
           {/* ── Responsáveis ────────────────────────────────────────── */}
-          <Secao titulo="Responsáveis" Icon={Users} cor="#7c3aed">
+          <Secao titulo="Responsáveis" Icon={Users} cor="var(--accent-violet)">
             {!ficha.dadosResponsaveis?.mae?.nome
               && !ficha.dadosResponsaveis?.pai?.nome
               && !ficha.dadosResponsaveis?.responsavelLegal?.nome && (
@@ -311,7 +311,7 @@ export default function MobileFichaAlunoPage() {
 
           {/* ── Autorizados a retirar ───────────────────────────────── */}
           {Array.isArray(ficha.autorizadosRetirada) && ficha.autorizadosRetirada.filter(a => a?.nome?.trim()).length > 0 && (
-            <Secao titulo="Autorizados a retirar" Icon={ShieldCheck} cor="#059669">
+            <Secao titulo="Autorizados a retirar" Icon={ShieldCheck} cor="var(--success)">
               {ficha.autorizadosRetirada.filter(a => a?.nome?.trim()).map((a, i) => (
                 <div key={i} style={{ marginBottom: 8 }}>
                   <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: 'var(--text-primary)' }}>
@@ -324,12 +324,12 @@ export default function MobileFichaAlunoPage() {
           )}
 
           {/* ── Dados pessoais ──────────────────────────────────────── */}
-          <Secao titulo="Dados pessoais" Icon={FileText} cor="#64748b">
+          <Secao titulo="Dados pessoais" Icon={FileText} cor="var(--text-secondary)">
             <Campo label="Data de nascimento" valor={fmtData(ficha.dataNascimento)} />
             <Campo label="Gênero" valor={ficha.genero} />
             <Campo label="Naturalidade" valor={[ficha.naturalidade, ficha.uf_nascimento].filter(Boolean).join(' / ')} />
             <Campo label="Nacionalidade" valor={ficha.nacionalidade} />
-            <Campo label="Endereço" valor={[ficha.endereco, ficha.cep].filter(Boolean).join(' · ')} icon={<MapPin size={13} color="#94a3b8" />} />
+            <Campo label="Endereço" valor={[ficha.endereco, ficha.cep].filter(Boolean).join(' · ')} icon={<MapPin size={13} color="var(--text-tertiary)" />} />
           </Secao>
         </>
       )}
@@ -347,9 +347,9 @@ function Chip({ children, tone }: { children: ReactNode; tone?: 'warn' }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       fontSize: 11, fontWeight: 500, padding: '4px 10px', borderRadius: 20,
-      background: warn ? '#fffbeb' : '#eef2ff',
-      color: warn ? '#92400e' : '#4338ca',
-      border: `0.5px solid ${warn ? '#fde68a' : '#e0e7ff'}`,
+      background: warn ? 'var(--warning-bg)' : 'var(--surface-brand)',
+      color: warn ? 'var(--warning)' : 'var(--text-brand)',
+      border: `0.5px solid ${warn ? 'var(--warning-border)' : 'var(--brand-100)'}`,
     }}>
       {children}
     </span>
@@ -362,7 +362,7 @@ function Secao({ titulo, Icon, cor, children }: {
   return (
     <section style={{ background: 'var(--surface-base)', borderRadius: 16, padding: '14px 16px', border: '0.5px solid var(--border-default)', marginBottom: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 9, background: `${cor}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 28, height: 28, borderRadius: 9, background: 'var(--surface-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon size={15} color={cor} />
         </div>
         <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>{titulo}</h2>
@@ -375,10 +375,10 @@ function Secao({ titulo, Icon, cor, children }: {
 function Campo({ label, valor, mono, icon }: { label: string; valor?: string | null; mono?: boolean; icon?: ReactNode }) {
   const v = (valor ?? '').toString().trim();
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderBottom: '0.5px solid #f1f5f9' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderBottom: '0.5px solid var(--border-subtle)' }}>
       <span style={{ fontSize: 13, color: 'var(--text-tertiary)', flexShrink: 0 }}>{label}</span>
       <span style={{
-        fontSize: 13, color: v ? '#0f172a' : '#cbd5e1', fontWeight: 500, textAlign: 'right',
+        fontSize: 13, color: v ? 'var(--text-primary)' : 'var(--text-disabled)', fontWeight: 500, textAlign: 'right',
         fontFamily: mono ? 'monospace' : undefined, wordBreak: 'break-word',
         display: 'inline-flex', alignItems: 'center', gap: 5,
       }}>
@@ -392,7 +392,7 @@ function Alerta({ children, cor, bg }: { children: ReactNode; cor: string; bg: s
   return (
     <div style={{
       display: 'flex', gap: 8, alignItems: 'flex-start',
-      background: bg, border: `0.5px solid ${cor}33`, borderRadius: 10,
+      background: bg, border: '0.5px solid var(--border-default)', borderRadius: 10,
       padding: '9px 11px', fontSize: 13, color: cor, marginBottom: 6,
     }}>
       {children}
@@ -416,7 +416,7 @@ function TelLink({ tel }: { tel: string }) {
 function CardResponsavel({ rotulo, resp }: { rotulo: string; resp: Responsavel }) {
   const tels = [resp.celular, resp.telefoneResidencial, resp.telefoneTrabalho].filter(Boolean) as string[];
   return (
-    <div style={{ padding: '8px 0', borderBottom: '0.5px solid #f1f5f9' }}>
+    <div style={{ padding: '8px 0', borderBottom: '0.5px solid var(--border-subtle)' }}>
       <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: 0.4 }}>{rotulo}</p>
       <p style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>{resp.nome}</p>
       {resp.parentesco && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '1px 0 0' }}>{resp.parentesco}</p>}

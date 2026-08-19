@@ -13,14 +13,14 @@ function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function agoraISO() { return new Date().toISOString(); }
 
 const TIPOS_OCORRENCIA = [
-  { id: 'MAL_ESTAR', label: 'Mal-estar geral', emoji: '🤒', cor: '#f59e0b' },
-  { id: 'QUEDA_ACIDENTE', label: 'Queda / acidente', emoji: '🩹', cor: '#ef4444' },
-  { id: 'ALERGIA', label: 'Reação alérgica', emoji: '⚠️', cor: '#dc2626' },
-  { id: 'VOMITO', label: 'Vômito', emoji: '🤢', cor: '#f59e0b' },
-  { id: 'FEBRE', label: 'Febre', emoji: '🌡️', cor: '#ef4444' },
-  { id: 'CHORO_EXCESSIVO', label: 'Choro excessivo', emoji: '😢', cor: '#3b82f6' },
-  { id: 'MEDICACAO', label: 'Administração de medicamento', emoji: '💊', cor: '#8b5cf6' },
-  { id: 'OUTRO', label: 'Outro', emoji: '📋', cor: '#6b7280' },
+  { id: 'MAL_ESTAR', label: 'Mal-estar geral', emoji: '🤒', cor: 'var(--warning)' },
+  { id: 'QUEDA_ACIDENTE', label: 'Queda / acidente', emoji: '🩹', cor: 'var(--error)' },
+  { id: 'ALERGIA', label: 'Reação alérgica', emoji: '⚠️', cor: 'var(--error)' },
+  { id: 'VOMITO', label: 'Vômito', emoji: '🤢', cor: 'var(--warning)' },
+  { id: 'FEBRE', label: 'Febre', emoji: '🌡️', cor: 'var(--error)' },
+  { id: 'CHORO_EXCESSIVO', label: 'Choro excessivo', emoji: '😢', cor: 'var(--brand-500)' },
+  { id: 'MEDICACAO', label: 'Administração de medicamento', emoji: '💊', cor: 'var(--accent-violet)' },
+  { id: 'OUTRO', label: 'Outro', emoji: '📋', cor: 'var(--text-secondary)' },
 ];
 
 export function MobileOcorrenciaPage() {
@@ -109,9 +109,9 @@ export function MobileOcorrenciaPage() {
       </div>
 
       {urgente && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#fef2f2', border: '0.5px solid #fca5a5', borderRadius: 12, marginBottom: 12 }}>
-          <AlertTriangle size={16} color="#ef4444" />
-          <p style={{ fontSize: 13, color: '#991b1b', margin: 0, fontWeight: 500 }}>Caso grave — notifique a secretaria imediatamente</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--error-bg)', border: '0.5px solid var(--error-border)', borderRadius: 12, marginBottom: 12 }}>
+          <AlertTriangle size={16} color="var(--error)" />
+          <p style={{ fontSize: 13, color: 'var(--error)', margin: 0, fontWeight: 500 }}>Caso grave — notifique a secretaria imediatamente</p>
         </div>
       )}
 
@@ -152,10 +152,10 @@ export function MobileOcorrenciaPage() {
       {(selectedChild !== undefined && selectedClassroom) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {selectedChild && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: '#fef2f2', border: '0.5px solid #fca5a5' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: 'var(--error-bg)', border: '0.5px solid var(--error-border)' }}>
               <span style={{ fontSize: 20 }}>👤</span>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#991b1b', flex: 1 }}>{selectedChild.firstName} {selectedChild.lastName}</span>
-              <button type="button" onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#991b1b', fontSize: 12 }}>Trocar</button>
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--error)', flex: 1 }}>{selectedChild.firstName} {selectedChild.lastName}</span>
+              <button type="button" onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)', fontSize: 12 }}>Trocar</button>
             </div>
           )}
 
@@ -167,7 +167,7 @@ export function MobileOcorrenciaPage() {
                   style={{
                     padding: '11px 10px', borderRadius: 12, cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                     border: `0.5px solid ${tipo === t.id ? t.cor : 'var(--color-border-tertiary)'}`,
-                    background: tipo === t.id ? `${t.cor}18` : 'var(--color-background-primary)',
+                    background: tipo === t.id ? 'var(--surface-brand)' : 'var(--color-background-primary)',
                     display: 'flex', alignItems: 'center', gap: 8,
                   }}>
                   <span style={{ fontSize: 18 }}>{t.emoji}</span>
@@ -189,7 +189,7 @@ export function MobileOcorrenciaPage() {
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 12, border: '0.5px solid var(--color-border-tertiary)', background: 'var(--color-background-primary)', cursor: 'pointer' }}>
                 <input type="checkbox" checked={contatoPais} onChange={(e) => setContatoPais(e.target.checked)}
-                  style={{ width: 18, height: 18, accentColor: '#4f46e5' }} />
+                  style={{ width: 18, height: 18, accentColor: 'var(--brand-600)' }} />
                 <span style={{ fontSize: 14, color: 'var(--color-text-primary)' }}>Responsável já foi contactado</span>
               </label>
             </>
@@ -202,7 +202,7 @@ export function MobileOcorrenciaPage() {
           <button type="button" aria-label="Registrar ocorrência" onClick={salvar} disabled={saving || !tipo || !descricao.trim()}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: saved ? '#10b981' : urgente ? '#ef4444' : '#4f46e5', color: '#fff',
+              background: saved ? 'var(--success)' : urgente ? 'var(--error)' : 'var(--brand-600)', color: 'var(--text-inverse)',
               fontSize: 15, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!tipo || !descricao.trim() || saving) ? 0.6 : 1,

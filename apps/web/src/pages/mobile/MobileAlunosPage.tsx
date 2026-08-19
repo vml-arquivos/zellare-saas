@@ -194,7 +194,7 @@ export default function MobileAlunosPage() {
               ) : (
                 <div style={{
                   width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-                  background: 'linear-gradient(135deg,#e0e7ff,#ede9fe)',
+                  background: 'var(--surface-brand)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 15, fontWeight: 600, color: ACCENT,
                 }}>

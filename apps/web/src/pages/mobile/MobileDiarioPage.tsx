@@ -134,7 +134,7 @@ export default function MobileDiarioPage() {
           {/* Progresso visual */}
           <div style={{ display: 'flex', gap: 6 }}>
             {[0, 1].map((i) => (
-              <div key={i} style={{ height: 4, flex: 1, borderRadius: 2, background: i < progressoForm ? '#4f46e5' : 'var(--color-border-tertiary)', transition: 'background 0.2s' }} />
+              <div key={i} style={{ height: 4, flex: 1, borderRadius: 2, background: i < progressoForm ? 'var(--brand-600)' : 'var(--color-border-tertiary)', transition: 'background 0.2s' }} />
             ))}
           </div>
 
@@ -148,9 +148,9 @@ export default function MobileDiarioPage() {
                 <button type="button" key={tipo} aria-pressed={form.tipo === tipo} onClick={() => update('tipo', tipo === form.tipo ? '' : tipo)}
                   style={{
                     padding: '7px 12px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
-                    border: `0.5px solid ${form.tipo === tipo ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
-                    background: form.tipo === tipo ? '#eef2ff' : 'var(--color-background-primary)',
-                    color: form.tipo === tipo ? '#4338ca' : 'var(--color-text-secondary)',
+                    border: `0.5px solid ${form.tipo === tipo ? 'var(--brand-600)' : 'var(--color-border-tertiary)'}`,
+                    background: form.tipo === tipo ? 'var(--surface-brand)' : 'var(--color-background-primary)',
+                    color: form.tipo === tipo ? 'var(--text-brand)' : 'var(--color-text-secondary)',
                     fontWeight: form.tipo === tipo ? 500 : 400,
                     WebkitTapHighlightColor: 'transparent',
                   }}>
@@ -202,7 +202,7 @@ export default function MobileDiarioPage() {
           <button type="button" aria-label={saved ? 'Diário publicado' : isOnline ? 'Publicar diário' : 'Salvar diário offline'} onClick={salvar} disabled={saving || !form.descricao.trim()}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: saved ? '#10b981' : '#4f46e5', color: '#fff',
+              background: saved ? 'var(--success)' : 'var(--brand-600)', color: 'var(--text-inverse)',
               fontSize: 15, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!form.descricao.trim() || saving) ? 0.6 : 1,

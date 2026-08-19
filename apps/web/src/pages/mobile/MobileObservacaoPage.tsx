@@ -20,9 +20,9 @@ const CAMPOS_BNCC = [
 ];
 
 const NIVEIS = [
-  { id: 'EMERGINDO', label: 'Emergindo', color: '#f59e0b', desc: 'Dá os primeiros sinais' },
-  { id: 'EM_DESENVOLVIMENTO', label: 'Desenvolvendo', color: '#3b82f6', desc: 'Demonstra com apoio' },
-  { id: 'CONSOLIDADO', label: 'Consolidado', color: '#10b981', desc: 'Demonstra com autonomia' },
+  { id: 'EMERGINDO', label: 'Emergindo', color: 'var(--warning)', desc: 'Dá os primeiros sinais' },
+  { id: 'EM_DESENVOLVIMENTO', label: 'Desenvolvendo', color: 'var(--brand-500)', desc: 'Demonstra com apoio' },
+  { id: 'CONSOLIDADO', label: 'Consolidado', color: 'var(--success)', desc: 'Demonstra com autonomia' },
 ];
 
 export default function MobileObservacaoPage() {
@@ -147,7 +147,7 @@ export default function MobileObservacaoPage() {
                 </div>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: 'var(--color-text-primary)' }}>{child.firstName} {child.lastName}</p>
-                  {child.laudado && <p style={{ fontSize: 11, color: '#7c3aed', margin: 0 }}>★ Laudado</p>}
+                  {child.laudado && <p style={{ fontSize: 11, color: 'var(--accent-violet)', margin: 0 }}>★ Laudado</p>}
                 </div>
               </button>
             ))}
@@ -158,14 +158,14 @@ export default function MobileObservacaoPage() {
       {selectedChild && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Criança selecionada */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, background: '#eef2ff', border: '0.5px solid #c7d2fe' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#c7d2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: '#3730a3', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, background: 'var(--surface-brand)', border: '0.5px solid var(--brand-200)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--brand-200)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: 'var(--brand-800)', flexShrink: 0 }}>
               {selectedChild.firstName[0]}{selectedChild.lastName?.[0] ?? ''}
             </div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#312e81' }}>{selectedChild.firstName} {selectedChild.lastName}</p>
+              <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: 'var(--brand-900)' }}>{selectedChild.firstName} {selectedChild.lastName}</p>
             </div>
-            <button onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', fontSize: 13 }}>Trocar</button>
+            <button onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-500)', fontSize: 13 }}>Trocar</button>
           </div>
 
           {/* Campos BNCC */}
@@ -176,11 +176,11 @@ export default function MobileObservacaoPage() {
                 <button type="button" key={campo.id} aria-pressed={form.campo === campo.id} onClick={() => setForm((f) => ({ ...f, campo: campo.id }))}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 12, cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
-                    border: `0.5px solid ${form.campo === campo.id ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
-                    background: form.campo === campo.id ? '#eef2ff' : 'var(--color-background-primary)',
+                    border: `0.5px solid ${form.campo === campo.id ? 'var(--brand-600)' : 'var(--color-border-tertiary)'}`,
+                    background: form.campo === campo.id ? 'var(--surface-brand)' : 'var(--color-background-primary)',
                   }}>
                   <span style={{ fontSize: 20 }}>{campo.emoji}</span>
-                  <span style={{ fontSize: 13, color: form.campo === campo.id ? '#4338ca' : 'var(--color-text-primary)', fontWeight: form.campo === campo.id ? 500 : 400 }}>
+                  <span style={{ fontSize: 13, color: form.campo === campo.id ? 'var(--text-brand)' : 'var(--color-text-primary)', fontWeight: form.campo === campo.id ? 500 : 400 }}>
                     {campo.label}
                   </span>
                 </button>
@@ -198,7 +198,7 @@ export default function MobileObservacaoPage() {
                     style={{
                       padding: '12px 8px', borderRadius: 12, cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                       border: `0.5px solid ${form.nivel === nivel.id ? nivel.color : 'var(--color-border-tertiary)'}`,
-                      background: form.nivel === nivel.id ? `${nivel.color}18` : 'var(--color-background-primary)',
+                      background: form.nivel === nivel.id ? (nivel.id === 'EMERGINDO' ? 'var(--warning-bg)' : nivel.id === 'CONSOLIDADO' ? 'var(--success-bg)' : 'var(--surface-brand)') : 'var(--color-background-primary)',
                       textAlign: 'center',
                     }}>
                     <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 2px', color: form.nivel === nivel.id ? nivel.color : 'var(--color-text-primary)' }}>{nivel.label}</p>
@@ -231,7 +231,7 @@ export default function MobileObservacaoPage() {
           <button type="button" aria-label="Salvar observação" onClick={salvar} disabled={saving || !podeEnviar}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
-              background: saved ? '#10b981' : '#4f46e5', color: '#fff', fontSize: 15, fontWeight: 500, cursor: 'pointer',
+              background: saved ? 'var(--success)' : 'var(--brand-600)', color: 'var(--text-inverse)', fontSize: 15, fontWeight: 500, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               opacity: (!podeEnviar || saving) ? 0.6 : 1,
             }}>
