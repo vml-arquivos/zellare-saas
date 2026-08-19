@@ -61,8 +61,8 @@ export function KpiCard({
         <div className={cn('p-2 rounded-xl bg-[var(--surface-base)]/70', s.icon)}>{icon}</div>
         {trend && <TrendIcon className={cn('h-3.5 w-3.5', s.sub)} />}
       </div>
-      <p className={cn('text-2xl font-semibold tabular-nums leading-none', s.text)}>{value}</p>
-      <p className={cn('text-xs mt-1.5 font-medium', s.sub)}>{label}</p>
+      <p className={cn('text-2xl font-medium tabular-nums leading-none', s.text)}>{value}</p>
+      <p className={cn('text-xs mt-1.5 font-normal', s.sub)}>{label}</p>
       {helper && <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{helper}</p>}
     </div>
   );
@@ -79,7 +79,7 @@ const BADGE_STYLES: Record<string, string> = {
 };
 export function Badge({ label, variant = 'default' }: { label: string; variant?: string }) {
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border', BADGE_STYLES[variant] ?? BADGE_STYLES.default)}>
+    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border', BADGE_STYLES[variant] ?? BADGE_STYLES.default)}>
       {label}
     </span>
   );
@@ -93,7 +93,7 @@ export function SectionHeader({
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2 min-w-0">
         {icon && <div className="text-[var(--text-tertiary)] flex-shrink-0">{icon}</div>}
-        <h2 className="text-sm font-semibold text-[var(--text-primary)] truncate">{title}</h2>
+        <h2 className="text-sm font-medium text-[var(--text-primary)] truncate">{title}</h2>
         {badge}
       </div>
       {action}
@@ -120,7 +120,7 @@ export function TabBar<T extends string>({
           {t.icon}
           {t.label}
           {t.badge != null && t.badge > 0 && (
-            <span className="ml-1 min-w-[18px] h-[18px] px-1 bg-[var(--error)] text-[var(--text-inverse)] text-[10px] font-bold rounded-full flex items-center justify-center">
+            <span className="ml-1 min-w-[18px] h-[18px] px-1 bg-[var(--error)] text-[var(--text-inverse)] text-[10px] font-medium rounded-full flex items-center justify-center">
               {t.badge}
             </span>
           )}
@@ -205,7 +205,7 @@ export function StatRow({ label, value, sub, action }: {
         {sub && <p className="text-xs text-[var(--text-tertiary)] truncate">{sub}</p>}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-        <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">{value}</span>
+        <span className="text-sm font-medium text-[var(--text-primary)] tabular-nums">{value}</span>
         {action}
       </div>
     </div>

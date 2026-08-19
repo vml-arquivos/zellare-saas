@@ -49,7 +49,7 @@ export function PageShell({
         <header className="zelare-page-header flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div className="space-y-0.5 min-w-0">
             {resolvedTitle && (
-              <h1 className="zelare-page-title text-[1.15rem] font-semibold tracking-tight leading-snug text-[var(--text-primary)] truncate">
+              <h1 className="zelare-page-title text-[1.15rem] font-medium tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate">
                 {resolvedTitle}
               </h1>
             )}
