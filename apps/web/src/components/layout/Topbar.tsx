@@ -98,7 +98,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
   }, [directClassroom?.id, isCoordRole]);
 
   return (
-    <header className="bg-[var(--surface-topbar)] backdrop-blur-md border-b border-[var(--border-subtle)] px-3 sm:px-4 sticky top-0 z-50 h-[52px] flex items-center">
+    <header className="bg-[var(--surface-topbar)] backdrop-blur-md border-b border-[var(--border-subtle)] px-3 sm:px-5 sticky top-0 z-50 h-[var(--topbar-height)] flex items-center shadow-[var(--shadow-xs)]">
       <div className="flex items-center justify-between w-full gap-2">
 
         {/* ── Esquerda: hamburguer + info pedagógica ── */}
@@ -115,7 +115,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
           {/* Data pedagógica — oculta em mobile pequeno */}
           <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
             <Calendar className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
-            <span className="font-mono text-[11px] font-normal text-[var(--text-secondary)] bg-[var(--surface-subtle)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-md tabular-nums">
+            <span className="font-mono text-[11px] font-normal text-[var(--text-secondary)] bg-[var(--surface-inset)] border border-[var(--border-subtle)] px-2 py-0.5 rounded-lg tabular-nums">
               {today}
             </span>
           </div>
@@ -158,7 +158,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
           </div>
 
           {/* Avatar compacto */}
-          <div className="h-7 w-7 rounded-full bg-[var(--surface-brand)] flex items-center justify-center border border-[var(--border-brand)]/40 flex-shrink-0">
+          <div className="h-8 w-8 rounded-xl bg-[var(--surface-brand)] flex items-center justify-center border border-[var(--border-brand)] flex-shrink-0">
             <User className="h-3.5 w-3.5 text-[var(--text-brand-soft)]" />
           </div>
 
@@ -169,7 +169,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
             aria-label={resolvedTheme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
             aria-pressed={resolvedTheme === 'dark'}
             title={resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
-            className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+            className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-inset)] transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
           >
             {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -177,7 +177,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
           {/* Logout — touch-friendly */}
           <button
             onClick={logout}
-            className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--surface-muted)] transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+            className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--surface-inset)] transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
             title="Sair"
           >
             <LogOut className="h-4 w-4" />

@@ -141,9 +141,9 @@ export function ChildAvatar({
   alt,
   sizeClassName,
   imageClassName = 'rounded-full object-cover',
-  fallbackClassName = 'rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center shadow-sm',
-  iconClassName = 'w-5 h-5 text-slate-400',
-  initialsClassName = 'text-sm font-medium text-indigo-600',
+  fallbackClassName = 'rounded-full bg-[var(--surface-brand)] border border-[var(--border-brand)] flex items-center justify-center shadow-[var(--shadow-xs)]',
+  iconClassName = 'w-5 h-5 text-[var(--text-tertiary)]',
+  initialsClassName = 'text-sm font-medium text-[var(--text-brand-soft)]',
   showInitials = false,
 }: ChildAvatarProps) {
   const resolvedChild = useMemo(() => child ?? { firstName, lastName, nome, photoUrl, fotoUrl }, [child, firstName, lastName, nome, photoUrl, fotoUrl]);

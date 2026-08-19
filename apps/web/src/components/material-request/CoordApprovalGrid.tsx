@@ -58,13 +58,13 @@ function parseItens(req: MaterialRequest): { nome: string; qtd: number }[] {
 
 function ResumoItens({ req }: { req: MaterialRequest }) {
   const itens = parseItens(req);
-  if (itens.length === 0) return <span className="text-gray-400 text-xs">—</span>;
+  if (itens.length === 0) return <span className="text-[var(--text-tertiary)] text-xs">—</span>;
   const primeiro = itens[0];
   return (
     <span className="text-xs">
       {primeiro.nome} x{primeiro.qtd}
       {itens.length > 1 && (
-        <span className="ml-1 text-gray-400">(+{itens.length - 1})</span>
+        <span className="ml-1 text-[var(--text-tertiary)]">(+{itens.length - 1})</span>
       )}
     </span>
   );
@@ -79,14 +79,14 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function PrioridadeBadge({ prioridade }: { prioridade?: string }) {
-  if (!prioridade || prioridade === 'normal') return <span className="text-gray-400 text-xs">—</span>;
+  if (!prioridade || prioridade === 'normal') return <span className="text-[var(--text-tertiary)] text-xs">—</span>;
   const cores: Record<string, string> = {
-    baixa: 'bg-green-50 text-green-700',
-    alta: 'bg-red-50 text-red-700',
-    urgente: 'bg-red-100 text-red-800 font-semibold',
+    baixa: 'bg-[var(--success-bg)] text-[var(--success)]',
+    alta: 'bg-[var(--error-bg)] text-[var(--error)]',
+    urgente: 'bg-[var(--error-bg)] text-[var(--error)] font-semibold',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${cores[prioridade] ?? 'bg-gray-50 text-gray-600'}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${cores[prioridade] ?? 'bg-[var(--surface-inset)] text-[var(--text-secondary)]'}`}>
       {prioridade.charAt(0).toUpperCase() + prioridade.slice(1)}
     </span>
   );
@@ -273,39 +273,39 @@ export function CoordApprovalGrid() {
     <div className="space-y-5">
       {/* Cabeçalho */}
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
           Aprovação de Requisições
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           Aprove ou rejeite solicitações de materiais feitas pelos professores (somente Pedagógico e Higiene Pessoal).
         </p>
       </header>
 
       {/* Mensagem de feedback */}
       {mensagem && (
-        <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+        <div className="flex items-center gap-2 bg-[var(--success-bg)] border border-[var(--success-border)] text-[var(--success)] px-4 py-3 rounded-lg text-sm">
           <CheckCircle className="h-4 w-4 flex-shrink-0" />
           {mensagem}
         </div>
       )}
       {erro && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <div className="flex items-center gap-2 bg-[var(--error-bg)] border border-[var(--error-border)] text-[var(--error)] px-4 py-3 rounded-lg text-sm">
           <XCircle className="h-4 w-4 flex-shrink-0" />
           {erro}
-          <button onClick={() => setErro(null)} className="ml-auto text-red-400 hover:text-red-600"><X className="h-4 w-4" /></button>
+          <button onClick={() => setErro(null)} className="ml-auto text-[var(--error)] hover:brightness-90"><X className="h-4 w-4" /></button>
         </div>
       )}
 
       {/* Filtros */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="ds-card p-4">
         <div className="flex flex-wrap gap-3 items-end">
           {/* Turma */}
           <div className="min-w-36">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Turma</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Turma</label>
             <select
               value={filtroTurma}
               onChange={e => setFiltroTurma(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             >
               <option value="">Todas</option>
               {turmas.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -314,23 +314,23 @@ export function CoordApprovalGrid() {
 
           {/* Professor */}
           <div className="min-w-44">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Professor</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Professor</label>
             <input
               type="text"
               value={filtroProfessor}
               onChange={e => setFiltroProfessor(e.target.value)}
               placeholder="Nome ou e-mail…"
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             />
           </div>
 
           {/* Categoria */}
           <div className="min-w-36">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Categoria</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Categoria</label>
             <select
               value={filtroCategoria}
               onChange={e => setFiltroCategoria(e.target.value as MaterialCategory | '')}
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             >
               <option value="">Todas</option>
               <option value="PEDAGOGICO">Pedagógico</option>
@@ -340,11 +340,11 @@ export function CoordApprovalGrid() {
 
           {/* Status */}
           <div className="min-w-36">
-            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Status</label>
             <select
               value={filtroStatus}
               onChange={e => setFiltroStatus(e.target.value as RequestStatus | 'PENDENTES' | '')}
-              className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             >
               <option value="PENDENTES">Pendentes</option>
               <option value="APROVADO">Aprovadas</option>
@@ -355,21 +355,21 @@ export function CoordApprovalGrid() {
 
           {/* Período */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Data início</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Data início</label>
             <input
               type="date"
               value={filtroDataInicio}
               onChange={e => setFiltroDataInicio(e.target.value)}
-              className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Data fim</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Data fim</label>
             <input
               type="date"
               value={filtroDataFim}
               onChange={e => setFiltroDataFim(e.target.value)}
-              className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
             />
           </div>
 
@@ -377,7 +377,7 @@ export function CoordApprovalGrid() {
           <button
             onClick={carregar}
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-60"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-[var(--brand-600)] text-[var(--text-inverse)] text-sm font-medium rounded-lg hover:bg-[var(--brand-700)] disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
@@ -386,14 +386,14 @@ export function CoordApprovalGrid() {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="ds-card overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-gray-400">
+          <div className="flex items-center justify-center py-12 text-[var(--text-tertiary)]">
             <RefreshCw className="h-5 w-5 animate-spin mr-2" />
             Carregando requisições…
           </div>
         ) : filtradas.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-[var(--text-tertiary)]">
             <p className="font-medium">Nenhuma requisição encontrada</p>
             <p className="text-xs mt-1">Ajuste os filtros ou aguarde novas solicitações dos professores.</p>
           </div>
@@ -401,7 +401,7 @@ export function CoordApprovalGrid() {
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
+                <tr className="bg-[var(--surface-inset)] text-[var(--text-tertiary)] text-xs uppercase tracking-wide border-b border-[var(--border-subtle)]">
                   <th className="px-4 py-3 text-left w-28">Data</th>
                   <th className="px-4 py-3 text-left">Professor</th>
                   <th className="px-4 py-3 text-left w-32">Turma</th>
@@ -413,7 +413,7 @@ export function CoordApprovalGrid() {
                   <th className="px-4 py-3 text-center w-36">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {filtradas.map(req => {
                   const isExpanded = expandido === req.id;
                   const isPending = req.status === 'SOLICITADO' || req.status === 'RASCUNHO';
@@ -424,10 +424,10 @@ export function CoordApprovalGrid() {
                     <>
                       <tr
                         key={req.id}
-                        className={`hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-blue-50/30' : ''}`}
+                        className={`hover:bg-[var(--surface-inset)] transition-colors ${isExpanded ? 'bg-[var(--surface-brand)]' : ''}`}
                       >
                         {/* Data */}
-                        <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                        <td className="px-4 py-3 text-xs text-[var(--text-secondary)] whitespace-nowrap">
                           {new Date(req.requestedDate || req.createdAt).toLocaleDateString('pt-BR')}
                         </td>
 
@@ -435,24 +435,24 @@ export function CoordApprovalGrid() {
                         <td className="px-4 py-3">
                           {req.createdByUser ? (
                             <div>
-                              <p className="font-medium text-gray-800 text-xs">
+                              <p className="font-medium text-[var(--text-primary)] text-xs">
                                 {req.createdByUser.firstName} {req.createdByUser.lastName}
                               </p>
-                              <p className="text-gray-400 text-xs">{req.createdByUser.email}</p>
+                              <p className="text-[var(--text-tertiary)] text-xs">{req.createdByUser.email}</p>
                             </div>
                           ) : (
-                            <span className="text-gray-400 text-xs">—</span>
+                            <span className="text-[var(--text-tertiary)] text-xs">—</span>
                           )}
                         </td>
 
                         {/* Turma */}
-                        <td className="px-4 py-3 text-xs text-gray-700">
-                          {req.classroom?.name ?? <span className="text-gray-400">—</span>}
+                        <td className="px-4 py-3 text-xs text-[var(--text-primary)]">
+                          {req.classroom?.name ?? <span className="text-[var(--text-tertiary)]">—</span>}
                         </td>
 
                         {/* Categoria */}
                         <td className="px-4 py-3">
-                          <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">
+                          <span className="inline-block bg-[var(--info-bg)] text-[var(--text-brand)] text-xs px-2 py-0.5 rounded-full">
                             {getCategoryLabel(req.type)}
                           </span>
                         </td>
@@ -464,7 +464,7 @@ export function CoordApprovalGrid() {
                             {itens.length > 1 && (
                               <button
                                 onClick={() => setExpandido(isExpanded ? null : req.id)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                               >
                                 {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                               </button>
@@ -473,7 +473,7 @@ export function CoordApprovalGrid() {
                         </td>
 
                         {/* Qtd Total */}
-                        <td className="px-4 py-3 text-right text-xs font-medium text-gray-700">
+                        <td className="px-4 py-3 text-right text-xs font-medium text-[var(--text-secondary)]">
                           {req.quantity}
                         </td>
 
@@ -495,7 +495,7 @@ export function CoordApprovalGrid() {
                                 onClick={() => handleAprovar(req.id)}
                                 disabled={isProcessing}
                                 title="Aprovar"
-                                className="p-1.5 text-green-600 hover:bg-green-50 rounded disabled:opacity-50"
+                                className="p-1.5 text-[var(--success)] hover:bg-[var(--success-bg)] rounded disabled:opacity-50"
                               >
                                 {isProcessing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                               </button>
@@ -503,7 +503,7 @@ export function CoordApprovalGrid() {
                                 onClick={() => handleRejeitar(req.id)}
                                 disabled={isProcessing}
                                 title="Rejeitar"
-                                className="p-1.5 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                                className="p-1.5 text-[var(--error)] hover:bg-[var(--error-bg)] rounded disabled:opacity-50"
                               >
                                 <XCircle className="h-4 w-4" />
                               </button>
@@ -511,27 +511,27 @@ export function CoordApprovalGrid() {
                                 onClick={() => abrirModalAjuste(req)}
                                 disabled={isProcessing}
                                 title="Ajustar"
-                                className="p-1.5 text-blue-500 hover:bg-blue-50 rounded disabled:opacity-50"
+                                className="p-1.5 text-[var(--brand-500)] hover:bg-[var(--info-bg)] rounded disabled:opacity-50"
                               >
                                 <Edit3 className="h-4 w-4" />
                               </button>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 text-center block">—</span>
+                            <span className="text-xs text-[var(--text-tertiary)] text-center block">—</span>
                           )}
                         </td>
                       </tr>
 
                       {/* Linha expandida: lista completa de itens */}
                       {isExpanded && itens.length > 1 && (
-                        <tr key={`${req.id}-expand`} className="bg-blue-50/20">
+                        <tr key={`${req.id}-expand`} className="bg-[var(--info-bg)]/20">
                           <td colSpan={9} className="px-8 py-2">
                             <ul className="space-y-0.5">
                               {itens.map((item, idx) => (
-                                <li key={idx} className="text-xs text-gray-600 flex items-baseline gap-1">
-                                  <span className="text-gray-400">•</span>
+                                <li key={idx} className="text-xs text-[var(--text-secondary)] flex items-baseline gap-1">
+                                  <span className="text-[var(--text-tertiary)]">•</span>
                                   <span>{item.nome}</span>
-                                  <span className="text-gray-400">x{item.qtd}</span>
+                                  <span className="text-[var(--text-tertiary)]">x{item.qtd}</span>
                                 </li>
                               ))}
                             </ul>
@@ -549,38 +549,38 @@ export function CoordApprovalGrid() {
 
       {/* Rodapé com contagem */}
       {!loading && filtradas.length > 0 && (
-        <p className="text-xs text-gray-400 text-right">
+        <p className="text-xs text-[var(--text-tertiary)] text-right">
           {filtradas.length} requisição{filtradas.length !== 1 ? 'ões' : ''} exibida{filtradas.length !== 1 ? 's' : ''}
         </p>
       )}
 
       {/* Modal Ajustar */}
       {modalAjuste && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-800">Ajustar Requisição</h2>
-              <button onClick={() => setModalAjuste(null)} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] backdrop-blur-sm p-4">
+          <div className="ds-modal w-full max-w-lg overflow-hidden">
+            <div className="ds-modal-header px-5 py-4">
+              <h2 className="font-display font-semibold text-[var(--text-primary)]">Ajustar Requisição</h2>
+              <button onClick={() => setModalAjuste(null)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
-              <p className="text-sm text-gray-600">
+            <div className="ds-modal-body p-5 space-y-4 max-h-[60vh]">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Ajuste as quantidades aprovadas para cada item:
               </p>
-              <table className="min-w-full text-sm border border-gray-100 rounded-lg overflow-hidden">
+              <table className="min-w-full text-sm border border-[var(--border-default)] rounded-lg overflow-hidden">
                 <thead>
-                  <tr className="bg-gray-50 text-xs text-gray-500 uppercase">
+                  <tr className="bg-[var(--surface-inset)] text-xs text-[var(--text-tertiary)] uppercase">
                     <th className="px-3 py-2 text-left">Item</th>
                     <th className="px-3 py-2 text-right w-24">Solicitado</th>
                     <th className="px-3 py-2 text-right w-28">Aprovado</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--border-subtle)]">
                   {modalAjuste.itens.map((item, idx) => (
                     <tr key={item.id}>
-                      <td className="px-3 py-2 text-xs text-gray-700">{item.nome}</td>
-                      <td className="px-3 py-2 text-right text-xs text-gray-500">{item.qtdSolicitada}</td>
+                      <td className="px-3 py-2 text-xs text-[var(--text-primary)]">{item.nome}</td>
+                      <td className="px-3 py-2 text-right text-xs text-[var(--text-secondary)]">{item.qtdSolicitada}</td>
                       <td className="px-3 py-2 text-right">
                         <input
                           type="number"
@@ -592,7 +592,7 @@ export function CoordApprovalGrid() {
                             novos[idx] = { ...item, qtdAprovada: Number(e.target.value) };
                             setModalAjuste({ ...modalAjuste, itens: novos });
                           }}
-                          className="w-20 border border-gray-200 rounded px-2 py-0.5 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-400"
+                          className="w-20 border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-[var(--brand-600)]"
                         />
                       </td>
                     </tr>
@@ -600,27 +600,27 @@ export function CoordApprovalGrid() {
                 </tbody>
               </table>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Observação</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Observação</label>
                 <textarea
                   value={modalAjuste.observacao}
                   onChange={e => setModalAjuste({ ...modalAjuste, observacao: e.target.value })}
                   rows={2}
                   placeholder="Motivo do ajuste (opcional)…"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  className="w-full border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)] resize-none"
                 />
               </div>
             </div>
-            <div className="px-5 py-3 border-t border-gray-100 flex justify-end gap-3">
+            <div className="ds-modal-footer px-5 py-3">
               <button
                 onClick={() => setModalAjuste(null)}
-                className="px-4 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="px-4 py-1.5 text-sm text-[var(--text-secondary)] border border-[var(--border-default)] rounded-lg hover:bg-[var(--surface-inset)]"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSalvarAjuste}
                 disabled={processando === modalAjuste.req.id}
-                className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                className="flex items-center gap-2 px-4 py-1.5 bg-[var(--brand-600)] text-[var(--text-inverse)] text-sm font-medium rounded-lg hover:bg-[var(--brand-700)] disabled:opacity-60"
               >
                 {processando === modalAjuste.req.id ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />

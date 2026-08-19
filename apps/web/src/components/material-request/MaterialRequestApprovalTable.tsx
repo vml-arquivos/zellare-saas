@@ -29,12 +29,12 @@ function StatusBadge({ status }: { status: string }) {
 function UrgenciaBadge({ urgencia }: { urgencia?: string }) {
   if (!urgencia) return null;
   const colors: Record<string, string> = {
-    BAIXA: 'bg-green-50 text-green-700 border border-green-200',
-    MEDIA: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-    ALTA: 'bg-red-50 text-red-700 border border-red-200',
+    BAIXA: 'bg-[var(--success-bg)] text-[var(--success)] border border-[var(--success-border)]',
+    MEDIA: 'bg-[var(--warning-bg)] text-[var(--warning)] border border-[var(--warning-border)]',
+    ALTA: 'bg-[var(--error-bg)] text-[var(--error)] border border-[var(--error-border)]',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[urgencia] ?? 'bg-gray-50 text-gray-600'}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[urgencia] ?? 'bg-[var(--surface-inset)] text-[var(--text-secondary)]'}`}>
       {urgencia.charAt(0) + urgencia.slice(1).toLowerCase()}
     </span>
   );
@@ -305,14 +305,14 @@ function DetalheDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white shadow-2xl flex flex-col">
+      <div className="fixed inset-0 z-40 bg-[var(--surface-overlay)] backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-[var(--surface-modal)] border-l border-[var(--border-default)] shadow-[var(--shadow-modal)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Detalhe da Requisição</h2>
+            <h2 className="font-display text-base font-semibold text-[var(--text-primary)]">Detalhe da Requisição</h2>
             {req && (
-              <p className="text-xs text-gray-400 mt-0.5">{req.code}</p>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{req.code}</p>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -320,14 +320,14 @@ function DetalheDrawer({
               <button
                 onClick={() => imprimirRequisicao(req)}
                 title="Imprimir / Gerar PDF"
-                className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="p-1.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--brand-600)] hover:bg-[var(--info-bg)] transition-colors"
               >
                 <Printer className="h-5 w-5" />
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -337,46 +337,46 @@ function DetalheDrawer({
         {/* Conteúdo */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
           {loading && (
-            <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+            <div className="flex items-center justify-center py-12 text-[var(--text-tertiary)] gap-2">
               <Loader2 className="h-6 w-6 animate-spin" />
               Carregando...
             </div>
           )}
           {erro && !loading && (
-            <div className="text-red-500 text-sm text-center py-8">{erro}</div>
+            <div className="text-[var(--error)] text-sm text-center py-8">{erro}</div>
           )}
           {req && !loading && (
             <>
               {/* Metadados */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Professor</p>
-                  <p className="font-medium text-gray-800">{professor}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Professor</p>
+                  <p className="font-medium text-[var(--text-primary)]">{professor}</p>
                   {req.createdByUser?.email && (
-                    <p className="text-xs text-gray-400">{req.createdByUser.email}</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">{req.createdByUser.email}</p>
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Turma</p>
-                  <p className="font-medium text-gray-800">{req.classroom?.name ?? '—'}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Turma</p>
+                  <p className="font-medium text-[var(--text-primary)]">{req.classroom?.name ?? '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Categoria</p>
-                  <p className="font-medium text-gray-800">{getCategoryLabel(req.type)}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Categoria</p>
+                  <p className="font-medium text-[var(--text-primary)]">{getCategoryLabel(req.type)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Data</p>
-                  <p className="font-medium text-gray-800">
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Data</p>
+                  <p className="font-medium text-[var(--text-primary)]">
                     {new Date(req.requestedDate ?? req.createdAt).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Status</p>
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Status</p>
                   <StatusBadge status={statusExibido} />
                 </div>
                 {urgencia && (
                   <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Urgência</p>
+                    <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-0.5">Urgência</p>
                     <UrgenciaBadge urgencia={urgencia} />
                   </div>
                 )}
@@ -385,8 +385,8 @@ function DetalheDrawer({
               {/* Justificativa */}
               {req.justificativa && (
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Justificativa</p>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-md px-3 py-2">
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-1">Justificativa</p>
+                  <p className="text-sm text-[var(--text-secondary)] bg-[var(--surface-inset)] rounded-md px-3 py-2">
                     {req.justificativa}
                   </p>
                 </div>
@@ -394,14 +394,14 @@ function DetalheDrawer({
 
               {/* Revisão anterior (se já revisada) */}
               {req.reviewData && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-                  <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">Revisão anterior</p>
-                  <p className="text-sm text-blue-800">
+                <div className="bg-[var(--info-bg)] border border-[var(--info-border)] rounded-lg px-4 py-3">
+                  <p className="text-xs font-medium text-[var(--text-brand)] uppercase tracking-wide mb-1">Revisão anterior</p>
+                  <p className="text-sm text-[var(--info)]">
                     {req.reviewData.isParcial ? 'Aprovação parcial' : req.reviewData.decision === 'REJECTED' ? 'Rejeitada' : 'Aprovada'}
                     {req.reviewData.notes && ` — ${req.reviewData.notes}`}
                   </p>
                   {req.reviewData.reviewedAt && (
-                    <p className="text-xs text-blue-500 mt-0.5">
+                    <p className="text-xs text-[var(--brand-500)] mt-0.5">
                       {new Date(req.reviewData.reviewedAt).toLocaleString('pt-BR')}
                     </p>
                   )}
@@ -411,13 +411,13 @@ function DetalheDrawer({
               {/* Grade de itens */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">
+                  <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">
                     {isPending && modoRevisao ? 'Revisão por Item' : 'Itens Solicitados'}
                   </p>
                   {isPending && temItensComId && !modoRevisao && (
                     <button
                       onClick={() => setModoRevisao(true)}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      className="text-xs text-[var(--brand-600)] hover:text-[var(--info)] font-medium"
                     >
                       Revisar por item
                     </button>
@@ -426,14 +426,14 @@ function DetalheDrawer({
                     <div className="flex gap-2">
                       <button
                         onClick={aprovarTodos}
-                        className="text-xs text-green-600 hover:text-green-800 font-medium"
+                        className="text-xs text-[var(--success)] hover:text-[var(--success)] font-medium"
                       >
                         Aprovar todos
                       </button>
-                      <span className="text-gray-300">|</span>
+                      <span className="text-[var(--text-disabled)]">|</span>
                       <button
                         onClick={rejeitarTodos}
-                        className="text-xs text-red-600 hover:text-red-800 font-medium"
+                        className="text-xs text-[var(--error)] hover:text-[var(--error)] font-medium"
                       >
                         Rejeitar todos
                       </button>
@@ -442,13 +442,13 @@ function DetalheDrawer({
                 </div>
 
                 {itens.length === 0 ? (
-                  <p className="text-sm text-gray-400 italic">Nenhum item detalhado.</p>
+                  <p className="text-sm text-[var(--text-tertiary)] italic">Nenhum item detalhado.</p>
                 ) : modoRevisao && temItensComId ? (
                   /* Modo revisão por item */
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="border border-[var(--border-default)] rounded-lg overflow-hidden">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                        <tr className="bg-[var(--surface-inset)] text-xs text-[var(--text-tertiary)] uppercase tracking-wide">
                           <th className="px-3 py-2 text-left">Produto</th>
                           <th className="px-3 py-2 text-center w-16">Solicit.</th>
                           <th className="px-3 py-2 text-center w-20">Aprovar</th>
@@ -456,21 +456,21 @@ function DetalheDrawer({
                           <th className="px-3 py-2 text-left">Motivo</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-[var(--border-subtle)]">
                         {itens.map((item) => {
                           const state = item.id ? itemStates.find(s => s.itemId === item.id) : null;
                           return (
-                            <tr key={item.id ?? item.item} className={state && !state.approved ? 'bg-red-50' : state?.qtyApproved !== state?.qtyMax ? 'bg-orange-50' : ''}>
-                              <td className="px-3 py-2 font-medium text-gray-800">
+                            <tr key={item.id ?? item.item} className={state && !state.approved ? 'bg-[var(--error-bg)]' : state?.qtyApproved !== state?.qtyMax ? 'bg-[var(--warning-bg)]' : ''}>
+                              <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
                                 {item.item}
-                                {item.unidade && <span className="text-xs text-gray-400 ml-1">({item.unidade})</span>}
+                                {item.unidade && <span className="text-xs text-[var(--text-tertiary)] ml-1">({item.unidade})</span>}
                               </td>
-                              <td className="px-3 py-2 text-center text-gray-600">{item.quantidade}</td>
+                              <td className="px-3 py-2 text-center text-[var(--text-secondary)]">{item.quantidade}</td>
                               <td className="px-3 py-2 text-center">
                                 {state ? (
                                   <button
                                     onClick={() => toggleItemApproved(state.itemId)}
-                                    className={`inline-flex items-center justify-center transition-colors ${state.approved ? 'text-green-600 hover:text-green-800' : 'text-gray-300 hover:text-gray-500'}`}
+                                    className={`inline-flex items-center justify-center transition-colors ${state.approved ? 'text-[var(--success)] hover:text-[var(--success)]' : 'text-[var(--text-disabled)] hover:text-[var(--text-tertiary)]'}`}
                                   >
                                     {state.approved
                                       ? <CheckSquare className="h-5 w-5" />
@@ -478,7 +478,7 @@ function DetalheDrawer({
                                     }
                                   </button>
                                 ) : (
-                                  <span className="text-gray-300">—</span>
+                                  <span className="text-[var(--text-disabled)]">—</span>
                                 )}
                               </td>
                               <td className="px-3 py-2 text-center">
@@ -489,10 +489,10 @@ function DetalheDrawer({
                                     max={state.qtyMax}
                                     value={state.qtyApproved}
                                     onChange={e => setQtyApproved(state.itemId, parseInt(e.target.value) || 0)}
-                                    className="w-16 text-center text-sm border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                    className="w-16 text-center text-sm border border-[var(--border-strong)] rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[var(--brand-600)]"
                                   />
                                 ) : (
-                                  <span className="text-gray-300">—</span>
+                                  <span className="text-[var(--text-disabled)]">—</span>
                                 )}
                               </td>
                               <td className="px-3 py-2">
@@ -502,10 +502,10 @@ function DetalheDrawer({
                                     placeholder="Motivo (opcional)"
                                     value={state.reason}
                                     onChange={e => setItemReason(state.itemId, e.target.value)}
-                                    className="w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                    className="w-full text-xs border border-[var(--border-default)] rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-600)]"
                                   />
                                 ) : (
-                                  <span className="text-gray-300 text-xs">—</span>
+                                  <span className="text-[var(--text-disabled)] text-xs">—</span>
                                 )}
                               </td>
                             </tr>
@@ -515,7 +515,7 @@ function DetalheDrawer({
                     </table>
                     {/* Resumo da revisão */}
                     {itemStates.length > 0 && (
-                      <div className={`px-3 py-2 text-xs font-medium border-t ${isParcialPreview ? 'bg-orange-50 text-orange-700 border-orange-200' : aprovados === itemStates.length ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                      <div className={`px-3 py-2 text-xs font-medium border-t ${isParcialPreview ? 'bg-[var(--warning-bg)] text-[var(--warning)] border-[var(--warning-border)]' : aprovados === itemStates.length ? 'bg-[var(--success-bg)] text-[var(--success)] border-[var(--success-border)]' : 'bg-[var(--error-bg)] text-[var(--error)] border-[var(--error-border)]'}`}>
                         {isParcialPreview
                           ? `Aprovação parcial: ${aprovados} aprovado(s), ${rejeitados} rejeitado(s)`
                           : aprovados === itemStates.length
@@ -527,10 +527,10 @@ function DetalheDrawer({
                   </div>
                 ) : (
                   /* Modo visualização */
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="border border-[var(--border-default)] rounded-lg overflow-hidden">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                        <tr className="bg-[var(--surface-inset)] text-xs text-[var(--text-tertiary)] uppercase tracking-wide">
                           <th className="px-3 py-2 text-left">Produto</th>
                           <th className="px-3 py-2 text-center">Qtd</th>
                           <th className="px-3 py-2 text-left">Unid.</th>
@@ -539,30 +539,30 @@ function DetalheDrawer({
                           <th className="px-3 py-2 text-left">Obs.</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-[var(--border-subtle)]">
                         {itens.map((i, idx) => {
                           const dbItem = i.id ? req.items?.find(it => it.id === i.id) : null;
                           return (
-                            <tr key={idx} className="hover:bg-gray-50">
-                              <td className="px-3 py-2 font-medium text-gray-800">{i.item}</td>
-                              <td className="px-3 py-2 text-center text-gray-700">{i.quantidade}</td>
-                              <td className="px-3 py-2 text-gray-500">{i.unidade ?? '—'}</td>
+                            <tr key={idx} className="hover:bg-[var(--surface-inset)]">
+                              <td className="px-3 py-2 font-medium text-[var(--text-primary)]">{i.item}</td>
+                              <td className="px-3 py-2 text-center text-[var(--text-secondary)]">{i.quantidade}</td>
+                              <td className="px-3 py-2 text-[var(--text-tertiary)]">{i.unidade ?? '—'}</td>
                               {!isPending && (
                                 <td className="px-3 py-2 text-center">
                                   {dbItem?.approved === true
-                                    ? <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
+                                    ? <CheckCircle2 className="h-4 w-4 text-[var(--success)] mx-auto" />
                                     : dbItem?.approved === false
-                                    ? <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                                    : <span className="text-gray-300">—</span>
+                                    ? <XCircle className="h-4 w-4 text-[var(--error)] mx-auto" />
+                                    : <span className="text-[var(--text-disabled)]">—</span>
                                   }
                                 </td>
                               )}
                               {!isPending && (
-                                <td className="px-3 py-2 text-center text-gray-700">
+                                <td className="px-3 py-2 text-center text-[var(--text-secondary)]">
                                   {dbItem?.qtyApproved != null ? dbItem.qtyApproved : '—'}
                                 </td>
                               )}
-                              <td className="px-3 py-2 text-gray-500 text-xs">
+                              <td className="px-3 py-2 text-[var(--text-tertiary)] text-xs">
                                 {dbItem?.approvalReason ?? i.observacao ?? '—'}
                               </td>
                             </tr>
@@ -577,7 +577,7 @@ function DetalheDrawer({
               {/* Nota geral (modo revisão) */}
               {isPending && modoRevisao && (
                 <div>
-                  <label className="block text-xs text-gray-400 uppercase tracking-wide mb-1">
+                  <label className="block text-xs text-[var(--text-tertiary)] uppercase tracking-wide mb-1">
                     Nota geral (opcional)
                   </label>
                   <textarea
@@ -585,7 +585,7 @@ function DetalheDrawer({
                     onChange={e => setNotaGeral(e.target.value)}
                     placeholder="Observação geral para o professor..."
                     rows={2}
-                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                    className="w-full text-sm border border-[var(--border-strong)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)] resize-none"
                   />
                 </div>
               )}
@@ -595,21 +595,21 @@ function DetalheDrawer({
 
         {/* Footer com ações */}
         {req && isPending && (
-          <div className="border-t border-gray-200 px-5 py-4 space-y-3">
+          <div className="border-t border-[var(--border-default)] px-5 py-4 space-y-3">
             {modoRevisao && temItensComId ? (
               /* Ações do modo revisão por item */
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setModoRevisao(false)}
                   disabled={isProcessing}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSalvarRevisaoPorItem}
                   disabled={isProcessing}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[var(--brand-600)] text-white rounded-lg hover:bg-[var(--brand-700)] disabled:opacity-50 transition-colors"
                 >
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   {isProcessing ? 'Salvando...' : 'Salvar Revisão'}
@@ -621,7 +621,7 @@ function DetalheDrawer({
                 <button
                   onClick={() => onRejeitar(req.id, req.title)}
                   disabled={isProcessing}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[var(--error-bg)] text-[var(--error)] border border-[var(--error-border)] rounded-lg hover:bg-[var(--error-bg)] disabled:opacity-50 transition-colors"
                 >
                   <XCircle className="h-4 w-4" />
                   Rejeitar
@@ -629,7 +629,7 @@ function DetalheDrawer({
                 <button
                   onClick={handleAprovarTudo}
                   disabled={isProcessing}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[var(--success)] text-[var(--text-inverse)] rounded-lg hover:brightness-95 disabled:opacity-50 transition-colors"
                 >
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   {isProcessing ? 'Aprovando...' : 'Aprovar Tudo'}
@@ -764,35 +764,35 @@ export function MaterialRequestApprovalTable() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Aprovação de Requisições</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Aprovação de Requisições</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           Gerencie as solicitações de materiais dos professores da sua unidade.
         </p>
       </div>
 
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${
-          toast.tipo === 'ok' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          toast.tipo === 'ok' ? 'bg-[var(--success)] text-[var(--text-inverse)]' : 'bg-[var(--error)] text-[var(--text-inverse)]'
         }`}>
           {toast.msg}
         </div>
       )}
 
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-[var(--border-default)]">
         {tabs.map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
               tab === t.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-[var(--brand-600)] text-[var(--brand-600)]'
+                : 'border-transparent text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
           >
             {t.label}
             {t.count != null && t.count > 0 && (
               <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                tab === t.key ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+                tab === t.key ? 'bg-[var(--info-bg)] text-[var(--text-brand)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
               }`}>
                 {t.count}
               </span>
@@ -805,7 +805,7 @@ export function MaterialRequestApprovalTable() {
         <select
           value={filterClassroom}
           onChange={e => setFilterClassroom(e.target.value)}
-          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-sm border border-[var(--border-strong)] rounded-md px-3 py-1.5 bg-[var(--surface-card)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
         >
           <option value="">Todas as turmas</option>
           {classrooms.map(c => (
@@ -815,7 +815,7 @@ export function MaterialRequestApprovalTable() {
         <select
           value={filterCategoria}
           onChange={e => setFilterCategoria(e.target.value as MaterialCategory | '')}
-          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-sm border border-[var(--border-strong)] rounded-md px-3 py-1.5 bg-[var(--surface-card)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
         >
           <option value="">Todas as categorias</option>
           <option value="PEDAGOGICO">Pedagógico</option>
@@ -829,22 +829,22 @@ export function MaterialRequestApprovalTable() {
           placeholder="Buscar professor, turma ou item..."
           value={filterBusca}
           onChange={e => setFilterBusca(e.target.value)}
-          className="text-sm border border-gray-300 rounded-md px-3 py-1.5 flex-1 min-w-48 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-sm border border-[var(--border-strong)] rounded-md px-3 py-1.5 flex-1 min-w-48 focus:outline-none focus:ring-2 focus:ring-[var(--brand-600)]"
         />
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-[var(--surface-card)] border border-[var(--border-default)] rounded-lg overflow-hidden">
         {loading && (
-          <div className="flex items-center justify-center py-12 text-gray-400 text-sm gap-2">
+          <div className="flex items-center justify-center py-12 text-[var(--text-tertiary)] text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             Carregando requisições...
           </div>
         )}
         {error && !loading && (
-          <div className="flex items-center justify-center py-12 text-red-500 text-sm">{error}</div>
+          <div className="flex items-center justify-center py-12 text-[var(--error)] text-sm">{error}</div>
         )}
         {!loading && !error && visiveis.length === 0 && (
-          <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
+          <div className="flex items-center justify-center py-12 text-[var(--text-tertiary)] text-sm">
             Nenhuma requisição encontrada.
           </div>
         )}
@@ -852,7 +852,7 @@ export function MaterialRequestApprovalTable() {
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
+                <tr className="bg-[var(--surface-inset)] text-xs text-[var(--text-tertiary)] uppercase tracking-wide border-b border-[var(--border-default)]">
                   <th className="px-4 py-3 text-left">Data</th>
                   <th className="px-4 py-3 text-left">Professor</th>
                   <th className="px-4 py-3 text-left">Turma</th>
@@ -863,7 +863,7 @@ export function MaterialRequestApprovalTable() {
                   <th className="px-4 py-3 text-center">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {visiveis.map(req => {
                   const isPending = req.status === 'SOLICITADO';
                   const isProcessing = processando === req.id;
@@ -880,21 +880,21 @@ export function MaterialRequestApprovalTable() {
                   return (
                     <tr
                       key={req.id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="hover:bg-[var(--surface-inset)] transition-colors cursor-pointer"
                       onClick={() => setDetalheId(req.id)}
                     >
-                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{data}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">{data}</td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-gray-800">{professor}</div>
-                        {email && <div className="text-xs text-gray-400">{email}</div>}
+                        <div className="font-medium text-[var(--text-primary)]">{professor}</div>
+                        {email && <div className="text-xs text-[var(--text-tertiary)]">{email}</div>}
                       </td>
-                      <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                        {req.classroom?.name ?? <span className="text-gray-400">—</span>}
+                      <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">
+                        {req.classroom?.name ?? <span className="text-[var(--text-tertiary)]">—</span>}
                       </td>
-                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                      <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">
                         {getCategoryLabel(req.type)}
                       </td>
-                      <td className="px-4 py-3 text-gray-600 max-w-xs">
+                      <td className="px-4 py-3 text-[var(--text-secondary)] max-w-xs">
                         <span className="line-clamp-2">{itensResumo}</span>
                       </td>
                       <td className="px-4 py-3">
@@ -907,7 +907,7 @@ export function MaterialRequestApprovalTable() {
                         <div className="flex items-center gap-1.5 justify-center">
                           <button
                             onClick={() => setDetalheId(req.id)}
-                            className="px-2.5 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 transition-colors flex items-center gap-1"
+                            className="px-2.5 py-1 text-xs font-medium text-[var(--brand-600)] border border-[var(--info-border)] rounded hover:bg-[var(--info-bg)] transition-colors flex items-center gap-1"
                           >
                             Abrir
                             <ChevronRight className="h-3 w-3" />
@@ -916,7 +916,7 @@ export function MaterialRequestApprovalTable() {
                             <button
                               onClick={() => handleAbrirRejeicao(req.id, req.title)}
                               disabled={isProcessing}
-                              className="px-2.5 py-1 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 disabled:opacity-50 transition-colors"
+                              className="px-2.5 py-1 text-xs font-medium bg-[var(--error-bg)] text-[var(--error)] border border-[var(--error-border)] rounded hover:bg-[var(--error-bg)] disabled:opacity-50 transition-colors"
                             >
                               Rejeitar
                             </button>
@@ -924,7 +924,7 @@ export function MaterialRequestApprovalTable() {
                           <button
                             onClick={() => setModalApagar({ id: req.id, titulo: req.title })}
                             disabled={isProcessing}
-                            className="px-2.5 py-1 text-xs font-medium text-gray-500 border border-gray-200 rounded hover:bg-gray-100 hover:text-red-600 hover:border-red-200 disabled:opacity-50 transition-colors"
+                            className="px-2.5 py-1 text-xs font-medium text-[var(--text-tertiary)] border border-[var(--border-default)] rounded hover:bg-[var(--surface-muted)] hover:text-[var(--error)] hover:border-[var(--error-border)] disabled:opacity-50 transition-colors"
                           >
                             Apagar
                           </button>
@@ -950,31 +950,31 @@ export function MaterialRequestApprovalTable() {
       />
 
       {modalRejeitar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Rejeitar Requisição</h2>
-            <p className="text-sm text-gray-500 mb-4 line-clamp-2">{modalRejeitar.titulo}</p>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Motivo da rejeição <span className="text-red-500">*</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] backdrop-blur-sm">
+          <div className="ds-modal w-full max-w-md mx-4 p-6">
+            <h2 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-1">Rejeitar Requisição</h2>
+            <p className="text-sm text-[var(--text-secondary)] mb-4 line-clamp-2">{modalRejeitar.titulo}</p>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+              Motivo da rejeição <span className="text-[var(--error)]">*</span>
             </label>
             <textarea
               value={motivoRejeicao}
               onChange={e => setMotivoRejeicao(e.target.value)}
               placeholder="Obrigatório: descreva o motivo para o professor..."
               rows={3}
-              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+              className="w-full text-sm border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--error)] resize-none"
             />
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => setModalRejeitar(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleConfirmarRejeicao}
                 disabled={!!processando || !motivoRejeicao.trim()}
-                className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium bg-[var(--error)] text-[var(--text-inverse)] rounded-lg hover:brightness-95 disabled:opacity-50 transition-colors"
               >
                 {processando ? 'Rejeitando...' : 'Confirmar Rejeição'}
               </button>
@@ -984,29 +984,29 @@ export function MaterialRequestApprovalTable() {
       )}
 
       {modalApagar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] backdrop-blur-sm">
+          <div className="ds-modal w-full max-w-md mx-4 p-6">
+            <h2 className="font-display text-lg font-semibold text-[var(--text-primary)] mb-1">
               Apagar requisição?
             </h2>
-            <p className="text-sm text-gray-500 mb-1 line-clamp-2">
+            <p className="text-sm text-[var(--text-secondary)] mb-1 line-clamp-2">
               {modalApagar.titulo}
             </p>
-            <p className="text-sm text-red-600 mb-6">
+            <p className="text-sm text-[var(--error)] mb-6">
               Esta ação é permanente e não pode ser desfeita.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setModalApagar(null)}
                 disabled={apagando}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleConfirmarApagar}
                 disabled={apagando}
-                className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium bg-[var(--error)] text-[var(--text-inverse)] rounded-lg hover:brightness-95 disabled:opacity-50 transition-colors"
               >
                 {apagando ? 'Apagando...' : 'Sim, apagar'}
               </button>

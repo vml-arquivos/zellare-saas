@@ -19,9 +19,9 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        'bg-white border border-slate-100 rounded-2xl shadow-ds-sm',
+        'ds-card',
         padding && 'p-4',
-        onClick && 'cursor-pointer hover:border-slate-200 hover:shadow-ds-md transition-all duration-150',
+        onClick && 'ds-card-interactive',
         className,
       )}
     >
@@ -32,13 +32,13 @@ export function Card({
 
 // ─── KPI Card premium ─────────────────────────────────────────────────────────
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'purple';
-const TONE_STYLES: Record<Tone, { bg: string; text: string; sub: string; icon: string }> = {
-  default: { bg: 'bg-slate-50',  text: 'text-slate-800', sub: 'text-slate-400', icon: 'text-slate-400' },
-  success: { bg: 'bg-emerald-50', text: 'text-emerald-700', sub: 'text-emerald-500', icon: 'text-emerald-500' },
-  warning: { bg: 'bg-amber-50',  text: 'text-amber-700',  sub: 'text-amber-500',  icon: 'text-amber-500' },
-  danger:  { bg: 'bg-red-50',    text: 'text-red-700',    sub: 'text-red-500',    icon: 'text-red-500' },
-  info:    { bg: 'bg-blue-50',   text: 'text-blue-700',   sub: 'text-blue-500',   icon: 'text-blue-500' },
-  purple:  { bg: 'bg-purple-50', text: 'text-purple-700', sub: 'text-purple-500', icon: 'text-purple-500' },
+const TONE_STYLES: Record<Tone, { bg: string; text: string; sub: string; icon: string; border: string }> = {
+  default: { bg: 'bg-[var(--surface-inset)]', text: 'text-[var(--text-primary)]', sub: 'text-[var(--text-tertiary)]', icon: 'text-[var(--text-secondary)]', border: 'border-[var(--border-default)]' },
+  success: { bg: 'bg-[var(--success-bg)]', text: 'text-[var(--success)]', sub: 'text-[var(--success)]', icon: 'text-[var(--success)]', border: 'border-[var(--success-border)]' },
+  warning: { bg: 'bg-[var(--warning-bg)]', text: 'text-[var(--warning)]', sub: 'text-[var(--warning)]', icon: 'text-[var(--warning)]', border: 'border-[var(--warning-border)]' },
+  danger: { bg: 'bg-[var(--error-bg)]', text: 'text-[var(--error)]', sub: 'text-[var(--error)]', icon: 'text-[var(--error)]', border: 'border-[var(--error-border)]' },
+  info: { bg: 'bg-[var(--info-bg)]', text: 'text-[var(--info)]', sub: 'text-[var(--info)]', icon: 'text-[var(--info)]', border: 'border-[var(--info-border)]' },
+  purple: { bg: 'bg-[var(--surface-brand)]', text: 'text-[var(--text-brand)]', sub: 'text-[var(--text-brand-soft)]', icon: 'text-[var(--text-brand-soft)]', border: 'border-[var(--border-brand)]' },
 };
 
 export function KpiCard({
@@ -53,30 +53,29 @@ export function KpiCard({
     <div
       onClick={onClick}
       className={cn(
-        'rounded-2xl p-4 border border-transparent transition-all duration-150',
-        s.bg,
-        onClick && 'cursor-pointer hover:brightness-95 active:scale-[0.98]',
+        'ds-kpi', s.bg, s.border,
+        onClick && 'cursor-pointer hover:brightness-[0.98] active:scale-[0.98] transition-transform duration-150',
       )}
     >
       <div className="flex items-center justify-between mb-3">
-        <div className={cn('p-2 rounded-xl bg-white/60', s.icon)}>{icon}</div>
+        <div className={cn('p-2 rounded-xl bg-[var(--surface-base)]/70', s.icon)}>{icon}</div>
         {trend && <TrendIcon className={cn('h-3.5 w-3.5', s.sub)} />}
       </div>
       <p className={cn('text-2xl font-semibold tabular-nums leading-none', s.text)}>{value}</p>
       <p className={cn('text-xs mt-1.5 font-medium', s.sub)}>{label}</p>
-      {helper && <p className="text-[11px] text-slate-400 mt-0.5">{helper}</p>}
+      {helper && <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{helper}</p>}
     </div>
   );
 }
 
 // ─── Badge ────────────────────────────────────────────────────────────────────
 const BADGE_STYLES: Record<string, string> = {
-  success: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  warning: 'bg-amber-100  text-amber-800  border-amber-200',
-  danger:  'bg-red-100    text-red-800    border-red-200',
-  info:    'bg-blue-100   text-blue-800   border-blue-200',
-  purple:  'bg-purple-100 text-purple-800 border-purple-200',
-  default: 'bg-slate-100  text-slate-600  border-slate-200',
+  success: 'bg-[var(--success-bg)] text-[var(--success)] border-[var(--success-border)]',
+  warning: 'bg-[var(--warning-bg)] text-[var(--warning)] border-[var(--warning-border)]',
+  danger: 'bg-[var(--error-bg)] text-[var(--error)] border-[var(--error-border)]',
+  info: 'bg-[var(--info-bg)] text-[var(--info)] border-[var(--info-border)]',
+  purple: 'bg-[var(--surface-brand)] text-[var(--text-brand)] border-[var(--border-brand)]',
+  default: 'bg-[var(--surface-inset)] text-[var(--text-secondary)] border-[var(--border-default)]',
 };
 export function Badge({ label, variant = 'default' }: { label: string; variant?: string }) {
   return (
@@ -92,9 +91,9 @@ export function SectionHeader({
 }: { title: string; icon?: React.ReactNode; action?: React.ReactNode; badge?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        {icon && <div className="text-slate-400">{icon}</div>}
-        <h2 className="text-sm font-semibold text-slate-700">{title}</h2>
+      <div className="flex items-center gap-2 min-w-0">
+        {icon && <div className="text-[var(--text-tertiary)] flex-shrink-0">{icon}</div>}
+        <h2 className="text-sm font-semibold text-[var(--text-primary)] truncate">{title}</h2>
         {badge}
       </div>
       {action}
@@ -110,22 +109,18 @@ export function TabBar<T extends string>({
   active: T; onChange: (id: T) => void; extra?: React.ReactNode;
 }) {
   return (
-    <div className="flex gap-1 bg-slate-100 rounded-xl p-1 overflow-x-auto scrollbar-none">
+    <div className="ds-tab-bar">
       {tabs.map((t) => (
         <button
           key={t.id}
+          type="button"
           onClick={() => onChange(t.id)}
-          className={cn(
-            'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150',
-            active === t.id
-              ? 'bg-white text-blue-700 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700 hover:bg-white/50',
-          )}
+          className={cn('ds-tab', active === t.id && 'ds-tab-active')}
         >
           {t.icon}
           {t.label}
           {t.badge != null && t.badge > 0 && (
-            <span className="ml-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+            <span className="ml-1 min-w-[18px] h-[18px] px-1 bg-[var(--error)] text-[var(--text-inverse)] text-[10px] font-bold rounded-full flex items-center justify-center">
               {t.badge}
             </span>
           )}
@@ -141,13 +136,19 @@ export function ProgressBar({ value, max = 100, color = 'blue', showLabel = true
   value: number; max?: number; color?: 'blue' | 'emerald' | 'amber' | 'red' | 'purple'; showLabel?: boolean;
 }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
-  const COLORS = { blue: 'bg-blue-500', emerald: 'bg-emerald-500', amber: 'bg-amber-500', red: 'bg-red-500', purple: 'bg-purple-500' };
+  const COLORS = {
+    blue: 'bg-[var(--brand-600)]',
+    emerald: 'bg-[var(--success)]',
+    amber: 'bg-[var(--warning)]',
+    red: 'bg-[var(--error)]',
+    purple: 'bg-[var(--accent-violet)]',
+  };
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
         <div className={cn('h-full rounded-full transition-all duration-500', COLORS[color])} style={{ width: `${pct}%` }} />
       </div>
-      {showLabel && <span className="text-[11px] text-slate-400 tabular-nums w-8 text-right">{pct}%</span>}
+      {showLabel && <span className="text-[11px] text-[var(--text-tertiary)] tabular-nums w-8 text-right">{pct}%</span>}
     </div>
   );
 }
@@ -156,17 +157,17 @@ export function ProgressBar({ value, max = 100, color = 'blue', showLabel = true
 export function EmptyData({ label = 'Sem dados disponíveis' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
-        <Info className="h-5 w-5 text-slate-300" />
+      <div className="w-10 h-10 rounded-2xl bg-[var(--surface-inset)] border border-[var(--border-subtle)] flex items-center justify-center mb-3">
+        <Info className="h-5 w-5 text-[var(--text-disabled)]" />
       </div>
-      <p className="text-sm text-slate-400">{label}</p>
+      <p className="text-sm text-[var(--text-tertiary)]">{label}</p>
     </div>
   );
 }
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 export function SkeletonBlock({ className }: { className?: string }) {
-  return <div className={cn('bg-slate-100 rounded-xl animate-pulse', className)} />;
+  return <div className={cn('ds-loading', className)} />;
 }
 export function SkeletonGrid({ n = 4, cols = 4 }: { n?: number; cols?: number }) {
   return (
@@ -179,10 +180,10 @@ export function SkeletonGrid({ n = 4, cols = 4 }: { n?: number; cols?: number })
 // ─── Alert banner ─────────────────────────────────────────────────────────────
 export function AlertBanner({ type, children }: { type: 'warning' | 'danger' | 'info' | 'success'; children: React.ReactNode }) {
   const styles = {
-    warning: 'bg-amber-50 border-amber-200 text-amber-800',
-    danger:  'bg-red-50   border-red-200   text-red-800',
-    info:    'bg-blue-50  border-blue-200  text-blue-800',
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    warning: 'bg-[var(--warning-bg)] border-[var(--warning-border)] text-[var(--warning)]',
+    danger: 'bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error)]',
+    info: 'bg-[var(--info-bg)] border-[var(--info-border)] text-[var(--info)]',
+    success: 'bg-[var(--success-bg)] border-[var(--success-border)] text-[var(--success)]',
   };
   const Icon = type === 'danger' ? AlertTriangle : type === 'success' ? CheckCircle : Info;
   return (
@@ -198,13 +199,13 @@ export function StatRow({ label, value, sub, action }: {
   label: string; value: string | number; sub?: string; action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+    <div className="flex items-center justify-between py-2.5 border-b border-[var(--border-subtle)] last:border-0">
       <div className="min-w-0">
-        <p className="text-sm text-slate-700 truncate">{label}</p>
-        {sub && <p className="text-xs text-slate-400 truncate">{sub}</p>}
+        <p className="text-sm text-[var(--text-secondary)] truncate">{label}</p>
+        {sub && <p className="text-xs text-[var(--text-tertiary)] truncate">{sub}</p>}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-        <span className="text-sm font-semibold text-slate-800 tabular-nums">{value}</span>
+        <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">{value}</span>
         {action}
       </div>
     </div>
@@ -214,5 +215,5 @@ export function StatRow({ label, value, sub, action }: {
 // ─── Loading spinner inline ───────────────────────────────────────────────────
 export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const sizes = { sm: 'h-4 w-4', md: 'h-5 w-5', lg: 'h-7 w-7' };
-  return <Loader2 className={cn('animate-spin text-slate-300', sizes[size])} />;
+  return <Loader2 className={cn('animate-spin text-[var(--text-tertiary)]', sizes[size])} />;
 }

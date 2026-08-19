@@ -227,10 +227,10 @@ function NavItem({ item, active, onClick }: { item: MenuItem; active: boolean; o
     <Link
       to={item.path}
       onClick={onClick}
-      className={`group flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-100 ${
+      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 ${
         active
-          ? 'relative bg-[var(--surface-brand)] text-[var(--text-primary)] shadow-ds-glow after:absolute after:left-0 after:top-1/2 after:h-5 after:w-0.5 after:-translate-y-1/2 after:rounded-r-full after:bg-[var(--accent-cyan)]'
-          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)]'
+          ? 'relative bg-[var(--surface-brand)] text-[var(--text-primary)] shadow-ds-glow after:absolute after:left-0 after:top-1/2 after:h-5 after:w-0.5 after:-translate-y-1/2 after:rounded-r-full after:bg-[var(--brand-600)]'
+          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-inset)] hover:text-[var(--text-primary)]'
       }`}
     >
       <span className="flex items-center gap-2">
@@ -336,7 +336,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   ];
 
   return (
-    <aside className="relative w-64 bg-[var(--surface-sidebar)] text-[var(--text-primary)] border-r border-[var(--border-subtle)] h-full min-h-screen flex flex-col overflow-hidden">
+    <aside className="relative w-[var(--sidebar-width)] bg-[var(--surface-sidebar)] text-[var(--text-primary)] border-r border-[var(--border-subtle)] h-full min-h-screen flex flex-col overflow-hidden shadow-[var(--shadow-sm)]">
       {/* Logo */}
       <div className="px-4 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center justify-between">
@@ -354,7 +354,7 @@ export function Sidebar({ onClose }: SidebarProps) {
               />
               {/* Fallback: ícone + texto */}
               <div className="hidden items-center gap-2" aria-hidden="true">
-                                  <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-ds-glow">
+                                  <div className="w-7 h-7 bg-brand-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-ds-glow">
 
                   <span className="text-white font-bold text-xs">Z</span>
                 </div>
@@ -376,7 +376,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             )}
           </div>
           {user && (
-            <div className="mt-3 px-2.5 py-2 bg-[var(--surface-subtle)] rounded-lg border border-[var(--border-default)]">
+            <div className="mt-3 px-3 py-2.5 bg-[var(--surface-inset)] rounded-xl border border-[var(--border-default)]">
               <p className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wide">Perfil ativo</p>
               <p className="text-sm font-medium text-[var(--text-primary)] truncate mt-0.5">
                 {(user.nome as string) || user.email}
