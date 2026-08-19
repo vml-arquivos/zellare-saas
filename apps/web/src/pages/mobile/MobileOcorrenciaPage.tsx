@@ -100,7 +100,7 @@ export function MobileOcorrenciaPage() {
   const urgente = ['ALERGIA', 'QUEDA_ACIDENTE', 'FEBRE'].includes(tipo);
 
   return (
-    <div style={{ padding: '16px 16px 120px' }}>
+    <div className="mobile-page">
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
           <HeartPulse size={20} /> Ocorrência
@@ -133,11 +133,11 @@ export function MobileOcorrenciaPage() {
               style={{ width: '100%', padding: '10px 14px 10px 36px', fontSize: 14, border: '0.5px solid var(--color-border-secondary)', borderRadius: 10, background: 'var(--color-background-primary)', color: 'var(--color-text-primary)', boxSizing: 'border-box' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 16 }}>
-            <button onClick={() => setSelectedChild(null)} style={{ padding: '10px 14px', borderRadius: 10, border: '0.5px solid var(--color-border-secondary)', background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+            <button type="button" onClick={() => setSelectedChild(null)} style={{ padding: '10px 14px', borderRadius: 10, border: '0.5px solid var(--color-border-secondary)', background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
               📋 Turma toda / sem criança específica
             </button>
             {filtrados.slice(0, 8).map((child) => (
-              <button key={child.id} onClick={() => setSelectedChild(child)}
+              <button type="button" key={child.id} aria-label={`Selecionar ${child.firstName} ${child.lastName ?? ''}`} onClick={() => setSelectedChild(child)}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, border: '0.5px solid var(--color-border-tertiary)', background: 'var(--color-background-primary)', cursor: 'pointer', textAlign: 'left' }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-background-info)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 500, color: 'var(--color-text-info)', flexShrink: 0 }}>
                   {child.firstName[0]}{child.lastName?.[0] ?? ''}
@@ -155,7 +155,7 @@ export function MobileOcorrenciaPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: '#fef2f2', border: '0.5px solid #fca5a5' }}>
               <span style={{ fontSize: 20 }}>👤</span>
               <span style={{ fontSize: 14, fontWeight: 500, color: '#991b1b', flex: 1 }}>{selectedChild.firstName} {selectedChild.lastName}</span>
-              <button onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#991b1b', fontSize: 12 }}>Trocar</button>
+              <button type="button" onClick={() => setSelectedChild(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#991b1b', fontSize: 12 }}>Trocar</button>
             </div>
           )}
 
@@ -163,7 +163,7 @@ export function MobileOcorrenciaPage() {
             <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 8 }}>Tipo de ocorrência *</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {TIPOS_OCORRENCIA.map((t) => (
-                <button key={t.id} onClick={() => setTipo(t.id === tipo ? '' : t.id)}
+                <button type="button" key={t.id} aria-pressed={tipo === t.id} onClick={() => setTipo(t.id === tipo ? '' : t.id)}
                   style={{
                     padding: '11px 10px', borderRadius: 12, cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                     border: `0.5px solid ${tipo === t.id ? t.cor : 'var(--color-border-tertiary)'}`,
@@ -198,8 +198,8 @@ export function MobileOcorrenciaPage() {
       )}
 
       {selectedClassroom && (
-        <div style={{ position: 'fixed', bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, padding: '12px 16px', background: 'var(--color-background-primary)', borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-          <button onClick={salvar} disabled={saving || !tipo || !descricao.trim()}
+        <div className="mobile-action-bar">
+          <button type="button" aria-label="Registrar ocorrência" onClick={salvar} disabled={saving || !tipo || !descricao.trim()}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
               background: saved ? '#10b981' : urgente ? '#ef4444' : '#4f46e5', color: '#fff',

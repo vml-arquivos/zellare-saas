@@ -14,7 +14,7 @@ if (!baseURL) {
   throw new Error(
     'VITE_API_URL não está configurado. ' +
     'Defina a variável de ambiente VITE_API_URL no arquivo .env ou nas configurações do Coolify. ' +
-    'Exemplo: VITE_API_URL=https://api.conexa3.casadf.com.br'
+    'Exemplo: VITE_API_URL=https://apizelare.casadf.com.br'
   );
 }
 

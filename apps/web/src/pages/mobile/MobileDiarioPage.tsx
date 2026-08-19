@@ -108,7 +108,7 @@ export default function MobileDiarioPage() {
   ].filter(Boolean).length;
 
   return (
-    <div style={{ padding: '16px 16px 120px' }}>
+    <div className="mobile-page">
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -145,7 +145,7 @@ export default function MobileDiarioPage() {
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {TIPOS_ATIVIDADE.map((tipo) => (
-                <button key={tipo} onClick={() => update('tipo', tipo === form.tipo ? '' : tipo)}
+                <button type="button" key={tipo} aria-pressed={form.tipo === tipo} onClick={() => update('tipo', tipo === form.tipo ? '' : tipo)}
                   style={{
                     padding: '7px 12px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
                     border: `0.5px solid ${form.tipo === tipo ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
@@ -198,8 +198,8 @@ export default function MobileDiarioPage() {
 
       {/* Botão salvar fixo */}
       {selectedClassroom && (
-        <div style={{ position: 'fixed', bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, padding: '12px 16px', background: 'var(--color-background-primary)', borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-          <button onClick={salvar} disabled={saving || !form.descricao.trim()}
+        <div className="mobile-action-bar">
+          <button type="button" aria-label={saved ? 'Diário publicado' : isOnline ? 'Publicar diário' : 'Salvar diário offline'} onClick={salvar} disabled={saving || !form.descricao.trim()}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
               background: saved ? '#10b981' : '#4f46e5', color: '#fff',

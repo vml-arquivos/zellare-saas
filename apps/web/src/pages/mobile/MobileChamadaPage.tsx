@@ -136,7 +136,7 @@ export default function MobileChamadaPage() {
   const naoBatidos = children.filter((c) => !attendance[c.id]).length;
 
   return (
-    <div style={{ padding: '16px 16px 0' }}>
+    <div className="mobile-page">
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--color-text-primary)' }}>Chamada</h1>
@@ -184,13 +184,13 @@ export default function MobileChamadaPage() {
 
           {/* Ações rápidas */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            <button onClick={() => marcarTodos('P')} style={{
+            <button type="button" onClick={() => marcarTodos('P')} style={{
               flex: 1, padding: '10px', borderRadius: 10, border: '0.5px solid #10b981',
               background: '#f0fdf4', color: '#065f46', fontSize: 13, fontWeight: 500, cursor: 'pointer',
             }}>
               ✓ Todos presentes
             </button>
-            <button onClick={() => marcarTodos(null)} style={{
+            <button type="button" onClick={() => marcarTodos(null)} style={{
               flex: 1, padding: '10px', borderRadius: 10, border: '0.5px solid var(--color-border-secondary)',
               background: 'var(--color-background-secondary)', color: 'var(--color-text-secondary)', fontSize: 13, cursor: 'pointer',
             }}>
@@ -199,12 +199,14 @@ export default function MobileChamadaPage() {
           </div>
 
           {/* Lista de alunos */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 100 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
             {children.map((child) => {
               const status = attendance[child.id];
               return (
                 <button
+                  type="button"
                   key={child.id}
+                  aria-label={`Marcar ${child.firstName} ${child.lastName ?? ''}`}
                   onClick={() => toggle(child.id)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12,
@@ -266,13 +268,10 @@ export default function MobileChamadaPage() {
 
       {/* Botão salvar fixo */}
       {selectedClassroom && children.length > 0 && (
-        <div style={{
-          position: 'fixed', bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))',
-          left: 0, right: 0, padding: '12px 16px',
-          background: 'var(--color-background-primary)',
-          borderTop: '0.5px solid var(--color-border-tertiary)',
-        }}>
+        <div className="mobile-action-bar">
           <button
+            type="button"
+            aria-label={saved ? 'Chamada salva' : isOnline ? 'Salvar chamada' : 'Salvar chamada offline'}
             onClick={salvar}
             disabled={saving || naoBatidos === children.length}
             style={{

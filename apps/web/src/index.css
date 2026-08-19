@@ -108,6 +108,19 @@
     --t-fast: 100ms;
     --t-base: 150ms;
     --t-slow: 250ms;
+
+    /* ── Aliases mobile legados: preservam telas PWA já existentes ── */
+    --color-background-primary: var(--surface-base);
+    --color-background-secondary: var(--surface-subtle);
+    --color-background-danger: var(--error-bg);
+    --color-background-info: var(--info-bg);
+    --color-border-secondary: var(--border-default);
+    --color-border-tertiary: var(--border-subtle);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-tertiary: var(--text-tertiary);
+    --color-text-danger: var(--error);
+    --color-text-info: var(--info);
   }
 
   .dark {
@@ -174,16 +187,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
   }
 
   body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     background-color: var(--surface-page);
     color: var(--text-primary);
     line-height: 1.6;
+    touch-action: manipulation;
     transition: background-color var(--t-slow) var(--ease), color var(--t-slow) var(--ease);
   }
+
+  #root { min-height: 100%; }
+
+  button, input, textarea, select { font: inherit; }
+  button { touch-action: manipulation; }
+  input, textarea, select { font-size: max(16px, 1rem); }
 
   :focus-visible {
     outline: 2px solid var(--border-focus);
@@ -440,6 +464,53 @@
   .ds-alert-error   { background: var(--error-bg);   color: var(--error);   border-color: var(--error-border); }
   .ds-alert-success { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
   .ds-alert-info    { background: var(--info-bg);    color: var(--info);    border-color: var(--info-border); }
+
+  /* ── Shell de captura mobile ─────────────────────────────────── */
+  .mobile-page {
+    min-height: 100%;
+    padding: 1rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-scroll {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-scroll::-webkit-scrollbar { display: none; }
+
+  .mobile-action-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 1rem -1rem calc(-1rem - env(safe-area-inset-bottom, 0px));
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--surface-base) 94%, transparent);
+    border-top: 0.5px solid var(--border-default);
+    box-shadow: 0 -10px 24px -18px rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(14px);
+  }
+
+  .mobile-touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .mobile-list-card {
+    width: 100%;
+    min-height: 64px;
+    border: 0.5px solid var(--border-default);
+    border-radius: var(--r-xl);
+    background: var(--surface-base);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-xs);
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
+  .mobile-list-card:active { transform: scale(0.985); }
+
+  @media (max-width: 360px) {
+    .mobile-page { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .mobile-action-bar { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+  }
 }
 
 /* ── Compatibilidade visual para páginas legadas no Zelare Night ──

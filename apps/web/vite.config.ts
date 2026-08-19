@@ -46,7 +46,8 @@ export default defineConfig({
         runtimeCaching: [
           {
             // API: network-first com fallback para cache (dados frescos quando online)
-            urlPattern: /^https:\/\/api\.zelare\.seu-dominio\.com\.br\/(?!auth).*/i,
+            urlPattern: /^https:\/\/apizelare\.casadf\.com\.br\/(lookup|children|attendance\/today)/i,
+            method: 'GET',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
@@ -57,7 +58,8 @@ export default defineConfig({
           },
           {
             // Auth: sempre da rede (tokens não podem ser stale)
-            urlPattern: /^https:\/\/api\.zelare\.seu-dominio\.com\.br\/auth.*/i,
+            urlPattern: /^https:\/\/apizelare\.casadf\.com\.br\/auth.*/i,
+            method: 'GET',
             handler: 'NetworkOnly',
           },
           {

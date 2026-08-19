@@ -109,7 +109,7 @@ export default function MobileObservacaoPage() {
   const podeEnviar = selectedChild && form.campo && form.nivel && form.descricao.trim().length >= 10;
 
   return (
-    <div style={{ padding: '16px 16px 120px' }}>
+    <div className="mobile-page">
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Eye size={20} /> Observação
@@ -140,7 +140,7 @@ export default function MobileObservacaoPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {childrenFiltrados.map((child) => (
-              <button key={child.id} onClick={() => setSelectedChild(child)}
+              <button type="button" key={child.id} aria-label={`Selecionar ${child.firstName} ${child.lastName ?? ''}`} onClick={() => setSelectedChild(child)}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, border: '0.5px solid var(--color-border-tertiary)', background: 'var(--color-background-primary)', cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent' }}>
                 <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-background-info)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: 'var(--color-text-info)', flexShrink: 0 }}>
                   {child.firstName[0]}{child.lastName?.[0] ?? ''}
@@ -173,7 +173,7 @@ export default function MobileObservacaoPage() {
             <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 8 }}>Campo de experiência (BNCC) *</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {CAMPOS_BNCC.map((campo) => (
-                <button key={campo.id} onClick={() => setForm((f) => ({ ...f, campo: campo.id }))}
+                <button type="button" key={campo.id} aria-pressed={form.campo === campo.id} onClick={() => setForm((f) => ({ ...f, campo: campo.id }))}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 12, cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
                     border: `0.5px solid ${form.campo === campo.id ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
@@ -194,7 +194,7 @@ export default function MobileObservacaoPage() {
               <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 8 }}>Nível observado *</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {NIVEIS.map((nivel) => (
-                  <button key={nivel.id} onClick={() => setForm((f) => ({ ...f, nivel: nivel.id }))}
+                  <button type="button" key={nivel.id} aria-pressed={form.nivel === nivel.id} onClick={() => setForm((f) => ({ ...f, nivel: nivel.id }))}
                     style={{
                       padding: '12px 8px', borderRadius: 12, cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                       border: `0.5px solid ${form.nivel === nivel.id ? nivel.color : 'var(--color-border-tertiary)'}`,
@@ -227,8 +227,8 @@ export default function MobileObservacaoPage() {
 
       {/* Botão salvar */}
       {selectedChild && (
-        <div style={{ position: 'fixed', bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, padding: '12px 16px', background: 'var(--color-background-primary)', borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-          <button onClick={salvar} disabled={saving || !podeEnviar}
+        <div className="mobile-action-bar">
+          <button type="button" aria-label="Salvar observação" onClick={salvar} disabled={saving || !podeEnviar}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
               background: saved ? '#10b981' : '#4f46e5', color: '#fff', fontSize: 15, fontWeight: 500, cursor: 'pointer',

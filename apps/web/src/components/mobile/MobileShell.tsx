@@ -86,6 +86,7 @@ export default function MobileShell() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {/* Atualizar app (força nova versão — destrava cache do PWA no iOS) */}
           <button
+            type="button"
             onClick={() => {
               if (confirm('Atualizar o app para a versão mais recente? A tela vai recarregar.')) {
                 hardRefreshPWA();
@@ -93,7 +94,7 @@ export default function MobileShell() {
             }}
             title="Atualizar app"
             style={{
-              width: 34, height: 34, borderRadius: 10, border: '0.5px solid var(--border-default)',
+              width: 38, height: 38, borderRadius: 11, border: '0.5px solid var(--border-default)',
               background: 'var(--surface-subtle)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-tertiary)',
@@ -104,12 +105,13 @@ export default function MobileShell() {
 
           {/* Alternância de tema */}
           <button
+            type="button"
             onClick={toggleTheme}
             title={resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
             aria-label={resolvedTheme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
             aria-pressed={resolvedTheme === 'dark'}
             style={{
-              width: 34, height: 34, borderRadius: 10, border: '0.5px solid var(--border-default)',
+              width: 38, height: 38, borderRadius: 11, border: '0.5px solid var(--border-default)',
               background: 'var(--surface-subtle)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-tertiary)',
@@ -120,10 +122,12 @@ export default function MobileShell() {
 
           {/* Botão versão desktop */}
           <button
+            type="button"
+            className="mobile-desktop-switch"
             onClick={() => navigate('/app/teacher-dashboard')}
             title="Versão desktop"
             style={{
-              width: 34, height: 34, borderRadius: 10, border: '0.5px solid var(--border-default)',
+              width: 38, height: 38, borderRadius: 11, border: '0.5px solid var(--border-default)',
               background: 'var(--surface-subtle)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'var(--text-tertiary)',
@@ -134,6 +138,7 @@ export default function MobileShell() {
 
           {/* Logout */}
           <button
+            type="button"
             onClick={() => { logout?.(); navigate('/login'); }}
             title="Sair"
             style={{
@@ -150,7 +155,7 @@ export default function MobileShell() {
 
       {/* ── Banner offline/sync ──────────────────────────────────── */}
       {(!isOnline || queueCount > 0) && (
-        <div style={{
+        <div role="status" aria-live="polite" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '7px 16px', flexShrink: 0,
           background: isOnline ? 'var(--warning-bg)' : 'var(--error-bg)',
@@ -181,12 +186,12 @@ export default function MobileShell() {
       )}
 
       {/* ── Conteúdo da página ───────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      <div className="mobile-scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
         <Outlet />
       </div>
 
       {/* ── Bottom navigation ────────────────────────────────────── */}
-      <nav style={{
+      <nav aria-label="Navegação principal mobile" style={{
         display: 'flex',
         background: 'var(--surface-base)',
         borderTop: '0.5px solid var(--border-default)',
@@ -197,9 +202,10 @@ export default function MobileShell() {
         {NAV.map(({ path, label, Icon }) => {
           const active = isNavActive(path, location.pathname);
           return (
-            <button key={path} onClick={() => navigate(path)} style={{
-              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-              gap: 2, padding: '9px 2px 8px',
+            <button key={path} type="button" aria-current={active ? 'page' : undefined} onClick={() => navigate(path)} style={{
+              flex: '1 1 0', minWidth: 48, minHeight: 60,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: 3, padding: '7px 2px 8px',
               background: 'none', border: 'none', cursor: 'pointer',
               WebkitTapHighlightColor: 'transparent',
               position: 'relative',
@@ -225,7 +231,7 @@ export default function MobileShell() {
                 />
               </div>
               <span style={{
-                fontSize: 9.5, fontWeight: active ? 600 : 400,
+                fontSize: 10, fontWeight: active ? 600 : 400,
                 color: active ? 'var(--text-brand-soft)' : 'var(--text-tertiary)',
                 letterSpacing: 0, lineHeight: 1, whiteSpace: 'nowrap',
               }}>
@@ -236,7 +242,7 @@ export default function MobileShell() {
         })}
       </nav>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }\n        @media (max-width: 380px) { .mobile-desktop-switch { display: none !important; } }`}</style>
     </div>
   );
 }

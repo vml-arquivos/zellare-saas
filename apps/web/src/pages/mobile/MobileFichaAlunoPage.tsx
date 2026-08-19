@@ -58,7 +58,7 @@ interface Ficha {
   unidade?: { id: string; name: string; code?: string } | null;
 }
 
-const ACCENT = '#4f46e5';
+const ACCENT = 'var(--brand-600)';
 
 function fmtData(iso?: string | null): string {
   if (!iso) return '—';
@@ -166,14 +166,16 @@ export default function MobileFichaAlunoPage() {
   const iniciais = ficha ? getChildInitials(ficha) : 'CR';
 
   return (
-    <div style={{ padding: '12px 16px 100px' }}>
+    <div className="mobile-page">
       {/* Voltar */}
       <button
+        type="button"
+        aria-label="Voltar para alunos"
         onClick={() => navigate('/app/mobile/alunos')}
         style={{
           display: 'flex', alignItems: 'center', gap: 4, marginBottom: 12,
           background: 'none', border: 'none', cursor: 'pointer',
-          color: '#64748b', fontSize: 14, padding: '4px 0',
+          color: 'var(--text-secondary)', fontSize: 14, padding: '4px 0',
         }}
       >
         <ChevronLeft size={18} /> Alunos
@@ -181,12 +183,12 @@ export default function MobileFichaAlunoPage() {
 
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
-          <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: '#94a3b8' }} />
+          <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-tertiary)' }} />
         </div>
       )}
 
       {erro && !loading && (
-        <div style={{ padding: '12px 14px', background: '#fef2f2', borderRadius: 12, fontSize: 14, color: '#991b1b' }}>
+        <div style={{ padding: '12px 14px', background: 'var(--error-bg)', borderRadius: 12, fontSize: 14, color: 'var(--error)' }}>
           {erro}
         </div>
       )}
@@ -196,8 +198,8 @@ export default function MobileFichaAlunoPage() {
           {/* ── Cabeçalho com avatar + câmera ───────────────────────── */}
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            background: '#fff', borderRadius: 18, padding: '20px 16px',
-            border: '0.5px solid #e2e8f0', marginBottom: 14,
+            background: 'var(--surface-base)', borderRadius: 18, padding: '20px 16px',
+            border: '0.5px solid var(--border-default)', marginBottom: 14,
           }}>
             <div style={{ position: 'relative', marginBottom: 12 }}>
               {fotoUrl ? (
@@ -219,6 +221,8 @@ export default function MobileFichaAlunoPage() {
 
               {/* Botão câmera */}
               <button
+                type="button"
+                aria-label="Tirar ou trocar foto"
                 onClick={abrirCamera}
                 disabled={enviandoFoto}
                 title="Tirar / trocar foto"
@@ -246,7 +250,7 @@ export default function MobileFichaAlunoPage() {
               />
             </div>
 
-            <h1 style={{ fontSize: 19, fontWeight: 600, margin: 0, color: '#0f172a', textAlign: 'center', lineHeight: 1.25 }}>
+            <h1 style={{ fontSize: 19, fontWeight: 600, margin: 0, color: 'var(--text-primary)', textAlign: 'center', lineHeight: 1.25 }}>
               {nome}
             </h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8 }}>
@@ -292,7 +296,7 @@ export default function MobileFichaAlunoPage() {
             {!ficha.dadosResponsaveis?.mae?.nome
               && !ficha.dadosResponsaveis?.pai?.nome
               && !ficha.dadosResponsaveis?.responsavelLegal?.nome && (
-              <p style={{ fontSize: 13, color: '#94a3b8', margin: '4px 0' }}>Nenhum responsável cadastrado.</p>
+              <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '4px 0' }}>Nenhum responsável cadastrado.</p>
             )}
             {ficha.dadosResponsaveis?.mae?.nome && (
               <CardResponsavel rotulo="Mãe" resp={ficha.dadosResponsaveis.mae} />
@@ -310,8 +314,8 @@ export default function MobileFichaAlunoPage() {
             <Secao titulo="Autorizados a retirar" Icon={ShieldCheck} cor="#059669">
               {ficha.autorizadosRetirada.filter(a => a?.nome?.trim()).map((a, i) => (
                 <div key={i} style={{ marginBottom: 8 }}>
-                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: '#0f172a' }}>
-                    {a.nome} {a.parentesco ? <span style={{ color: '#94a3b8', fontWeight: 400 }}>· {a.parentesco}</span> : null}
+                  <p style={{ fontSize: 14, fontWeight: 500, margin: 0, color: 'var(--text-primary)' }}>
+                    {a.nome} {a.parentesco ? <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>· {a.parentesco}</span> : null}
                   </p>
                   {a.telefone && <TelLink tel={a.telefone} />}
                 </div>
@@ -356,12 +360,12 @@ function Secao({ titulo, Icon, cor, children }: {
   titulo: string; Icon: ComponentType<{ size?: number; color?: string }>; cor: string; children: ReactNode;
 }) {
   return (
-    <section style={{ background: '#fff', borderRadius: 16, padding: '14px 16px', border: '0.5px solid #e2e8f0', marginBottom: 12 }}>
+    <section style={{ background: 'var(--surface-base)', borderRadius: 16, padding: '14px 16px', border: '0.5px solid var(--border-default)', marginBottom: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ width: 28, height: 28, borderRadius: 9, background: `${cor}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon size={15} color={cor} />
         </div>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#0f172a' }}>{titulo}</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>{titulo}</h2>
       </div>
       <div>{children}</div>
     </section>
@@ -372,7 +376,7 @@ function Campo({ label, valor, mono, icon }: { label: string; valor?: string | n
   const v = (valor ?? '').toString().trim();
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderBottom: '0.5px solid #f1f5f9' }}>
-      <span style={{ fontSize: 13, color: '#94a3b8', flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'var(--text-tertiary)', flexShrink: 0 }}>{label}</span>
       <span style={{
         fontSize: 13, color: v ? '#0f172a' : '#cbd5e1', fontWeight: 500, textAlign: 'right',
         fontFamily: mono ? 'monospace' : undefined, wordBreak: 'break-word',
@@ -413,13 +417,13 @@ function CardResponsavel({ rotulo, resp }: { rotulo: string; resp: Responsavel }
   const tels = [resp.celular, resp.telefoneResidencial, resp.telefoneTrabalho].filter(Boolean) as string[];
   return (
     <div style={{ padding: '8px 0', borderBottom: '0.5px solid #f1f5f9' }}>
-      <p style={{ fontSize: 11, color: '#94a3b8', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: 0.4 }}>{rotulo}</p>
-      <p style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#0f172a' }}>{resp.nome}</p>
-      {resp.parentesco && <p style={{ fontSize: 12, color: '#64748b', margin: '1px 0 0' }}>{resp.parentesco}</p>}
+      <p style={{ fontSize: 11, color: 'var(--text-tertiary)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: 0.4 }}>{rotulo}</p>
+      <p style={{ fontSize: 14, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>{resp.nome}</p>
+      {resp.parentesco && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '1px 0 0' }}>{resp.parentesco}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4 }}>
         {tels.map((t, i) => <TelLink key={i} tel={t} />)}
       </div>
-      {resp.email && <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0', wordBreak: 'break-all' }}>{resp.email}</p>}
+      {resp.email && <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0', wordBreak: 'break-all' }}>{resp.email}</p>}
     </div>
   );
 }

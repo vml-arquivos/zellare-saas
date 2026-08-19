@@ -10,8 +10,9 @@
  * Zero dependências externas. Usa IndexedDB nativo.
  */
 
+// Nome legado preservado deliberadamente para manter rascunhos e fila de versões anteriores.
 const DB_NAME = 'conexa-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -219,7 +220,7 @@ export const drafts = {
 // ─── Sincronizador ────────────────────────────────────────────────────────────
 
 export async function syncPendingActions(
-  httpPost: (endpoint: string, payload: unknown) => Promise<unknown>,
+  httpRequest: (endpoint: string, method: OfflineAction['method'], payload: unknown) => Promise<unknown>,
   onProgress?: (done: number, total: number) => void,
 ): Promise<{ synced: number; errors: number }> {
   const pending = await getPendingActions();
@@ -231,7 +232,7 @@ export async function syncPendingActions(
   for (const action of pending) {
     try {
       await updateActionStatus(action.id, 'syncing');
-      await httpPost(action.endpoint, action.payload);
+      await httpRequest(action.endpoint, action.method, action.payload);
       await markActionDone(action.id);
       synced++;
     } catch (err) {

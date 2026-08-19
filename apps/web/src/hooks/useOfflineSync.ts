@@ -13,6 +13,7 @@ import {
   enqueueAction,
   getQueueCount,
   syncPendingActions,
+  markActionDone,
   type OfflineAction,
 } from '../services/offlineDB';
 import http from '../api/http';
@@ -35,29 +36,42 @@ export function useOfflineSync(): UseOfflineSyncReturn {
   const [queueCount, setQueueCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const syncingRef = useRef(false);
+  const reconnectTimerRef = useRef<number | null>(null);
 
   // Atualizar contagem da fila
   const refreshQueue = useCallback(async () => {
-    const count = await getQueueCount();
-    setQueueCount(count);
+    try {
+      const count = await getQueueCount();
+      setQueueCount(count);
+    } catch {
+      // IndexedDB pode estar bloqueado em modo privado; o app continua online.
+      setQueueCount(0);
+    }
   }, []);
 
   // Detectar mudanças de conectividade
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      // Ao voltar online, sincronizar automaticamente após 1s
-      setTimeout(() => syncNow(), 1000);
+      // Ao voltar online, sincronizar automaticamente após 1s, sem timers órfãos.
+      if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = window.setTimeout(() => { void syncNow(); }, 1000);
     };
     const handleOffline = () => setIsOnline(false);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) void syncNow();
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    refreshQueue();
+    document.addEventListener('visibilitychange', handleVisibility);
+    void refreshQueue();
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (reconnectTimerRef.current !== null) window.clearTimeout(reconnectTimerRef.current);
     };
   }, []);
 
@@ -68,8 +82,9 @@ export function useOfflineSync(): UseOfflineSyncReturn {
     setIsSyncing(true);
     try {
       const { synced, errors } = await syncPendingActions(
-        async (endpoint, payload) => {
-          const res = await http.post(endpoint, payload);
+        async (endpoint, method, payload) => {
+          const fn = method === 'POST' ? http.post : method === 'PUT' ? http.put : http.patch;
+          const res = await fn(endpoint, payload);
           return res.data;
         },
       );
@@ -93,8 +108,8 @@ export function useOfflineSync(): UseOfflineSyncReturn {
     method: OfflineAction['method'],
     payload: Record<string, unknown>,
   ): Promise<{ local: boolean; synced: boolean }> => {
-    // Sempre salva localmente primeiro
-    await enqueueAction(type, endpoint, method, payload);
+    // Sempre salva localmente primeiro e guarda o ID exato desta ação.
+    const actionId = await enqueueAction(type, endpoint, method, payload);
     await refreshQueue();
 
     // Se online, tenta sincronizar imediatamente
@@ -102,10 +117,8 @@ export function useOfflineSync(): UseOfflineSyncReturn {
       try {
         const fn = method === 'POST' ? http.post : method === 'PUT' ? http.put : http.patch;
         await fn(endpoint, payload);
-        // Sucesso: remove da fila
-        const pending = await import('../services/offlineDB').then((m) => m.getPendingActions());
-        const last = pending[pending.length - 1];
-        if (last) await import('../services/offlineDB').then((m) => m.markActionDone(last.id));
+        // Sucesso: remove exatamente a ação criada por esta operação.
+        await markActionDone(actionId);
         await refreshQueue();
         return { local: true, synced: true };
       } catch (err) {

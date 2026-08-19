@@ -62,7 +62,7 @@ export default function MobileMaterialPage() {
   };
 
   return (
-    <div style={{ padding: '16px 16px 120px' }}>
+    <div className="mobile-page">
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Package size={20} /> Requisição
@@ -75,7 +75,7 @@ export default function MobileMaterialPage() {
       {/* Categorias */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
         {CATEGORIAS.map((cat) => (
-          <button key={cat.id} onClick={() => { setCategoria(cat.id); setItensSelecionados([]); }}
+          <button type="button" key={cat.id} aria-pressed={categoria === cat.id} onClick={() => { setCategoria(cat.id); setItensSelecionados([]); }}
             style={{
               padding: '14px 12px', borderRadius: 14, cursor: 'pointer', textAlign: 'center',
               border: `0.5px solid ${categoria === cat.id ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
@@ -96,7 +96,7 @@ export default function MobileMaterialPage() {
               <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 8 }}>Selecione os itens *</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {catInfo.itens.map((item) => (
-                  <button key={item} onClick={() => toggleItem(item)}
+                  <button type="button" key={item} aria-pressed={itensSelecionados.includes(item)} onClick={() => toggleItem(item)}
                     style={{
                       padding: '8px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
                       border: `0.5px solid ${itensSelecionados.includes(item) ? '#4f46e5' : 'var(--color-border-tertiary)'}`,
@@ -127,7 +127,7 @@ export default function MobileMaterialPage() {
             <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 8 }}>Prioridade</label>
             <div style={{ display: 'flex', gap: 8 }}>
               {PRIORIDADES.map((p) => (
-                <button key={p.id} onClick={() => setPrioridade(p.id)}
+                <button type="button" key={p.id} aria-pressed={prioridade === p.id} onClick={() => setPrioridade(p.id)}
                   style={{
                     flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                     border: `0.5px solid ${prioridade === p.id ? p.color : 'var(--color-border-tertiary)'}`,
@@ -164,8 +164,8 @@ export default function MobileMaterialPage() {
 
       {/* Botão enviar */}
       {categoria && (
-        <div style={{ position: 'fixed', bottom: 'calc(60px + env(safe-area-inset-bottom, 0px))', left: 0, right: 0, padding: '12px 16px', background: 'var(--color-background-primary)', borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-          <button onClick={salvar}
+        <div className="mobile-action-bar">
+          <button type="button" aria-label="Enviar requisição de material" onClick={salvar}
             disabled={saving || (itensSelecionados.length === 0 && !itemCustom.trim())}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',

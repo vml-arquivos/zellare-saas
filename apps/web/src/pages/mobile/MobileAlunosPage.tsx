@@ -30,7 +30,7 @@ interface AlunoLista {
   classroomName?: string;
 }
 
-const ACCENT = '#4f46e5';
+const ACCENT = 'var(--brand-600)';
 
 export default function MobileAlunosPage() {
   const navigate = useNavigate();
@@ -117,25 +117,25 @@ export default function MobileAlunosPage() {
   }, [alunos, busca, selectedClassroom]);
 
   return (
-    <div style={{ padding: '16px 16px 100px' }}>
+    <div className="mobile-page">
       <div style={{ marginBottom: 14 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: '#0f172a' }}>Alunos</h1>
-        <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 500, margin: '0 0 2px', color: 'var(--text-primary)' }}>Alunos</h1>
+        <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>
           {filtrados.length} aluno{filtrados.length !== 1 ? 's' : ''} · toque para ver a ficha
         </p>
       </div>
 
       {/* Busca */}
       <div style={{ position: 'relative', marginBottom: 10 }}>
-        <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+        <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
         <input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar aluno…"
           style={{
             width: '100%', padding: '11px 14px 11px 38px', fontSize: 15,
-            border: '0.5px solid #e2e8f0', borderRadius: 12, background: '#fff',
-            color: '#0f172a', outline: 'none',
+            border: '0.5px solid var(--border-default)', borderRadius: 12, background: 'var(--surface-base)',
+            color: 'var(--text-primary)', outline: 'none',
           }}
         />
       </div>
@@ -147,28 +147,28 @@ export default function MobileAlunosPage() {
           onChange={(e) => setSelectedClassroom(e.target.value)}
           style={{
             width: '100%', padding: '11px 40px 11px 14px', fontSize: 15,
-            border: '0.5px solid #e2e8f0', borderRadius: 12, background: '#fff',
-            color: '#0f172a', appearance: 'none',
+            border: '0.5px solid var(--border-default)', borderRadius: 12, background: 'var(--surface-base)',
+            color: 'var(--text-primary)', appearance: 'none',
           }}
         >
           <option value="">Todas as turmas</option>
           {classrooms.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <ChevronDown size={16} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#94a3b8' }} />
+        <ChevronDown size={16} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }} />
       </div>
 
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
-          <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: '#94a3b8' }} />
+          <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-tertiary)' }} />
         </div>
       )}
 
       {erro && !loading && (
-        <div style={{ padding: '12px 14px', background: '#fef2f2', borderRadius: 12, fontSize: 14, color: '#991b1b' }}>{erro}</div>
+        <div style={{ padding: '12px 14px', background: 'var(--error-bg)', borderRadius: 12, fontSize: 14, color: 'var(--error)' }}>{erro}</div>
       )}
 
       {!loading && filtrados.length === 0 && !erro && (
-        <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: 14, padding: 24 }}>Nenhum aluno encontrado.</p>
+        <p style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontSize: 14, padding: 24 }}>Nenhum aluno encontrado.</p>
       )}
 
       {/* Lista */}
@@ -177,12 +177,14 @@ export default function MobileAlunosPage() {
           const fotoUrl = resolveChildPhotoUrl(a);
           return (
             <button
+              type="button"
               key={a.id}
+              aria-label={`Abrir ficha de ${a.firstName} ${a.lastName}`}
               onClick={() => navigate(`/app/mobile/alunos/${a.id}`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '10px 14px', borderRadius: 14,
-                border: '0.5px solid #e2e8f0', background: '#fff',
+                border: '0.5px solid var(--border-default)', background: 'var(--surface-base)',
                 cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -201,21 +203,21 @@ export default function MobileAlunosPage() {
               )}
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: '#0f172a', lineHeight: 1.3 }}>
+                <p style={{ fontSize: 15, fontWeight: 500, margin: 0, color: 'var(--text-primary)', lineHeight: 1.3 }}>
                   {a.firstName} {a.lastName}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                  {a.classroomName && <span style={{ fontSize: 11, color: '#94a3b8' }}>{a.classroomName}</span>}
+                  {a.classroomName && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{a.classroomName}</span>}
                   {a.allergies && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#d97706' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--warning)' }}>
                       <AlertTriangle size={11} /> Alergia
                     </span>
                   )}
-                  {a.laudado && <span style={{ fontSize: 11, color: '#7c3aed' }}>Laudado</span>}
+                  {a.laudado && <span style={{ fontSize: 11, color: 'var(--accent-violet)' }}>Laudado</span>}
                 </div>
               </div>
 
-              <ChevronRight size={18} color="#cbd5e1" style={{ flexShrink: 0 }} />
+              <ChevronRight size={18} color="var(--border-strong)" style={{ flexShrink: 0 }} />
             </button>
           );
         })}
