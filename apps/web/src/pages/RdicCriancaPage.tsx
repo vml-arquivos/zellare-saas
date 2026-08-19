@@ -103,12 +103,18 @@ interface RdicSalvo {
 }
 
 interface RelatorioIAConsolidado {
+  reportId?: string;
+  status?: string;
   relatorio: string;
   pontosFortess: string[];
   sugestoes: string[];
   anonimizado: boolean;
   totalObservacoes: number;
   codigoAnonimizado: string;
+  periodoInicio?: string;
+  periodoFim?: string;
+  fontes?: Record<string, number>;
+  requerRevisaoHumana?: boolean;
 }
 
 interface DiagnosticoExpress {
@@ -833,9 +839,13 @@ export default function RdicCriancaPage() {
     try {
       const ano = new Date().getFullYear();
       const trimestreAtual = TRIMESTRES.find(t => t.id === trimestre);
+      const { start, end } = periodoDoTrimestre(trimestre);
+      const periodo = `${trimestreAtual?.label ?? `${trimestre}º Trimestre`} ${ano}`;
       const res = await http.post('/ia/relatorio-consolidado-lgpd', {
         childId: alunoSelecionado.id,
-        periodo: `${trimestreAtual?.label ?? `${trimestre}º Trimestre`} ${ano}`,
+        periodo,
+        startDate: `${start}T00:00:00.000Z`,
+        endDate: `${end}T23:59:59.999Z`,
       });
       setRelatorioIA(res.data);
       setMostrarRelatorioIA(true);
@@ -846,7 +856,11 @@ export default function RdicCriancaPage() {
       if (res.data?.sugestoes?.length > 0 && !proximosPassos.trim()) {
         setProximosPassos(res.data.sugestoes.join('\n'));
       }
-      toast.success(`Rascunho gerado com base em ${res.data.totalObservacoes} observações do Diário de Bordo!`);
+      const fontes = Object.entries(res.data?.fontes ?? {})
+        .filter(([, value]) => Number(value) > 0)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(' · ');
+      toast.success(`Relatório salvo em revisão humana com ${res.data.totalObservacoes} anotações pedagógicas${fontes ? ` (${fontes})` : ''}.`);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Erro ao gerar rascunho com IA';
       toast.error(msg);
@@ -1332,6 +1346,11 @@ export default function RdicCriancaPage() {
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                       Código: {relatorioIA.codigoAnonimizado}
                     </span>
+                    {relatorioIA.status && (
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                        {relatorioIA.status === 'EM_REVISAO' ? 'Em revisão humana' : relatorioIA.status}
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => setMostrarRelatorioIA(v => !v)}
@@ -1371,8 +1390,20 @@ export default function RdicCriancaPage() {
                         </ul>
                       </div>
                     )}
+                    {relatorioIA.fontes && (
+                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-xs font-semibold uppercase text-slate-500">Fontes reais consideradas</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {Object.entries(relatorioIA.fontes).filter(([, value]) => Number(value) > 0).map(([fonte, valor]) => (
+                            <span key={fonte} className="rounded-full bg-white px-2.5 py-1 text-xs text-slate-600 border border-slate-200">
+                              {fonte.replace(/[A-Z]/g, (letter) => ` ${letter}`).replace(/^./, (letter) => letter.toUpperCase())}: {valor}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <p className="text-xs text-gray-400 italic">
-                      * Rascunho gerado por IA. Revise e adapte conforme sua observação direta da criança.
+                      * Rascunho salvo no banco como relatório em revisão humana. A IA não produz diagnóstico, laudo clínico nem publicação automática.
                     </p>
                   </div>
                 )}

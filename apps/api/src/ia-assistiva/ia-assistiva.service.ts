@@ -14,6 +14,7 @@ import { GerarAtividadeDto, FaixaEtaria, TipoAtividade } from './dto/gerar-ativi
 import { GerarPlanoDeAulaDto } from './dto/gerar-plano-de-aula.dto';
 import { GerarIdeiasRapidasDto } from './dto/gerar-ideias-rapidas.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { RoleLevel, RdicStatus } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { canAccessUnit } from '../common/utils/can-access-unit';
 import {
@@ -418,93 +419,282 @@ Responda em JSON:
   }
 
   /**
-   * Gera relatório consolidado de desenvolvimento com anonimização LGPD.
-   * Busca dados reais do banco (Diário de Bordo + microgestos) e envia
-   * apenas dados anonimizados para a IA.
+   * Consolida anotações reais do professor e demais fontes da criança.
+   *
+   * O texto enviado à IA é minimizado e anonimizado. A camada de evidências,
+   * frequência, família, nutrição e alertas é contabilizada para rastreabilidade,
+   * mas conteúdo clínico, psicológico e familiar não é enviado ao modelo.
+   * O resultado é persistido como DevelopmentReport em EM_REVISAO; a IA nunca
+   * publica, aprova ou substitui a revisão profissional.
    */
-  async gerarRelatorioConsolidadoLGPD(params: {
-    childId: string;
-    periodo: string;
-  }): Promise<{
+  async gerarRelatorioConsolidadoLGPD(
+    params: {
+      childId: string;
+      periodo: string;
+      startDate?: string;
+      endDate?: string;
+    },
+    user: JwtPayload,
+  ): Promise<{
+    reportId: string;
+    status: string;
     relatorio: string;
     pontosFortess: string[];
     sugestoes: string[];
     anonimizado: boolean;
     totalObservacoes: number;
     codigoAnonimizado: string;
+    periodo: string;
+    periodoInicio: string;
+    periodoFim: string;
+    fontes: Record<string, number>;
+    requerRevisaoHumana: true;
   }> {
-    // 1. Buscar dados da criança
+    const parseDate = (value?: string, endOfDay = false): Date | null => {
+      if (!value) return null;
+      const parsed = new Date(endOfDay && /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T23:59:59.999` : value);
+      if (Number.isNaN(parsed.getTime())) throw new BadRequestException(`Data inválida: ${value}`);
+      return parsed;
+    };
+
+    let inicio = parseDate(params.startDate);
+    let fim = parseDate(params.endDate, true);
+    if (!inicio || !fim) {
+      const ano = Number(params.periodo.match(/20\d{2}/)?.[0] ?? new Date().getFullYear());
+      const trimestre = params.periodo.match(/([1-3])(?:º|o)?\s*Trimestre/i)?.[1];
+      if (trimestre === '1') {
+        inicio = new Date(ano, 1, 1);
+        fim = new Date(ano, 4, 31, 23, 59, 59, 999);
+      } else if (trimestre === '2') {
+        inicio = new Date(ano, 5, 1);
+        fim = new Date(ano, 8, 30, 23, 59, 59, 999);
+      } else if (trimestre === '3') {
+        inicio = new Date(ano, 9, 1);
+        fim = new Date(ano, 11, 31, 23, 59, 59, 999);
+      } else {
+        inicio = new Date(ano, 0, 1);
+        fim = new Date(ano, 11, 31, 23, 59, 59, 999);
+      }
+    }
+    if (!inicio || !fim || inicio > fim) {
+      throw new BadRequestException('Período inválido para geração do relatório.');
+    }
+
     const crianca = await this.prisma.child.findUnique({
       where: { id: params.childId },
-      select: { id: true, firstName: true, lastName: true, dateOfBirth: true },
+      select: {
+        id: true,
+        mantenedoraId: true,
+        unitId: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        enrollments: {
+          where: { status: 'ATIVA' },
+          orderBy: { enrollmentDate: 'desc' },
+          take: 1,
+          select: {
+            classroomId: true,
+            classroom: {
+              select: {
+                id: true,
+                name: true,
+                unitId: true,
+                unit: { select: { id: true, name: true, mantenedoraId: true } },
+              },
+            },
+          },
+        },
+      },
     });
-    if (!crianca) throw new ServiceUnavailableException('Criança não encontrada.');
+    if (!crianca) throw new NotFoundException('Criança não encontrada.');
+    if (crianca.mantenedoraId !== user.mantenedoraId && !user.roles.some((role) => role.level === RoleLevel.DEVELOPER)) {
+      throw new ForbiddenException('Criança fora do escopo da mantenedora.');
+    }
 
-    // 2. Código anônimo determinístico (baseado no ID, nunca no nome)
-    const codigoAnonimizado = `C-${params.childId.slice(-6).toUpperCase()}`;
-    const nomeAnonimizado = this.anonimizarNome(
-      `${crianca.firstName} ${crianca.lastName}`,
-      codigoAnonimizado,
-    );
+    const enrollment = crianca.enrollments[0];
+    const unitId = enrollment?.classroom.unitId ?? crianca.unitId;
+    if (!(await canAccessUnit(user, unitId))) {
+      throw new ForbiddenException('Sem acesso à unidade da criança.');
+    }
 
-    // 3. Calcular faixa etária a partir de dateOfBirth
+    const diaryEvents = await this.prisma.diaryEvent.findMany({
+      where: { childId: crianca.id, eventDate: { gte: inicio, lte: fim } },
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        description: true,
+        observations: true,
+        developmentNotes: true,
+        behaviorNotes: true,
+        eventDate: true,
+        status: true,
+      },
+      orderBy: { eventDate: 'desc' },
+      take: 500,
+    });
+
+    const developmentObservations = await this.prisma.developmentObservation.findMany({
+      where: { childId: crianca.id, date: { gte: inicio, lte: fim } },
+      select: {
+        id: true,
+        category: true,
+        date: true,
+        behaviorDescription: true,
+        socialInteraction: true,
+        emotionalState: true,
+        motorSkills: true,
+        cognitiveSkills: true,
+        languageSkills: true,
+        learningProgress: true,
+        planningParticipation: true,
+        interests: true,
+        challenges: true,
+        recommendations: true,
+        nextSteps: true,
+      },
+      orderBy: { date: 'desc' },
+      take: 500,
+    });
+
+    const [attendance, familyCommunications, parentMeetings, alerts, evidenceLayer, nutritionalCase] = await Promise.all([
+      this.prisma.attendance.count({ where: { childId: crianca.id, date: { gte: inicio, lte: fim } } }),
+      this.prisma.familyCommunication.count({ where: { childId: crianca.id, createdAt: { gte: inicio, lte: fim } } }),
+      this.prisma.atendimentoPais.count({ where: { childId: crianca.id, dataAtendimento: { gte: inicio, lte: fim } } }),
+      this.prisma.alertaAluno.count({ where: { childId: crianca.id, geradoEm: { gte: inicio, lte: fim } } }),
+      this.prisma.childEvidence.findMany({
+        where: { childId: crianca.id, capturedAt: { gte: inicio, lte: fim }, isActive: true },
+        select: { id: true, sourceType: true, evidenceType: true, sensitivity: true, visibility: true, content: true, capturedAt: true },
+        orderBy: { capturedAt: 'desc' },
+        take: 500,
+      }),
+      this.prisma.acompanhamentoNutricional.findUnique({ where: { childId: crianca.id }, select: { id: true, ativo: true, motivoAcompanhamento: true } }),
+    ]);
+
+    const codigoAnonimizado = `C-${crianca.id.slice(-6).toUpperCase()}`;
+    const nomeAnonimizado = this.anonimizarNome(`${crianca.firstName} ${crianca.lastName}`, codigoAnonimizado);
+    const regexNome = new RegExp(`${crianca.firstName}|${crianca.lastName}`, 'gi');
+    const anonimizar = (texto: string) => texto
+      .replace(/\b[A-Z][a-zÀ-ÿ]{2,}\s[A-Z][a-zÀ-ÿ]{2,}\b/g, nomeAnonimizado)
+      .replace(regexNome, nomeAnonimizado)
+      .trim();
+
+    const observacoes: string[] = [];
+    for (const event of diaryEvents) {
+      const campos = [event.title, event.description, event.observations, event.developmentNotes, event.behaviorNotes]
+        .filter((value): value is string => Boolean(value?.trim()));
+      if (campos.length > 0) observacoes.push(`Diário (${event.eventDate.toISOString().slice(0, 10)}): ${anonimizar(campos.join(' — '))}`);
+    }
+    for (const observation of developmentObservations) {
+      const campos = [
+        observation.behaviorDescription,
+        observation.socialInteraction,
+        observation.emotionalState,
+        observation.motorSkills,
+        observation.cognitiveSkills,
+        observation.languageSkills,
+        observation.learningProgress,
+        observation.planningParticipation,
+        observation.interests,
+        observation.challenges,
+        observation.recommendations,
+        observation.nextSteps,
+      ].filter((value): value is string => Boolean(value?.trim()));
+      if (campos.length > 0) observacoes.push(`Observação de desenvolvimento (${observation.date.toISOString().slice(0, 10)}): ${anonimizar(campos.join(' — '))}`);
+    }
+    for (const evidence of evidenceLayer) {
+      if (evidence.content && !['SAUDE', 'PSICOLOGICA', 'FAMILIAR'].includes(String(evidence.sensitivity))) {
+        observacoes.push(`Evidência ${evidence.evidenceType}: ${anonimizar(evidence.content)}`);
+      }
+    }
+
+    if (observacoes.length === 0) {
+      throw new BadRequestException('Não há anotações pedagógicas suficientes no período selecionado para gerar o relatório.');
+    }
+
     let faixaEtaria = 'Criança Pequena (4 a 5 anos)';
     if (crianca.dateOfBirth) {
-      const idadeMeses = Math.floor(
-        (Date.now() - new Date(crianca.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 30.44),
-      );
+      const idadeMeses = Math.floor((Date.now() - new Date(crianca.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
       if (idadeMeses <= 18) faixaEtaria = 'Bebê (0 a 1 ano e 6 meses)';
       else if (idadeMeses <= 47) faixaEtaria = 'Criança Bem Pequena (1a7m a 3a11m)';
       else faixaEtaria = 'Criança Pequena (4 a 5 anos e 11 meses)';
     }
 
-    // 4. Buscar observações do Diário de Bordo
-    // Campos reais: description, observations, developmentNotes, behaviorNotes
-    const diaryEvents = await this.prisma.diaryEvent.findMany({
-      where: { childId: params.childId },
-      select: {
-        description: true,
-        observations: true,
-        developmentNotes: true,
-        behaviorNotes: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 30,
-    });
-
-    // 5. Montar observações anonimizadas (remover nomes próprios)
-    const observacoes: string[] = [];
-    const regexNome = new RegExp(`${crianca.firstName}|${crianca.lastName}`, 'gi');
-    for (const ev of diaryEvents) {
-      const campos = [ev.description, ev.observations, ev.developmentNotes, ev.behaviorNotes].filter(Boolean) as string[];
-      for (const campo of campos) {
-        const obs = campo
-          .replace(/\b[A-Z][a-z]{2,}\s[A-Z][a-z]{2,}\b/g, nomeAnonimizado)
-          .replace(regexNome, nomeAnonimizado);
-        observacoes.push(obs);
-      }
-    }
-
-    if (observacoes.length === 0) {
-      throw new ServiceUnavailableException(
-        'Não há observações suficientes. Registre pelo menos uma entrada no Diário de Bordo.',
-      );
-    }
-
-    // 6. Chamar IA com dados 100% anonimizados
     const resultado = await this.gerarRelatorioAluno({
       nomeAluno: nomeAnonimizado,
       faixaEtaria,
-      observacoes: observacoes.slice(0, 20),
-      periodo: params.periodo,
+      observacoes: observacoes.slice(0, 80),
+      periodo: `${params.periodo} (${inicio.toISOString().slice(0, 10)} a ${fim.toISOString().slice(0, 10)})`,
     });
+
+    const fontes = {
+      diarioBordo: diaryEvents.length,
+      observacoesDesenvolvimento: developmentObservations.length,
+      camadaEvidencias: evidenceLayer.length,
+      frequencia: attendance,
+      comunicacoesFamilia: familyCommunications,
+      atendimentosPais: parentMeetings,
+      alertas: alerts,
+      casosNutricionaisAtivos: nutritionalCase?.ativo ? 1 : 0,
+      fontesSensíveisNãoEnviadas: evidenceLayer.filter((item) => ['SAUDE', 'PSICOLOGICA', 'FAMILIAR'].includes(String(item.sensitivity))).length,
+    };
+
+    const classroomId = enrollment?.classroomId ?? (diaryEvents[0]
+      ? (await this.prisma.diaryEvent.findFirst({
+        where: { id: diaryEvents[0].id },
+        select: { classroomId: true },
+      }))?.classroomId
+      : undefined);
+    if (!classroomId) throw new BadRequestException('A criança não possui turma ativa para vincular o relatório.');
+
+    const content = JSON.stringify({
+      ...resultado,
+      codigoAnonimizado,
+      periodo: params.periodo,
+      periodoInicio: inicio.toISOString(),
+      periodoFim: fim.toISOString(),
+      fontes,
+      geradoPorIA: true,
+      requerRevisaoHumana: true,
+    });
+    const existing = await this.prisma.developmentReport.findFirst({
+      where: {
+        childId: crianca.id,
+        classroomId,
+        unitId,
+        authorId: user.sub,
+        period: params.periodo,
+        status: { in: [RdicStatus.RASCUNHO, RdicStatus.EM_REVISAO, RdicStatus.DEVOLVIDO] },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const report = existing
+      ? await this.prisma.developmentReport.update({ where: { id: existing.id }, data: { content, status: RdicStatus.EM_REVISAO } })
+      : await this.prisma.developmentReport.create({
+        data: {
+          childId: crianca.id,
+          authorId: user.sub,
+          classroomId,
+          unitId,
+          period: params.periodo,
+          content,
+          status: RdicStatus.EM_REVISAO,
+        },
+      });
 
     return {
       ...resultado,
+      reportId: report.id,
+      status: report.status,
       anonimizado: true,
       totalObservacoes: observacoes.length,
       codigoAnonimizado,
+      periodo: params.periodo,
+      periodoInicio: inicio.toISOString(),
+      periodoFim: fim.toISOString(),
+      fontes,
+      requerRevisaoHumana: true,
     };
   }
 

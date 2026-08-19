@@ -87,13 +87,15 @@ export class IaAssistivaController {
   @Post('relatorio-consolidado-lgpd')
   @HttpCode(HttpStatus.OK)
   gerarRelatorioConsolidadoLGPD(
-    @Body() body: { childId: string; periodo: string },
-    @CurrentUser() _user: JwtPayload,
+    @Body() body: { childId: string; periodo: string; startDate?: string; endDate?: string },
+    @CurrentUser() user: JwtPayload,
   ) {
     return this.iaService.gerarRelatorioConsolidadoLGPD({
       childId: body.childId,
       periodo: body.periodo,
-    });
+      startDate: body.startDate,
+      endDate: body.endDate,
+    }, user);
   }
 
   /**
