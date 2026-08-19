@@ -124,6 +124,58 @@ describe('DiaryEventService - Ocorrências', () => {
     expect(mockPrismaService.planning.findUnique).not.toHaveBeenCalled();
   });
 
+  it('deve permitir Diário de Bordo publicado sem planejamento quando há destaque', async () => {
+    const dto = {
+      type: DiaryEventType.ATIVIDADE_PEDAGOGICA,
+      title: 'Diário livre de teste',
+      description: 'Registro natural da rotina',
+      eventDate: new Date().toISOString(),
+      childId: 'child-1',
+      classroomId: 'class-1',
+      status: 'PUBLICADO',
+      aiContext: { momentoDestaque: 'A turma explorou materiais sensoriais com curiosidade.' },
+    };
+
+    const result = await service.create(dto as any, mockUser);
+
+    expect(result.id).toBe('event-1');
+    expect(mockPrismaService.planning.findUnique).not.toHaveBeenCalled();
+    expect(mockPrismaService.diaryEvent.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ planningId: expect.anything() }),
+      }),
+    );
+  });
+
+  it('deve manter a avaliação obrigatória quando o Diário está vinculado a planejamento', async () => {
+    const validPlanningId = 'clxxxxxxxxxxxxxxxxxxxxxxxx';
+    mockPrismaService.planning.findUnique.mockResolvedValue({
+      id: validPlanningId,
+      status: PlanningStatus.APROVADO,
+      classroomId: 'class-1',
+      startDate: new Date('2020-01-01'),
+      endDate: new Date('2099-12-31'),
+      curriculumMatrix: null,
+    });
+
+    const dto = {
+      type: DiaryEventType.ATIVIDADE_PEDAGOGICA,
+      title: 'Diário com planejamento',
+      description: 'Registro vinculado',
+      eventDate: new Date().toISOString(),
+      childId: 'child-1',
+      classroomId: 'class-1',
+      planningId: validPlanningId,
+      status: 'PUBLICADO',
+      aiContext: { momentoDestaque: 'A turma participou.' },
+    };
+
+    await expect(service.create(dto as any, mockUser)).rejects.toThrow(
+      /Avaliação do Plano de Aula preenchida/i,
+    );
+    expect(mockPrismaService.diaryEvent.create).not.toHaveBeenCalled();
+  });
+
   it('deve criar ocorrência com planningId válido em status EM_EXECUCAO', async () => {
     const validPlanningId = 'clxxxxxxxxxxxxxxxxxxxxxxxx';
     mockPrismaService.planning.findUnique.mockResolvedValue({

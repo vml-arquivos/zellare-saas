@@ -124,9 +124,9 @@ export class DiaryEventService {
     const resolvedCurriculumEntryId = createDto.curriculumEntryId && CUID_RE.test(createDto.curriculumEntryId)
       ? createDto.curriculumEntryId : undefined;
 
-    // REGRA DE OURO (segurança produção): Diário publicado exige planejamento APROVADO ou EM_EXECUCAO ativo.
-    // Cobre o tipo atual ATIVIDADE_PEDAGOGICA (frontend) e o legado DIARIO_BORDO.
-    // Ocorrências são isentas — podem ocorrer fora do planejamento pedagógico.
+    // Diário de Bordo pode ser publicado em modo livre, sem planejamento aprovado.
+    // Quando o professor envia planningId, o evento continua vinculado e sujeito às
+    // validações específicas do planejamento abaixo. Ocorrências permanecem isentas.
     const isPublicacao =
       createDto.status === 'PUBLICADO' || createDto.status == null;
     const isDiarioBordo =
@@ -134,35 +134,13 @@ export class DiaryEventService {
       isPublicacao &&
       ((createDto.type as string) === 'DIARIO_BORDO' ||
         (createDto.type as string) === 'ATIVIDADE_PEDAGOGICA');
-    if (isDiarioBordo && !resolvedPlanningId) {
-      // Buscar planejamento ativo da turma para a data do evento
-      const activePlanning = await this.prisma.planning.findFirst({
-        where: {
-          classroomId: resolvedClassroomId,
-          mantenedoraId: classroom.unit.mantenedoraId,
-          unitId: classroom.unitId,
-          status: { in: [PlanningStatus.APROVADO, PlanningStatus.EM_EXECUCAO] },
-          startDate: { lte: eventDate },
-          endDate: { gte: eventDate },
-        },
-        orderBy: { startDate: 'desc' },
-        select: { id: true },
-      });
-      if (!activePlanning) {
-        throw new BadRequestException(
-          `Não há planejamento aprovado ou em execução para esta turma na data ${formatPedagogicalDate(eventDate)}. ` +
-          `O Diário de Bordo exige um planejamento ativo. Verifique com a coordenação.`,
-        );
-      }
-      // Vincular automaticamente ao planejamento ativo encontrado
-      (createDto as any).planningId = activePlanning.id;
-    }
 
-    // GATE AVALIAÇÃO (segurança produção): ATIVIDADE_PEDAGOGICA publicada exige avaliação da execução.
-    // Verifica aiContext.avaliacaoPlanoAula (campo principal) ou aiContext.statusExecucaoPlano (fallback).
+    // GATE AVALIAÇÃO: a avaliação da execução é obrigatória somente quando há
+    // planejamento explicitamente vinculado; no Diário livre, o destaque/reflexão
+    // registrado pelo professor é suficiente para publicar a rotina.
     if (
-      !isOcorrencia &&
-      isPublicacao &&
+      isDiarioBordo &&
+      Boolean(resolvedPlanningId) &&
       (createDto.type as string) === 'ATIVIDADE_PEDAGOGICA'
     ) {
       const avaliacaoPreenchida =
