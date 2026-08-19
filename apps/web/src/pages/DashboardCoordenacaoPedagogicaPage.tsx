@@ -1841,6 +1841,8 @@ export default function DashboardCoordenacaoPedagogicaPage() {
         <OcorrenciasPanel
           titulo="Ocorrências da Unidade"
           unitId={unitIdParam ?? user?.unitId ?? undefined}
+          showHierarchyFilters
+          showUnitFilter={false}
         />
       )}
     </PageShell>

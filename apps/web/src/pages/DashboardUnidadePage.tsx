@@ -502,6 +502,8 @@ export function DashboardUnidadePage() {
           <OcorrenciasPanel
             titulo="Ocorrências da Unidade"
             unitId={user?.unitId ?? undefined}
+            showHierarchyFilters
+            showUnitFilter={false}
           />
         )}
       </div>

@@ -88,13 +88,14 @@ export class CoordenacaoController {
   }
 
   /**
-   * GET /coordenacao/dashboard/geral
-   * Dashboard consolidado da coordenação geral / mantenedora
+   * GET /coordenacao/dashboard/geral?unitId=
+   * Dashboard consolidado da coordenação geral / mantenedora.
+   * Sem unitId: toda a rede; com unitId: visão detalhada da unidade selecionada.
    */
   @Get('dashboard/geral')
   @RequireRoles(RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
-  dashboardGeral(@CurrentUser() user: JwtPayload) {
-    return this.svc.getDashboardGeral(user);
+  dashboardGeral(@Query('unitId') unitId: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.getDashboardGeral(user, unitId);
   }
 
   // ─── PLANEJAMENTOS (visão coordenação) ────────────────────────────────────

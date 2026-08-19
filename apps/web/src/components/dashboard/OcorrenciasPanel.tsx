@@ -8,13 +8,15 @@
  *           DashboardDiretorPage, DashboardNutricionistaPage, professor (DiarioBordoPage)
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import http from '../../api/http';
+import { useUnitScope } from '../../contexts/UnitScopeContext';
 import { Card, CardContent } from '../ui/card';
 import { LoadingState } from '../ui/LoadingState';
 import { getPedagogicalToday } from '@/utils/pedagogicalDate';
 import {
   TriangleAlert, RefreshCw, Camera, User, BookOpen,
-  Calendar, ChevronDown, ChevronUp, Search, Printer,
+  Calendar, ChevronDown, ChevronUp, Search, Printer, ShieldCheck,
 } from 'lucide-react';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -59,7 +61,7 @@ function formatData(eventDate: string): string {
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 interface OcorrenciasPanelProps {
-  /** Filtrar por unidade específica (opcional — se omitido, usa escopo do usuário) */
+  /** Filtrar por unidade específica (opcional — se omitido, usa o escopo global ativo) */
   unitId?: string;
   /** Filtrar por turma específica (opcional — para professor ver apenas sua turma) */
   classroomId?: string;
@@ -67,6 +69,10 @@ interface OcorrenciasPanelProps {
   titulo?: string;
   /** Se true, mostra apenas as ocorrências do professor logado (para DiarioBordoPage) */
   apenasMinhas?: boolean;
+  /** Ativa a navegação administrativa unidade → turma → criança. */
+  showHierarchyFilters?: boolean;
+  /** Exibe o seletor de unidade dentro do painel; use false quando a página já o exibe no cabeçalho. */
+  showUnitFilter?: boolean;
 }
 
 export function OcorrenciasPanel({
@@ -74,16 +80,102 @@ export function OcorrenciasPanel({
   classroomId,
   titulo = 'Ocorrências Registradas',
   apenasMinhas = false,
+  showHierarchyFilters = false,
+  showUnitFilter = true,
 }: OcorrenciasPanelProps) {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { accessibleUnits, selectedUnitId: contextUnitId, setUnit: setContextUnit } = useUnitScope();
+  const routeUnitId = searchParams.get('unitId') ?? '';
+  const routeClassroomId = searchParams.get('classroomId') ?? '';
+  const routeChildId = searchParams.get('childId') ?? '';
+  const effectiveUnitId = unitId ?? contextUnitId ?? routeUnitId;
+  const [turmas, setTurmas] = useState<Array<{ id: string; name: string; unitId: string }>>([]);
+  const [criancas, setCriancas] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  const [loadingTurmas, setLoadingTurmas] = useState(false);
+  const [loadingCriancas, setLoadingCriancas] = useState(false);
+  const [selectedClassroomId, setSelectedClassroomId] = useState(classroomId ?? routeClassroomId);
+  const [selectedChildId, setSelectedChildId] = useState(routeChildId);
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandido, setExpandido] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
-  const [filtroTurma, setFiltroTurma] = useState('');
   const [filtroProfessor, setFiltroProfessor] = useState('');
   const [filtroPeriodo, setFiltroPeriodo] = useState<'hoje' | '7d' | '30d' | 'todos'>('todos');
   const printRef = useRef<HTMLDivElement>(null);
+
+  const updateRouteFilters = useCallback((updates: { classroomId?: string; childId?: string }) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      if (updates.classroomId !== undefined) {
+        if (updates.classroomId) next.set('classroomId', updates.classroomId);
+        else next.delete('classroomId');
+      }
+      if (updates.childId !== undefined) {
+        if (updates.childId) next.set('childId', updates.childId);
+        else next.delete('childId');
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  // Resolve a unidade selecionada antes de consultar turmas reais.
+  useEffect(() => {
+    if (!showHierarchyFilters || !effectiveUnitId) {
+      setTurmas([]);
+      setSelectedClassroomId('');
+      setCriancas([]);
+      setSelectedChildId('');
+      return;
+    }
+
+    setLoadingTurmas(true);
+    http.get('/lookup/classrooms/accessible', { params: { unitId: effectiveUnitId } })
+      .then((response) => {
+        const data = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
+        setTurmas(data);
+        const requestedClassroomId = classroomId ?? routeClassroomId;
+        const validClassroomId = data.some((item: { id: string }) => item.id === requestedClassroomId)
+          ? requestedClassroomId
+          : '';
+        setSelectedClassroomId(validClassroomId);
+        if (!validClassroomId && (requestedClassroomId || routeChildId)) {
+          updateRouteFilters({ classroomId: '', childId: '' });
+        }
+      })
+      .catch(() => {
+        setTurmas([]);
+        setSelectedClassroomId('');
+        updateRouteFilters({ classroomId: '', childId: '' });
+      })
+      .finally(() => setLoadingTurmas(false));
+  }, [showHierarchyFilters, effectiveUnitId, classroomId, routeClassroomId, routeChildId, updateRouteFilters]);
+
+  // Resolve crianças somente depois da turma, mantendo a hierarquia explícita.
+  useEffect(() => {
+    if (!showHierarchyFilters || !selectedClassroomId) {
+      setCriancas([]);
+      setSelectedChildId('');
+      return;
+    }
+
+    setLoadingCriancas(true);
+    http.get('/lookup/children/accessible', { params: { classroomId: selectedClassroomId } })
+      .then((response) => {
+        const data = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
+        setCriancas(data);
+        const validChildId = data.some((item: { id: string }) => item.id === routeChildId) ? routeChildId : '';
+        setSelectedChildId(validChildId);
+        if (!validChildId && routeChildId) updateRouteFilters({ childId: '' });
+      })
+      .catch(() => {
+        setCriancas([]);
+        setSelectedChildId('');
+        updateRouteFilters({ childId: '' });
+      })
+      .finally(() => setLoadingCriancas(false));
+  }, [showHierarchyFilters, selectedClassroomId, routeChildId, updateRouteFilters]);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -94,9 +186,12 @@ export function OcorrenciasPanel({
         limit: '200',
       };
       // Escopo de unidade (coordenadora de unidade / STAFF_CENTRAL com unitId)
-      if (unitId) params.unitId = unitId;
-      // Escopo de turma (professor — backend já filtra, mas passamos para garantir)
-      if (classroomId) params.classroomId = classroomId;
+      const scopeUnitId = unitId ?? effectiveUnitId;
+      if (scopeUnitId) params.unitId = scopeUnitId;
+      // Escopo de turma e criança: ambos chegam ao backend para evitar carregar dados fora do detalhe selecionado.
+      const scopeClassroomId = classroomId ?? selectedClassroomId;
+      if (scopeClassroomId) params.classroomId = scopeClassroomId;
+      if (selectedChildId) params.childId = selectedChildId;
 
       if (filtroPeriodo === 'hoje') {
         params.startDate = hoje + 'T00:00:00.000Z';
@@ -118,20 +213,9 @@ export function OcorrenciasPanel({
     } finally {
       setLoading(false);
     }
-  }, [unitId, classroomId, filtroPeriodo]);
+  }, [unitId, effectiveUnitId, classroomId, selectedClassroomId, selectedChildId, filtroPeriodo]);
 
   useEffect(() => { carregar(); }, [carregar]);
-
-  // Lista de turmas únicas para o filtro da coordenadora
-  const turmasUnicas = useMemo(() => {
-    const mapa = new Map<string, string>();
-    ocorrencias.forEach(o => {
-      if (o.classroom?.id && o.classroom?.name) {
-        mapa.set(o.classroom.id, o.classroom.name);
-      }
-    });
-    return Array.from(mapa.entries()).sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
-  }, [ocorrencias]);
 
   // Filtros locais
   const filtradas = ocorrencias.filter(o => {
@@ -148,12 +232,22 @@ export function OcorrenciasPanel({
       desc.includes(busca.toLowerCase());
     const cat = getCategoriaTag(o);
     const matchCat = !filtroCategoria || cat === filtroCategoria;
-    // Filtro por turma: se classroomId foi passado como prop, o backend já filtrou.
-    // O filtroTurma local é para a coordenadora que vê todas as turmas.
-    const matchTurma = !filtroTurma || o.classroom?.id === filtroTurma;
     const matchProfessor = !filtroProfessor || professor.includes(filtroProfessor.toLowerCase());
-    return matchBusca && matchCat && matchTurma && matchProfessor;
+    return matchBusca && matchCat && matchProfessor;
   });
+
+  function abrirTimeline(ocorrencia: Ocorrencia) {
+    if (!ocorrencia.child?.id) return;
+    const params = new URLSearchParams();
+    if (effectiveUnitId) params.set('unitId', effectiveUnitId);
+    if (ocorrencia.classroom?.id) params.set('classroomId', ocorrencia.classroom.id);
+    const query = params.toString();
+    navigate(`/app/crianca/${ocorrencia.child.id}/timeline${query ? `?${query}` : ''}`);
+  }
+
+  function abrirCuidado(ocorrencia: Ocorrencia) {
+    if (ocorrencia.child?.id) navigate(`/app/cuidado/${ocorrencia.child.id}`);
+  }
 
   // ─── Impressão / PDF ────────────────────────────────────────────────────────
   function imprimir() {
@@ -276,18 +370,58 @@ export function OcorrenciasPanel({
           ))}
         </div>
 
-        {/* Filtro por turma — exibido apenas quando a coordenadora vê múltiplas turmas */}
-        {!classroomId && turmasUnicas.length > 1 && (
-          <select
-            value={filtroTurma}
-            onChange={e => setFiltroTurma(e.target.value)}
-            className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-orange-300"
-          >
-            <option value="">Todas as turmas</option>
-            {turmasUnicas.map(([id, nome]) => (
-              <option key={id} value={id}>{nome}</option>
-            ))}
-          </select>
+        {showHierarchyFilters && (
+          <>
+            {!unitId && showUnitFilter && (
+              <select
+                value={effectiveUnitId}
+                onChange={(event) => {
+                  const nextUnitId = event.target.value;
+                  setContextUnit(nextUnitId || null);
+                  updateRouteFilters({ classroomId: '', childId: '' });
+                }}
+                className="border border-indigo-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                aria-label="Selecionar unidade"
+              >
+                <option value="">Selecione uma unidade</option>
+                {accessibleUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
+              </select>
+            )}
+            <select
+              value={selectedClassroomId}
+              onChange={(event) => {
+                const nextClassroomId = event.target.value;
+                setSelectedClassroomId(nextClassroomId);
+                setSelectedChildId('');
+                updateRouteFilters({ classroomId: nextClassroomId, childId: '' });
+              }}
+              disabled={!effectiveUnitId || loadingTurmas}
+              className="border border-indigo-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Selecionar turma"
+            >
+              <option value="">{loadingTurmas ? 'Carregando turmas...' : effectiveUnitId ? 'Todas as turmas' : 'Selecione unidade primeiro'}</option>
+              {turmas.map((turma) => <option key={turma.id} value={turma.id}>{turma.name}</option>)}
+            </select>
+            <select
+              value={selectedChildId}
+              onChange={(event) => {
+                const nextChildId = event.target.value;
+                setSelectedChildId(nextChildId);
+                updateRouteFilters({ childId: nextChildId });
+              }}
+              disabled={!selectedClassroomId || loadingCriancas}
+              className="border border-indigo-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Selecionar criança"
+            >
+              <option value="">{loadingCriancas ? 'Carregando crianças...' : selectedClassroomId ? 'Todas as crianças' : 'Selecione uma turma primeiro'}</option>
+              {criancas.map((child) => <option key={child.id} value={child.id}>{child.firstName} {child.lastName}</option>)}
+            </select>
+            {(effectiveUnitId || selectedClassroomId || selectedChildId) && (
+              <span className="inline-flex items-center gap-1 rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-1.5 text-[11px] font-medium text-indigo-700">
+                <ShieldCheck className="h-3.5 w-3.5" /> Escopo real aplicado
+              </span>
+            )}
+          </>
         )}
 
         {/* Categoria */}
@@ -419,8 +553,30 @@ export function OcorrenciasPanel({
                         </div>
                       )}
 
-                      {/* Botão imprimir individual */}
-                      <div className="flex justify-end">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {ocorr.child?.id && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={(event) => { event.stopPropagation(); abrirTimeline(ocorr); }}
+                                className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
+                              >
+                                <BookOpen className="h-3 w-3" /> Ver timeline
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(event) => { event.stopPropagation(); abrirCuidado(ocorr); }}
+                                className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                              >
+                                <ShieldCheck className="h-3 w-3" /> Cuidado integrado
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Botão imprimir individual */}
+                        <div className="flex justify-end">
                         <button
                           onClick={e => {
                             e.stopPropagation();
@@ -442,13 +598,15 @@ export function OcorrenciasPanel({
                             win.document.close();
                             win.focus();
                             setTimeout(() => win.print(), 500);
-                          }}
+                          }                        }
                           className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-200 rounded px-2 py-1"
                         >
                           <Printer className="h-3 w-3" />
                           Imprimir esta ocorrência
                         </button>
+                        </div>
                       </div>
+
                     </div>
                   )}
                 </CardContent>

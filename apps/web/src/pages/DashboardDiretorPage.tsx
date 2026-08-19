@@ -733,7 +733,12 @@ export function DashboardDiretorPage() {
       {/* ── Aba: Ocorrências ── */}
       {aba === 'ocorrencias' && (
         <div className="space-y-4">
-          <OcorrenciasPanel titulo="Ocorrências da Unidade" unitId={user?.unitId ?? undefined} />
+          <OcorrenciasPanel
+            titulo="Ocorrências da Unidade"
+            unitId={user?.unitId ?? undefined}
+            showHierarchyFilters
+            showUnitFilter={false}
+          />
         </div>
       )}
     </PageShell>

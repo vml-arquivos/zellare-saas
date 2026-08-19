@@ -628,7 +628,10 @@ export default function DashboardPsicologoPage() {
       ══════════════════════════════════════════════════════════════════ */}
       {abaAtiva === 'ocorrencias' && (
         <div className="space-y-4">
-          <OcorrenciasPanel titulo="Ocorrências da Rede" />
+          <OcorrenciasPanel
+            titulo="Ocorrências da Rede"
+            showHierarchyFilters
+          />
         </div>
       )}
     </PageShell>

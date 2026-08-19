@@ -39,6 +39,15 @@ export class CoordenacaoService {
     @Optional() private readonly evidenceService?: EvidenceService,
   ) {}
 
+  private async assertUnitInScope(user: JwtPayload, unitId: string | null) {
+    if (!unitId) return;
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: unitId, mantenedoraId: user.mantenedoraId },
+      select: { id: true },
+    });
+    if (!unit) throw new ForbiddenException('Unidade não encontrada ou sem acesso');
+  }
+
   private async getDevelopmentSnapshot(classroomIds: string[], user?: JwtPayload) {
     if (classroomIds.length === 0) {
       return { janelaDias: 30, diarios: 0, observacoes: 0, totalRegistros: 0, criancasComRegistro: 0, alertas: 0, evidenciasUnificadas: 0, fontesUnificadas: [], porTurma: [] };
@@ -195,6 +204,7 @@ export class CoordenacaoService {
     if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
     const unitIdRaw = resolveUnitId(user, unitIdOverride);
     if (!unitIdRaw) throw new ForbiddenException('Selecione uma unidade para ver o dashboard da unidade');
+    await this.assertUnitInScope(user, unitIdRaw);
     const unitId: string = unitIdRaw;
     const today = new Date().toISOString().slice(0, 10);
     const cacheKey = `coord:unidade:${unitId}:${today}`;
@@ -348,10 +358,12 @@ export class CoordenacaoService {
 
   // ─── DASHBOARD GERAL ──────────────────────────────────────────────────────
 
-  async getDashboardGeral(user: JwtPayload) {
+  async getDashboardGeral(user: JwtPayload, unitIdOverride?: string) {
     if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
+    const unitId = resolveUnitId(user, unitIdOverride);
+    await this.assertUnitInScope(user, unitId);
     const today = new Date().toISOString().slice(0, 10);
-    const cacheKey = `coord:geral:${user.mantenedoraId}:${today}`;
+    const cacheKey = `coord:geral:${user.mantenedoraId}:${unitId ?? 'network'}:${today}`;
     return this.cached(cacheKey, 120, async () => {
     try {
     const today = new Date();
@@ -369,7 +381,9 @@ export class CoordenacaoService {
       reunioesAgendadas,
     ] = await Promise.all([
       this.prisma.unit.findMany({
-        where: { mantenedoraId: user.mantenedoraId },
+        where: unitId
+          ? { id: unitId, mantenedoraId: user.mantenedoraId }
+          : { mantenedoraId: user.mantenedoraId },
         include: {
           classrooms: {
             include: {
@@ -380,13 +394,29 @@ export class CoordenacaoService {
         },
       }),
       this.prisma.enrollment.count({
-        where: { status: 'ATIVA', classroom: { unit: { mantenedoraId: user.mantenedoraId } } },
+        where: unitId
+          ? { status: 'ATIVA', classroom: { unitId } }
+          : { status: 'ATIVA', classroom: { unit: { mantenedoraId: user.mantenedoraId } } },
       }),
-      this.prisma.materialRequest.count({ where: { mantenedoraId: user.mantenedoraId, status: RequestStatus.SOLICITADO } }),
-      this.prisma.planning.count({ where: { mantenedoraId: user.mantenedoraId, status: PlanningStatus.RASCUNHO } }),
-      this.prisma.diaryEvent.count({ where: { mantenedoraId: user.mantenedoraId, eventDate: todayRange } }),
+      this.prisma.materialRequest.count({
+        where: unitId
+          ? { unitId, status: RequestStatus.SOLICITADO }
+          : { mantenedoraId: user.mantenedoraId, status: RequestStatus.SOLICITADO },
+      }),
+      this.prisma.planning.count({
+        where: unitId
+          ? { unitId, status: PlanningStatus.RASCUNHO }
+          : { mantenedoraId: user.mantenedoraId, status: PlanningStatus.RASCUNHO },
+      }),
+      this.prisma.diaryEvent.count({
+        where: unitId
+          ? { unitId, eventDate: todayRange }
+          : { mantenedoraId: user.mantenedoraId, eventDate: todayRange },
+      }),
       this.prisma.coordenacaoReuniao.count({
-        where: { mantenedoraId: user.mantenedoraId, status: 'AGENDADA', dataRealizacao: { gte: today } },
+        where: unitId
+          ? { mantenedoraId: user.mantenedoraId, unitId, status: 'AGENDADA', dataRealizacao: { gte: today } }
+          : { mantenedoraId: user.mantenedoraId, status: 'AGENDADA', dataRealizacao: { gte: today } },
       }),
     ]);
 
@@ -425,13 +455,17 @@ export class CoordenacaoService {
     );
 
     const ultimasReunioes = await this.prisma.coordenacaoReuniao.findMany({
-      where: { mantenedoraId: user.mantenedoraId, tipo: 'REDE' },
+      where: unitId
+        ? { mantenedoraId: user.mantenedoraId, unitId }
+        : { mantenedoraId: user.mantenedoraId, tipo: 'REDE' },
       orderBy: { dataRealizacao: 'desc' },
       take: 5,
     });
 
     const proximasReunioes = await this.prisma.coordenacaoReuniao.findMany({
-      where: { mantenedoraId: user.mantenedoraId, dataRealizacao: { gte: today }, status: 'AGENDADA' },
+      where: unitId
+        ? { mantenedoraId: user.mantenedoraId, unitId, dataRealizacao: { gte: today }, status: 'AGENDADA' }
+        : { mantenedoraId: user.mantenedoraId, dataRealizacao: { gte: today }, status: 'AGENDADA' },
       orderBy: { dataRealizacao: 'asc' },
       take: 5,
     });

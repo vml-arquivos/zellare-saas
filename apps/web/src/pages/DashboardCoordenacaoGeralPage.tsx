@@ -10,7 +10,7 @@
  *  - GET /coordenacao/reunioes
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../app/AuthProvider';
 import { PageShell } from '../components/ui/PageShell';
 import { useApiCache } from '../hooks/useApiCache';
@@ -76,6 +76,9 @@ interface Requisicao {
   classroom?: { name: string; unit?: { name: string } };
   createdByUser?: { firstName: string; lastName: string };
 }
+
+type AbaCoordenacaoGeral = 'visao' | 'unidades' | 'pedagogico' | 'desenvolvimento' | 'saude' | 'requisicoes' | 'reunioes' | 'ocorrencias';
+const ABAS_COORDENACAO_GERAL: AbaCoordenacaoGeral[] = ['visao', 'unidades', 'pedagogico', 'desenvolvimento', 'saude', 'requisicoes', 'reunioes', 'ocorrencias'];
 
 // ─── Helpers visuais ─────────────────────────────────────────────────────────
 function calcStatus(u: UnidadeConsolidado): 'otimo' | 'atencao' | 'critico' {
@@ -176,16 +179,21 @@ function SkeletonGrid({ n = 8 }: { n?: number }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function DashboardCoordenacaoGeralPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { accessibleUnits: unidadesCtx } = useUnitScope();
+  const { selectedUnitId } = useUnitScope();
   const apiCache = useApiCache(120_000);
+  const abaParam = searchParams.get('tab');
+  const abaInicial: AbaCoordenacaoGeral = ABAS_COORDENACAO_GERAL.includes(abaParam as AbaCoordenacaoGeral)
+    ? abaParam as AbaCoordenacaoGeral
+    : 'visao';
 
   const [loading, setLoading] = useState(true);
   const [dashboard, setDashboard] = useState<DashboardGeralAPI | null>(null);
   const [funil, setFunil] = useState<GovernanceFunnel | null>(null);
   const [coverageFields, setCoverageFields] = useState<Array<{ field: string; pct: number }>>([]);
   const [requisicoes, setRequisicoes] = useState<Requisicao[]>([]);
-  const [abaAtiva, setAbaAtiva] = useState<'visao' | 'unidades' | 'pedagogico' | 'desenvolvimento' | 'saude' | 'requisicoes' | 'reunioes' | 'ocorrencias'>('visao');
+  const [abaAtiva, setAbaAtivaState] = useState<AbaCoordenacaoGeral>(abaInicial);
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'otimo' | 'atencao' | 'critico'>('todas');
   const [refreshKey, setRefreshKey] = useState(0);
   // Estado das novas abas
@@ -217,18 +225,36 @@ export default function DashboardCoordenacaoGeralPage() {
   const hoje = getPedagogicalToday();
   const ha30 = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
+  const mudarAba = useCallback((aba: AbaCoordenacaoGeral) => {
+    setAbaAtivaState(aba);
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      if (aba === 'visao') next.delete('tab');
+      else next.set('tab', aba);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    if (ABAS_COORDENACAO_GERAL.includes(abaParam as AbaCoordenacaoGeral)) {
+      setAbaAtivaState(abaParam as AbaCoordenacaoGeral);
+    }
+  }, [abaParam]);
+
   const carregar = useCallback(async () => {
     setLoading(true);
     try {
+      const scopeParams = selectedUnitId ? { unitId: selectedUnitId } : {};
+      const funnelParams = { startDate: ha30, endDate: hoje, ...scopeParams };
       const [dashRes, funilRes, covRes, reqRes] = await Promise.allSettled([
-        apiCache.get('/coordenacao/dashboard/geral', {}, () =>
-          http.get('/coordenacao/dashboard/geral').then(r => r.data)),
-        apiCache.get('/insights/governance/funnel', { startDate: ha30, endDate: hoje }, () =>
-          http.get('/insights/governance/funnel', { params: { startDate: ha30, endDate: hoje } }).then(r => r.data)),
-        apiCache.get('/insights/governance/coverage', { startDate: ha30, endDate: hoje }, () =>
-          http.get('/insights/governance/coverage', { params: { startDate: ha30, endDate: hoje } }).then(r => r.data)),
-        apiCache.get('/coordenacao/requisicoes', { status: 'SOLICITADO' }, () =>
-          http.get('/coordenacao/requisicoes', { params: { status: 'SOLICITADO' } }).then(r => r.data)),
+        apiCache.get('/coordenacao/dashboard/geral', scopeParams, () =>
+          http.get('/coordenacao/dashboard/geral', { params: scopeParams }).then(r => r.data)),
+        apiCache.get('/insights/governance/funnel', funnelParams, () =>
+          http.get('/insights/governance/funnel', { params: funnelParams }).then(r => r.data)),
+        apiCache.get('/insights/governance/coverage', funnelParams, () =>
+          http.get('/insights/governance/coverage', { params: funnelParams }).then(r => r.data)),
+        apiCache.get('/coordenacao/requisicoes', { status: 'SOLICITADO', ...scopeParams }, () =>
+          http.get('/coordenacao/requisicoes', { params: { status: 'SOLICITADO', ...scopeParams } }).then(r => r.data)),
       ]);
       if (dashRes.status === 'fulfilled') setDashboard(dashRes.value as DashboardGeralAPI);
       if (funilRes.status === 'fulfilled') setFunil(funilRes.value as GovernanceFunnel);
@@ -245,19 +271,21 @@ export default function DashboardCoordenacaoGeralPage() {
     } finally {
       setLoading(false);
     }
-  }, [refreshKey]); // eslint-disable-line
+  }, [refreshKey, selectedUnitId, ha30, hoje]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => {
+    apiCache.invalidateAll();
+    void carregar();
+  }, [carregar, selectedUnitId]);
 
   // ─── Carregar dados de desenvolvimento quando aba abre ────────────────────
   useEffect(() => {
     if (abaAtiva !== 'desenvolvimento' && abaAtiva !== 'saude') return;
-    if (abaAtiva === 'desenvolvimento' && devObservacoes.length > 0) return;
-    if (abaAtiva === 'saude' && saudeAlertas.length > 0) return;
     setLoadingDev(true);
+    const scopeParams = selectedUnitId ? { unitId: selectedUnitId } : {};
     Promise.allSettled([
-      http.get('/alertas', { params: { limit: 50, severidade: 'ALTA,CRITICA,MEDIA' } }),
-      http.get('/development-observations', { params: { limit: 100 } }),
+      http.get('/alertas', { params: { limit: 50, severidade: 'ALTA,CRITICA,MEDIA', ...scopeParams } }),
+      http.get('/development-observations', { params: { limit: 100, ...scopeParams } }),
     ]).then(([alertasRes, devRes]) => {
       if (alertasRes.status === 'fulfilled') {
         const d = alertasRes.value.data;
@@ -289,7 +317,7 @@ export default function DashboardCoordenacaoGeralPage() {
         setDevObservacoes(resumo);
       }
     }).finally(() => setLoadingDev(false));
-  }, [abaAtiva]);
+  }, [abaAtiva, selectedUnitId]);
 
   // ─── Carregar Desenvolvimento e diários por unidade quando aba pedagógico abre ──────────
   useEffect(() => {
@@ -416,7 +444,7 @@ export default function DashboardCoordenacaoGeralPage() {
               <Bell className="h-3 w-3" />{reqPendentes} requisição(ões) pendente(s)
             </span>
           )}
-          <button onClick={() => setAbaAtiva('unidades')} className="ml-auto text-xs text-orange-600 underline">
+          <button onClick={() => mudarAba('unidades')} className="ml-auto text-xs text-orange-600 underline">
             Ver detalhes
           </button>
         </div>
@@ -431,7 +459,7 @@ export default function DashboardCoordenacaoGeralPage() {
         {ABAS.map(a => (
           <button
             key={a.id}
-            onClick={() => setAbaAtiva(a.id)}
+            onClick={() => mudarAba(a.id)}
             className={`ds-tab ${abaAtiva === a.id ? 'ds-tab-active' : ''}`}
           >
             {a.icon}{a.label}
@@ -450,7 +478,7 @@ export default function DashboardCoordenacaoGeralPage() {
           {loading ? <SkeletonGrid n={8} /> : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <KpiCard icon={<Building2 className="h-5 w-5" />} label="Unidades ativas"
-                value={fmt(ind?.totalUnidades)} tone="info" onClick={() => setAbaAtiva('unidades')} />
+                value={fmt(ind?.totalUnidades)} tone="info" onClick={() => mudarAba('unidades')} />
               <KpiCard icon={<GraduationCap className="h-5 w-5" />} label="Total de alunos"
                 value={fmt(ind?.totalAlunos)} tone="default" />
               <KpiCard icon={<Users className="h-5 w-5" />} label="Professores"
@@ -462,19 +490,19 @@ export default function DashboardCoordenacaoGeralPage() {
               <KpiCard icon={<ShoppingCart className="h-5 w-5" />} label="Req. pendentes"
                 value={fmt(ind?.requisicoesPendentes)}
                 tone={(ind?.requisicoesPendentes ?? 0) > 0 ? 'warning' : 'success'}
-                onClick={() => setAbaAtiva('requisicoes')} />
+                onClick={() => mudarAba('requisicoes')} />
               <KpiCard icon={<FileText className="h-5 w-5" />} label="Plan. em rascunho"
                 value={fmt(ind?.planejamentosRascunho)}
                 tone={(ind?.planejamentosRascunho ?? 0) > 5 ? 'warning' : 'default'}
-                onClick={() => setAbaAtiva('pedagogico')} />
+                onClick={() => mudarAba('pedagogico')} />
               <KpiCard icon={<Calendar className="h-5 w-5" />} label="Reuniões agendadas"
                 value={fmt(ind?.reunioesAgendadas)} tone="info"
-                onClick={() => setAbaAtiva('reunioes')} />
+                onClick={() => mudarAba('reunioes')} />
               <KpiCard icon={<Shield className="h-5 w-5" />} label="Unidades críticas"
                 value={alertasCriticos}
                 tone={alertasCriticos > 0 ? 'danger' : 'success'}
                 helper={alertasCriticos === 0 ? 'Tudo OK' : 'Requerem atenção'}
-                onClick={() => setAbaAtiva('unidades')} />
+                onClick={() => mudarAba('unidades')} />
             </div>
           )}
 
@@ -548,7 +576,7 @@ export default function DashboardCoordenacaoGeralPage() {
           {/* Próximas reuniões */}
           {!loading && (dashboard?.proximasReunioes?.length ?? 0) > 0 && (
             <SectionCard title="Próximas Reuniões" icon={<Calendar className="h-4 w-4 text-indigo-500" />}
-              action={{ label: 'Ver todas', onClick: () => setAbaAtiva('reunioes') }}>
+              action={{ label: 'Ver todas', onClick: () => mudarAba('reunioes') }}>
               <div className="space-y-2">
                 {dashboard!.proximasReunioes.map(r => (
                   <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
@@ -906,7 +934,11 @@ export default function DashboardCoordenacaoGeralPage() {
       ══════════════════════════════════════════════════════════════════ */}
       {abaAtiva === 'ocorrencias' && (
         <div className="space-y-4">
-          <OcorrenciasPanel titulo="Ocorrências da Rede" />
+          <OcorrenciasPanel
+            titulo="Ocorrências da Rede"
+            showHierarchyFilters
+            showUnitFilter={false}
+          />
         </div>
       )}
 

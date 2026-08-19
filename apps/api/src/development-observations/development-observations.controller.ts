@@ -26,7 +26,7 @@ export class DevelopmentObservationsController {
   }
 
   /**
-   * GET /development-observations?childId=&classroomId=&category=&startDate=&endDate=
+   * GET /development-observations?unitId=&childId=&classroomId=&category=&startDate=&endDate=
    * Listar observações com filtros
    */
   @Get()

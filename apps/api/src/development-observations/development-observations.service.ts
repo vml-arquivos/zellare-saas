@@ -129,7 +129,29 @@ export class DevelopmentObservationsService {
    * sem duplicar linhas em `development_observation`.
    */
   private async listarIntegrado(query: any, user: JwtPayload) {
-    const classroomIds = await this.accessibleClassroomIds(user);
+    let classroomIds = await this.accessibleClassroomIds(user);
+    if (Array.isArray(classroomIds) && classroomIds.length === 0) return [];
+
+    // Quando um painel central seleciona uma unidade, restringir a leitura às
+    // turmas ativas dessa unidade e à mantenedora do usuário. Para DEVELOPER,
+    // accessibleClassroomIds retorna null (acesso amplo), então este recorte
+    // transforma explicitamente a seleção em uma lista segura de turmas.
+    if (query.unitId) {
+      const scopedClassrooms = await this.prisma.classroom.findMany({
+        where: {
+          unitId: query.unitId,
+          isActive: true,
+          unit: { mantenedoraId: user.mantenedoraId },
+          ...(Array.isArray(classroomIds) ? { id: { in: classroomIds } } : {}),
+        },
+        select: { id: true },
+      });
+      classroomIds = scopedClassrooms.map((classroom) => classroom.id);
+    }
+
+    if (query.classroomId && Array.isArray(classroomIds) && !classroomIds.includes(query.classroomId)) {
+      return [];
+    }
     if (Array.isArray(classroomIds) && classroomIds.length === 0) return [];
 
     const dateFilter: any = {};
