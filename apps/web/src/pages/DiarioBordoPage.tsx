@@ -1639,14 +1639,9 @@ export default function DiarioBordoPage() {
       toast.error('Realize a Chamada do Dia antes de abrir e salvar o Diário do Dia.');
       return;
     }
-    // GATE 2 (segurança produção): plano de aula aprovado obrigatório para publicação
-    if (!planejamentoHoje) {
-      toast.error(
-        'Publicação bloqueada: nenhum plano de aula aprovado vinculado a hoje. ' +
-        'Solicite à coordenação aprovar o planejamento antes de publicar o diário.',
-      );
-      return;
-    }
+    // Diário livre: quando não há plano aprovado para a data, o registro natural da rotina
+    // continua permitido. As regras de execução e avaliação abaixo só se aplicam quando
+    // existe planejamento aprovado/em execução para o dia.
     if (!form.momentoDestaque.trim() && !form.avaliacaoPlanoAula.trim() && !form.reflexaoPedagogica.trim()) {
       toast.error('Preencha pelo menos o Momento de Destaque ou a Avaliação do Plano de Aula.');
       return;
@@ -1663,8 +1658,9 @@ export default function DiarioBordoPage() {
       toast.error('Seleccione o status de execução do plano do dia: CUMPRIDO, PARCIAL ou NÃO REALIZADO.');
       return;
     }
-    // GATE 3 (segurança produção): avaliação da execução obrigatória para publicação
-    if (!form.avaliacaoPlanoAula.trim()) {
+    // Com plano aprovado, a avaliação da execução é obrigatória; no Diário livre,
+    // o destaque/reflexão já validado acima é suficiente para registrar a rotina.
+    if (planejamentoHoje && !form.avaliacaoPlanoAula.trim()) {
       toast.error(
         'Preencha a Avaliação do Plano de Aula antes de publicar. ' +
         'Use o botão "Gerar com IA" ou escreva diretamente no campo.',
@@ -3710,8 +3706,10 @@ export default function DiarioBordoPage() {
                       <p className="text-base font-bold text-indigo-900">Avaliação do Plano de Aula</p>
                     </div>
                     <p className="text-xs text-indigo-700 pl-9">
-                      Campo obrigatório. Gerado pela IA com base nos dados acima — revise e edite antes de salvar.
-                      Este texto alimenta o RIA e o Desenvolvimento.
+                      {planejamentoHoje
+                        ? 'Campo obrigatório para avaliar o plano aprovado. Gere com IA, revise e edite antes de salvar.'
+                        : 'Opcional no Diário livre. Você pode registrar naturalmente a rotina e usar este campo quando desejar uma síntese pedagógica.'}
+                      {' '}Este texto alimenta o RIA e o Desenvolvimento.
                     </p>
                   </div>
                   <button
@@ -3731,7 +3729,9 @@ export default function DiarioBordoPage() {
                   </button>
                 </div>
                 <Textarea
-                  placeholder="Clique em 'Gerar com IA' para criar a avaliação automaticamente, ou escreva diretamente aqui. Este campo será usado no RIA e Desenvolvimento."
+                  placeholder={planejamentoHoje
+                    ? "Clique em 'Gerar com IA' para criar a avaliação automaticamente, ou escreva diretamente aqui. Este campo será usado no RIA e Desenvolvimento."
+                    : 'Opcional no Diário livre: registre uma síntese pedagógica se desejar.'}
                   rows={6}
                   value={form.avaliacaoPlanoAula}
                   onChange={e => setForm(f => ({ ...f, avaliacaoPlanoAula: e.target.value }))}
