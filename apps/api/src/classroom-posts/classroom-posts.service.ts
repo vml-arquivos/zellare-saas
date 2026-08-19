@@ -1,6 +1,7 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { EvidenceService } from '../evidence/evidence.service';
 import { RoleLevel } from '@prisma/client';
 
 function hasLevel(user: JwtPayload, ...levels: RoleLevel[]): boolean {
@@ -9,7 +10,10 @@ function hasLevel(user: JwtPayload, ...levels: RoleLevel[]): boolean {
 
 @Injectable()
 export class ClassroomPostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /** Criar post/tarefa na sala virtual */
   async criar(dto: any, user: JwtPayload) {
@@ -126,12 +130,14 @@ export class ClassroomPostsService {
   async registrarDesempenho(postId: string, dto: any, user: JwtPayload) {
     const { childId, performance, notes } = dto;
 
-    return this.prisma.studentPostPerformance.upsert({
+    const result = await this.prisma.studentPostPerformance.upsert({
       where: { postId_childId: { postId, childId } },
       create: { postId, childId, performance, notes, createdBy: user.sub },
       update: { performance, notes },
       include: { child: { select: { id: true, firstName: true, lastName: true } } },
     });
+    await this.evidenceService?.syncSafely('STUDENT_POST_PERFORMANCE', () => this.evidenceService!.syncStudentPostPerformance(result));
+    return result;
   }
 
   /** Listar desempenhos de todos os alunos em um post */

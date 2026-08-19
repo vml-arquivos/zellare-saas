@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException, Optional } from '@nestjs/common';
 import { Prisma, EnrollmentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateChildDto } from './dto/create-child.dto';
 import { UpdateChildDto } from './dto/update-child.dto';
 import { FilterChildDto } from './dto/filter-child.dto';
 import { canAccessUnit } from '../common/utils/can-access-unit';
+import { EvidenceService } from '../evidence/evidence.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -51,7 +52,10 @@ function normalizeChildJsonFields(
 
 @Injectable()
 export class ChildrenService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /**
    * Criar nova criança
@@ -90,6 +94,7 @@ export class ChildrenService {
       },
     });
 
+    await this.evidenceService?.syncSafely('CHILD_PROFILE', () => this.evidenceService!.syncChildProfile(child));
     return child;
   }
 
@@ -263,6 +268,7 @@ export class ChildrenService {
       },
     });
 
+    await this.evidenceService?.syncSafely('CHILD_PROFILE', () => this.evidenceService!.syncChildProfile(updated));
     return updated;
   }
 
@@ -363,6 +369,7 @@ export class ChildrenService {
       });
     }
 
+    await this.evidenceService?.syncSafely('CHILD_PROFILE', () => this.evidenceService!.syncChildProfile({ ...child, photoUrl, updatedAt: new Date() }));
     return { photoUrl, message: 'Foto atualizada com sucesso' };
   }
 
@@ -557,6 +564,7 @@ export class ChildrenService {
       console.warn('[DietaryRestriction] Falha ao criar alerta/notificação:', e);
     }
 
+    await this.evidenceService?.syncSafely('DIETARY_RESTRICTION', () => this.evidenceService!.syncDietaryRestriction(restriction));
     return restriction;
   }
 

@@ -1,12 +1,16 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { FamilyCommunicationStatus, RoleLevel, RoleType } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFamilyMessageDto, CreateGuardianLinkDto, FamilyQueryDto, FamilyTimelineQueryDto } from './dto/family.dto';
+import { EvidenceService } from '../evidence/evidence.service';
 
 @Injectable()
 export class FamilyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   private roleLevels(user: JwtPayload) {
     return user.roles?.map((role) => role.level) || [];
@@ -231,9 +235,11 @@ export class FamilyService {
       recipientUserId = guardian?.userId;
       if (!recipientUserId) throw new NotFoundException('Nenhum responsável ativo encontrado para receber a mensagem');
     }
-    return this.prisma.familyCommunication.create({
+    const message = await this.prisma.familyCommunication.create({
       data: { mantenedoraId: user.mantenedoraId, unitId: child.unitId, childId, senderUserId: user.sub, recipientUserId, subject: dto.subject.trim(), body: dto.body.trim(), status: FamilyCommunicationStatus.ENVIADA },
     });
+    await this.evidenceService?.syncSafely('FAMILY_COMMUNICATION', () => this.evidenceService!.syncFamilyCommunication(message));
+    return message;
   }
 
   async markMessageRead(id: string, user: JwtPayload) {

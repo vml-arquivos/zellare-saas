@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/services/audit.service';
@@ -19,12 +20,14 @@ import {
 } from '../common/utils/date.utils';
 import { getScopedWhereForDiaryEvent } from './diary-event-scope.helper';
 import { normalizeStructuredObservationContext } from './dto/structured-observation';
+import { EvidenceService } from '../evidence/evidence.service';
 
 @Injectable()
 export class DiaryEventService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    @Optional() private readonly evidenceService?: EvidenceService,
   ) {}
 
   /**
@@ -289,6 +292,8 @@ export class DiaryEventService {
       classroom.unitId,
       diaryEvent,
     );
+
+    await this.evidenceService?.syncSafely('DIARY_EVENT', () => this.evidenceService!.syncDiaryEvent(diaryEvent));
 
     return diaryEvent;
   }

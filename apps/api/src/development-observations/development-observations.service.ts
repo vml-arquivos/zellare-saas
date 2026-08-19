@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, ForbiddenException, NotFoundException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { RoleLevel } from '@prisma/client';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
+import { EvidenceService } from '../evidence/evidence.service';
 
 
 const UPLOADS_ROOT_DIR = path.resolve(process.env.UPLOADS_DIR ?? 'uploads');
@@ -89,7 +90,10 @@ function nullableText(value: unknown): string | null | undefined {
 
 @Injectable()
 export class DevelopmentObservationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /** Retorna as turmas que o usuário pode consultar. Null significa acesso total. */
   private async accessibleClassroomIds(user: JwtPayload): Promise<string[] | null> {
@@ -240,7 +244,47 @@ export class DevelopmentObservationsService {
         };
       });
 
-    return [...formalItems, ...diaryItems]
+    const evidenceItems = this.evidenceService
+      ? (await this.evidenceService.list({
+          childId: query.childId,
+          classroomId: query.classroomId,
+          startDate: query.startDate,
+          endDate: query.endDate,
+          limit: '500',
+        }, user))
+        .filter((item: any) => !query.category || item.evidenceType === query.category || item.sourceType === query.category)
+        .map((item: any) => ({
+          id: `evidence:${item.id}`,
+          sourceId: item.sourceId,
+          source: 'ChildEvidence',
+          sourceType: item.sourceType,
+          evidenceType: item.evidenceType,
+          sensitivity: item.sensitivity,
+          visibility: item.visibility,
+          reviewStatus: item.reviewStatus,
+          category: item.evidenceType,
+          date: item.capturedAt,
+          createdAt: item.createdAt,
+          childId: item.childId,
+          classroomId: item.classroomId,
+          behaviorDescription: item.evidenceType === 'COMPORTAMENTO' ? item.content : null,
+          learningProgress: ['APRENDIZAGEM', 'DESENVOLVIMENTO', 'MIDIA_PEDAGOGICA'].includes(item.evidenceType) ? item.content : null,
+          developmentAlerts: item.evidenceType === 'ALERTA_DERIVADO' ? item.content : null,
+          recommendations: null,
+          nextSteps: null,
+          content: item.content ?? '',
+          title: item.evidenceType,
+          structuredData: item.structuredData,
+          status: item.reviewStatus,
+          child: item.child ? { ...item.child, name: `${item.child.firstName} ${item.child.lastName}`.trim() } : null,
+          classroom: null,
+          unitId: item.unitId,
+          unitName: null,
+          createdByUser: null,
+        }))
+      : [];
+
+    return [...formalItems, ...diaryItems, ...evidenceItems]
       .sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime())
       .slice(0, Math.min(Number(query.limit) || 200, 500));
   }
@@ -262,6 +306,8 @@ export class DevelopmentObservationsService {
         child: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
       },
     });
+
+    await this.evidenceService?.syncSafely('DEVELOPMENT_OBSERVATION', () => this.evidenceService!.syncDevelopmentObservation(obs));
 
     return serializeDevelopmentObservation(obs);
   }
@@ -298,6 +344,8 @@ export class DevelopmentObservationsService {
       data,
       include: { child: { select: { id: true, firstName: true, lastName: true, photoUrl: true } } },
     });
+
+    await this.evidenceService?.syncSafely('DEVELOPMENT_OBSERVATION', () => this.evidenceService!.syncDevelopmentObservation(updated));
 
     return serializeDevelopmentObservation(updated);
   }

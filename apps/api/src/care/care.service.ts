@@ -1,12 +1,17 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { RoleLevel } from '@prisma/client';
+import { Optional } from '@nestjs/common';
+import { EvidenceService } from '../evidence/evidence.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { canAccessUnit } from '../common/utils/can-access-unit';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CareService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   async getChildOverview(childId: string, user: JwtPayload) {
     const child = await this.prisma.child.findUnique({
@@ -92,6 +97,9 @@ export class CareService {
     }
 
     const privileged = user.roles.some((role) => privilegedLevels.has(role.level));
+    const evidenceSummary = this.evidenceService
+      ? await this.evidenceService.summary(childId, user)
+      : null;
 
     return {
       child: {
@@ -168,6 +176,7 @@ export class CareService {
         descricao: privileged ? meeting.descricao : null,
         encaminhamento: privileged ? meeting.encaminhamento : null,
       })),
+      evidenceSummary,
       reports: child.developmentReports.map((report) => ({
         id: report.id,
         period: report.period,

@@ -1,13 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import { EvidenceService } from '../evidence/evidence.service';
 import { SeveridadeAlerta, TipoAlerta } from '@prisma/client';
 
 @Injectable()
 export class AlertasService {
   private readonly logger = new Logger(AlertasService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /**
    * Roda todo dia às 6h de segunda a sexta — analisa faltas dos últimos 30 dias
@@ -346,7 +350,7 @@ export class AlertasService {
     });
 
     if (existente) {
-      await this.prisma.alertaOperacional.update({
+      const updated = await this.prisma.alertaOperacional.update({
         where: { id: existente.id },
         data: {
           unitId: params.unitId,
@@ -357,10 +361,11 @@ export class AlertasService {
           metadados: params.metadados,
         },
       });
-      return;
+      await this.evidenceService?.syncSafely('ALERTA_OPERACIONAL', () => this.evidenceService!.syncOperationalAlert(updated));
+      return updated;
     }
 
-    await this.prisma.alertaOperacional.create({
+    const created = await this.prisma.alertaOperacional.create({
       data: {
         childId: params.childId,
         classroomId: params.classroomId,
@@ -373,5 +378,7 @@ export class AlertasService {
         metadados: params.metadados,
       },
     });
+    await this.evidenceService?.syncSafely('ALERTA_OPERACIONAL', () => this.evidenceService!.syncOperationalAlert(created));
+    return created;
   }
 }

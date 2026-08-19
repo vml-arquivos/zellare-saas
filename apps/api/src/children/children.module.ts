@@ -4,10 +4,12 @@ import { memoryStorage } from 'multer';
 import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { EvidenceModule } from '../evidence/evidence.module';
 
 @Module({
   imports: [
     PrismaModule,
+    EvidenceModule,
     MulterModule.register({ storage: memoryStorage() }),
   ],
   controllers: [ChildrenController],

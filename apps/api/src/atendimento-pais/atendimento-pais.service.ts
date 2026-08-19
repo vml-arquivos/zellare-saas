@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StatusAtendimento } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { CreateAtendimentoDto } from './dto/create-atendimento.dto';
+import { EvidenceService } from '../evidence/evidence.service';
 
 @Injectable()
 export class AtendimentoPaisService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly evidenceService: EvidenceService,
+  ) {}
 
   /**
    * Cria um novo atendimento com pais/responsáveis
@@ -29,7 +33,7 @@ export class AtendimentoPaisService {
       throw new NotFoundException('Criança não encontrada ou sem acesso');
     }
 
-    return this.prisma.atendimentoPais.create({
+    const atendimento = await this.prisma.atendimentoPais.create({
       data: {
         mantenedoraId: user.mantenedoraId,
         unitId: child.unitId || user.unitId || '',
@@ -52,6 +56,8 @@ export class AtendimentoPaisService {
         },
       },
     });
+    await this.evidenceService.syncSafely('ATENDIMENTO_PAIS', () => this.evidenceService.syncAtendimentoPais(atendimento));
+    return atendimento;
   }
 
   /**

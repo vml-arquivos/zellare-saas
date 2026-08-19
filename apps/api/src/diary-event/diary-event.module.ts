@@ -5,6 +5,7 @@ import { DiaryEventService } from './diary-event.service';
 import { DiaryEventController } from './diary-event.controller';
 import { AuditService } from '../common/services/audit.service';
 import { AiModule } from '../ai/ai.module';
+import { EvidenceModule } from '../evidence/evidence.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AiModule } from '../ai/ai.module';
       limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
     }),
     AiModule,
+    EvidenceModule,
   ],
   controllers: [DiaryEventController],
   providers: [DiaryEventService, AuditService],

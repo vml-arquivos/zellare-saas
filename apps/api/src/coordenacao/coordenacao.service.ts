@@ -1,5 +1,6 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EvidenceService } from '../evidence/evidence.service';
 import { PlanningStatus, RequestStatus, RoleLevel } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
@@ -33,11 +34,14 @@ export class CoordenacaoService {
     return data;
   }
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
-  private async getDevelopmentSnapshot(classroomIds: string[]) {
+  private async getDevelopmentSnapshot(classroomIds: string[], user?: JwtPayload) {
     if (classroomIds.length === 0) {
-      return { janelaDias: 30, diarios: 0, observacoes: 0, totalRegistros: 0, criancasComRegistro: 0, alertas: 0, porTurma: [] };
+      return { janelaDias: 30, diarios: 0, observacoes: 0, totalRegistros: 0, criancasComRegistro: 0, alertas: 0, evidenciasUnificadas: 0, fontesUnificadas: [], porTurma: [] };
     }
 
     const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -56,7 +60,11 @@ export class CoordenacaoService {
       }),
     ]);
 
-    const childIds = new Set([...diarios, ...observacoes].map((item) => item.childId));
+    const evidenciasUnificadas = this.evidenceService && user
+      ? (await this.evidenceService.list({ startDate: startDate.toISOString(), limit: '1000' }, user)).filter((item) => classroomIds.includes(item.classroomId ?? ''))
+      : [];
+    const fontesUnificadas = [...new Set(evidenciasUnificadas.map((item) => item.sourceType))];
+    const childIds = new Set([...diarios, ...observacoes, ...evidenciasUnificadas].map((item: any) => item.childId));
     const perClassroom = new Map<string, { classroomId: string; registros: number; diarios: number; observacoes: number; alertas: number }>();
     for (const classroomId of classroomIds) {
       perClassroom.set(classroomId, { classroomId, registros: 0, diarios: 0, observacoes: 0, alertas: 0 });
@@ -84,6 +92,8 @@ export class CoordenacaoService {
       totalRegistros: diarios.length + observacoes.length,
       criancasComRegistro: childIds.size,
       alertas: [...perClassroom.values()].reduce((sum, item) => sum + item.alertas, 0),
+      evidenciasUnificadas: evidenciasUnificadas.length,
+      fontesUnificadas,
       porTurma: [...perClassroom.values()],
     };
   }
@@ -279,7 +289,7 @@ export class CoordenacaoService {
       take: 10,
     });
 
-    const desenvolvimento = await this.getDevelopmentSnapshot(turmas.map((turma) => turma.id));
+    const desenvolvimento = await this.getDevelopmentSnapshot(turmas.map((turma) => turma.id), user);
 
     return {
       unitId,
@@ -428,6 +438,7 @@ export class CoordenacaoService {
 
     const desenvolvimento = await this.getDevelopmentSnapshot(
       unidades.flatMap((unidade) => unidade.classrooms.map((classroom) => classroom.id)),
+      user,
     );
 
     return {

@@ -57,6 +57,7 @@ import { EmpresasTransporteModule } from './empresas-transporte/empresas-transpo
 import { TeacherRankingModule } from './teacher-ranking/teacher-ranking.module';
 import { FamilyModule } from './family/family.module';
 import { CareModule } from './care/care.module';
+import { EvidenceModule } from './evidence/evidence.module';
 
 @Module({
   imports: [
@@ -116,6 +117,7 @@ import { CareModule } from './care/care.module';
     TeacherRankingModule,
     FamilyModule,
     CareModule,
+    EvidenceModule,
   ],
   controllers: [AppController],
   providers: [

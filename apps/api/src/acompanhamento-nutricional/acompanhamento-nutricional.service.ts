@@ -2,10 +2,12 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { RoleLevel } from '@prisma/client';
+import { EvidenceService } from '../evidence/evidence.service';
 
 function hasLevel(user: JwtPayload, level: RoleLevel): boolean {
   return user.roles.some((r: { level: RoleLevel }) => r.level === level);
@@ -20,7 +22,10 @@ function isNutricionistaOuSuperior(user: JwtPayload): boolean {
 
 @Injectable()
 export class AcompanhamentoNutricionalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   // ─── Helpers de acesso ────────────────────────────────────────────────────────
 
@@ -89,7 +94,7 @@ export class AcompanhamentoNutricionalService {
     });
 
     if (existing) {
-      return this.prisma.acompanhamentoNutricional.update({
+      const updated = await this.prisma.acompanhamentoNutricional.update({
         where: { childId: dto.childId },
         data: { ...data, criadoPorId: existing.criadoPorId }, // preservar criador original
         include: {
@@ -106,9 +111,11 @@ export class AcompanhamentoNutricionalService {
           },
         },
       });
+      await this.evidenceService?.syncSafely('NUTRITIONAL_FOLLOW_UP', () => this.evidenceService!.syncNutrition(updated));
+      return updated;
     }
 
-    return this.prisma.acompanhamentoNutricional.create({
+    const created = await this.prisma.acompanhamentoNutricional.create({
       data,
       include: {
         child: {
@@ -124,6 +131,8 @@ export class AcompanhamentoNutricionalService {
         },
       },
     });
+    await this.evidenceService?.syncSafely('NUTRITIONAL_FOLLOW_UP', () => this.evidenceService!.syncNutrition(created));
+    return created;
   }
 
   // ─── Buscar acompanhamento de uma criança ─────────────────────────────────────

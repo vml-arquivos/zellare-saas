@@ -1,12 +1,16 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AttendanceStatus } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { assertSchoolDay } from '../common/utils/date.utils';
+import { EvidenceService } from '../evidence/evidence.service';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /**
    * Registra a chamada de uma turma para uma data específica
@@ -70,6 +74,10 @@ export class AttendanceService {
         });
       }),
     );
+
+    await Promise.all(results.map((attendance) =>
+      this.evidenceService?.syncSafely('ATTENDANCE', () => this.evidenceService!.syncAttendance(attendance)),
+    ));
 
     const presentes = results.filter((r) => r.status === 'PRESENTE').length;
     const ausentes = results.filter((r) => r.status === 'AUSENTE').length;

@@ -284,7 +284,8 @@ model Mantenedora {
   atendimentosPais     AtendimentoPais[]
   relatoriosFoto       RelatorioFoto[]
   rdixTemplates        RDIXTemplate[]
-  rdixInstancias       RDIXInstancia[]
+    rdixInstancias        RDIXInstancia[]
+  childEvidences        ChildEvidence[]
   alertasOperacionais  AlertaOperacional[]
   templatesOffline     TemplateOffline[]
   recadosTurma         RecadoTurma[]
@@ -353,6 +354,7 @@ model Unit {
   cardapios             Cardapio[]
    configuracoesRefeicao ConfiguracaoRefeicao[]
   developmentReports    DevelopmentReport[]
+  childEvidences        ChildEvidence[]
   iaRequests            IaRequest[] @relation("UnitIaRequests")
   @@unique([mantenedoraId, code])
   @@index([mantenedoraId])
@@ -402,6 +404,8 @@ model User {
   materialRequestsCreated MaterialRequest[]  @relation("CreatedBy")
    auditLogs               AuditLog[]         @relation("User")
   developmentReports      DevelopmentReport[]
+  childEvidencesCaptured  ChildEvidence[]    @relation("ChildEvidenceCapturedBy")
+  childEvidencesReviewed  ChildEvidence[]    @relation("ChildEvidenceReviewedBy")
   microgestosRegistrados  MicrogestoRegistro[] @relation("MicrogestosRegistrados")
   iaRequests              IaRequest[]          @relation("UserIaRequests")
   @@index([mantenedoraId])
@@ -602,6 +606,7 @@ model Child {
   rdixInstancias      RDIXInstancia[]
   studentPostPerfs    StudentPostPerformance[]
   developmentObs              DevelopmentObservation[]
+  childEvidences              ChildEvidence[]
   developmentReports          DevelopmentReport[]
   acompanhamentosNutricionais AcompanhamentoNutricional[]
   microgestosRegistros        MicrogestoRegistro[]
@@ -681,6 +686,7 @@ model Classroom {
   reportBases      ReportBase[]
    classroomPosts       ClassroomPost[]
   developmentReports   DevelopmentReport[]
+  childEvidences       ChildEvidence[]
   microgestosRegistros MicrogestoRegistro[]
   alertasAluno         AlertaAluno[]
   @@unique([unitId, code])
@@ -2635,4 +2641,84 @@ model IaFeedback {
   @@index([responseId])
   @@index([userId])
   @@map("ia_feedback")
+}
+
+
+// ============================================================================
+// 16. CAMADA UNIFICADA DE EVIDÊNCIAS DA CRIANÇA
+// ============================================================================
+// Projeção aditiva e idempotente das fontes reais de dados. As tabelas de
+// origem permanecem como fonte de verdade operacional; esta camada normaliza
+// proveniência, escopo, sensibilidade e revisão para consultas e relatórios.
+
+enum EvidenceSensitivity {
+  ORDINARIA
+  SENSIVEL
+  SAUDE
+  PSICOLOGICA
+  FAMILIAR
+}
+
+enum EvidenceVisibility {
+  INTERNA
+  PEDAGOGICA
+  GESTAO
+  FAMILIA_AUTORIZADA
+  RESTRITA
+}
+
+enum EvidenceReviewStatus {
+  NAO_REVISADA
+  EM_REVISAO
+  REVISADA
+  REJEITADA
+  ARQUIVADA
+}
+
+model ChildEvidence {
+  id            String  @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  classroomId   String?
+  childId       String
+
+  sourceType    String  @db.VarChar(80)
+  sourceId      String  @db.VarChar(255)
+  sourceVersion Int?
+  evidenceType  String  @db.VarChar(80)
+
+  capturedAt DateTime
+  capturedBy String? @db.VarChar(255)
+
+  content        String? @db.Text
+  structuredData Json?
+  tags           Json?
+
+  sensitivity  EvidenceSensitivity  @default(ORDINARIA)
+  visibility   EvidenceVisibility   @default(PEDAGOGICA)
+  reviewStatus EvidenceReviewStatus @default(NAO_REVISADA)
+  reviewedBy   String? @db.VarChar(255)
+  reviewedAt   DateTime?
+  reviewNote   String? @db.Text
+
+  schemaVersion Int     @default(1)
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  mantenedora   Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit          Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  classroom     Classroom?  @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  child         Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
+  capturedByUser User?      @relation("ChildEvidenceCapturedBy", fields: [capturedBy], references: [id], onDelete: SetNull)
+  reviewedByUser User?      @relation("ChildEvidenceReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@unique([sourceType, sourceId, childId])
+  @@index([mantenedoraId, unitId])
+  @@index([childId, capturedAt(sort: Desc)])
+  @@index([classroomId, capturedAt(sort: Desc)])
+  @@index([sourceType, sourceId])
+  @@index([evidenceType, capturedAt(sort: Desc)])
+  @@index([sensitivity, visibility])
+  @@index([reviewStatus])
 }

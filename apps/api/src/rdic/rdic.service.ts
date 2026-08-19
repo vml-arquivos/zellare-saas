@@ -3,12 +3,14 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { DiaryEventStatus, RdicDocumentEventType, StatusRDIX } from '@prisma/client';
 import { MICROGESTO_CATALOGO } from '../common/constants/microgestos.constants';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { EvidenceService } from '../evidence/evidence.service';
 
 /**
  * Fluxo de aprovação do RDIC (P0):
@@ -94,7 +96,10 @@ const GENERIC_CHILD_DEVELOPMENT_PROFILE = {
 
 @Injectable()
 export class RdicService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   private roleTypes(user: JwtPayload): string[] {
     return (user.roles ?? []).map((role) => String(role.type ?? ''));
@@ -241,7 +246,9 @@ export class RdicService {
       return updated;
     };
     const transaction = (this.prisma as any).$transaction;
-    return typeof transaction === 'function' ? transaction.call(this.prisma, operation) : operation(this.prisma);
+    const updated = typeof transaction === 'function' ? await transaction.call(this.prisma, operation) : await operation(this.prisma);
+    await this.evidenceService?.syncSafely('RDIX_INSTANCE', () => this.evidenceService!.syncRdxInstance(updated));
+    return updated;
   }
 
   async listarPerfis(user: JwtPayload) {
@@ -432,6 +439,7 @@ export class RdicService {
       profileCode: profile.code,
       profileVersion: profile.version,
     });
+    await this.evidenceService?.syncSafely('RDIX_INSTANCE', () => this.evidenceService!.syncRdxInstance(created));
     return created;
   }
 

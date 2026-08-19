@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { AcompanhamentoNutricionalController } from './acompanhamento-nutricional.controller';
 import { AcompanhamentoNutricionalService } from './acompanhamento-nutricional.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { EvidenceModule } from '../evidence/evidence.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, EvidenceModule],
   controllers: [AcompanhamentoNutricionalController],
   providers: [AcompanhamentoNutricionalService],
   exports: [AcompanhamentoNutricionalService],

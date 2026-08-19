@@ -1,10 +1,14 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { EvidenceService } from '../evidence/evidence.service';
 
 @Injectable()
 export class RdxService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly evidenceService?: EvidenceService,
+  ) {}
 
   /**
    * Criar novo relatório de fotos
@@ -40,6 +44,7 @@ export class RdxService {
       },
     });
 
+    await this.evidenceService?.syncSafely('MEDIA', () => this.evidenceService!.syncPhotoReport(relatorio, dto.fotos ?? []));
     return {
       ...relatorio,
       fotos: dto.fotos ?? [],
@@ -118,6 +123,7 @@ export class RdxService {
       data: { descricao: novaDescricao },
     });
 
+    await this.evidenceService?.syncSafely('MEDIA', () => this.evidenceService!.syncPhotoReport(atualizado, novasFotos));
     return { ...atualizado, fotos: novasFotos };
   }
 
