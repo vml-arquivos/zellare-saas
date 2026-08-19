@@ -264,3 +264,47 @@ describe('FinanceService', () => {
     );
   });
 });
+
+
+describe('FinanceService — sincronização de funcionários', () => {
+  it('cria perfis financeiros idempotentes a partir de usuários ativos institucionais', async () => {
+    const prisma = makePrisma() as any;
+    prisma.user.findMany = jest.fn().mockResolvedValue([
+      {
+        id: 'teacher-1',
+        firstName: 'Ana',
+        lastName: 'Lima',
+        cpf: null,
+        unitId: 'unit-1',
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        roles: [{ role: { type: 'PROFESSOR', level: 'PROFESSOR' } }],
+      },
+      {
+        id: 'guardian-1',
+        firstName: 'Bruna',
+        lastName: 'Melo',
+        cpf: null,
+        unitId: 'unit-1',
+        roles: [{ role: { type: 'FAMILIA_RESPONSAVEL', level: 'FAMILIA' } }],
+      },
+    ]);
+    prisma.employeeProfile.findFirst.mockResolvedValue(null);
+    prisma.employeeProfile.create.mockResolvedValue({ id: 'employee-1' });
+    prisma.employeeProfile.findMany.mockResolvedValue([{ id: 'employee-1', firstName: 'Ana', lastName: 'Lima' }]);
+    prisma.unit.findFirst.mockResolvedValue({ id: 'unit-1' });
+
+    const service = new FinanceService(prisma);
+    const employees = await service.listEmployees(manager, {} as any);
+
+    expect(prisma.employeeProfile.create).toHaveBeenCalledTimes(1);
+    expect(prisma.employeeProfile.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        userId: 'teacher-1',
+        employeeCode: 'USR-teacher-1',
+        roleType: 'PROFESSOR',
+        employmentStatus: 'ATIVO',
+      }),
+    }));
+    expect(employees).toEqual([{ id: 'employee-1', firstName: 'Ana', lastName: 'Lima' }]);
+  });
+});

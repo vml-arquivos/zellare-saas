@@ -328,7 +328,78 @@ export class FinanceService {
     });
   }
 
+  private async ensureEmployeeProfiles(user: JwtPayload) {
+    const userDelegate = (this.prisma as any).user;
+    const employeeDelegate = (this.prisma as any).employeeProfile;
+    if (typeof userDelegate?.findMany !== 'function') return;
+
+    const users = await userDelegate.findMany({
+      where: { mantenedoraId: user.mantenedoraId, status: 'ATIVO' },
+      include: {
+        roles: {
+          where: { isActive: true },
+          include: { role: { select: { type: true, level: true } } },
+        },
+      },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+    });
+
+    for (const employeeUser of users) {
+      const activeRoles = (employeeUser.roles ?? []).filter((assignment: any) => {
+        const roleType = String(assignment.role?.type ?? '');
+        const roleLevel = String(assignment.role?.level ?? assignment.scopeLevel ?? '');
+        return roleType !== 'FAMILIA_RESPONSAVEL' && roleLevel !== 'FAMILIA';
+      });
+      if (activeRoles.length === 0) continue;
+
+      const role = activeRoles[0]?.role;
+      const roleType = String(role?.type ?? role?.level ?? 'COLABORADOR');
+      const existing = typeof employeeDelegate?.findFirst === 'function'
+        ? await employeeDelegate.findFirst({ where: { mantenedoraId: user.mantenedoraId, userId: employeeUser.id } })
+        : null;
+
+      if (existing) {
+        const desiredUnitId = existing.unitId ?? employeeUser.unitId ?? null;
+        const needsUpdate = existing.firstName !== employeeUser.firstName
+          || existing.lastName !== employeeUser.lastName
+          || existing.unitId !== desiredUnitId
+          || existing.roleType !== roleType;
+        if (needsUpdate && typeof employeeDelegate?.update === 'function') {
+          await employeeDelegate.update({
+            where: { id: existing.id },
+            data: {
+              firstName: employeeUser.firstName,
+              lastName: employeeUser.lastName,
+              unitId: desiredUnitId,
+              roleType,
+              updatedBy: user.sub,
+            },
+          });
+        }
+        continue;
+      }
+
+      await employeeDelegate.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId: employeeUser.unitId ?? null,
+          userId: employeeUser.id,
+          employeeCode: `USR-${employeeUser.id}`.slice(0, 50),
+          firstName: employeeUser.firstName,
+          lastName: employeeUser.lastName,
+          cpf: employeeUser.cpf ?? undefined,
+          roleType,
+          employmentStatus: FinanceEmploymentStatus.ATIVO,
+          hireDate: employeeUser.createdAt ?? new Date(),
+          createdBy: user.sub,
+          updatedBy: user.sub,
+        },
+      });
+    }
+  }
+
   async listEmployees(user: JwtPayload, query: ListFinanceQueryDto) {
+    await this.ensureEmployeeProfiles(user);
     const unitId = await this.resolveUnitId(user, query.unitId);
     return this.prisma.employeeProfile.findMany({
       where: {
