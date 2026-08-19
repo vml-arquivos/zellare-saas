@@ -209,6 +209,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-synthesis: none;
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
     overscroll-behavior-x: none;
@@ -907,33 +908,33 @@
 @layer utilities {
   /* Padrão tipográfico global Zelare: leve, delicado e uniforme. */
   :where(.font-thin, .font-extralight, .font-light, .font-normal, .font-medium, .font-semibold, .font-bold, .font-extrabold, .font-black) {
-    font-weight: 400 !important;
+    font-weight: 300 !important;
   }
 
   h1, h2, h3, h4, h5, h6,
   .font-display,
   .zelare-page-title {
     font-family: var(--font-display) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.006em !important;
+    font-weight: 300 !important;
+    letter-spacing: -0.004em !important;
   }
 
   body, button, input, textarea, select,
   .font-body {
     font-family: var(--font-body) !important;
-    font-weight: 400 !important;
+    font-weight: 300 !important;
   }
 
   .uppercase {
     letter-spacing: 0.055em !important;
-    font-weight: 400 !important;
+    font-weight: 300 !important;
   }
 
-  strong, b { font-weight: 400 !important; }
+  strong, b { font-weight: 300 !important; }
 
   /* Mantém presença sem criar blocos tipográficos pesados. */
   .tabular-nums.text-2xl,
   .tabular-nums.text-3xl,
   .tabular-nums.text-4xl,
-  .tabular-nums.text-5xl { font-weight: 500 !important; }
+  .tabular-nums.text-5xl { font-weight: 400 !important; }
 }
