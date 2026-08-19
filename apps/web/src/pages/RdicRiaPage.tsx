@@ -269,7 +269,7 @@ export default function RdicRiaPage() {
   return (
     <PageShell
       title="Desenvolvimento — Registro de Desenvolvimento Individual da Criança"
-      subtitle="Avaliação bimestral por dimensões de desenvolvimento baseada nos 5 Campos de Experiência da BNCC"
+      subtitle="Desenvolvimento do período."
     >
       {/* Abas */}
       <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 flex-wrap">
@@ -297,7 +297,7 @@ export default function RdicRiaPage() {
               <div>
                 <h3 className="font-semibold text-blue-800">Desenvolvimento — Registro de Desenvolvimento Individual da Criança</h3>
                 <p className="text-sm text-blue-600 mt-0.5">
-                  Avaliação bimestral por dimensões de desenvolvimento baseada nos 5 Campos de Experiência da BNCC.
+                  Desenvolvimento do período..
                   Registre o nível de desenvolvimento de cada criança em cada indicador.
                 </p>
               </div>
@@ -479,11 +479,11 @@ export default function RdicRiaPage() {
             <CardContent className="space-y-4">
               <div>
                 <Label>Observação Geral *</Label>
-                <Textarea placeholder="Descreva o desenvolvimento geral da criança neste bimestre, destacando avanços, interesses e conquistas..." rows={4} value={rdicForm.observacaoGeral} onChange={e => setRdicForm(f => ({ ...f, observacaoGeral: e.target.value }))} />
+                <Textarea placeholder="Desenvolvimento do período..." rows={4} value={rdicForm.observacaoGeral} onChange={e => setRdicForm(f => ({ ...f, observacaoGeral: e.target.value }))} />
               </div>
               <div>
                 <Label>Próximos Passos e Encaminhamentos</Label>
-                <Textarea placeholder="Registre as estratégias pedagógicas, encaminhamentos e objetivos para o próximo período..." rows={3} value={rdicForm.proximosPassos} onChange={e => setRdicForm(f => ({ ...f, proximosPassos: e.target.value }))} />
+                <Textarea placeholder="Próximos passos..." rows={3} value={rdicForm.proximosPassos} onChange={e => setRdicForm(f => ({ ...f, proximosPassos: e.target.value }))} />
               </div>
             </CardContent>
           </Card>
@@ -605,7 +605,7 @@ export default function RdicRiaPage() {
               </div>
               <div>
                 <Label>Descrição da Situação *</Label>
-                <Textarea placeholder="Descreva a situação que motivou a intervenção, o contexto e os comportamentos observados..." rows={3} value={riaForm.descricaoSituacao} onChange={e => setRiaForm(f => ({ ...f, descricaoSituacao: e.target.value }))} />
+                <Textarea placeholder="Situação observada..." rows={3} value={riaForm.descricaoSituacao} onChange={e => setRiaForm(f => ({ ...f, descricaoSituacao: e.target.value }))} />
               </div>
               <div>
                 <Label>Estratégias Adotadas</Label>

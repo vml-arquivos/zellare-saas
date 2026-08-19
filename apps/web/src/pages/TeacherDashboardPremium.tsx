@@ -207,7 +207,7 @@ export default function TeacherDashboardPremium() {
                 </Button>
                 <Button onClick={() => navigate('/app/rdic-crianca')} className="bg-gradient-to-r from-[#22C55E] to-[#16A34A] hover:from-[#16A34A] hover:to-[#15803D] text-white h-24 flex flex-col items-center justify-center space-y-2 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
                   <Users className="h-6 w-6" />
-                  <span className="text-sm">Desenvolvimento por Criança</span>
+                  <span className="text-sm">Desenvolvimento</span>
                 </Button>
                 <Button onClick={() => navigate('/app/plano-de-aula')} className="bg-gradient-to-r from-[#F59E0B] to-[#D97706] hover:from-[#D97706] hover:to-[#B45309] text-white h-24 flex flex-col items-center justify-center space-y-2 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   <Calendar className="h-6 w-6" />

@@ -3126,7 +3126,7 @@ export default function DiarioBordoPage() {
                 <div>
                   <Label>Descrição do Microgesto *</Label>
                   <Textarea
-                    placeholder="Descreva a ação pedagógica: o que você fez, como a criança respondeu, qual foi o impacto..."
+                    placeholder="O que foi feito?"
                     rows={2}
                     value={microgestoForm.descricao}
                     onChange={e => setMicrogestoForm(f => ({ ...f, descricao: e.target.value }))}
@@ -3777,7 +3777,7 @@ export default function DiarioBordoPage() {
               <div>
                 <Label>Momento de Destaque do Dia</Label>
                 <Textarea
-                  placeholder="Descreva o momento mais significativo do dia: uma descoberta, uma fala marcante, uma interação especial, uma conquista..."
+                  placeholder="Momento do dia..."
                   rows={3}
                   value={form.momentoDestaque}
                   onChange={e => setForm(f => ({ ...f, momentoDestaque: e.target.value }))}
@@ -3786,7 +3786,7 @@ export default function DiarioBordoPage() {
               <div>
                 <Label>Encaminhamentos e Próximos Passos</Label>
                 <Textarea
-                  placeholder="Registre o que precisa ser comunicado aos pais, encaminhado à coordenação ou planejado para os próximos dias..."
+                  placeholder="Recados e próximos passos..."
                   rows={2}
                   value={form.encaminhamentos}
                   onChange={e => setForm(f => ({ ...f, encaminhamentos: e.target.value }))}
@@ -3923,7 +3923,7 @@ export default function DiarioBordoPage() {
               <div>
                 <Label>Descrição detalhada *</Label>
                 <Textarea
-                  placeholder="Descreva o que aconteceu com detalhes: hora, contexto, pessoas envolvidas, como foi resolvido..."
+                  placeholder="O que aconteceu?"
                   rows={4}
                   value={ocorrForm.descricao}
                   onChange={e => setOcorrForm(f => ({ ...f, descricao: e.target.value }))}
@@ -4238,7 +4238,7 @@ export default function DiarioBordoPage() {
                 {/* Comportamento */}
                 <div className="bg-orange-50 rounded-xl p-4 space-y-3">
                   <p className="text-sm font-semibold text-orange-700 flex items-center gap-2"><Heart className="h-4 w-4" /> Comportamento e Emoções</p>
-                  <Textarea placeholder="Como foi o comportamento geral da criança hoje? Houve agitação, choro, agressividade, tranquilidade?" rows={2}
+                  <Textarea placeholder="Comportamento do dia..." rows={2}
                     value={obsForm.behaviorDescription} onChange={e => setObsForm(f => ({ ...f, behaviorDescription: e.target.value }))} />
                   <Textarea placeholder="Interação social com outras crianças e adultos..." rows={2}
                     value={obsForm.socialInteraction} onChange={e => setObsForm(f => ({ ...f, socialInteraction: e.target.value }))} />
@@ -4260,16 +4260,16 @@ export default function DiarioBordoPage() {
                   <p className="text-sm font-semibold text-blue-700 flex items-center gap-2"><Star className="h-4 w-4" /> Desenvolvimento Pedagógico</p>
                   <Textarea placeholder="Como foi o aprendizado? Progresso observado, dificuldades, conquistas..." rows={2}
                     value={obsForm.learningProgress} onChange={e => setObsForm(f => ({ ...f, learningProgress: e.target.value }))} />
-                  <Textarea placeholder="Participação no plano de aula: engajamento, interesse, como foi o desempenho na atividade planejada..." rows={2}
+                  <Textarea placeholder="Participação na atividade..." rows={2}
                     value={obsForm.planningParticipation} onChange={e => setObsForm(f => ({ ...f, planningParticipation: e.target.value }))} />
                 </div>
 
                 {/* Psicológico / Desenvolvimento integral */}
                 <div className="bg-purple-50 rounded-xl p-4 space-y-3">
                   <p className="text-sm font-semibold text-purple-700 flex items-center gap-2"><Brain className="h-4 w-4" /> Desenvolvimento Integral</p>
-                  <Textarea placeholder="Observações psicológicas, mentais e físicas: sinais de ansiedade, dificuldades de atenção, desenvolvimento motor, linguagem..." rows={2}
+                  <Textarea placeholder="Sinais observados..." rows={2}
                     value={obsForm.psychologicalNotes} onChange={e => setObsForm(f => ({ ...f, psychologicalNotes: e.target.value }))} />
-                  <Textarea placeholder="Alertas de desenvolvimento: algo que chama atenção e pode indicar necessidade de acompanhamento especializado..." rows={2}
+                  <Textarea placeholder="Alertas..." rows={2}
                     value={obsForm.developmentAlerts} onChange={e => setObsForm(f => ({ ...f, developmentAlerts: e.target.value }))} />
                   <Textarea placeholder="Recomendações e próximos passos para esta criança..." rows={2}
                     value={obsForm.recommendations} onChange={e => setObsForm(f => ({ ...f, recommendations: e.target.value }))} />

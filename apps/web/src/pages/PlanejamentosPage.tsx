@@ -724,7 +724,7 @@ export default function PlanejamentosPage() {
               </div>
               <div>
                 <Label>Intencionalidade Pedagógica e Observações</Label>
-                <Textarea placeholder="Registre a intencionalidade pedagógica, adaptações necessárias, observações sobre a turma..." rows={3} value={form.observacoes} onChange={e => setForm(f => ({ ...f, observacoes: e.target.value }))} />
+                <Textarea placeholder="Observações do planejamento..." rows={3} value={form.observacoes} onChange={e => setForm(f => ({ ...f, observacoes: e.target.value }))} />
               </div>
             </CardContent>
           </Card>

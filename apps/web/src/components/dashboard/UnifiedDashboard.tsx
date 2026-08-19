@@ -70,8 +70,8 @@ const W_PROFESSOR: Widget[] = [
   },
   {
     id: 'rdic',
-    title: 'Desenvolvimento por Criança',
-    description: 'Relatório de Desenvolvimento Individual da Criança.',
+    title: 'Desenvolvimento',
+    description: 'Registrar evolução.',
     icon: <Brain className="h-5 w-5" />,
     path: '/app/rdic-crianca',
     accent: 'bg-amber-600',
@@ -89,8 +89,8 @@ const W_PROFESSOR: Widget[] = [
   },
   {
     id: 'atendimentos',
-    title: 'Atendimentos Pais',
-    description: 'Registre e consulte atendimentos com responsáveis.',
+    title: 'Famílias',
+    description: 'Registros da família.',
     icon: <MessageCircle className="h-5 w-5" />,
     path: '/app/atendimentos-pais',
     accent: 'bg-teal-600',
@@ -98,8 +98,8 @@ const W_PROFESSOR: Widget[] = [
   },
   {
     id: 'alergias',
-    title: 'Alergias e Dietas',
-    description: 'Consulte restrições alimentares da turma.',
+    title: 'Alergias',
+    description: 'Restrições da turma.',
     icon: <Apple className="h-5 w-5" />,
     path: '/app/painel-alergias',
     accent: 'bg-red-600',
@@ -108,8 +108,8 @@ const W_PROFESSOR: Widget[] = [
   },
   {
     id: 'materiais',
-    title: 'Requisições de Materiais',
-    description: 'Solicite materiais pedagógicos para a turma.',
+    title: 'Materiais',
+    description: 'Solicitar materiais.',
     icon: <ShoppingCart className="h-5 w-5" />,
     path: '/app/material-requests',
     accent: 'bg-slate-600',

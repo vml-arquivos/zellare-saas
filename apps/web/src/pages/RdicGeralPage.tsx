@@ -246,8 +246,8 @@ export default function RdicGeralPage() {
         {rdicsFiltrados.length === 0 ? (
           <EmptyState
             icon={<Brain className="h-12 w-12 text-gray-400" />}
-            title="Nenhum Desenvolvimento publicado ainda"
-            description="Os Relatórios aparecerão aqui após serem aprovados e publicados pela coordenação pedagógica de cada unidade."
+            title="Nenhum relatório"
+            description="Relatórios aprovados aparecem aqui."
           />
         ) : (
           <div className="space-y-3">

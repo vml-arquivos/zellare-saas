@@ -131,14 +131,14 @@ export default function RdicProfilesPage() {
   }
 
   return (
-    <PageShell title="Perfis Documentais" subtitle="Configure como cada rede ou instituição transforma evidências em documentos oficiais de desenvolvimento">
+    <PageShell title="Perfis" subtitle="Documentos da instituição">
       <div className="space-y-6">
         <Card className="border-blue-100 bg-blue-50/60">
           <CardContent className="p-5 flex gap-3">
             <Info className="h-5 w-5 text-blue-700 mt-0.5 shrink-0" />
             <div className="text-sm text-blue-950">
               <p className="font-semibold">O RDIC não é universal para todas as instituições.</p>
-              <p className="mt-1 text-blue-900/80">O Zelare mantém perfis oficiais curados, como o modelo da SEEDF, e permite que cada mantenedora clone ou crie seu próprio relatório. Alterar o perfil não modifica documentos já criados: cada instância guarda a versão utilizada.</p>
+              <p className="mt-1 text-blue-900/80">Referências oficiais e perfis próprios. Documentos já criados não mudam.</p>
             </div>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export default function RdicProfilesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Catálogo disponível</h2>
-            <p className="text-sm text-slate-500">Perfis públicos são referências; perfis próprios podem ser definidos como padrão.</p>
+            <p className="text-sm text-slate-500">Escolha ou crie um perfil padrão.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => void loadProfiles()} disabled={loading || saving}><RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />Atualizar</Button>
@@ -157,7 +157,7 @@ export default function RdicProfilesPage() {
         {showCreate && (
           <Card>
             <CardContent className="p-5 space-y-4">
-              <div><h3 className="font-semibold text-slate-900">Criar perfil próprio</h3><p className="text-xs text-slate-500 mt-1">Use o nome e as regras do regimento, sistema de ensino ou rede da instituição. A validade oficial deve ser conferida pela própria entidade.</p></div>
+              <div><h3 className="font-semibold text-slate-900">Criar perfil próprio</h3><p className="text-xs text-slate-500 mt-1">Nome e regras da instituição. Confirme a validade oficial.</p></div>
               <div className="grid md:grid-cols-3 gap-4">
                 <div><Label>Código *</Label><Input className="mt-1" value={form.code} placeholder="ESCOLA_RELATORIO_2026" onChange={(event) => setForm((value) => ({ ...value, code: event.target.value }))} /></div>
                 <div><Label>Nome do perfil *</Label><Input className="mt-1" value={form.name} placeholder="Relatório da Escola" onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))} /></div>
@@ -193,7 +193,7 @@ export default function RdicProfilesPage() {
 
         <Card className="border-slate-200"><CardContent className="p-5 flex flex-wrap items-center justify-between gap-4"><div><p className="font-semibold text-slate-900">Perfil padrão para novos RDICs</p><p className="text-sm text-slate-500 mt-1">{selected ? `${selected.documentLabel} · ${institutionLabels[selected.institutionType]}` : 'Selecione um perfil acima'}</p></div><Button onClick={() => void defineDefault()} disabled={!selectedId || saving}><ShieldCheck className="h-4 w-4 mr-2" />Definir como padrão</Button></CardContent></Card>
 
-        <div className="text-xs text-slate-500 space-y-1"><p><strong>Perfis curados:</strong> são referências documentais incorporadas pela plataforma e não substituem validação do órgão competente.</p><p><strong>Escola particular:</strong> deve configurar seu próprio nome, sistema de ensino, proposta pedagógica, regras de assinatura e arquivamento.</p><p><strong>Documentos históricos:</strong> ficam protegidos pelo snapshot da versão utilizada no momento da criação.</p></div>
+        <div className="text-xs text-slate-500 space-y-1"><p><strong>Perfis curados:</strong> Referências. Confirme no órgão competente.</p><p><strong>Escola particular:</strong> Configure nome, assinatura e arquivo.</p><p><strong>Documentos históricos:</strong> mantêm a versão usada na criação.</p></div>
       </div>
     </PageShell>
   );

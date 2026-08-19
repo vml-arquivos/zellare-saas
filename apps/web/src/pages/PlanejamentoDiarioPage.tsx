@@ -252,7 +252,7 @@ export default function PlanejamentoDiarioPage() {
   return (
     <PageShell
       title="Planejamento Diário"
-      subtitle="Calendário pedagógico 2026 — Sequência Pedagógica Piloto por data, segmento e campo de experiência"
+      subtitle="Calendário 2026."
     >
       {/* Abas */}
       <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 overflow-x-auto">

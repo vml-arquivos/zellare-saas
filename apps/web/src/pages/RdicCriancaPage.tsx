@@ -1505,7 +1505,7 @@ export default function RdicCriancaPage() {
                 <Textarea
                   value={proximosPassos}
                   onChange={e => setProximosPassos(e.target.value)}
-                  placeholder="Descreva as estratégias pedagógicas, encaminhamentos e objetivos para o próximo período..."
+                  placeholder="Próximos passos..."
                   rows={4}
                   className="resize-none"
                 />

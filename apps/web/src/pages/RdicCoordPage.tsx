@@ -532,9 +532,9 @@ export default function RdicCoordPage() {
                         <div className="rounded-lg bg-white p-2 text-center"><p className="text-lg font-bold text-rose-600">{turmaResumo.totalPontosAtencao}</p><p className="text-[11px] text-gray-500">pontos de atenção</p></div>
                       </div>
                       {turmaResumo.criancas.some((crianca) => crianca.tendencia === 'ATENCAO') && (
-                        <p className="mt-3 text-xs text-rose-700">Há crianças com sinais pedagógicos para acompanhamento. Consulte o detalhe individual antes de qualquer encaminhamento.</p>
+                        <p className="mt-3 text-xs text-rose-700">Há crianças para acompanhar.</p>
                       )}
-                      <p className="mt-2 text-[11px] text-gray-400">Indicadores operacionais derivados do Diário e das observações; não constituem diagnóstico clínico.</p>
+                      <p className="mt-2 text-[11px] text-gray-400">Indicadores do Diário. Sem diagnóstico.</p>
                     </>
                   ) : null}
                 </CardContent>

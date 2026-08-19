@@ -189,14 +189,14 @@ export default function CareOverviewPage() {
   }
 
   return (
-    <PageShell title="Cuidado integrado" subtitle="Uma leitura protegida de desenvolvimento, alimentação, alertas e acompanhamento familiar baseada nos registros reais do Zelare.">
+    <PageShell title="Cuidado integrado" subtitle="Cuidado, alimentação e família.">
       <div className="space-y-6">
         <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-emerald-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="flex items-center gap-2 text-sm font-medium text-indigo-700"><HeartPulse className="h-4 w-4" /> Visão somente leitura e com revisão humana</div>
               <h1 className="mt-2 text-2xl font-semibold text-slate-900">Acompanhe a criança como um todo</h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600">O painel reúne os sinais disponíveis para o seu papel. Campos sensíveis continuam minimizados pelo backend e cada encaminhamento exige decisão da equipe autorizada.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Resumo protegido do cuidado.</p>
             </div>
             <div className="flex items-center gap-2">
               <label htmlFor="care-child" className="sr-only">Selecionar criança</label>
@@ -241,7 +241,7 @@ export default function CareOverviewPage() {
                 <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                   <div>
                     <div className="flex items-center gap-2 text-sm font-semibold text-violet-800"><ShieldCheck className="h-4 w-4" /> Cobertura unificada da criança</div>
-                    <p className="mt-1 text-sm text-slate-600">Registros naturais cruzados por proveniência, com o conteúdo sensível mantido sob o escopo autorizado.</p>
+                    <p className="mt-1 text-sm text-slate-600">Registros do cuidado.</p>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800">Revisão humana obrigatória</span>
                 </div>
@@ -298,7 +298,7 @@ export default function CareOverviewPage() {
               </SectionCard>
             </div>
 
-            <footer className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between"><span><CheckCircle2 className="mr-1 inline h-4 w-4 text-emerald-600" /> Visão gerada em {formatDateTime(overview.governance.generatedAt)} · somente leitura</span><span>{overview.governance.sensitiveFieldsMinimized ? 'Campos sensíveis minimizados para este papel.' : 'Campos sensíveis disponíveis apenas conforme autorização.'} Revisão humana obrigatória.</span></footer>
+            <footer className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between"><span><CheckCircle2 className="mr-1 inline h-4 w-4 text-emerald-600" /> Visão gerada em {formatDateTime(overview.governance.generatedAt)} · somente leitura</span><span>{overview.governance.sensitiveFieldsMinimized ? 'Campos protegidos.' : 'Acesso protegido.'} Revisão humana obrigatória.</span></footer>
           </>
         )}
 

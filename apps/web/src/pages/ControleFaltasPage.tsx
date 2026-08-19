@@ -685,7 +685,7 @@ function ControleFaltasProfessorView() {
       {!isHoje && !isFimDeSemana && (
         <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-sm text-orange-700 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <span>Você está registrando a chamada de um dia anterior. Máximo de {MAX_RETROATIVO} dias retroativos permitido.</span>
+          <span>Chamada retroativa · até {MAX_RETROATIVO} dias.</span>
         </div>
       )}
 

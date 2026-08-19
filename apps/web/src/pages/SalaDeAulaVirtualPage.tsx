@@ -431,10 +431,10 @@ export default function SalaDeAulaVirtualPage() {
           anoLetivo: anoAtual,
           rascunhoJson,
         });
-        toast.success(`Desenvolvimento de ${alunoSelecionado.firstName} criado! Acesse Desenvolvimento por Criança para completar.`);
+        toast.success(`Desenvolvimento de ${alunoSelecionado.firstName} criado.`);
       } catch (err: any) {
         if (err?.response?.status === 400 && err?.response?.data?.message?.includes('Já existe')) {
-          toast.info(`Desenvolvimento de ${alunoSelecionado.firstName} já existe para este período. Acesse Desenvolvimento por Criança para editar.`);
+          toast.info(`Desenvolvimento de ${alunoSelecionado.firstName} já existe neste período.`);
         } else {
           throw err;
         }
@@ -923,7 +923,7 @@ export default function SalaDeAulaVirtualPage() {
         <div className="space-y-4 max-w-3xl">
           {!alunoSelecionado ? (
             <>
-              <p className="text-sm text-gray-500">Selecione um aluno para registrar atividades, avaliações e acompanhar o desenvolvimento individual.</p>
+              <p className="text-sm text-gray-500">Selecione um aluno.</p>
               {criancas.length === 0 && <EmptyState title="Nenhum aluno encontrado" description="Verifique se a turma possui alunos cadastrados." />}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {criancas.map(c => (
@@ -1448,13 +1448,7 @@ export default function SalaDeAulaVirtualPage() {
                           </div>
 
                           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                            <p className="text-sm font-semibold text-amber-800 mb-1">O que acontece ao gerar o Desenvolvimento:</p>
-                            <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                              <li>Um rascunho do Desenvolvimento é criado automaticamente com base nos seus registros</li>
-                              <li>Você será redirecionado para a página Desenvolvimento por Criança para completar e enviar</li>
-                              <li>A coordenadora revisará e aprovará o relatório final</li>
-                              <li>Após publicado, fica disponível para coordenadora geral e psicóloga</li>
-                            </ul>
+                            <p className="text-sm text-amber-800">Gera rascunho para revisão.</p>
                           </div>
 
                           <div className="flex gap-3">

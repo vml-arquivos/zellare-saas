@@ -281,7 +281,7 @@ function CardEntrada({ entrada, expanded, onToggle, ehProfessor }: {
                   <p className="text-xs font-semibold text-gray-500 mb-1">Reflexão pedagógica (opcional)</p>
                   <textarea
                     rows={3}
-                    placeholder="Como as crianças reagiram? O que funcionou bem? O que adaptar na próxima vez? Quais microgestos observou?"
+                    placeholder="Reflexão da atividade..."
                     value={avaliacaoTexto}
                     onChange={e => setAvaliacaoTexto(e.target.value)}
                     className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"

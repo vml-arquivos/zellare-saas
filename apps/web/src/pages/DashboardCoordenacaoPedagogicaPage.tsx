@@ -136,7 +136,7 @@ function PedagogicoSubNav({
         <div className="space-y-3">
           {diarios.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 bg-white rounded-2xl border border-gray-100 gap-2">
-              <p className="text-sm text-gray-400">Nenhum diário registrado neste período.</p>
+              <p className="text-sm text-gray-400">Nenhum diário.</p>
             </div>
           ) : (
             diarios.map((diario: any) => {
@@ -703,7 +703,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
           <Eye className="h-5 w-5 text-blue-500 flex-shrink-0" />
           <div>
             <p className="text-sm font-semibold text-blue-800">Modo Análise — Coordenação Geral</p>
-            <p className="text-xs text-blue-600">Você está visualizando dados desta unidade. Aprovações são responsabilidade da Coordenação da Unidade.</p>
+            <p className="text-xs text-blue-600">Unidade atual. Aprovação da coordenação.</p>
           </div>
         </div>
       )}
@@ -1577,7 +1577,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
             return diariosFiltrados.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-gray-100 gap-2">
               <ClipboardList className="h-10 w-10 text-gray-200" />
-              <p className="text-sm text-gray-400">{diarios.length === 0 ? 'Nenhum diário registrado neste período.' : 'Nenhum diário encontrado com os filtros aplicados.'}</p>
+              <p className="text-sm text-gray-400">{diarios.length === 0 ? 'Nenhum diário.' : 'Nenhum diário.'}</p>
             </div>
           ) : (
             <div className="space-y-3">

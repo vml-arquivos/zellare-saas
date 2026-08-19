@@ -263,7 +263,7 @@ export function ReportsPage() {
               <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-rose-700">{diaryQuality.collection.teacherConcerns}</p><p className="text-xs text-slate-500">marcados para revisão</p></div>
               <div className="rounded-lg bg-white p-3"><p className="text-2xl font-bold text-slate-700">{diaryQuality.collection.noOpportunity}</p><p className="text-xs text-slate-500">sem oportunidade, não atraso</p></div>
             </div>
-            <p className="mt-3 text-xs text-violet-800">Este bloco organiza evidências pedagógicas e não produz diagnóstico ou laudo clínico automático.</p>
+            <p className="mt-3 text-xs text-violet-800">Evidências pedagógicas. Sem diagnóstico automático.</p>
           </section>
         )}
 
@@ -296,7 +296,7 @@ export function ReportsPage() {
           </section>
         )}
 
-        {pendings && pendings.pendentes.length > 0 && <section className="rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-semibold text-amber-900">Fila de atenção operacional</h3><p className="mt-1 text-sm text-amber-800">Crianças sem registro recente. A fila serve para orientar o cuidado da equipe, não para punir o professor.</p><div className="mt-3 flex flex-wrap gap-2">{pendings.pendentes.slice(0, 12).map((pending) => <span key={pending.childId} className="rounded-full bg-white px-3 py-1 text-xs text-amber-900">{pending.nome} · {pending.classroomName}</span>)}</div></section>}
+        {pendings && pendings.pendentes.length > 0 && <section className="rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-semibold text-amber-900">Fila de atenção operacional</h3><p className="mt-1 text-sm text-amber-800">Crianças sem registro recente.</p><div className="mt-3 flex flex-wrap gap-2">{pendings.pendentes.slice(0, 12).map((pending) => <span key={pending.childId} className="rounded-full bg-white px-3 py-1 text-xs text-amber-900">{pending.nome} · {pending.classroomName}</span>)}</div></section>}
       </div>
     );
   };
@@ -458,7 +458,7 @@ export function ReportsPage() {
       {reportType === 'pedagogical' && (
         <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
           <h2 className="text-lg font-semibold mb-2 text-gray-700">Filtros — Visão Pedagógica Consolidada</h2>
-          <p className="mb-4 text-sm text-gray-500">Escolha uma turma para ver evidências por criança. Sem turma, a visão mostra cobertura por unidade ou por toda a rede, conforme seu escopo.</p>
+          <p className="mb-4 text-sm text-gray-500">Selecione a turma.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Turma <span className="text-gray-400 text-xs">(opcional)</span></label>

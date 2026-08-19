@@ -399,7 +399,7 @@ export default function AdminUnidadesPage() {
               <AlertCircle className="h-7 w-7 text-red-500" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">Excluir Unidade?</h3>
-            <p className="text-gray-500 text-sm mb-6">Unidades com dados vinculados serão desativadas. Unidades vazias serão excluídas permanentemente.</p>
+            <p className="text-gray-500 text-sm mb-6">Unidades com dados serão desativadas; vazias serão excluídas.</p>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setConfirmDelete(null)}>Cancelar</Button>
               <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => excluirUnidade(confirmDelete)}>Confirmar</Button>

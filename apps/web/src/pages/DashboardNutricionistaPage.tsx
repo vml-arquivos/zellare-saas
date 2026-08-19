@@ -748,7 +748,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                 <div className="text-center py-8 text-gray-400">
                   <p className="text-4xl mb-2">🥗</p>
                   <p className="text-sm font-medium text-gray-500">Nenhum alimento adicionado ainda</p>
-                  <p className="text-xs text-gray-400 mt-1">1. Escolha a categoria &rarr; 2. Selecione o alimento &rarr; 3. Informe o peso &rarr; clique em <strong>Adicionar</strong></p>
+                  <p className="text-xs text-gray-400 mt-1">Categoria · alimento · peso · salvar <strong>Adicionar</strong></p>
                 </div>
               )}
 
@@ -1068,7 +1068,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-gray-400 mt-3">Valores de referência: Resolução FNDE nº 06/2020 — PNAE. Comparativo baseado na média diária calculada do cardápio da semana.</p>
+                  <p className="text-xs text-gray-400 mt-3">Referência PNAE.</p>
                 </div>
               </div>
             );

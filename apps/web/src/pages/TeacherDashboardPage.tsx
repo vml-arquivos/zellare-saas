@@ -1087,14 +1087,14 @@ export default function TeacherDashboardPage() {
                     <Brain className="h-6 w-6 text-[var(--text-inverse)]" />
                   </div>
                   <div>
-                    <p className="font-medium text-[var(--text-primary)]">Análise Pedagógica com IA</p>
-                    <p className="text-xs text-[var(--text-secondary)]">Descreva o dia e a IA gera Desenvolvimento automaticamente</p>
+                    <p className="font-medium text-[var(--text-primary)]">IA Pedagógica</p>
+                    <p className="text-xs text-[var(--text-secondary)]">Gerar registro</p>
                   </div>
                 </div>
                 <textarea
                   className="w-full border-2 border-[var(--border-default)] rounded-xl p-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-600)] bg-[var(--surface-card)]"
                   rows={5}
-                  placeholder="Descreva como foi o dia da turma: atividades realizadas, comportamentos observados, interações entre crianças, aprendizagens percebidas, situações relevantes...\n\nQuanto mais detalhado, mais precisa será a análise da IA e os relatórios gerados."
+                  placeholder="Resumo do dia..."
                   value={entradaDiarioIA}
                   onChange={e => setEntradaDiarioIA(e.target.value)}
                 />

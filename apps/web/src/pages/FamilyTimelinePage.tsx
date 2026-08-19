@@ -140,7 +140,7 @@ export default function FamilyTimelinePage() {
               <LockKeyhole className="mt-0.5 h-5 w-5 text-emerald-700" />
               <div>
                 <p className="font-semibold text-emerald-950">Privacidade aplicada</p>
-                <p className="mt-1 text-sm text-emerald-900">A timeline filtra dados para o vínculo autorizado. Dados de saúde não são exibidos nesta visão.</p>
+                <p className="mt-1 text-sm text-emerald-900">Acesso autorizado. Saúde protegida.</p>
                 <p className="mt-1 text-xs text-emerald-800">Período: {formatDate(timeline.from)} até {formatDate(timeline.to)}</p>
                 <p className="mt-1 text-xs font-medium text-emerald-800">
                   {timeline.privacy.developmentVisible === false

@@ -393,7 +393,7 @@ export default function PainelAnaliticoCriancaPage() {
                         return (
                           <div key={nivel} className={`flex-1 min-w-[120px] rounded-xl border p-3 text-center ${cor}`}>
                             <p className="text-2xl font-bold">{count}</p>
-                            <p className="text-xs font-medium mt-0.5">{nivel === 'ALCANCADO' ? '✅ Alcançado' : nivel === 'EM_DESENVOLVIMENTO' ? '🟡 Em Desenvolvimento' : '🔴 Requer Atenção'}</p>
+                            <p className="text-xs font-medium mt-0.5">{nivel === 'ALCANCADO' ? 'Alcançado' : nivel === 'EM_DESENVOLVIMENTO' ? 'Em desenvolvimento' : 'Atenção'}</p>
                             <p className="text-xs opacity-70">{pct}%</p>
                           </div>
                         );

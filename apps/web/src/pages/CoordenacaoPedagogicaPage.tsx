@@ -666,7 +666,7 @@ export default function CoordenacaoPedagogicaPage() {
 
           <div className="space-y-3">
             {reunioes.length === 0 && (
-              <EmptyState icon={<Calendar className="h-12 w-12 text-gray-300" />} title="Nenhuma reunião agendada" description="Agende a próxima reunião pedagógica" action={<Button onClick={() => setModalReuniao(true)}><Plus className="h-4 w-4 mr-2" />Agendar</Button>} />
+              <EmptyState icon={<Calendar className="h-12 w-12 text-gray-300" />} title="Nenhuma reunião" description="Agende uma reunião" action={<Button onClick={() => setModalReuniao(true)}><Plus className="h-4 w-4 mr-2" />Agendar</Button>} />
             )}
 
             {reunioes.map(reuniao => {

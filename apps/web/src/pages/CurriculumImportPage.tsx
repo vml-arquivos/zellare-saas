@@ -156,9 +156,9 @@ export function CurriculumImportPage() {
   }
 
   return (
-    <PageShell title="Importar Matriz Curricular" subtitle="Validação real, preview auditável e aplicação idempotente sobre as tabelas curriculares do Zelare.">
+    <PageShell title="Importar Matriz Curricular" subtitle="Importação da matriz.">
       <div className="mx-auto max-w-4xl space-y-6">
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-900"><ShieldCheck className="mr-2 inline h-4 w-4" /> O arquivo é analisado pelo backend antes de gravar. O preview não cria matriz, não altera entries e mostra a ação prevista para cada linha.</div>
+        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-900"><ShieldCheck className="mr-2 inline h-4 w-4" /> O arquivo será validado antes de gravar.</div>
 
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Download className="h-4 w-4 text-indigo-600" />Passo 1 — Use o modelo oficial</CardTitle></CardHeader>

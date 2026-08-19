@@ -130,7 +130,7 @@ function ModalUsuario({
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{isEdit ? 'Editar Usuário' : 'Novo Usuário'}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">{isEdit ? `Editando: ${usuario!.firstName} ${usuario!.lastName}` : 'Preencha os dados do novo usuário'}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{isEdit ? usuario!.firstName + ' ' + usuario!.lastName : 'Novo usuário'}</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />

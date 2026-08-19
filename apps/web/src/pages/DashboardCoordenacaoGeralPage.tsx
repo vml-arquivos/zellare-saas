@@ -1050,7 +1050,7 @@ export default function DashboardCoordenacaoGeralPage() {
               {/* Navegação rápida para criança */}
               <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-4">
                 <p className="text-sm font-semibold text-purple-800 mb-1">Análise individual</p>
-                <p className="text-xs text-purple-600 mb-3">Acesse o painel analítico de cada criança para ver evolução detalhada por campo de experiência, linha do tempo e observações.</p>
+                <p className="text-xs text-purple-600 mb-3">Ver evolução e registros.</p>
                 <button onClick={() => navigate('/app/secretaria/matriculas')}
                   className="flex items-center gap-1.5 px-3 py-2 bg-white border border-purple-200 rounded-xl text-xs font-medium text-purple-700 hover:bg-purple-50 transition-colors">
                   <Eye className="h-3.5 w-3.5" /> Buscar criança
