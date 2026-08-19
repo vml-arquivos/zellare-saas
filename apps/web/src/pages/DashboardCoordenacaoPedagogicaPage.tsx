@@ -79,11 +79,20 @@ interface Diario {
 interface TurmaResumo {
   id: string; nome: string; totalAlunos: number; professor: string | null; chamadaFeita: boolean;
 }
+interface DevelopmentSummary {
+  janelaDias: number;
+  diarios: number;
+  observacoes: number;
+  totalRegistros: number;
+  criancasComRegistro: number;
+  alertas: number;
+}
 interface DashboardData {
   turmas: number; professores: number; alunosTotal: number;
   requisicoesParaAnalisar: number; planejamentosParaRevisar: number;
   diariosEstaSemana: number; taxaPresencaMedia: number; alertas: string[];
   turmasLista: TurmaResumo[];
+  desenvolvimento?: DevelopmentSummary;
 }
 
 // ─── Sub-componente: aba Pedagógico com sub-navegação ────────────────────────
@@ -439,6 +448,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
             : 0,
           alertas: [],
           turmasLista: turmasArr,
+          desenvolvimento: raw?.desenvolvimento ?? undefined,
         });
         if (Array.isArray(raw?.planejamentosParaRevisao) && raw.planejamentosParaRevisao.length > 0) {
           setPlanejamentos(raw.planejamentosParaRevisao.map((p: Record<string, unknown>) => ({
@@ -815,6 +825,15 @@ export default function DashboardCoordenacaoPedagogicaPage() {
                 trend: { value: 2, direction: 'down', label: 'vs ontem' },
                 color: 'text-red-600',
                 icon: <Bell className="h-5 w-5 text-red-600" />,
+              },
+              {
+                id: 'desenvolvimento',
+                label: 'Evidências de Desenvolvimento',
+                value: dashboard?.desenvolvimento?.totalRegistros ?? 0,
+                trend: { value: dashboard?.desenvolvimento?.criancasComRegistro ?? 0, direction: 'up', label: 'crianças com registro' },
+                color: 'text-purple-600',
+                icon: <Brain className="h-5 w-5 text-purple-600" />,
+                onClick: () => navigate('/app/desenvolvimento-infantil'),
               },
             ]}
           />

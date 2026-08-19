@@ -32,12 +32,20 @@ interface PedidoCompra {
   }[];
 }
 
+interface DevelopmentSummary {
+  totalRegistros: number;
+  criancasComRegistro: number;
+  alertas: number;
+  diarios: number;
+  observacoes: number;
+}
 interface DashboardData {
   totalCriancas: number;
   totalTurmas: number;
   totalProfessores: number;
   pedidosPendentes: number;
   planejamentosAtivos: number;
+  desenvolvimento?: DevelopmentSummary;
   // Pedagógico
   diariosHoje: number;
   diariosEstaSemana: number;
@@ -143,6 +151,7 @@ export function DashboardDiretorPage() {
         planejamentosEmRevisao: planEmRevisao,
         rdicIniciadosTrimestre: rdicIniciados,
         rdicAprovadosTrimestre: rdicAprov,
+        desenvolvimento: coordData?.desenvolvimento ?? undefined,
       });
     } catch {
       setDados(null);
@@ -381,7 +390,7 @@ export function DashboardDiretorPage() {
                     <p className="text-[11px] text-gray-500 mt-0.5">Planos p/ revisar</p>
                   </div>
 
-                  {/* Desenvolvimento trimestre */}
+                  {/* Desenvolvimento oficial */}
                   <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
@@ -389,7 +398,17 @@ export function DashboardDiretorPage() {
                     <p className="text-xl font-bold text-gray-800">
                       {dados?.rdicAprovadosTrimestre ?? 0}
                     </p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">Desenvolvimento aprovados 1T</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">Desenvolvimentos oficiais aprovados</p>
+                  </div>
+                  {/* Evidências integradas do Diário */}
+                  <div className="rounded-xl bg-purple-50 border border-purple-100 p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <BookOpen className="h-3.5 w-3.5 text-purple-500" />
+                    </div>
+                    <p className="text-xl font-bold text-purple-700">
+                      {dados?.desenvolvimento?.totalRegistros ?? 0}
+                    </p>
+                    <p className="text-[11px] text-purple-600 mt-0.5">Evidências dos últimos 30 dias</p>
                   </div>
                 </div>
 

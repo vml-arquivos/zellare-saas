@@ -73,6 +73,14 @@ interface DimensaoAvaliacao {
   indicadores: IndicadorAvaliacao[];
 }
 
+interface EvidenciasResumo {
+  diarios: number;
+  observacoes: number;
+  microgestos: number;
+  diasComRegistro: number;
+  pontosAtencao: number;
+}
+
 interface RdicSalvo {
   id: string;
   childId: string;
@@ -231,6 +239,16 @@ const TRIMESTRES = [
 ] as const;
 type TrimestreId = (typeof TRIMESTRES)[number]['id'];
 
+function periodoDoTrimestre(trimestreId: TrimestreId) {
+  const ano = new Date().getFullYear();
+  const periodos: Record<TrimestreId, { start: string; end: string }> = {
+    1: { start: `${ano}-02-01`, end: `${ano}-05-31` },
+    2: { start: `${ano}-06-01`, end: `${ano}-09-30` },
+    3: { start: `${ano}-10-01`, end: `${ano}-12-31` },
+  };
+  return periodos[trimestreId];
+}
+
 // ─── Kanban: status e agrupamento ───────────────────────────────────────────
 const RDIC_STATUS = {
   PENDING:     'PENDING',
@@ -326,11 +344,13 @@ function CardCrianca({
   selecionado,
   onClick,
   rdicsCount,
+  evidencias,
 }: {
   aluno: Aluno;
   selecionado: boolean;
   onClick: () => void;
   rdicsCount: number;
+  evidencias?: EvidenciasResumo;
 }) {
   const iniciais = `${aluno.firstName[0] ?? ''}${aluno.lastName[0] ?? ''}`.toUpperCase();
   const gradient = getAvatarGradient(aluno.firstName);
@@ -381,13 +401,20 @@ function CardCrianca({
           </p>
         </div>
 
-        {/* Badge Desenvolvimento */}
-        <div className={`flex-shrink-0 text-[11px] px-2 py-1 rounded-lg font-semibold border ${
-          rdicsCount > 0
-            ? 'bg-green-50 text-green-700 border-green-200'
-            : 'bg-gray-50 text-gray-400 border-gray-200'
-        }`}>
-          {rdicsCount > 0 ? `✓ ${rdicsCount}` : 'Sem Desenvolvimento'}
+        {/* Status do documento oficial RDIC + evidências naturais do Diário */}
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <div className={`text-[11px] px-2 py-1 rounded-lg font-semibold border ${
+            rdicsCount > 0
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-gray-50 text-gray-400 border-gray-200'
+          }`}>
+            {rdicsCount > 0 ? `✓ ${rdicsCount} RDIC` : 'RDIC pendente'}
+          </div>
+          {evidencias && (evidencias.diarios + evidencias.observacoes) > 0 && (
+            <div className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {evidencias.diarios + evidencias.observacoes} evidências do Diário
+            </div>
+          )}
         </div>
       </div>
     </button>
@@ -461,6 +488,7 @@ export default function RdicCriancaPage() {
       carregarEvidencias(alunoSelecionado.id, t);
       carregarDiagnosticoExpress(alunoSelecionado.id, t);
     }
+    if (turma?.id) void carregarResumoExpressTurma(turma.id, t);
   };
   const [dimensoes, setDimensoes] = useState<DimensaoAvaliacao[]>(criarDimensoesVazias());
   const [observacaoGeral, setObservacaoGeral] = useState('');
@@ -495,6 +523,8 @@ export default function RdicCriancaPage() {
   // Kanban
   const [kanbanTab, setKanbanTab] = useState<string>(RDIC_STATUS.PENDING);
   const [rdicsMap, setRdicsMap] = useState<Record<string, RdicSalvo[]>>({});
+  const [evidenciasMap, setEvidenciasMap] = useState<Record<string, EvidenciasResumo>>({});
+  const [loadingEvidenciasTurma, setLoadingEvidenciasTurma] = useState(false);
 
   // Tarefa 2.3 — Evidências do diário no período
   const [evidencias, setEvidencias] = useState<{ tipo: string; count: number; label: string; cor: string }[]>([]);
@@ -516,6 +546,7 @@ export default function RdicCriancaPage() {
         const res = await http.get('/teachers/dashboard');
         if (res.data?.hasClassroom) {
           setTurma(res.data.classroom);
+          void carregarResumoExpressTurma(res.data.classroom.id, trimestre);
           const lista: Aluno[] = res.data.alunos ?? [];
           setAlunos(lista);
           carregarRdicsMapParaTurma(lista, res.data?.classroom?.id);
@@ -553,6 +584,7 @@ export default function RdicCriancaPage() {
           unit: { name: unitRes.data?.name ?? '' },
         };
         setTurma(turmaObj);
+        void carregarResumoExpressTurma(turmaObj.id, trimestre);
         const childrenRes = await http.get(`/lookup/classrooms/${turmaInfo.id}/children`);
         const lista: Aluno[] = (Array.isArray(childrenRes.data) ? childrenRes.data : childrenRes.data?.data ?? []).map((c: any) => ({
           id: c.id,
@@ -609,14 +641,34 @@ export default function RdicCriancaPage() {
       // silencioso — Kanban fica com todos pendentes
     }
   }
+  async function carregarResumoExpressTurma(classroomId: string, trimestreId: TrimestreId) {
+    const { start, end } = periodoDoTrimestre(trimestreId);
+    setLoadingEvidenciasTurma(true);
+    try {
+      const res = await http.get('/rdic/turma/express-summary', {
+        params: { classroomId, startDate: `${start}T00:00:00.000Z`, endDate: `${end}T23:59:59.999Z` },
+      });
+      const mapa: Record<string, EvidenciasResumo> = {};
+      for (const item of (res.data?.criancas ?? [])) {
+        mapa[item.childId] = {
+          diarios: Number(item.diarios ?? 0),
+          observacoes: Number(item.observacoes ?? 0),
+          microgestos: Number(item.microgestos ?? 0),
+          diasComRegistro: Number(item.diasComRegistro ?? 0),
+          pontosAtencao: Number(item.pontosAtencao ?? 0),
+        };
+      }
+      setEvidenciasMap(mapa);
+    } catch {
+      setEvidenciasMap({});
+    } finally {
+      setLoadingEvidenciasTurma(false);
+    }
+  }
+
   // Tarefa 2.3 — Carregar evidências do diário para o período do trimestre selecionado
   async function carregarDiagnosticoExpress(childId: string, trimestreId: TrimestreId) {
-    const PERIODOS: Record<TrimestreId, { start: string; end: string }> = {
-      1: { start: `${new Date().getFullYear()}-02-01`, end: `${new Date().getFullYear()}-05-31` },
-      2: { start: `${new Date().getFullYear()}-06-01`, end: `${new Date().getFullYear()}-09-30` },
-      3: { start: `${new Date().getFullYear()}-10-01`, end: `${new Date().getFullYear()}-12-31` },
-    };
-    const { start, end } = PERIODOS[trimestreId];
+    const { start, end } = periodoDoTrimestre(trimestreId);
     setLoadingDiagnosticoExpress(true);
     try {
       const res = await http.get(`/rdic/child/${childId}/express-summary`, {
@@ -631,12 +683,7 @@ export default function RdicCriancaPage() {
   }
 
   async function carregarEvidencias(childId: string, trimestreId: TrimestreId) {
-    const PERIODOS: Record<TrimestreId, { start: string; end: string }> = {
-      1: { start: `${new Date().getFullYear()}-02-01`, end: `${new Date().getFullYear()}-05-31` },
-      2: { start: `${new Date().getFullYear()}-06-01`, end: `${new Date().getFullYear()}-09-30` },
-      3: { start: `${new Date().getFullYear()}-10-01`, end: `${new Date().getFullYear()}-12-31` },
-    };
-    const { start, end } = PERIODOS[trimestreId];
+    const { start, end } = periodoDoTrimestre(trimestreId);
     setLoadingEvidencias(true);
     try {
       const res = await http.get('/diary-events', { params: { childId, startDate: start, endDate: end, limit: '500' } });
@@ -900,6 +947,9 @@ export default function RdicCriancaPage() {
             <div>
               <h2 className="text-lg font-semibold text-gray-800">Selecione a criança</h2>
               <p className="text-sm text-gray-500">{alunos.length} alunos na turma</p>
+              <p className="text-xs text-indigo-500 mt-1">
+                {loadingEvidenciasTurma ? 'Atualizando evidências do Diário...' : 'O badge azul mostra registros naturais já coletados no Diário.'}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 font-medium">Trimestre:</span>
@@ -977,6 +1027,7 @@ export default function RdicCriancaPage() {
                       selecionado={alunoSelecionado?.id === aluno.id}
                       onClick={() => selecionarAluno(aluno)}
                       rdicsCount={(rdicsMap[aluno.id] ?? []).length}
+                      evidencias={evidenciasMap[aluno.id]}
                     />
                   ))}
                 </div>

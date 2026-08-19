@@ -63,6 +63,23 @@ function hasLevel(user: JwtPayload, ...levels: RoleLevel[]): boolean {
   return Array.isArray(user.roles) && user.roles.some((r: any) => levels.includes(r?.level));
 }
 
+function firstText(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+function diaryCategory(type: unknown): string {
+  const normalized = String(type ?? '').toUpperCase();
+  if (normalized.includes('DESENVOLVIMENTO')) return 'DESENVOLVIMENTO';
+  if (normalized.includes('COMPORTAMENTO')) return 'COMPORTAMENTO';
+  if (normalized.includes('AVALIACAO') || normalized.includes('ATIVIDADE')) return 'APRENDIZAGEM';
+  if (normalized.includes('SAUDE')) return 'PSICOLOGICO';
+  if (normalized.includes('REFEICAO') || normalized.includes('SONO') || normalized.includes('HIGIENE')) return 'GERAL';
+  return 'GERAL';
+}
+
 function nullableText(value: unknown): string | null | undefined {
   if (value === undefined) return undefined;
   if (value === null) return null;
@@ -73,6 +90,160 @@ function nullableText(value: unknown): string | null | undefined {
 @Injectable()
 export class DevelopmentObservationsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Retorna as turmas que o usuário pode consultar. Null significa acesso total. */
+  private async accessibleClassroomIds(user: JwtPayload): Promise<string[] | null> {
+    if (hasLevel(user, RoleLevel.DEVELOPER)) return null;
+
+    const where: any = { isActive: true };
+    if (hasLevel(user, RoleLevel.MANTENEDORA)) {
+      where.unit = { mantenedoraId: user.mantenedoraId };
+    } else if (hasLevel(user, RoleLevel.STAFF_CENTRAL)) {
+      const staffRole = user.roles?.find((role: any) => role?.level === RoleLevel.STAFF_CENTRAL);
+      const scopes = Array.isArray(staffRole?.unitScopes) ? staffRole.unitScopes : [];
+      where.unit = { mantenedoraId: user.mantenedoraId };
+      if (scopes.length > 0) where.unitId = { in: scopes };
+    } else if (hasLevel(user, RoleLevel.UNIDADE)) {
+      if (!user.unitId) return [];
+      where.unitId = user.unitId;
+    } else if (hasLevel(user, RoleLevel.PROFESSOR)) {
+      const links = await this.prisma.classroomTeacher.findMany({
+        where: { teacherId: user.sub, isActive: true },
+        select: { classroomId: true },
+      });
+      return links.map((link) => link.classroomId);
+    } else {
+      return [];
+    }
+
+    const classrooms = await this.prisma.classroom.findMany({ where, select: { id: true } });
+    return classrooms.map((classroom) => classroom.id);
+  }
+
+  /**
+   * Leitura unificada: transforma eventos naturais do Diário em evidências de desenvolvimento
+   * sem duplicar linhas em `development_observation`.
+   */
+  private async listarIntegrado(query: any, user: JwtPayload) {
+    const classroomIds = await this.accessibleClassroomIds(user);
+    if (Array.isArray(classroomIds) && classroomIds.length === 0) return [];
+
+    const dateFilter: any = {};
+    if (query.startDate) dateFilter.gte = new Date(query.startDate);
+    if (query.endDate) dateFilter.lte = new Date(query.endDate);
+    const hasDateFilter = Object.keys(dateFilter).length > 0;
+
+    const formalWhere: any = {
+      ...(query.childId ? { childId: query.childId } : {}),
+      ...(query.classroomId ? { classroomId: query.classroomId } : {}),
+      ...(hasDateFilter ? { date: dateFilter } : {}),
+      ...(classroomIds ? { classroomId: { in: classroomIds, ...(query.classroomId ? {} : {}) } } : {}),
+      ...(hasLevel(user, RoleLevel.PROFESSOR) ? { createdBy: user.sub } : {}),
+    };
+    if (query.classroomId) formalWhere.classroomId = query.classroomId;
+
+    const diaryWhere: any = {
+      ...(query.childId ? { childId: query.childId } : {}),
+      ...(query.classroomId ? { classroomId: query.classroomId } : {}),
+      ...(hasDateFilter ? { eventDate: dateFilter } : {}),
+      ...(classroomIds ? { classroomId: { in: classroomIds } } : {}),
+      ...(hasLevel(user, RoleLevel.PROFESSOR) ? { createdBy: user.sub } : {}),
+    };
+    // Institucionalmente, somente registros publicados/revisados entram nos painéis.
+    if (!hasLevel(user, RoleLevel.PROFESSOR)) {
+      diaryWhere.status = { in: ['PUBLICADO', 'REVISADO', 'ARQUIVADO'] };
+    }
+
+    const [formal, diary] = await Promise.all([
+      this.prisma.developmentObservation.findMany({
+        where: formalWhere,
+        orderBy: { date: 'desc' },
+        take: 500,
+        include: { child: { select: { id: true, firstName: true, lastName: true, photoUrl: true } } },
+      }),
+      this.prisma.diaryEvent.findMany({
+        where: diaryWhere,
+        orderBy: { eventDate: 'desc' },
+        take: 500,
+        include: {
+          child: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+          classroom: { select: { id: true, name: true, unit: { select: { id: true, name: true } } } },
+          createdByUser: { select: { id: true, firstName: true, lastName: true, email: true } },
+          curriculumEntry: { select: { campoDeExperiencia: true, objetivoBNCC: true, objetivoBNCCCode: true } },
+        },
+      }),
+    ]);
+
+    const formalClassroomIds = formal.map((item) => item.classroomId).filter(Boolean) as string[];
+    const formalClassrooms = formalClassroomIds.length > 0
+      ? await this.prisma.classroom.findMany({
+          where: { id: { in: formalClassroomIds } },
+          select: { id: true, name: true, unit: { select: { id: true, name: true } } },
+        })
+      : [];
+    const classroomMap = new Map(formalClassrooms.map((item) => [item.id, item]));
+
+    const formalItems = formal
+      .filter((item) => !query.category || item.category === query.category)
+      .map((item: any) => {
+        const classroom = item.classroomId ? classroomMap.get(item.classroomId) ?? null : null;
+        const content = firstText(
+          item.behaviorDescription,
+          item.learningProgress,
+          item.socialInteraction,
+          item.emotionalState,
+          item.motorSkills,
+          item.cognitiveSkills,
+          item.languageSkills,
+          item.recommendations,
+        ) ?? '';
+        return {
+          ...item,
+          source: 'DevelopmentObservation',
+          sourceId: item.id,
+          content,
+          child: item.child ? { ...item.child, name: `${item.child.firstName} ${item.child.lastName}`.trim() } : item.child,
+          classroom,
+          unitId: classroom?.unit?.id ?? null,
+          unitName: classroom?.unit?.name ?? null,
+          createdByUser: null,
+        };
+      });
+
+    const diaryItems = diary
+      .filter((item: any) => !query.category || diaryCategory(item.type) === query.category)
+      .map((item: any) => {
+        const content = firstText(item.description, item.observations, item.developmentNotes, item.behaviorNotes) ?? '';
+        return {
+          id: `diary:${item.id}`,
+          sourceId: item.id,
+          source: 'DiaryEvent',
+          category: item.curriculumEntry?.campoDeExperiencia ?? diaryCategory(item.type),
+          date: item.eventDate,
+          createdAt: item.createdAt,
+          childId: item.childId,
+          classroomId: item.classroomId,
+          behaviorDescription: item.behaviorNotes ?? null,
+          learningProgress: item.developmentNotes ?? null,
+          developmentAlerts: item.type === 'COMPORTAMENTO' || item.type === 'SAUDE' ? content : null,
+          recommendations: null,
+          nextSteps: null,
+          content,
+          title: item.title,
+          curriculumEntry: item.curriculumEntry ?? null,
+          status: item.status,
+          child: item.child ? { ...item.child, name: `${item.child.firstName} ${item.child.lastName}`.trim() } : item.child,
+          classroom: item.classroom,
+          unitId: item.classroom?.unit?.id ?? null,
+          unitName: item.classroom?.unit?.name ?? null,
+          createdByUser: item.createdByUser,
+        };
+      });
+
+    return [...formalItems, ...diaryItems]
+      .sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime())
+      .slice(0, Math.min(Number(query.limit) || 200, 500));
+  }
 
   /**
    * Professor/coordenador cria observação individual de uma criança.
@@ -95,36 +266,10 @@ export class DevelopmentObservationsService {
     return serializeDevelopmentObservation(obs);
   }
 
-  /** Listar observações — filtro por criança, turma, categoria e período. */
+  /** Listar observações e evidências do Diário — filtro por criança, turma, categoria e período. */
   async listar(query: any, user: JwtPayload) {
-    const { childId, classroomId, category, startDate, endDate, limit } = query;
-    const where: any = {};
-
-    if (childId) where.childId = childId;
-    if (classroomId) where.classroomId = classroomId;
-    if (category) where.category = category;
-
-    if (startDate || endDate) {
-      where.date = {};
-      if (startDate) where.date.gte = new Date(startDate);
-      if (endDate) where.date.lte = new Date(endDate);
-    }
-
-    // Professor vê apenas observações que ele criou.
-    if (hasLevel(user, RoleLevel.PROFESSOR)) {
-      where.createdBy = user.sub;
-    }
-
-    const obs = await this.prisma.developmentObservation.findMany({
-      where,
-      orderBy: { date: 'desc' },
-      take: Number(limit) || 100,
-      include: {
-        child: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-      },
-    });
-
-    return obs.map((item) => serializeDevelopmentObservation(item));
+    const integrated = await this.listarIntegrado(query, user);
+    return integrated.map((item) => serializeDevelopmentObservation(item));
   }
 
   /** Detalhe de uma observação. */
@@ -170,32 +315,16 @@ export class DevelopmentObservationsService {
     return { success: true };
   }
 
-  /**
-   * Evolução detalhada de uma criança por período.
-   * Mantém a análise em modo somente leitura e usa apenas campos existentes.
-   */
-  async evolucaoAluno(childId: string, periodoMeses = 3) {
+  /** Evolução detalhada de uma criança, incluindo evidências do Diário. */
+  async evolucaoAluno(childId: string, periodoMeses = 3, user: JwtPayload) {
     const dataInicio = new Date();
     dataInicio.setMonth(dataInicio.getMonth() - periodoMeses);
-
-    const obs = await this.prisma.developmentObservation.findMany({
-      where: { childId, date: { gte: dataInicio } },
-      orderBy: { date: 'asc' },
-      select: {
-        id: true,
-        date: true,
-        category: true,
-        emotionalState: true,
-        developmentAlerts: true,
-        recommendations: true,
-        behaviorDescription: true,
-        learningProgress: true,
-      },
-    });
+    const obs = await this.listarIntegrado({ childId, startDate: dataInicio.toISOString(), limit: 500 }, user);
+    const ordenadas = [...obs].sort((a, b) => new Date(a.date ?? a.createdAt).getTime() - new Date(b.date ?? b.createdAt).getTime());
 
     const porSemana: Record<string, { semana: string; total: number; alertas: number; categorias: Record<string, number> }> = {};
-    for (const o of obs) {
-      const d = new Date(o.date);
+    for (const o of ordenadas) {
+      const d = new Date(o.date ?? o.createdAt);
       const semana = `${d.getFullYear()}-S${Math.ceil((d.getDate() + new Date(d.getFullYear(), d.getMonth(), 1).getDay()) / 7).toString().padStart(2, '0')}`;
       if (!porSemana[semana]) porSemana[semana] = { semana, total: 0, alertas: 0, categorias: {} };
       porSemana[semana].total++;
@@ -204,93 +333,73 @@ export class DevelopmentObservationsService {
       porSemana[semana].categorias[cat] = (porSemana[semana].categorias[cat] ?? 0) + 1;
     }
 
-    const categorias = obs.reduce((acc: Record<string, number>, o) => {
+    const categorias = ordenadas.reduce((acc: Record<string, number>, o) => {
       const cat = o.category || 'GERAL';
       acc[cat] = (acc[cat] || 0) + 1;
       return acc;
     }, {});
-
-    const totalAlertas = obs.filter((o) => Boolean(o.developmentAlerts)).length;
-    const tendencia = totalAlertas > obs.length * 0.3 ? 'ATENCAO'
+    const totalAlertas = ordenadas.filter((o) => Boolean(o.developmentAlerts)).length;
+    const tendencia = totalAlertas > ordenadas.length * 0.3 ? 'ATENCAO'
       : totalAlertas === 0 ? 'ESTAVEL' : 'MONITORAR';
 
     return {
       childId,
       periodoMeses,
-      totalObs: obs.length,
+      totalObs: ordenadas.length,
       totalAlertas,
       tendencia,
       categorias,
       serieSemanal: Object.values(porSemana),
-      ultimasObs: obs.slice(-5).reverse().map((item) => serializeDevelopmentObservation(item)),
+      ultimasObs: ordenadas.slice(-5).reverse().map((item) => serializeDevelopmentObservation(item)),
     };
   }
 
   /** Resumo de desenvolvimento de uma criança para coordenação/psicologia. */
-  async resumoAluno(childId: string) {
-    const [obs, total] = await Promise.all([
-      this.prisma.developmentObservation.findMany({
-        where: { childId },
-        orderBy: { date: 'desc' },
-        take: 20,
-        include: { child: { select: { id: true, firstName: true, lastName: true } } },
-      }),
-      this.prisma.developmentObservation.count({ where: { childId } }),
-    ]);
-
+  async resumoAluno(childId: string, user: JwtPayload) {
+    const obs = await this.listarIntegrado({ childId, limit: 500 }, user);
     const porCategoria = obs.reduce((acc: Record<string, number>, o) => {
-      acc[o.category] = (acc[o.category] || 0) + 1;
+      const category = o.category || 'GERAL';
+      acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {});
-
     const totalAlertas = obs.filter((o) => Boolean(o.developmentAlerts)).length;
     const totalRecomendacoes = obs.filter((o) => Boolean(o.recommendations)).length;
-
-    return { total, totalAlertas, totalRecomendacoes, porCategoria, ultimas: obs.map((item) => serializeDevelopmentObservation(item)) };
+    return {
+      total: obs.length,
+      totalAlertas,
+      totalRecomendacoes,
+      porCategoria,
+      ultimas: obs.slice(0, 20).map((item) => serializeDevelopmentObservation(item)),
+    };
   }
 
-  /** Resumo consolidado de uma turma. */
-  async resumoTurma(classroomId: string) {
-    const obs = await this.prisma.developmentObservation.findMany({
-      where: { classroomId },
-      orderBy: { date: 'desc' },
-      include: {
-        child: { select: { id: true, firstName: true, lastName: true } },
-      },
-    });
-
+  /** Resumo consolidado de uma turma, incluindo o Diário de Bordo. */
+  async resumoTurma(classroomId: string, user: JwtPayload) {
+    const obs = await this.listarIntegrado({ classroomId, limit: 500 }, user);
     const porCategoria = obs.reduce((acc: Record<string, number>, o) => {
-      acc[o.category] = (acc[o.category] || 0) + 1;
+      const category = o.category || 'GERAL';
+      acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {});
-
-    const porCrianca: Record<string, {
-      id: string; nome: string; total: number;
-      alertas: number; recomendacoes: number;
-      categorias: Record<string, number>;
-    }> = {};
+    const porCrianca: Record<string, { id: string; nome: string; total: number; alertas: number; recomendacoes: number; categorias: Record<string, number> }> = {};
 
     for (const o of obs) {
       const cid = o.childId;
-      const nome = o.child ? `${o.child.firstName} ${o.child.lastName}`.trim() : cid;
-      if (!porCrianca[cid]) {
-        porCrianca[cid] = { id: cid, nome, total: 0, alertas: 0, recomendacoes: 0, categorias: {} };
-      }
+      const nome = o.child?.name ?? (`${o.child?.firstName ?? ''} ${o.child?.lastName ?? ''}`.trim() || cid);
+      if (!porCrianca[cid]) porCrianca[cid] = { id: cid, nome, total: 0, alertas: 0, recomendacoes: 0, categorias: {} };
       porCrianca[cid].total++;
       if (o.developmentAlerts) porCrianca[cid].alertas++;
       if (o.recommendations) porCrianca[cid].recomendacoes++;
-      porCrianca[cid].categorias[o.category] = (porCrianca[cid].categorias[o.category] || 0) + 1;
+      const category = o.category || 'GERAL';
+      porCrianca[cid].categorias[category] = (porCrianca[cid].categorias[category] || 0) + 1;
     }
 
     const criancas = Object.values(porCrianca).sort((a, b) => b.total - a.total);
-    const totalAlertas = obs.filter((o) => Boolean(o.developmentAlerts)).length;
-    const totalRecomendacoes = obs.filter((o) => Boolean(o.recommendations)).length;
-
     return {
       classroomId,
       totalObs: obs.length,
-      totalAlertas,
-      totalRecomendacoes,
+      totalAlertas: obs.filter((o) => Boolean(o.developmentAlerts)).length,
+      totalRecomendacoes: obs.filter((o) => Boolean(o.recommendations)).length,
       totalCriancas: criancas.length,
       porCategoria,
       criancas,

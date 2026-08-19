@@ -58,7 +58,7 @@ export class DevelopmentObservationsController {
     @Query('meses') meses: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.svc.evolucaoAluno(childId, Number(meses) || 3);
+    return this.svc.evolucaoAluno(childId, Number(meses) || 3, user);
   }
 
   /**
@@ -72,8 +72,8 @@ export class DevelopmentObservationsController {
     RoleLevel.MANTENEDORA,
     RoleLevel.DEVELOPER,
   )
-  resumoAluno(@Param('childId') childId: string) {
-    return this.svc.resumoAluno(childId);
+  resumoAluno(@Param('childId') childId: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.resumoAluno(childId, user);
   }
 
   /**
@@ -87,8 +87,8 @@ export class DevelopmentObservationsController {
     RoleLevel.MANTENEDORA,
     RoleLevel.DEVELOPER,
   )
-  resumoTurma(@Param('classroomId') classroomId: string) {
-    return this.svc.resumoTurma(classroomId);
+  resumoTurma(@Param('classroomId') classroomId: string, @CurrentUser() user: JwtPayload) {
+    return this.svc.resumoTurma(classroomId, user);
   }
 
 

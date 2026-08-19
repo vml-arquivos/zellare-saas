@@ -35,6 +35,59 @@ export class CoordenacaoService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private async getDevelopmentSnapshot(classroomIds: string[]) {
+    if (classroomIds.length === 0) {
+      return { janelaDias: 30, diarios: 0, observacoes: 0, totalRegistros: 0, criancasComRegistro: 0, alertas: 0, porTurma: [] };
+    }
+
+    const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [diarios, observacoes] = await Promise.all([
+      this.prisma.diaryEvent.findMany({
+        where: {
+          classroomId: { in: classroomIds },
+          eventDate: { gte: startDate },
+          status: { in: ['PUBLICADO', 'REVISADO', 'ARQUIVADO'] },
+        },
+        select: { classroomId: true, childId: true, type: true },
+      }),
+      this.prisma.developmentObservation.findMany({
+        where: { classroomId: { in: classroomIds }, date: { gte: startDate } },
+        select: { classroomId: true, childId: true, developmentAlerts: true },
+      }),
+    ]);
+
+    const childIds = new Set([...diarios, ...observacoes].map((item) => item.childId));
+    const perClassroom = new Map<string, { classroomId: string; registros: number; diarios: number; observacoes: number; alertas: number }>();
+    for (const classroomId of classroomIds) {
+      perClassroom.set(classroomId, { classroomId, registros: 0, diarios: 0, observacoes: 0, alertas: 0 });
+    }
+    for (const event of diarios) {
+      const row = perClassroom.get(event.classroomId);
+      if (!row) continue;
+      row.registros += 1;
+      row.diarios += 1;
+      if (['COMPORTAMENTO', 'SAUDE'].includes(String(event.type))) row.alertas += 1;
+    }
+    for (const observation of observacoes) {
+      if (!observation.classroomId) continue;
+      const row = perClassroom.get(observation.classroomId);
+      if (!row) continue;
+      row.registros += 1;
+      row.observacoes += 1;
+      if (observation.developmentAlerts) row.alertas += 1;
+    }
+
+    return {
+      janelaDias: 30,
+      diarios: diarios.length,
+      observacoes: observacoes.length,
+      totalRegistros: diarios.length + observacoes.length,
+      criancasComRegistro: childIds.size,
+      alertas: [...perClassroom.values()].reduce((sum, item) => sum + item.alertas, 0),
+      porTurma: [...perClassroom.values()],
+    };
+  }
+
   // ─── REUNIÕES / PAUTAS ───────────────────────────────────────────────────
 
   async criarReuniao(dto: any, user: JwtPayload) {
@@ -226,10 +279,13 @@ export class CoordenacaoService {
       take: 10,
     });
 
+    const desenvolvimento = await this.getDevelopmentSnapshot(turmas.map((turma) => turma.id));
+
     return {
       unitId,
       data: today.toISOString(),
       alertas: { turmasSemChamadaHoje, planejamentosParados },
+      desenvolvimento,
       indicadores: {
         totalTurmas: turmas.length,
         totalAlunos,
@@ -370,9 +426,14 @@ export class CoordenacaoService {
       take: 5,
     });
 
+    const desenvolvimento = await this.getDevelopmentSnapshot(
+      unidades.flatMap((unidade) => unidade.classrooms.map((classroom) => classroom.id)),
+    );
+
     return {
       mantenedoraId: user.mantenedoraId,
       data: today.toISOString(),
+      desenvolvimento,
       indicadoresGerais: {
         totalUnidades: unidades.length,
         totalAlunos,
