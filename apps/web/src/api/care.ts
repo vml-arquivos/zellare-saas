@@ -9,6 +9,21 @@ export interface CareChildOption {
   classroomName?: string | null;
 }
 
+export interface CareEvidenceSummary {
+  childId: string;
+  total: number;
+  byType: Record<string, number>;
+  bySource: Record<string, number>;
+  bySensitivity: Record<string, number>;
+  lastCapturedAt?: string | null;
+  governance: {
+    generatedAt: string;
+    evidenceOnly: boolean;
+    humanReviewRequired: boolean;
+    sourceTraceability: boolean;
+  };
+}
+
 export interface CareOverview {
   child: {
     id: string;
@@ -84,6 +99,7 @@ export interface CareOverview {
     descricao?: string | null;
     encaminhamento?: string | null;
   }>;
+  evidenceSummary?: CareEvidenceSummary | null;
   reports: Array<{
     id: string;
     period?: string | null;

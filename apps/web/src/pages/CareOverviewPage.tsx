@@ -46,6 +46,24 @@ function text(value?: string | null) {
   return value?.trim() || 'Sem registro disponível.';
 }
 
+const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
+  CHILD_PROFILE: 'Cadastro da criança',
+  DIARY_EVENT: 'Diário de Bordo',
+  DEVELOPMENT_OBSERVATION: 'Observações de desenvolvimento',
+  ATTENDANCE: 'Presença',
+  FAMILY_COMMUNICATION: 'Comunicação familiar',
+  ATENDIMENTO_PAIS: 'Atendimentos com a família',
+  NUTRITIONAL_FOLLOW_UP: 'Acompanhamento nutricional',
+  DIETARY_RESTRICTION: 'Restrições alimentares',
+  RDIX_INSTANCE: 'Documento RDIC/RDX',
+  DEVELOPMENT_REPORT: 'Relatório de desenvolvimento',
+  ALERTA_ALUNO: 'Alertas',
+};
+
+function evidenceSourceLabel(source: string) {
+  return EVIDENCE_SOURCE_LABELS[source] ?? source.replaceAll('_', ' ');
+}
+
 function SummaryCard({ label, value, icon: Icon, tone }: { label: string; value: string | number; icon: typeof Activity; tone: string }) {
   return (
     <div className={`rounded-2xl border p-5 shadow-sm ${tone}`}>
@@ -217,6 +235,27 @@ export default function CareOverviewPage() {
               <SummaryCard label="Acompanhamentos nutricionais" value={overview.nutrition.length} icon={Utensils} tone="border-emerald-200 bg-emerald-50 text-emerald-900" />
               <SummaryCard label="Registros de família" value={overview.familyCare.length + overview.reports.length} icon={MessageCircle} tone="border-sky-200 bg-sky-50 text-sky-900" />
             </section>
+
+            {overview.evidenceSummary && (
+              <section className="rounded-2xl border border-violet-200 bg-violet-50/40 p-5 shadow-sm">
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-violet-800"><ShieldCheck className="h-4 w-4" /> Cobertura unificada da criança</div>
+                    <p className="mt-1 text-sm text-slate-600">Registros naturais cruzados por proveniência, com o conteúdo sensível mantido sob o escopo autorizado.</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800">Revisão humana obrigatória</span>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <SummaryCard label="Evidências armazenadas" value={overview.evidenceSummary.total} icon={ClipboardCheck} tone="border-violet-200 bg-white text-violet-900" />
+                  <SummaryCard label="Fontes integradas" value={Object.keys(overview.evidenceSummary.bySource).length} icon={Activity} tone="border-violet-200 bg-white text-violet-900" />
+                  <SummaryCard label="Tipos registrados" value={Object.keys(overview.evidenceSummary.byType).length} icon={FileText} tone="border-violet-200 bg-white text-violet-900" />
+                  <div className="rounded-2xl border border-violet-200 bg-white p-5 shadow-sm"><p className="text-xs text-slate-500">Última captura</p><p className="mt-3 text-sm font-semibold text-violet-900">{formatDateTime(overview.evidenceSummary.lastCapturedAt)}</p><p className="mt-1 text-xs text-slate-500">Fonte rastreável no armazenamento central.</p></div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2" aria-label="Fontes de evidência">
+                  {Object.entries(overview.evidenceSummary.bySource).map(([source, count]) => <span key={source} className="rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-medium text-violet-800">{evidenceSourceLabel(source)} · {count}</span>)}
+                </div>
+              </section>
+            )}
 
             <div className="grid gap-6 xl:grid-cols-2">
               <SectionCard title="Saúde, alergias e alimentação" icon={Utensils} tone="border-emerald-200 bg-emerald-50/40">

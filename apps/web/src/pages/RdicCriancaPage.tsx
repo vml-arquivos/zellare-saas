@@ -12,7 +12,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../app/AuthProvider';
-import { isProfessor as checkIsProfessor } from '../api/auth';
+import { hasRole, isProfessor as checkIsProfessor } from '../api/auth';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { PageShell } from '../components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -464,7 +464,10 @@ export default function RdicCriancaPage() {
   const preselectedChildId = searchParams.get('childId');
   const preselectedClassroomId = searchParams.get('classroomId');
   // Perfil: PROFESSOR usa /teachers/dashboard; UNIDADE/outros usam lookup
-  const isProf = checkIsProfessor(user);
+  const isPrivilegedScope = ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL', 'UNIDADE'].some((role) => hasRole(user, role));
+  // Contas privilegiadas podem também carregar PROFESSOR no token, mas devem
+  // enxergar o escopo administrativo de unidades, não o dashboard de professor.
+  const isProf = checkIsProfessor(user) && !isPrivilegedScope;
   const [loading, setLoading] = useState(true);
   const [turma, setTurma] = useState<Turma | null>(null);
   const [alunos, setAlunos] = useState<Aluno[]>([]);
@@ -564,13 +567,31 @@ export default function RdicCriancaPage() {
         }
       } else {
         // ── Fluxo UNIDADE/STAFF_CENTRAL/outros: usa lookup ──
-        const unitId = (user as any)?.unitId;
-        const classRes = await http.get('/lookup/classrooms/accessible', {
+        let unitId = (user as any)?.unitId as string | undefined;
+        let classRes = await http.get('/lookup/classrooms/accessible', {
           params: unitId ? { unitId } : {},
         });
-        const turmasList: { id: string; name: string; code?: string; unitId?: string }[] = Array.isArray(classRes.data)
+        let turmasList: { id: string; name: string; code?: string; unitId?: string }[] = Array.isArray(classRes.data)
           ? classRes.data
           : classRes.data?.data ?? [];
+
+        // DEVELOPER/MANTENEDORA/STAFF_CENTRAL podem não possuir unitId no token.
+        // Nesses casos, resolve a primeira unidade real do escopo e só então lista as turmas.
+        if (turmasList.length === 0 && isPrivilegedScope) {
+          const unitsRes = await http.get('/lookup/units/accessible');
+          const units: Array<{ id: string }> = Array.isArray(unitsRes.data)
+            ? unitsRes.data
+            : unitsRes.data?.data ?? [];
+          const rememberedUnitId = sessionStorage.getItem('zelare:selectedUnitId') ?? undefined;
+          const selectedUnit = units.find((item) => item.id === unitId || item.id === rememberedUnitId) ?? units[0];
+          unitId = selectedUnit?.id;
+          if (unitId) {
+            classRes = await http.get('/lookup/classrooms/accessible', { params: { unitId } });
+            turmasList = Array.isArray(classRes.data)
+              ? classRes.data
+              : classRes.data?.data ?? [];
+          }
+        }
         if (turmasList.length === 0) return;
         // Usar classroomId da URL se disponível, senão a primeira turma
         const targetId = preselectedClassroomId ?? turmasList[0].id;
