@@ -938,3 +938,20 @@
   .tabular-nums.text-4xl,
   .tabular-nums.text-5xl { font-weight: 400 !important; }
 }
+
+
+/* Override final de produto: uma única leitura leve em todas as rotas. */
+#root :where(:not(code):not(pre):not(.font-mono)) {
+  font-family: var(--font-body) !important;
+  font-weight: 300 !important;
+}
+
+#root :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-body) !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.003em !important;
+}
+
+#root :where(.tabular-nums.text-2xl, .tabular-nums.text-3xl, .tabular-nums.text-4xl, .tabular-nums.text-5xl) {
+  font-weight: 400 !important;
+}

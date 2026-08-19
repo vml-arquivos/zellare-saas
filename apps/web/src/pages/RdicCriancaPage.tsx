@@ -943,13 +943,13 @@ export default function RdicCriancaPage() {
   // ─── Render: Sem turma ────────────────────────────────────────────────────
   if (!turma) {
     return (
-      <PageShell title="Desenvolvimento por Criança" subtitle="Registro de Desenvolvimento Individual">
+      <PageShell title="Desenvolvimento" subtitle="Registro por criança">
         <EmptyState
           icon={<Users className="h-12 w-12 text-gray-400" />}
           title={isProf ? 'Você ainda não tem turma' : 'Nenhuma turma encontrada'}
           description={isProf
-            ? 'Aguarde a coordenação vincular você a uma turma para acessar os Relatórios.'
-            : 'Não foi possível carregar as turmas desta unidade. Verifique se há turmas ativas cadastradas.'}
+            ? 'Sem turma vinculada.'
+            : 'Nenhuma turma disponível.'}
         />
       </PageShell>
     );
@@ -957,7 +957,7 @@ export default function RdicCriancaPage() {
 
   return (
     <PageShell
-      title="Desenvolvimento por Criança"
+      title="Desenvolvimento"
       subtitle={`${turma.name} · ${turma.unit?.name}`}
     >
       {/* ─── Cabeçalho informativo ─── */}
@@ -965,10 +965,9 @@ export default function RdicCriancaPage() {
         <div className="flex items-start gap-3">
           <Brain className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-indigo-800">Desenvolvimento — Registro de Desenvolvimento Individual da Criança</h3>
+            <h3 className="font-semibold text-indigo-800">Desenvolvimento</h3>
             <p className="text-sm text-indigo-600 mt-0.5">
-              Avaliação bimestral por dimensões de desenvolvimento baseada nos <strong>5 Campos de Experiência da BNCC</strong>.
-              Selecione uma criança da sua turma para iniciar ou continuar o Desenvolvimento.
+              Registre a evolução de cada criança.
             </p>
           </div>
         </div>
@@ -980,14 +979,14 @@ export default function RdicCriancaPage() {
           {/* Cabeçalho + seletor de trimestre */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800">Selecione a criança</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Criança</h2>
               <p className="text-sm text-gray-500">{alunos.length} alunos na turma</p>
               <p className="text-xs text-indigo-500 mt-1">
-                {loadingEvidenciasTurma ? 'Atualizando evidências do Diário...' : 'O badge azul mostra registros naturais já coletados no Diário.'}
+                {loadingEvidenciasTurma ? 'Atualizando evidências do Diário...' : 'Registros do Diário'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 font-medium">Trimestre:</span>
+              <span className="text-sm text-gray-600 font-medium">Período:</span>
               <div className="flex gap-1">
                 {TRIMESTRES.map(t => (
                   <button
@@ -1009,8 +1008,8 @@ export default function RdicCriancaPage() {
           {alunos.length === 0 ? (
             <EmptyState
               icon={<Users className="h-12 w-12 text-gray-400" />}
-              title="Nenhum aluno encontrado"
-              description="A turma ainda não tem alunos matriculados."
+              title="Nenhuma criança encontrada"
+              description="A turma está sem crianças."
             />
           ) : (
             <>
@@ -1341,14 +1340,14 @@ export default function RdicCriancaPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <span className="text-sm font-medium text-gray-700">
-                      Rascunho gerado — {relatorioIA.totalObservacoes} observações analisadas
+                      Rascunho · {relatorioIA.totalObservacoes} observações
                     </span>
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                       Código: {relatorioIA.codigoAnonimizado}
                     </span>
                     {relatorioIA.status && (
                       <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                        {relatorioIA.status === 'EM_REVISAO' ? 'Em revisão humana' : relatorioIA.status}
+                        {relatorioIA.status === 'EM_REVISAO' ? 'Em revisão' : relatorioIA.status}
                       </span>
                     )}
                   </div>
@@ -1363,7 +1362,7 @@ export default function RdicCriancaPage() {
                 {mostrarRelatorioIA && (
                   <div className="space-y-3">
                     <div className="bg-white rounded-lg p-3 border border-violet-100">
-                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Relatório gerado pela IA</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Relatório IA</p>
                       <p className="text-sm text-gray-700 leading-relaxed">{relatorioIA.relatorio}</p>
                     </div>
                     {relatorioIA.pontosFortess?.length > 0 && (
@@ -1380,7 +1379,7 @@ export default function RdicCriancaPage() {
                     )}
                     {relatorioIA.sugestoes?.length > 0 && (
                       <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                        <p className="text-xs font-semibold text-blue-700 uppercase mb-2">Sugestões de Continuidade</p>
+                        <p className="text-xs font-semibold text-blue-700 uppercase mb-2">Sugestões</p>
                         <ul className="space-y-1">
                           {relatorioIA.sugestoes.map((s, i) => (
                             <li key={i} className="text-sm text-blue-800 flex items-start gap-2">
@@ -1392,7 +1391,7 @@ export default function RdicCriancaPage() {
                     )}
                     {relatorioIA.fontes && (
                       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                        <p className="text-xs font-semibold uppercase text-slate-500">Fontes reais consideradas</p>
+                        <p className="text-xs font-semibold uppercase text-slate-500">Fontes</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {Object.entries(relatorioIA.fontes).filter(([, value]) => Number(value) > 0).map(([fonte, valor]) => (
                             <span key={fonte} className="rounded-full bg-white px-2.5 py-1 text-xs text-slate-600 border border-slate-200">
@@ -1403,7 +1402,7 @@ export default function RdicCriancaPage() {
                       </div>
                     )}
                     <p className="text-xs text-gray-400 italic">
-                      * Rascunho salvo no banco como relatório em revisão humana. A IA não produz diagnóstico, laudo clínico nem publicação automática.
+                      * Em revisão humana. A IA não gera diagnóstico ou laudo clínico.
                     </p>
                   </div>
                 )}
@@ -1413,7 +1412,7 @@ export default function RdicCriancaPage() {
 
           {/* 5 Campos de Experiência BNCC */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-800">Avaliação por Campo de Experiência</h3>
+            <h3 className="font-semibold text-gray-800">Campos de experiência</h3>
             {DIMENSOES_BNCC.map(dim => {
               const dimData = dimensoes.find(d => d.dimensao === dim.id);
               const aberta = dimensaoAberta === dim.id;

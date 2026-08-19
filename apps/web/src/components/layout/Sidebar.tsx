@@ -23,10 +23,10 @@ interface MenuItem {
 
 // PROFESSOR / PROFESSOR_AUXILIAR ──────────────────────────────────────────────
 const PROFESSOR_PRINCIPAL: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/teacher-dashboard', label: 'Painel do Professor', icon: <GraduationCap className="h-4 w-4" /> },
   { path: '/app/mobile',            label: 'App Mobile (PWA)',    icon: <Smartphone className="h-4 w-4" />, badge: 'Mobile' },
-  { path: '/app/material-requests', label: 'Requisições de Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
+  { path: '/app/material-requests', label: 'Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
 ];
 const PROFESSOR_FERRAMENTAS: MenuItem[] = [
   // Plano de Aula: entrada única → calendário de planejamentos
@@ -35,12 +35,12 @@ const PROFESSOR_FERRAMENTAS: MenuItem[] = [
   { path: '/app/diario-calendario',   label: 'Diário',                 icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coleta-diaria',       label: 'Diário de Bordo',           icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
   // Chamada Diária removida do menu principal (incorporada ao fluxo do Diário)
-  { path: '/app/rdic-crianca',        label: 'Desenvolvimento por Criança',       icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/rdic-crianca',        label: 'Desenvolvimento',       icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdx',                 label: 'Fotos da Turma',         icon: <Camera className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais',   label: 'Atendimentos Pais',      icon: <MessageCircle className="h-4 w-4" /> },
+  { path: '/app/atendimentos-pais',   label: 'Famílias',      icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/matriz-pedagogica',   label: 'Matriz 2026',            icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/painel-alergias',     label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" />, badge: 'Atenção' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/painel-alergias',     label: 'Alergias',      icon: <Apple className="h-4 w-4" />, badge: 'Atenção' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 const FAMILY_ITEMS: MenuItem[] = [
@@ -49,61 +49,61 @@ const FAMILY_ITEMS: MenuItem[] = [
 
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
 const COORD_GESTAO: MenuItem[] = [
-  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/coordenacao-pedagogica', label: 'Painel da Coordenação',    icon: <Home className="h-4 w-4" /> },
   { path: '/app/coordenacao',            label: 'Turmas & Reuniões',        icon: <Users className="h-4 w-4" /> },
-  { path: '/app/material-requests',      label: 'Requisições de Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
+  { path: '/app/material-requests',      label: 'Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
   { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
 ];
 const COORD_PEDAGOGICO: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diario-calendario', label: 'Diário',             icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coleta-diaria',     label: 'Diário de Bordo',       icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
-  { path: '/app/atendimentos-pais', label: 'Atendimentos Pais',  icon: <MessageCircle className="h-4 w-4" /> },
-  { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
-  { path: '/app/rdic-crianca',    label: 'Desenvolvimento por Criança',    icon: <Brain className="h-4 w-4" /> },
+  { path: '/app/atendimentos-pais', label: 'Famílias',  icon: <MessageCircle className="h-4 w-4" /> },
+  { path: '/app/rdic-coord',        label: 'Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
+  { path: '/app/rdic-crianca',    label: 'Desenvolvimento',    icon: <Brain className="h-4 w-4" /> },
   { path: '/app/inteligencia',    label: 'Inteligência',        icon: <Sparkles className="h-4 w-4" /> },
   { path: '/app/reports',         label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
-  { path: '/app/painel-alergias', label: 'Alergias e Dietas',   icon: <Apple className="h-4 w-4" />, badge: 'Importante' },
+  { path: '/app/painel-alergias', label: 'Alergias',   icon: <Apple className="h-4 w-4" />, badge: 'Importante' },
 ];
 
 // UNIDADE — Diretor ────────────────────────────────────────────────────────────
 const DIRETOR_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diretor',           label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
   { path: '/app/pedidos-compra',    label: 'Aprovar Pedidos',        icon: <ShoppingBag className="h-4 w-4" />, badge: 'Aprovação' },
   { path: '/app/coordenacao',       label: 'Turmas & Equipe',        icon: <Users className="h-4 w-4" /> },
   { path: '/app/reports',           label: 'Relatórios',             icon: <BarChart2 className="h-4 w-4" /> },
   { path: '/app/planejamentos',     label: 'Planejamentos',          icon: <BookOpen className="h-4 w-4" /> },
-  { path: '/app/painel-alergias',   label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" /> },
+  { path: '/app/painel-alergias',   label: 'Alergias',      icon: <Apple className="h-4 w-4" /> },
   { path: '/app/financeiro',          label: 'Financeiro e Ponto',      icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // UNIDADE — Nutricionista ──────────────────────────────────────────────────────
 // Navegação completa do módulo via query param ?s=<secao>
 // A sidebar global escura é o único menu do módulo (sem sidebar interna)
 const NUTRI_ITEMS: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/nutricionista',                      label: 'Painel da Nutricionista', icon: <Utensils className="h-4 w-4" /> },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/nutricionista',                      label: 'Nutrição', icon: <Utensils className="h-4 w-4" /> },
   { path: '/app/nutricionista?s=cardapios',          label: 'Cardápios',               icon: <BookOpen className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=cardapios-nutricao', label: 'Cálculo Nutricional',     icon: <BarChart2 className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=turmas',             label: 'Turmas e Crianças',       icon: <Users className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=dietas',             label: 'Dietas e Restrições',     icon: <AlertTriangle className="h-4 w-4" />, badge: 'Importante' },
+  { path: '/app/nutricionista?s=cardapios-nutricao', label: 'Cálculo',     icon: <BarChart2 className="h-4 w-4" /> },
+  { path: '/app/nutricionista?s=turmas',             label: 'Turmas',       icon: <Users className="h-4 w-4" /> },
+  { path: '/app/nutricionista?s=dietas',             label: 'Dietas',     icon: <AlertTriangle className="h-4 w-4" />, badge: 'Importante' },
   { path: '/app/nutricionista?s=observacoes-prof',   label: 'Obs. dos Professores',    icon: <Eye className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=anotacoes-nutri',          label: 'Anotações Nutricionais',    icon: <FileEdit className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=acompanhamento-individual', label: 'Acompanhamento Individual', icon: <Shield className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/nutricionista?s=anotacoes-nutri',          label: 'Anotações',    icon: <FileEdit className="h-4 w-4" /> },
+  { path: '/app/nutricionista?s=acompanhamento-individual', label: 'Acompanhamento', icon: <Shield className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/nutricionista?s=relatorio',                 label: 'Relatórios',                icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=pedidos',            label: 'Pedidos de Alimentação',  icon: <ShoppingCart className="h-4 w-4" /> },
+  { path: '/app/nutricionista?s=pedidos',            label: 'Pedidos',  icon: <ShoppingCart className="h-4 w-4" /> },
   { path: '/app/nutricionista?s=configuracoes',      label: 'Configurações',           icon: <Settings className="h-4 w-4" /> },
 ];
 
 // UNIDADE — Administrativo (Secretaria) ─────────────────────────────────────
 const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/secretaria',                    label: 'Painel da Secretaria',         icon: <Home className="h-4 w-4" /> },
   { path: '/app/secretaria/matriculas',         label: 'Matrículas e Fichas',          icon: <UserCheck className="h-4 w-4" /> },
   { path: '/app/secretaria/matriculas/nova',    label: 'Nova Matrícula',               icon: <UserPlus className="h-4 w-4" />, badge: 'Essencial' },
@@ -111,7 +111,7 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
   { path: '/app/secretaria/faltas',             label: 'Controle de Faltas',           icon: <ClipboardList className="h-4 w-4" /> },
   { path: '/app/secretaria/atestados',          label: 'Atestados e Documentos',       icon: <FolderCheck className="h-4 w-4" /> },
   { path: '/app/secretaria/ocorrencias',        label: 'Saúde e Ocorrências',          icon: <HeartPulse className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais',             label: 'Atendimento aos Pais',         icon: <MessageCircle className="h-4 w-4" /> },
+  { path: '/app/atendimentos-pais',             label: 'Famílias',         icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/secretaria/transporte',         label: 'Transporte e Retirada',        icon: <Bus className="h-4 w-4" /> },
   { path: '/app/secretaria/funcionarios',       label: 'Funcionários da Unidade',      icon: <Building2 className="h-4 w-4" /> },
   { path: '/app/financeiro',                     label: 'Financeiro e Ponto',            icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
@@ -120,82 +120,82 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
 
 // UNIDADE — Genérico (sem roleType específico) ─────────────────────────────────
 const UNIDADE_GESTAO: MenuItem[] = [
-  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/unidade',                       label: 'Painel da Unidade',      icon: <Home className="h-4 w-4" /> },
   { path: '/app/coordenacao-pedagogica',        label: 'Coord. Pedagógica',      icon: <Building2 className="h-4 w-4" /> },
   { path: '/app/coordenacao',                   label: 'Turmas & Reuniões',      icon: <Users className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/material-requests',             label: 'Requisições Pendentes',  icon: <ShoppingCart className="h-4 w-4" /> },
   { path: '/app/relatorio-consumo-materiais',   label: 'Consumo de Materiais',   icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/dashboard-consumo-materiais',   label: 'Consumo — Gráficos',      icon: <TrendingUp className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/painel-alergias',               label: 'Alergias e Dietas',      icon: <Apple className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/painel-alergias',               label: 'Alergias',      icon: <Apple className="h-4 w-4" />, badge: 'Novo' },
     { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
   { path: '/app/financeiro',              label: 'Financeiro e Ponto',       icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
 ];
 const UNIDADE_PEDAGOGICO: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coleta-diaria',     label: 'Diário de Bordo',              icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
-  { path: '/app/rdic-coord',        label: 'Desenvolvimento — Revisão e Aprovação', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
-  { path: '/app/rdic-crianca',      label: 'Desenvolvimento por Criança',           icon: <Brain className="h-4 w-4" /> },
-  { path: '/app/inteligencia',      label: 'Painel de Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/rdic-coord',        label: 'Revisão', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
+  { path: '/app/rdic-crianca',      label: 'Desenvolvimento',           icon: <Brain className="h-4 w-4" /> },
+  { path: '/app/inteligencia',      label: 'Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdx',               label: 'Fotos da Turma',             icon: <Camera className="h-4 w-4" /> },
   { path: '/app/matriz-pedagogica', label: 'Matriz 2026',                icon: <Layers className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais', label: 'Atendimentos Pais',          icon: <MessageCircle className="h-4 w-4" /> },
+  { path: '/app/atendimentos-pais', label: 'Famílias',          icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/reports',           label: 'Relatórios',                 icon: <BarChart2 className="h-4 w-4" /> },
 ];
 // STAFF_CENTRAL_PSICOLOGIA ──────────────────────────────────────────────────────────────────────────────────
 const PSICOLOGA_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/psicologo',                label: 'Psicologia Central',      icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento Infantil', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdic-geral',               label: 'Relatórios Publicados',         icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/central',                  label: 'Análises Centrais',        icon: <TrendingUp className="h-4 w-4" /> },
+  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/rdic-geral',               label: 'Relatórios',         icon: <FileText className="h-4 w-4" /> },
+  { path: '/app/central',                  label: 'Análises',        icon: <TrendingUp className="h-4 w-4" /> },
   { path: '/app/reports',                  label: 'Relatórios',               icon: <BarChart2 className="h-4 w-4" /> },
 ];
 // STAFF_CENTRAL ──────────────────────────────────────────────────────────────────────────────────
 const CENTRAL_ITEMS: MenuItem[] = [
-  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/central',                  label: 'Análises Centrais',        icon: <TrendingUp className="h-4 w-4" /> },
-  { path: '/app/inteligencia',             label: 'Painel de Inteligência',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/central',                  label: 'Análises',        icon: <TrendingUp className="h-4 w-4" /> },
+  { path: '/app/inteligencia',             label: 'Inteligência',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coordenacao-geral',        label: 'Coordenação Geral',        icon: <Network className="h-4 w-4" /> },
-  { path: '/app/rdic-geral',               label: 'Relatórios Publicados',         icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento Infantil', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/rdic-geral',               label: 'Relatórios',         icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/matriz-pedagogica',        label: 'Matriz 2026',              icon: <Layers className="h-4 w-4" /> },
   { path: '/app/reports',                  label: 'Relatórios',               icon: <BarChart2 className="h-4 w-4" /> },
 ];
 
 // MANTENEDORA ──────────────────────────────────────────────────────────────────
 const MANTENEDORA_ITEMS: MenuItem[] = [
-  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/dashboard',         label: 'Painel Global',       icon: <LayoutDashboard className="h-4 w-4" /> },
   { path: '/app/coordenacao-geral', label: 'Coordenação Geral',   icon: <Network className="h-4 w-4" /> },
-  { path: '/app/central',           label: 'Análises Centrais',   icon: <TrendingUp className="h-4 w-4" /> },
-  { path: '/app/rdic-geral',        label: 'Relatórios Publicados',    icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/central',           label: 'Análises',   icon: <TrendingUp className="h-4 w-4" /> },
+  { path: '/app/rdic-geral',        label: 'Relatórios',    icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/pedidos-compra',    label: 'Pedidos de Compra',   icon: <ShoppingBag className="h-4 w-4" /> },
   { path: '/app/financeiro',         label: 'Financeiro e Ponto',    icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/matriz-pedagogica', label: 'Matriz 2026',         icon: <Layers className="h-4 w-4" /> },
   { path: '/app/reports',           label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
 ];
 
 // DEVELOPER — acesso completo ──────────────────────────────────────────────────
 const DEV_EXTRA: MenuItem[] = [
-  { path: '/app/metricas-cobertura',  label: 'Cobertura e Métricas',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Vínculos Familiares',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado Integrado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/sala-de-aula-virtual', label: 'Sala de Aula Virtual',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdic-ria',             label: 'Desenvolvimento — Registros (RIA)', icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/planejamentos',        label: 'Planejamentos',          icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/nutricionista',        label: 'Painel da Nutricionista',icon: <Utensils className="h-4 w-4" /> },
+  { path: '/app/nutricionista',        label: 'Nutrição',icon: <Utensils className="h-4 w-4" /> },
   { path: '/app/diretor',              label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
   { path: '/app/configuracoes',        label: 'Configurações',          icon: <Settings className="h-4 w-4" /> },
-  { path: '/app/ranking-preenchimento', label: 'Ranking de Preenchimento', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
 ];
 
 // ─── Componentes de navegação ─────────────────────────────────────────────────
@@ -214,7 +214,7 @@ function isActiveForItem(location: ReturnType<typeof useLocation>, itemPath: str
     return true;
   }
   // Item sem query param: ativo apenas se pathname bate E não há ?s= na URL
-  // (para não marcar "Painel da Nutricionista" quando uma sub-seção está ativa)
+  // (para não marcar "Nutrição" quando uma sub-seção está ativa)
   if (location.pathname === itemPathname) {
     const locParams = new URLSearchParams(location.search);
     return !locParams.has('s');
@@ -415,7 +415,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         )}
         {/* STAFF_CENTRAL — Coordenação Geral e demais */}
         {!isDeveloper && isCentral && !isPsicologa && (
-          <NavSection titulo="Análises Centrais" items={CENTRAL_ITEMS} location={location} onItemClick={onClose} />
+          <NavSection titulo="Análises" items={CENTRAL_ITEMS} location={location} onItemClick={onClose} />
         )}
 
         {/* UNIDADE — Diretor */}

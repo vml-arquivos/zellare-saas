@@ -35,11 +35,10 @@ export function MaterialRequestPage() {
       <header>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
           <ShoppingCart className="h-6 w-6 text-blue-600" />
-          Requisições de Materiais
+          Materiais
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Solicite materiais pedagógicos, de higiene pessoal e outros para sua turma.
-          As solicitações são encaminhadas à Coordenadora Pedagógica da unidade.
+          Materiais para a turma.
         </p>
       </header>
 
@@ -47,12 +46,9 @@ export function MaterialRequestPage() {
       <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg">
         <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800">
-          <p className="font-semibold mb-1">Como funciona o fluxo de requisições:</p>
+          <p className="font-semibold mb-1">Fluxo</p>
           <p>
-            Ao submeter uma requisição, ela é encaminhada automaticamente para a{' '}
-            <strong>Coordenadora Pedagógica</strong> da sua unidade, que poderá aprovar,
-            ajustar ou encaminhar para a Direção e Administrativo conforme necessário.
-            Você pode acompanhar o status de cada solicitação na aba "Minhas Requisições".
+            Envie a requisição e acompanhe o status em Minhas requisições.
           </p>
         </div>
       </div>
@@ -68,7 +64,7 @@ export function MaterialRequestPage() {
           }`}
         >
           <ShoppingCart className="h-4 w-4" />
-          Nova Requisição
+          Nova requisição
         </button>
         <button
           onClick={() => setActiveView('list')}
@@ -79,7 +75,7 @@ export function MaterialRequestPage() {
           }`}
         >
           <ClipboardList className="h-4 w-4" />
-          Minhas Requisições
+          Minhas requisições
         </button>
       </div>
 

@@ -3379,11 +3379,11 @@ export default function DiarioBordoPage() {
                     </span>
                     <div>
                       <p className="text-sm font-bold text-fuchsia-900">Observações individuais</p>
-                      <p className="text-xs text-fuchsia-600">Clique em um comportamento e selecione as crianças. Alimenta o Desenvolvimento.</p>
+                      <p className="text-xs text-fuchsia-600">Marque as crianças.</p>
                     </div>
                   </div>
                   {(['desempenho', 'comportamento', 'desenvolvimento'] as const).map(grupo => {
-                    const grupoLabel = grupo === 'desempenho' ? 'Desempenho e aprendizagem' : grupo === 'comportamento' ? 'Comportamento e regulação' : 'Desenvolvimento e sinais de alerta';
+                    const grupoLabel = grupo === 'desempenho' ? 'Desempenho' : grupo === 'comportamento' ? 'Comportamento' : 'Sinais';
                     const grupoTipos = OBSERVACOES_INDIVIDUAIS_TIPOS.filter(t => t.grupo === grupo);
                     return (
                       <div key={grupo} className="space-y-2">
@@ -3420,7 +3420,7 @@ export default function DiarioBordoPage() {
                                         <X className="h-4 w-4" />
                                       </button>
                                     </div>
-                                    <p className="text-[10px] text-fuchsia-600">Selecione as crianças que se enquadram hoje:</p>
+                                    <p className="text-[10px] text-fuchsia-600">Marque as crianças.</p>
                                     <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
                                       {criancas.slice().sort((a, b) => a.firstName.localeCompare(b.firstName, 'pt-BR')).map(c => {
                                         const selecionada = (obs?.criancaIds ?? []).includes(c.id);

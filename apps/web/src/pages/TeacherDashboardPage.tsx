@@ -150,7 +150,7 @@ const ACOES_RAPIDAS = [
   { id: 'diario', label: 'Diário da Turma', desc: 'Registrar o dia', icon: <BookOpen className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/diario-calendario' },
   { id: 'planejamento', label: 'Planejamentos', desc: 'Planejar semana', icon: <Calendar className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/planejamentos' },
   { id: 'sala', label: 'Sala de Aula Virtual', desc: 'Tarefas e desempenho', icon: <GraduationCap className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/sala-de-aula-virtual' },
-  { id: 'rdic', label: 'Desenvolvimento por Criança', desc: 'Desenvolvimento individual', icon: <Brain className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/rdic-crianca' },
+  { id: 'rdic', label: 'Desenvolvimento', desc: 'Registrar', icon: <Brain className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/rdic-crianca' },
   { id: 'materiais', label: 'Materiais', desc: 'Solicitar recursos', icon: <ShoppingCart className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/material-requests' },
   { id: 'fotos', label: 'Fotos da Turma', desc: 'Galeria e RDX', icon: <Camera className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/rdx' },
   { id: 'relatorio', label: 'Relatórios', desc: 'Ver evolução', icon: <TrendingUp className="h-6 w-6" />, cor: 'bg-[var(--surface-brand)]', rota: '/app/reports' },
@@ -541,16 +541,13 @@ export default function TeacherDashboardPage() {
                     Cockpit da turma
                   </div>
                   <div>
-                    <h2 className="text-[1.65rem] font-medium tracking-[-0.01em]">Sua visão rápida da turma de hoje</h2>
+                    <h2 className="text-[1.65rem] font-medium tracking-[-0.01em]">Resumo da turma</h2>
                     <p className="mt-1 max-w-2xl text-sm text-[var(--text-secondary)]">
                       {turma ? `${turma.name} · ${turma.unit?.name}` : 'Painel da professora'}
                       {turma?.segmento ? ` · segmento ${turma.segmento}` : ''}
                     </p>
                   </div>
                   <div className="space-y-2 text-sm text-[var(--text-secondary)]">
-                    <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
-                      Painel simplificado para leitura rápida, com foco em presença, registros do dia e planejamento pedagógico ativo.
-                    </p>
                     <div className="flex flex-wrap gap-2 text-xs text-[var(--text-secondary)]">
                       {destaquesResumoTurma.map((item) => (
                         <span key={item} className="rounded-full border border-[var(--border-default)] bg-[var(--surface-inset)] px-3 py-1">{item}</span>
@@ -616,22 +613,22 @@ export default function TeacherDashboardPage() {
                     <Star className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--text-secondary)]">Resumo pedagógico de hoje</p>
+                    <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--text-secondary)]">Hoje</p>
                     <p className="mt-1 text-lg font-medium text-[var(--text-primary)]">
                       {insightsHoje?.diaSemana ? insightsHoje.diaSemana.charAt(0).toUpperCase() + insightsHoje.diaSemana.slice(1) : ddmmHoje + '/2026'}
                     </p>
                     {insightsHoje?.planejamentoAtivo ? (
                       <p className="mt-1 text-sm text-[var(--text-primary)]">
-                        Planejamento ativo: <span className="font-medium">{insightsHoje.planejamentoAtivo.title}</span>
+                        Ativo: <span className="font-medium">{insightsHoje.planejamentoAtivo.title}</span>
                       </p>
                     ) : (
-                      <p className="mt-1 text-sm text-[var(--text-primary)]">Sem planejamento ativo identificado para hoje.</p>
+                      <p className="mt-1 text-sm text-[var(--text-primary)]">Sem planejamento hoje.</p>
                     )}
                   </div>
                 </div>
                 <button onClick={() => navigate('/app/planejamentos')}
                   className="inline-flex items-center gap-1 rounded-full border border-[var(--border-brand)] bg-[var(--surface-card)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition hover:bg-[var(--surface-card)]">
-                  Ver planejamentos <ArrowRight className="h-3 w-3" />
+                  Planejamentos <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
 
@@ -649,7 +646,7 @@ export default function TeacherDashboardPage() {
                   <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-card)] p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--brand-600)]">Presença recente</p>
+                        <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--brand-600)]">Presença</p>
                         <p className="mt-1 text-2xl font-medium text-[var(--text-primary)]">{presentesHoje}<span className="text-sm font-medium text-[var(--brand-600)]">/{totalAlunos || '?'} presentes</span></p>
                       </div>
                       <div className="rounded-2xl bg-[var(--surface-brand)] p-3 text-[var(--brand-600)]">
@@ -663,7 +660,7 @@ export default function TeacherDashboardPage() {
                   </div>
 
                   <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-card)] p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--text-secondary)]">Leitura rápida da turma</p>
+                    <p className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--text-secondary)]">Resumo</p>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-3">
                         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Diários da semana</p>
@@ -671,7 +668,7 @@ export default function TeacherDashboardPage() {
                         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface-muted)]"><div className="h-full rounded-full bg-[var(--brand-600)]" style={{ width: `${diariosPct}%` }} /></div>
                       </div>
                       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-3 py-3">
-                        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Cobertura pedagógica</p>
+                        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Registros</p>
                         <p className="mt-1 text-lg font-medium text-[var(--text-primary)]">{registrosHoje}/{totalAlunos || '?'}</p>
                         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface-muted)]"><div className="h-full rounded-full bg-[var(--brand-600)]" style={{ width: `${registrosHojePct}%` }} /></div>
                       </div>
@@ -683,9 +680,9 @@ export default function TeacherDashboardPage() {
                   <div className="rounded-[24px] border border-[var(--border-default)]/80 bg-[var(--surface-card)] p-4 shadow-[var(--shadow-card)] sm:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--text-secondary)]">Planejamento do dia</p>
+                        <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--text-secondary)]">Planejamento</p>
                         <h3 className="mt-1 text-base font-medium leading-tight text-[var(--text-primary)] break-words">
-                          {planejamentoResumoHoje.title || 'Síntese pedagógica organizada para execução em sala'}
+                          {planejamentoResumoHoje.title || 'Planejamento do dia'}
                         </h3>
                       </div>
                       <button onClick={() => navigate('/app/planejamentos')}
@@ -698,19 +695,19 @@ export default function TeacherDashboardPage() {
                       <div className="mt-4 space-y-3">
                         {planejamentoResumoHoje.atividade && (
                           <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-inset)]/80 px-4 py-3">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Desenvolvimento da Atividade</p>
+                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Atividade</p>
                             <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-primary)] whitespace-pre-wrap break-words">{planejamentoResumoHoje.atividade}</p>
                           </div>
                         )}
                         {planejamentoResumoHoje.recursos && (
                           <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-card)] px-4 py-3">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Recursos e Materiais</p>
+                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Recursos</p>
                             <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-secondary)] whitespace-pre-wrap break-words">{planejamentoResumoHoje.recursos}</p>
                           </div>
                         )}
                         {!planejamentoResumoHoje.atividade && !planejamentoResumoHoje.recursos && planejamentoResumoHoje.objectives.length > 0 && (
                           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-inset)] px-4 py-3">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Campos de Experiência</p>
+                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--text-secondary)]">Campos</p>
                             <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-secondary)]">
                               {[...new Set(planejamentoResumoHoje.objectives.map(o => o.campoExperiencia).filter(Boolean))].join(' · ') || 'Não informado'}
                             </p>
@@ -719,7 +716,7 @@ export default function TeacherDashboardPage() {
                       </div>
                     ) : (
                       <div className="mt-4 text-center rounded-2xl border border-dashed border-[var(--border-brand)] bg-[var(--surface-card)] py-8 px-4">
-                        <p className="text-sm text-[var(--text-secondary)]">Nenhum planejamento ativo para hoje.</p>
+                        <p className="text-sm text-[var(--text-secondary)]">Sem planejamento hoje.</p>
                         <button onClick={() => navigate('/app/planejamento/novo')}
                           className="mt-2 text-xs font-medium text-[var(--text-primary)] underline underline-offset-2">
                           Criar planejamento →
@@ -734,7 +731,7 @@ export default function TeacherDashboardPage() {
                           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[var(--brand-600)] hover:bg-[var(--brand-700)] text-[var(--text-inverse)] text-sm font-medium rounded-xl transition-colors"
                         >
                           <ClipboardList className="h-4 w-4" />
-                          Registrar Diário do Dia
+                          Registrar Diário
                         </button>
                         <button
                           onClick={() => {
@@ -833,9 +830,6 @@ export default function TeacherDashboardPage() {
               <div className="flex flex-col gap-3 rounded-[28px] border border-[var(--border-default)] bg-[var(--surface-card)] p-5 shadow-[var(--shadow-card)] lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h2 className="text-lg font-medium text-[var(--text-primary)]">Minhas Crianças</h2>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    Acesso rápido às crianças da turma, com leitura objetiva do status do dia e ações essenciais.
-                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
                   <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1">{alunos.length} crianças</span>
