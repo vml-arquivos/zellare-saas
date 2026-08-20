@@ -1197,11 +1197,10 @@ export default function PlanoDeAulaNovoPage() {
                         </p>
                       </div>
 
-                      {/* Tarefa 3.1 — Sugestão de atividade via IA (opcional e editável).
-                          Fica disponível mesmo quando a data ainda não tem objetivo
-                          curricular; nesse caso a API trabalha em modo aberto e não
-                          inventa códigos ou referências oficiais. */}
-                      {!modoRevisao && (() => {
+                      {/* Tarefa 3.1 — Sugestão de atividade via IA: autoria exclusiva do professor.
+                          A coordenação revisa o conteúdo enviado e nunca gera a atividade
+                          dentro do plano docente. A autoria institucional fica em fluxo separado. */}
+                      {!isCoordRole && !modoRevisao && (() => {
                         const obj = day.objectives[0];
                         const segmentoTurma = turmaSelecionada
                           ? inferirSegmento(turmaSelecionada)
