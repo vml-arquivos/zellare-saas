@@ -826,6 +826,20 @@ export default function PlanoDeAulaNovoPage() {
     );
   }
 
+  // Coordenação nunca entra no formulário de criação sem um plano carregado.
+  if (isCoordRole && !planningId) {
+    return (
+      <PageShell title="Revisão de Planejamento" subtitle="Selecione um plano existente para analisar">
+        <div className="max-w-2xl mx-auto rounded-xl border border-slate-200 bg-slate-50/70 p-6 text-center space-y-4">
+          <p className="text-sm text-slate-600">A coordenação não cria planos de aula nesta área.</p>
+          <Button variant="outline" onClick={() => navigate('/app/planejamentos')}>
+            <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para Planejamentos
+          </Button>
+        </div>
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell
       title={isCoordRole ? 'Visualizar Planejamento' : isEditing ? 'Editar Planejamento' : 'Novo Planejamento'}
@@ -956,6 +970,32 @@ export default function PlanoDeAulaNovoPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {modoRevisao ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Dados do planejamento</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label>Turma</Label>
+                    <p className="mt-1 text-sm font-medium text-slate-800">{turmaSelecionada?.name || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <Label>Período</Label>
+                    <p className="mt-1 text-sm font-medium text-slate-800">
+                      {formatDateBR(startDate)}{days.length > 1 ? ` — ${formatDateBR(days[days.length - 1]?.date ?? startDate)}` : ''}
+                    </p>
+                  </div>
+                  <div>
+                    <Label>Quantidade de dias</Label>
+                    <p className="mt-1 text-sm text-slate-700">{numDays}</p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Título</Label>
+                    <p className="mt-1 text-sm text-slate-800">{title || 'Não informado'}</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
             {/* Turma */}
             <div>
               <Label>
@@ -1067,6 +1107,8 @@ export default function PlanoDeAulaNovoPage() {
                   </p>
                 </div>
               </div>
+            )}
+              </>
             )}
           </CardContent>
         </Card>
