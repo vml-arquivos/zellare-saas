@@ -75,7 +75,7 @@ export function ActionRequiredBlock({ items, loading = false }: ActionRequiredBl
                 e.stopPropagation();
                 item.action();
               }}
-              className={`mt-3 w-full py-1.5 px-2 rounded-lg text-xs font-normal ${item.color} hover:opacity-90 transition-opacity text-white`}
+              className="mt-3 w-full py-1.5 px-2 rounded-lg text-xs font-normal bg-[var(--brand-600)] hover:bg-[var(--brand-700)] transition-colors text-white"
             >
               {item.actionLabel}
             </button>
