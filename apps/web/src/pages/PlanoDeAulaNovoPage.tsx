@@ -25,9 +25,12 @@ import { Badge } from '../components/ui/badge';
 // Tarefa 3.1 — IA no planejamento
 import { GeradorAtividadeIA } from '../components/planejamento/GeradorAtividadeIA';
 import { RevisarPlanejamentoIA } from '../components/planejamento/RevisarPlanejamentoIA';
+import { gerarPDF, imprimirPlanejamento } from '../components/PrintablePlan';
 import {
   Save,
   Send,
+  Printer,
+  Download,
   Clock,
   CheckCircle,
   BookOpen,
@@ -42,7 +45,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import http from '../api/http';
-import { submitPlanningForReview, getPlanning } from '../api/plannings';
+import { submitPlanningForReview, getPlanning, type Planning } from '../api/plannings';
 import { safeJsonParse, safeJsonStringify } from '../lib/safeJson';
 import { useAuth } from '../app/AuthProvider';
 import { normalizeRoles } from '../app/RoleProtectedRoute';
@@ -362,11 +365,10 @@ export default function PlanoDeAulaNovoPage() {
   ];
   const allRolesPlan = [...new Set([...userRoles, ...userRoleTypes])];
   const isCoordRole = allRolesPlan.some((r) => COORD_ROLES_PLAN.includes(r));
-  const podeCriarPlanejamento = [
-    'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL',
-    'MANTENEDORA', 'DEVELOPER',
-  ].some((role) => allRolesPlan.includes(role));
-  const podeEnviarParaRevisao = ['PROFESSOR', 'UNIDADE', 'DEVELOPER']
+  // A coordenação não cria planos: sua experiência é exclusivamente de revisão.
+  const podeCriarPlanejamento = !isCoordRole && ['PROFESSOR', 'PROFESSOR_AUXILIAR']
+    .some((role) => allRolesPlan.includes(role));
+  const podeEnviarParaRevisao = !isCoordRole && ['PROFESSOR', 'PROFESSOR_AUXILIAR']
     .some((role) => allRolesPlan.includes(role));
 
   // Coordenadores podem aprovar/devolver planejamentos em revisão
@@ -387,6 +389,7 @@ export default function PlanoDeAulaNovoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [planningId, setPlanningId] = useState<string | null>(id ?? null);
+  const [loadedPlanning, setLoadedPlanning] = useState<Planning | null>(null);
   const [status, setStatus] = useState<string>('RASCUNHO');
 
   // Datas ocupadas (já existem planejamentos nessas datas)
@@ -470,6 +473,7 @@ export default function PlanoDeAulaNovoPage() {
         // 4) Se editando, carrega planejamento existente
         if (id) {
           const planning = await getPlanning(id);
+          setLoadedPlanning(planning);
           setStatus(planning.status ?? 'RASCUNHO');
           setPlanningId(id);
 
@@ -806,9 +810,11 @@ export default function PlanoDeAulaNovoPage() {
     CANCELADO: { label: 'Cancelado', icon: <AlertCircle className="h-3 w-3" />, className: 'bg-gray-100 text-gray-500' },
   };
   const statusInfo = statusConfig[status] ?? statusConfig.RASCUNHO;
-  // Bloqueado: o status imutável impede edição e envio, independentemente do perfil.
-  // A coordenação pode criar/editar rascunhos conforme o escopo real do backend.
+  // A coordenação sempre entra em leitura quando abre um planejamento existente.
+  // O professor mantém o fluxo de edição conforme o status do planejamento.
+  const modoRevisao = isCoordRole && Boolean(planningId);
   const bloqueado = ['EM_REVISAO', 'APROVADO', 'EM_EXECUCAO', 'CONCLUIDO', 'PUBLICADO', 'CANCELADO'].includes(status);
+  const somenteLeitura = bloqueado || modoRevisao;
 
   if (loading) {
     return (
@@ -840,7 +846,7 @@ export default function PlanoDeAulaNovoPage() {
         </div>
 
         {/* Banner de auto-save */}
-        {hasDraft && !planningId && (
+        {!modoRevisao && hasDraft && !planningId && (
           <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm">
             <Save className="h-4 w-4 flex-shrink-0 text-blue-500" />
             <span className="flex-1">
@@ -879,6 +885,7 @@ export default function PlanoDeAulaNovoPage() {
                     setAprovando(true);
                     await http.patch(`/plannings/${planningId}/approve`);
                     setStatus('APROVADO');
+                    setLoadedPlanning(prev => prev ? { ...prev, status: 'APROVADO' } : prev);
                     toast.success('Planejamento aprovado!');
                   } catch (err: any) {
                     toast.error(err?.response?.data?.message ?? 'Erro ao aprovar');
@@ -918,6 +925,7 @@ export default function PlanoDeAulaNovoPage() {
                         setAprovando(true);
                         await http.post(`/plannings/${planningId}/devolver`, { comment: motivoDevolver.trim() });
                         setStatus('DEVOLVIDO');
+                        setLoadedPlanning(prev => prev ? { ...prev, status: 'DEVOLVIDO', reviewComment: motivoDevolver.trim() } : prev);
                         setModalDevolver(false);
                         setMotivoDevolver('');
                         toast.success('Planejamento devolvido para correção.');
@@ -962,7 +970,7 @@ export default function PlanoDeAulaNovoPage() {
                   matrizCache.current.clear();
                   setDays(prev => prev.map(d => ({ ...d, objectives: [], matrizLoading: false })));
                 }}
-                disabled={bloqueado}
+                disabled={somenteLeitura}
               >
                 <option value="">Selecione a turma...</option>
                 {turmas.map(t => (
@@ -986,7 +994,7 @@ export default function PlanoDeAulaNovoPage() {
                   type="date"
                   value={startDate}
                   onChange={e => setStartDate(e.target.value)}
-                  disabled={bloqueado}
+                  disabled={somenteLeitura}
                   className={occupiedDates.length > 0 ? 'border-amber-400' : ''}
                 />
                 {startDate && (
@@ -1021,7 +1029,7 @@ export default function PlanoDeAulaNovoPage() {
                     const v = parseInt(e.target.value, 10);
                     setNumDays(isNaN(v) || v < 1 ? 1 : Math.min(31, v));
                   }}
-                  disabled={bloqueado}
+                  disabled={somenteLeitura}
                 />
                 <p className="text-xs text-gray-400 mt-1">Máximo 31 dias</p>
               </div>
@@ -1034,7 +1042,7 @@ export default function PlanoDeAulaNovoPage() {
                 placeholder="Gerado automaticamente ao selecionar turma e data"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                disabled={bloqueado}
+                disabled={somenteLeitura}
               />
               <p className="text-xs text-gray-400 mt-1">
                 Você pode personalizar o título se desejar.
@@ -1151,7 +1159,7 @@ export default function PlanoDeAulaNovoPage() {
                           Fica disponível mesmo quando a data ainda não tem objetivo
                           curricular; nesse caso a API trabalha em modo aberto e não
                           inventa códigos ou referências oficiais. */}
-                      {(() => {
+                      {!modoRevisao && (() => {
                         const obj = day.objectives[0];
                         const segmentoTurma = turmaSelecionada
                           ? inferirSegmento(turmaSelecionada)
@@ -1176,38 +1184,58 @@ export default function PlanoDeAulaNovoPage() {
                         );
                       })()}
 
-                      <div>
-                        <Label>
-                          Desenvolvimento da Atividade <span className="text-red-500">*</span>
-                        </Label>
-                        <Textarea
-                          placeholder="Descreva como você vai desenvolver a atividade em sala..."
-                          rows={4}
-                          value={day.teacher.atividade}
-                          onChange={e => updateTeacherField(day.date, 'atividade', e.target.value)}
-                          disabled={bloqueado}
-                        />
-                      </div>
-                      <div>
-                        <Label>Recursos e materiais</Label>
-                        <Textarea
-                          placeholder="Liste os materiais, espaços e recursos necessários..."
-                          rows={2}
-                          value={day.teacher.recursos}
-                          onChange={e => updateTeacherField(day.date, 'recursos', e.target.value)}
-                          disabled={bloqueado}
-                        />
-                      </div>
-                      <div>
-                        <Label>Observações / Adaptações</Label>
-                        <Textarea
-                          placeholder="Adaptações para crianças com necessidades específicas..."
-                          rows={2}
-                          value={day.teacher.observacoes}
-                          onChange={e => updateTeacherField(day.date, 'observacoes', e.target.value)}
-                          disabled={bloqueado}
-                        />
-                      </div>
+                      {modoRevisao ? (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-4">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Conteúdo enviado pela professora</p>
+                          <div>
+                            <Label>Desenvolvimento da Atividade</Label>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800">{day.teacher.atividade || 'Não informado.'}</p>
+                          </div>
+                          <div>
+                            <Label>Recursos e materiais</Label>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">{day.teacher.recursos || 'Não informado.'}</p>
+                          </div>
+                          <div>
+                            <Label>Observações / Adaptações</Label>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">{day.teacher.observacoes || 'Não informado.'}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div>
+                            <Label>
+                              Desenvolvimento da Atividade <span className="text-red-500">*</span>
+                            </Label>
+                            <Textarea
+                              placeholder="Descreva como você vai desenvolver a atividade em sala..."
+                              rows={4}
+                              value={day.teacher.atividade}
+                              onChange={e => updateTeacherField(day.date, 'atividade', e.target.value)}
+                              disabled={bloqueado}
+                            />
+                          </div>
+                          <div>
+                            <Label>Recursos e materiais</Label>
+                            <Textarea
+                              placeholder="Liste os materiais, espaços e recursos necessários..."
+                              rows={2}
+                              value={day.teacher.recursos}
+                              onChange={e => updateTeacherField(day.date, 'recursos', e.target.value)}
+                              disabled={bloqueado}
+                            />
+                          </div>
+                          <div>
+                            <Label>Observações / Adaptações</Label>
+                            <Textarea
+                              placeholder="Adaptações para crianças com necessidades específicas..."
+                              rows={2}
+                              value={day.teacher.observacoes}
+                              onChange={e => updateTeacherField(day.date, 'observacoes', e.target.value)}
+                              disabled={bloqueado}
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </CardContent>
                 )}
@@ -1225,6 +1253,25 @@ export default function PlanoDeAulaNovoPage() {
 
         {planningId && (
           <RevisarPlanejamentoIA planningId={planningId} />
+        )}
+
+        {modoRevisao && loadedPlanning && (
+          <div className="flex flex-col sm:flex-row gap-3 pb-2">
+            <Button
+              variant="outline"
+              className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
+              onClick={() => imprimirPlanejamento(loadedPlanning)}
+            >
+              <Printer className="h-4 w-4 mr-2" /> Imprimir planejamento
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+              onClick={() => gerarPDF(loadedPlanning)}
+            >
+              <Download className="h-4 w-4 mr-2" /> Visualizar / salvar PDF
+            </Button>
+          </div>
         )}
 
         {/* ─── Ações ─── */}
@@ -1259,7 +1306,7 @@ export default function PlanoDeAulaNovoPage() {
           </div>
         )}
         {/* Perfis sem envio para revisão retornam após salvar o rascunho */}
-        {!bloqueado && !podeCriarPlanejamento && isCoordRole && (
+        {!modoRevisao && !bloqueado && !podeCriarPlanejamento && isCoordRole && (
           <div className="flex pb-8">
             <Button
               variant="outline"
