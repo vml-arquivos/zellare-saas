@@ -7,12 +7,17 @@ import { getAccessToken } from '../api/tokenStorage';
 import { useTheme } from '../app/ThemeProvider';
 import { Eye, EyeOff, BookOpen, Sparkles, Smartphone } from 'lucide-react';
 
+type LoginSubmitEvent =
+  | React.FormEvent<HTMLFormElement>
+  | React.MouseEvent<HTMLButtonElement>
+  | React.KeyboardEvent<HTMLInputElement>;
+
 // Detecta se o app está rodando como PWA instalado
 function isPWAMode(): boolean {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
     window.matchMedia('(display-mode: fullscreen)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
@@ -26,10 +31,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { resolvedTheme, toggleTheme } = useTheme();
 
-  const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
-    if (e && typeof (e as React.FormEvent).preventDefault === 'function') {
-      (e as React.FormEvent).preventDefault();
-    }
+  const handleSubmit = async (e: LoginSubmitEvent) => {
+    e.preventDefault();
     setError('');
     setLoading(true);
     try {
@@ -161,7 +164,7 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e as any)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
                 style={{
                   width: '100%', padding: '13px 44px 13px 14px', borderRadius: 12, boxSizing: 'border-box',
                   border: '0.5px solid var(--border-default)', background: 'var(--surface-subtle)',
@@ -183,7 +186,7 @@ export function LoginPage() {
 
           {/* Botão entrar */}
           <button
-            onClick={handleSubmit as any}
+            onClick={handleSubmit}
             disabled={loading || !email || !password}
             style={{
               width: '100%', padding: '14px', borderRadius: 14, border: 'none',
@@ -221,12 +224,12 @@ export function LoginPage() {
         type="button"
         onClick={toggleTheme}
         aria-label={`Ativar tema ${resolvedTheme === 'dark' ? 'claro' : 'escuro'}`}
-        className="absolute right-5 top-5 z-20 rounded-full border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium text-white backdrop-blur transition hover:bg-black/35"
+        className="zelare-theme-toggle absolute right-5 top-5 z-20 rounded-full px-3 py-2 text-xs backdrop-blur transition"
       >
         {resolvedTheme === 'dark' ? 'Tema claro' : 'Tema escuro'}
       </button>
       {/* Painel esquerdo — identidade visual */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden">
+      <div className="zelare-login-brand hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="relative z-10 max-w-md text-center">
           {/* Logo desktop — Zelare institucional */}
           <div className="flex items-center justify-center mb-8">
@@ -247,16 +250,16 @@ export function LoginPage() {
               </div>
               <div className="text-left">
                 <h1 className="text-4xl font-black tracking-tight">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
-                <p className="text-emerald-100 text-sm font-medium tracking-widest uppercase">Gestão inteligente</p>
+                <p className="zelare-login-brand-accent text-sm tracking-widest uppercase">Gestão inteligente</p>
               </div>
             </div>
           </div>
 
           <h2 className="text-3xl font-bold mb-4 leading-tight">
             Cuidado, pedagogia<br />
-            <span className="text-emerald-200">e gestão inteligente</span>
+            <span className="zelare-login-brand-accent">e gestão inteligente</span>
           </h2>
-          <p className="text-emerald-50 text-lg leading-relaxed mb-8">
+          <p className="zelare-login-brand-copy text-lg leading-relaxed mb-8">
             Uma plataforma para entidades públicas e privadas cuidarem da rotina pedagógica, dos registros, dos relatórios e da gestão educacional em um só lugar.
           </p>
 
@@ -268,9 +271,9 @@ export function LoginPage() {
               { icon: '📊', text: 'Relatórios e gestão inteligente' },
               { icon: '🤖', text: 'Assistente de IA para educadores' },
             ].map((f, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3 backdrop-blur-sm">
+              <div key={i} className="zelare-login-brand-feature flex items-center gap-3 rounded-xl px-4 py-3 backdrop-blur-sm">
                 <span className="text-xl">{f.icon}</span>
-                <span className="text-sm font-medium text-emerald-50">{f.text}</span>
+                <span className="zelare-login-brand-feature-text text-sm">{f.text}</span>
               </div>
             ))}
           </div>
@@ -298,8 +301,8 @@ export function LoginPage() {
                 <span className="text-emerald-700 font-black text-2xl">Z</span>
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
-                <p className="text-emerald-100 text-xs">Gestão inteligente</p>
+                <h1 className="text-2xl font-black text-[var(--text-primary)]">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
+                <p className="text-[var(--text-secondary)] text-xs">Gestão inteligente</p>
               </div>
             </div>
           </div>
