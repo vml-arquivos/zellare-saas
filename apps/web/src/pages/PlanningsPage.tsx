@@ -90,8 +90,8 @@ export function PlanningsPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-blue-600" />
+        <h1 className="text-2xl font-normal tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
+          <BookOpen className="h-6 w-6 text-[var(--text-brand-soft)]" />
           Planejamentos Pedagógicos
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -99,36 +99,36 @@ export function PlanningsPage() {
         </p>
       </header>
 
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl p-5 shadow-md">
+      <section className="ds-card rounded-xl p-5 shadow-md">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 opacity-80" />
-            <h2 className="text-base font-semibold">Sequência Piloto 2026 — Semana Atual</h2>
+            <Calendar className="h-5 w-5 text-[var(--text-brand-soft)]" />
+            <h2 className="text-base font-normal text-[var(--text-primary)]">Sequência Piloto 2026 — Semana Atual</h2>
           </div>
           <div className="flex gap-1">
             {SEQUENCIA_PILOTO_EXEMPLO.map((_, i) => (
               <button key={i} onClick={() => setSemanaAtiva(i)}
-                className={`w-2 h-2 rounded-full transition-all ${i === semanaAtiva ? 'bg-white' : 'bg-white/40'}`} />
+                className={`w-2 h-2 rounded-full transition-all ${i === semanaAtiva ? 'bg-[var(--accent-violet)]' : 'bg-[var(--surface-muted)]'}`} />
             ))}
           </div>
         </div>
-        <p className="text-xs text-blue-200 mb-3">{sequenciaAtiva.semana}</p>
+        <p className="text-xs text-[var(--text-secondary)] mb-3">{sequenciaAtiva.semana}</p>
         <div className="space-y-2">
-          <div className="bg-white/10 rounded-lg p-3">
-            <p className="text-xs font-semibold text-blue-200 mb-1">Campo de Experiência</p>
-            <p className="text-sm font-medium">{sequenciaAtiva.campoDeExperiencia}</p>
+          <div className="ds-surface rounded-lg p-3">
+            <p className="text-xs font-normal text-[var(--text-brand-soft)] mb-1">Campo de Experiência</p>
+            <p className="text-sm font-normal text-[var(--text-primary)]">{sequenciaAtiva.campoDeExperiencia}</p>
           </div>
-          <div className="bg-white/10 rounded-lg p-3">
-            <p className="text-xs font-semibold text-blue-200 mb-1">Objetivo BNCC</p>
-            <p className="text-xs leading-relaxed">{sequenciaAtiva.objetivoBNCC}</p>
+          <div className="ds-surface rounded-lg p-3">
+            <p className="text-xs font-normal text-[var(--text-brand-soft)] mb-1">Objetivo BNCC</p>
+            <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{sequenciaAtiva.objetivoBNCC}</p>
           </div>
-          <div className="bg-white/10 rounded-lg p-3">
-            <p className="text-xs font-semibold text-blue-200 mb-1">Objetivo Currículo em Movimento DF</p>
-            <p className="text-xs leading-relaxed">{sequenciaAtiva.objetivoCurriculo}</p>
+          <div className="ds-surface rounded-lg p-3">
+            <p className="text-xs font-normal text-[var(--text-brand-soft)] mb-1">Objetivo Currículo em Movimento DF</p>
+            <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{sequenciaAtiva.objetivoCurriculo}</p>
           </div>
         </div>
         <button onClick={() => setExpandidoGerador(!expandidoGerador)}
-          className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-colors">
+          className="mt-4 w-full ds-btn-primary flex items-center justify-center gap-2 py-2.5 text-sm transition-colors">
           <Sparkles className="h-4 w-4" />
           {expandidoGerador ? 'Fechar Gerador de Atividade' : 'Gerar Atividade com IA para esta Semana'}
         </button>
@@ -146,15 +146,15 @@ export function PlanningsPage() {
 
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-gray-800 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-gray-500" />
+          <h2 className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
+            <FileText className="h-4 w-4 text-[var(--text-brand-soft)]" />
             Meus Planejamentos
           </h2>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
-              <Filter className="h-3.5 w-3.5 text-gray-400" />
+              <Filter className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
               <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="ds-input text-xs px-2 py-1.5 focus:outline-none">
                 <option value="">Todos os status</option>
                 <option value="RASCUNHO">Rascunho</option>
                 <option value="PUBLICADO">Publicado</option>
@@ -163,7 +163,7 @@ export function PlanningsPage() {
               </select>
             </div>
             <button onClick={carregarPlanejamentos} disabled={carregando}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+              className="ds-btn-ghost flex items-center gap-1 text-xs transition-colors">
               <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
               Atualizar
             </button>
@@ -171,7 +171,7 @@ export function PlanningsPage() {
         </div>
 
         {erro && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mb-3">
+          <div className="ds-alert ds-alert-error flex items-center gap-2 p-3 rounded-lg mb-3">
             <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
             <p className="text-sm text-red-700">{erro}</p>
           </div>

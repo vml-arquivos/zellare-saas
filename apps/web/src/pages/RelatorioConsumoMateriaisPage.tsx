@@ -62,16 +62,16 @@ const TIPO_LABEL: Record<string, string> = {
   PERMANENTE: 'Permanente', OUTRO: 'Outros', OUTROS: 'Outros',
 };
 const STATUS_LABEL: Record<string, { label: string; cor: string; hex: string }> = {
-  SOLICITADO: { label: 'Solicitado', cor: 'bg-blue-100 text-blue-700', hex: 'var(--brand-600)' },
-  EM_ANALISE: { label: 'Em Análise', cor: 'bg-yellow-100 text-yellow-700', hex: 'var(--warning)' },
-  APROVADO:   { label: 'Aprovado',   cor: 'bg-green-100 text-green-700',  hex: 'var(--success)' },
-  REJEITADO:  { label: 'Rejeitado',  cor: 'bg-red-100 text-red-700',      hex: 'var(--error)' },
-  ENTREGUE:   { label: 'Entregue',   cor: 'bg-purple-100 text-purple-700',hex: 'var(--brand-600)' },
-  RASCUNHO:   { label: 'Rascunho',   cor: 'bg-gray-100 text-gray-600',    hex: 'var(--text-tertiary)' },
+  SOLICITADO: { label: 'Solicitado', cor: 'ds-badge-brand', hex: 'var(--accent-cyan)' },
+  EM_ANALISE: { label: 'Em Análise', cor: 'ds-badge-amber', hex: 'var(--warning)' },
+  APROVADO:   { label: 'Aprovado',   cor: 'ds-badge-green', hex: 'var(--success)' },
+  REJEITADO:  { label: 'Rejeitado',  cor: 'ds-badge-red', hex: 'var(--error)' },
+  ENTREGUE:   { label: 'Entregue',   cor: 'ds-badge-brand', hex: 'var(--accent-violet)' },
+  RASCUNHO:   { label: 'Rascunho',   cor: 'ds-badge', hex: 'var(--text-tertiary)' },
 };
 const CATEGORIA_CORES: Record<string, string> = {
-  PEDAGOGICO: 'var(--brand-600)', HIGIENE: 'var(--brand-500)', LIMPEZA: 'var(--success)',
-  ALIMENTACAO: 'var(--warning)', CONSUMIVEL: 'var(--warning)', PERMANENTE: 'var(--brand-600)', OUTRO: 'var(--text-tertiary)',
+  PEDAGOGICO: 'var(--accent-violet)', HIGIENE: 'var(--accent-cyan)', LIMPEZA: 'var(--accent-violet)',
+  ALIMENTACAO: 'var(--success)', CONSUMIVEL: 'var(--accent-cyan)', PERMANENTE: 'var(--accent-violet)', OUTRO: 'var(--text-tertiary)',
 };
 const PRIORITY_LABEL: Record<string, { label: string; cor: string }> = {
   baixa: { label: 'Baixa', cor: 'text-gray-400' },
@@ -96,21 +96,22 @@ function KpiCard({ icon: Icon, label, value, sub, color, trend }: {
   icon: React.ElementType; label: string; value: string | number;
   sub?: string; color: string; trend?: { value: number; label: string };
 }) {
+  const iconTone = color.includes('red') || color.includes('error') ? 'text-[var(--error)]' : color.includes('green') || color.includes('success') ? 'text-[var(--success)]' : 'text-[var(--text-brand-soft)]';
   return (
-    <Card className={`border ${color} shadow-sm`}>
+    <Card className="ds-card shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs text-gray-500 font-medium mb-1">{label}</p>
-            <p className="text-2xl font-bold text-gray-800">{value}</p>
-            {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+            <p className="text-xs text-[var(--text-secondary)] font-normal mb-1">{label}</p>
+            <p className="text-xl font-normal text-[var(--text-primary)]">{value}</p>
+            {sub && <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{sub}</p>}
           </div>
-          <div className={`p-2 rounded-lg ${color.replace('border-', 'bg-').replace('-200', '-100')}`}>
-            <Icon className="h-5 w-5 text-gray-600" />
+          <div className="ds-icon-tile">
+            <Icon className={`h-5 w-5 ${iconTone}`} />
           </div>
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend.value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+          <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend.value >= 0 ? 'text-[var(--success)]' : 'text-[var(--error)]'}`}>
             {trend.value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             {trend.value >= 0 ? '+' : ''}{trend.value}% {trend.label}
           </div>
@@ -529,10 +530,10 @@ export default function RelatorioConsumoMateriaisPage() {
             <div className="space-y-6">
               {/* Evolução Temporal */}
               {serieMensalFmt.length > 0 && (
-                <Card className="border border-gray-200">
+                <Card className="ds-card">
                   <CardHeader>
-                    <CardTitle className="text-base text-gray-700 flex items-center gap-2">
-                      <Activity className="h-4 w-4 text-indigo-500" /> Evolução Temporal
+                    <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-[var(--accent-violet)]" /> Evolução Temporal
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -540,8 +541,8 @@ export default function RelatorioConsumoMateriaisPage() {
                       <AreaChart data={serieMensalFmt} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                         <defs>
                           <linearGradient id="gradReq" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--brand-600)" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="var(--brand-600)" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--accent-violet)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="var(--accent-violet)" stopOpacity={0} />
                           </linearGradient>
                           <linearGradient id="gradAprov" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="var(--success)" stopOpacity={0.3} />
@@ -553,9 +554,9 @@ export default function RelatorioConsumoMateriaisPage() {
                         <YAxis tick={{ fontSize: 11 }} />
                         <Tooltip formatter={(v: number, name: string) => [fmt(v), name]} />
                         <Legend />
-                        <Area type="monotone" dataKey="requisicoes" name="Requisições" stroke="var(--brand-600)" fill="url(#gradReq)" strokeWidth={2} dot={{ r: 3 }} />
+                        <Area type="monotone" dataKey="requisicoes" name="Requisições" stroke="var(--accent-violet)" fill="url(#gradReq)" strokeWidth={2} dot={{ r: 3 }} />
                         <Area type="monotone" dataKey="aprovadas" name="Aprovadas" stroke="var(--success)" fill="url(#gradAprov)" strokeWidth={2} dot={{ r: 3 }} />
-                        <Area type="monotone" dataKey="entregues" name="Entregues" stroke="var(--brand-600)" fill="none" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+                        <Area type="monotone" dataKey="entregues" name="Entregues" stroke="var(--accent-violet)" fill="none" strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -565,10 +566,10 @@ export default function RelatorioConsumoMateriaisPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Por Tipo de Consumo */}
                 {topCategorias.length > 0 && (
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardHeader>
-                      <CardTitle className="text-base text-gray-700 flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-indigo-500" /> Consumo por Tipo
+                      <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-[var(--accent-cyan)]" /> Consumo por Tipo
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -589,9 +590,9 @@ export default function RelatorioConsumoMateriaisPage() {
                         {topCategorias.map((c, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs">
                             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CATEGORIA_CORES[Object.keys(CATEGORIA_CORES)[i % Object.keys(CATEGORIA_CORES).length]] ?? 'var(--brand-600)' }} />
-                            <span className="text-gray-600 flex-1">{c.name}</span>
-                            <span className="text-gray-400">{pct(c.total, relatorio.total)}%</span>
-                            {c.custo > 0 && <span className="text-gray-500 font-medium">{fmtBRL(c.custo)}</span>}
+                            <span className="text-[var(--text-secondary)] flex-1">{c.name}</span>
+                            <span className="text-[var(--text-tertiary)]">{pct(c.total, relatorio.total)}%</span>
+                            {c.custo > 0 && <span className="text-[var(--text-secondary)] font-normal">{fmtBRL(c.custo)}</span>}
                           </div>
                         ))}
                       </div>
@@ -601,10 +602,10 @@ export default function RelatorioConsumoMateriaisPage() {
 
                 {/* Distribuição por Status */}
                 {pieStatus.length > 0 && (
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardHeader>
-                      <CardTitle className="text-base text-gray-700 flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-indigo-500" /> Distribuição por Status
+                      <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[var(--accent-violet)]" /> Distribuição por Status
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -622,8 +623,8 @@ export default function RelatorioConsumoMateriaisPage() {
                         {pieStatus.map((s, i) => (
                           <div key={i} className="flex items-center gap-1.5 text-xs">
                             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.fill }} />
-                            <span className="text-gray-600">{s.name}</span>
-                            <span className="text-gray-400 ml-auto">{pct(s.value, relatorio.total)}%</span>
+                            <span className="text-[var(--text-secondary)]">{s.name}</span>
+                            <span className="text-[var(--text-tertiary)] ml-auto">{pct(s.value, relatorio.total)}%</span>
                           </div>
                         ))}
                       </div>
@@ -633,37 +634,37 @@ export default function RelatorioConsumoMateriaisPage() {
               </div>
 
               {/* Métricas analíticas */}
-              <Card className="border border-gray-200">
+              <Card className="ds-card">
                 <CardHeader>
-                  <CardTitle className="text-base text-gray-700">Métricas Analíticas</CardTitle>
+                  <CardTitle className="text-base font-normal text-[var(--text-primary)]">Métricas Analíticas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-gray-500 mb-1">Média de itens/req.</p>
-                      <p className="text-xl font-bold text-gray-800">
+                    <div className="ds-surface rounded-lg p-3 text-center">
+                      <p className="text-xs text-[var(--text-tertiary)] mb-1">Média de itens/req.</p>
+                      <p className="text-xl font-normal text-[var(--text-primary)]">
                         {relatorio.total > 0 ? (relatorio.quantidadeTotal / relatorio.total).toFixed(1) : '—'}
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-gray-500 mb-1">Ticket médio</p>
-                      <p className="text-xl font-bold text-gray-800">{fmtBRL(ticketMedio)}</p>
+                    <div className="ds-surface rounded-lg p-3 text-center">
+                      <p className="text-xs text-[var(--text-tertiary)] mb-1">Ticket médio</p>
+                      <p className="text-xl font-normal text-[var(--text-primary)]">{fmtBRL(ticketMedio)}</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-gray-500 mb-1">Taxa de aprovação</p>
-                      <p className="text-xl font-bold text-green-600">{taxaAprovacao}%</p>
+                    <div className="ds-surface rounded-lg p-3 text-center">
+                      <p className="text-xs text-[var(--text-tertiary)] mb-1">Taxa de aprovação</p>
+                      <p className="text-xl font-normal text-[var(--success)]">{taxaAprovacao}%</p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-gray-500 mb-1">Taxa de entrega</p>
-                      <p className="text-xl font-bold text-purple-600">{taxaEntrega}%</p>
+                    <div className="ds-surface rounded-lg p-3 text-center">
+                      <p className="text-xs text-[var(--text-tertiary)] mb-1">Taxa de entrega</p>
+                      <p className="text-xl font-normal text-[var(--accent-violet)]">{taxaEntrega}%</p>
                     </div>
                     {tendencia !== null && (
-                      <div className="col-span-2 md:col-span-4 bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+                      <div className="col-span-2 md:col-span-4 ds-surface rounded-lg p-3 flex items-center gap-3">
                         {tendencia >= 0
-                          ? <TrendingUp className="h-5 w-5 text-green-500 flex-shrink-0" />
-                          : <TrendingDown className="h-5 w-5 text-red-500 flex-shrink-0" />}
+                          ? <TrendingUp className="h-5 w-5 text-[var(--success)] flex-shrink-0" />
+                          : <TrendingDown className="h-5 w-5 text-[var(--error)] flex-shrink-0" />}
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-normal text-[var(--text-primary)]">
                             Tendência: {tendencia >= 0 ? '+' : ''}{tendencia}% vs período anterior equivalente
                           </p>
                           <p className="text-xs text-gray-400">Comparando 1ª metade vs 2ª metade da série temporal disponível</p>
@@ -687,9 +688,9 @@ export default function RelatorioConsumoMateriaisPage() {
                 </div>
               ) : (
                 <>
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardHeader>
-                      <CardTitle className="text-base text-gray-700 flex items-center gap-2">
+                      <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-teal-500" /> Consumo por Turma
                         <span className="text-xs font-normal text-gray-400 ml-auto">{porTurmaEfetivo.length} turmas</span>
                       </CardTitle>
@@ -710,7 +711,7 @@ export default function RelatorioConsumoMateriaisPage() {
                   </Card>
 
                   {/* Tabela detalhada por turma */}
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardContent className="p-0">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -754,9 +755,9 @@ export default function RelatorioConsumoMateriaisPage() {
                 </div>
               ) : (
                 <>
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardHeader>
-                      <CardTitle className="text-base text-gray-700 flex items-center gap-2">
+                      <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
                         <Users className="h-4 w-4 text-indigo-500" /> Top Professores por Consumo
                         <span className="text-xs font-normal text-gray-400 ml-auto">{porProfessorEfetivo.length} professores</span>
                       </CardTitle>
@@ -789,7 +790,7 @@ export default function RelatorioConsumoMateriaisPage() {
                   </Card>
 
                   {/* Tabela detalhada por professor */}
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardContent className="p-0">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -840,9 +841,9 @@ export default function RelatorioConsumoMateriaisPage() {
                 const topProd = Object.values(prodMap).sort((a, b) => b.total - a.total).slice(0, 8);
                 if (!topProd.length) return null;
                 return (
-                  <Card className="border border-gray-200">
+                  <Card className="ds-card">
                     <CardHeader>
-                      <CardTitle className="text-base text-gray-700 flex items-center gap-2">
+                      <CardTitle className="text-base font-normal text-[var(--text-primary)] flex items-center gap-2">
                         <Package className="h-4 w-4 text-orange-500" /> Top Tipos de Consumo por Quantidade
                       </CardTitle>
                     </CardHeader>
@@ -928,12 +929,12 @@ export default function RelatorioConsumoMateriaisPage() {
                     <CardContent>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div className="bg-white rounded-lg p-3 text-center border">
-                          <p className="text-xs text-gray-500 mb-1">1ª metade do período</p>
-                          <p className="text-2xl font-bold text-gray-700">{fmt(totalPrimeira)}</p>
+                          <p className="text-xs text-[var(--text-tertiary)] mb-1">1ª metade do período</p>
+                          <p className="text-xl font-normal text-[var(--success)]">{fmt(totalPrimeira)}</p>
                           <p className="text-xs text-gray-400">requisições</p>
                         </div>
                         <div className="bg-white rounded-lg p-3 text-center border">
-                          <p className="text-xs text-gray-500 mb-1">2ª metade do período</p>
+                          <p className="text-xs text-[var(--text-tertiary)] mb-1">2ª metade do período</p>
                           <p className={`text-2xl font-bold ${crescendo ? 'text-orange-600' : 'text-green-600'}`}>{fmt(totalSegunda)}</p>
                           <p className="text-xs text-gray-400">requisições</p>
                         </div>
@@ -951,7 +952,7 @@ export default function RelatorioConsumoMateriaisPage() {
 
               {/* Custo por Mês */}
               {serieMensalFmt.length > 0 && (
-                <Card className="border border-gray-200">
+                <Card className="ds-card">
                   <CardHeader>
                     <CardTitle className="text-base text-gray-700">Custo Estimado por Mês</CardTitle>
                   </CardHeader>
@@ -971,7 +972,7 @@ export default function RelatorioConsumoMateriaisPage() {
 
               {/* Itens por Mês */}
               {serieMensalFmt.length > 0 && (
-                <Card className="border border-gray-200">
+                <Card className="ds-card">
                   <CardHeader>
                     <CardTitle className="text-base text-gray-700">Volume de Itens por Mês</CardTitle>
                   </CardHeader>
@@ -991,7 +992,7 @@ export default function RelatorioConsumoMateriaisPage() {
 
               {/* Custo por Tipo de Consumo */}
               {topCategorias.filter(c => c.custo > 0).length > 0 && (
-                <Card className="border border-gray-200">
+                <Card className="ds-card">
                   <CardHeader>
                     <CardTitle className="text-base text-gray-700">Custo por Tipo de Consumo</CardTitle>
                   </CardHeader>
@@ -1017,7 +1018,7 @@ export default function RelatorioConsumoMateriaisPage() {
 
           {/* ── ABA: DETALHES ────────────────────────────────────────────────── */}
           {(activeTab as string) === 'detalhes' && (
-            <Card className="border border-gray-200">
+            <Card className="ds-card">
               <CardHeader>
                 <CardTitle className="text-base text-gray-700 flex items-center justify-between">
                   <span>Detalhes das Requisições</span>

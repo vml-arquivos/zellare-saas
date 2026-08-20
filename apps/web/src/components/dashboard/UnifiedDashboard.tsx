@@ -612,18 +612,18 @@ export function UnifiedDashboard() {
   ];
 
   return (
-    <div className="min-h-full bg-surface-subtle">
+    <div className="min-h-full bg-[var(--surface-page)]">
       {/* ── Hero header ────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 px-5 sm:px-6 py-6 sm:py-8">
+      <div className="bg-[var(--surface-topbar)] border-b border-[var(--border-subtle)] px-5 sm:px-6 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          <p className="text-[10px] font-medium text-brand-400 tracking-widest mb-1.5 uppercase">
+          <p className="text-[10px] font-normal text-[var(--text-brand-soft)] tracking-widest mb-1.5 uppercase">
             {import.meta.env.VITE_APP_NAME || 'Zelare'}
           </p>
-          <h1 className="text-lg sm:text-xl font-semibold text-white leading-snug">
+          <h1 className="text-lg sm:text-xl font-normal text-[var(--text-primary)] leading-snug">
             {greeting}, {userName.split(' ')[0]}
           </h1>
           {unitName && (
-            <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1.5 font-normal">
+            <p className="text-[11px] text-[var(--text-secondary)] mt-1.5 flex items-center gap-1.5 font-normal">
               <Building2 className="h-3 w-3" />
               {unitName}
             </p>
@@ -640,12 +640,12 @@ export function UnifiedDashboard() {
         />
 
         {/* ── Atalhos rápidos ─────────────────────────────────────────────── */}
-        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-wrap gap-2">
+        <div className="mt-6 pt-5 border-t border-[var(--border-subtle)] flex flex-wrap gap-2">
           {quickLinks.map((link) => (
             <button
               key={link.path}
               onClick={() => navigate(link.path)}
-              className="flex items-center gap-1.5 text-[11px] font-normal text-slate-400 hover:text-brand-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-brand-50"
+              className="flex items-center gap-1.5 text-[11px] font-normal text-[var(--text-tertiary)] hover:text-[var(--text-brand-soft)] transition-colors px-3 py-1.5 rounded-lg hover:bg-[var(--surface-brand)]"
             >
               {link.icon}
               {link.label}

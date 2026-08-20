@@ -1242,3 +1242,17 @@ h1, h2, h3, h4, h5, h6, button, input, textarea, select, label, strong, b { font
   --input: var(--border-default);
   --ring: var(--border-focus);
 }
+
+/* ── Contrato final dos anexos: nenhum gradiente legado quebra contraste ── */
+:where([class*="bg-gradient"]:has(.text-white), [class*="bg-gradient"].text-white) {
+  background-image: none !important;
+  background-color: var(--brand-600) !important;
+  color: var(--text-inverse) !important;
+}
+:where([class*="bg-gradient"]:has(.text-white):hover, [class*="bg-gradient"].text-white:hover) {
+  background-color: var(--brand-700) !important;
+}
+:where([class*="bg-gradient"]:not(:has(.text-white)):not(.text-white)) {
+  background-image: none !important;
+  background-color: var(--surface-card) !important;
+}

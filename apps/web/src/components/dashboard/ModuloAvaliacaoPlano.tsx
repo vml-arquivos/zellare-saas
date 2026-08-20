@@ -47,9 +47,9 @@ export function ModuloAvaliacaoPlano({
     <div className="space-y-4">
       {/* Heading do módulo */}
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-1 h-6 bg-blue-600 rounded-full" />
-        <h2 className="text-lg font-bold text-gray-900">Avaliação do Plano</h2>
-        <p className="text-sm text-gray-500 ml-auto">Planejamentos, diários e execução</p>
+        <div className="w-1 h-6 bg-[var(--accent-violet)] rounded-full" />
+        <h2 className="text-lg font-normal text-[var(--text-primary)]">Avaliação do Plano</h2>
+        <p className="text-sm text-[var(--text-secondary)] ml-auto">Planejamentos, diários e execução</p>
       </div>
 
       {/* KPI: Pendências + Diários */}
@@ -57,23 +57,23 @@ export function ModuloAvaliacaoPlano({
         {/* Pendências */}
         <button
           onClick={onPendenciasClick}
-          className="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white text-left hover:bg-slate-800 transition-colors group"
+          className="ds-card p-4 text-left hover:bg-[var(--surface-card-hover)] transition-colors group"
         >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">Pendências</p>
-          <p className="mt-1.5 text-3xl font-bold group-hover:text-blue-300 transition-colors">{totalPendencias}</p>
-          <p className="mt-1 text-xs text-slate-400">planejamentos · diários</p>
-          <p className="mt-2 text-[10px] text-slate-500 group-hover:text-slate-300">Ver detalhes →</p>
+          <p className="text-[11px] font-normal uppercase tracking-[0.15em] text-[var(--text-tertiary)]">Pendências</p>
+          <p className="mt-1.5 text-3xl font-normal text-[var(--accent-violet)] group-hover:text-[var(--text-brand)] transition-colors">{totalPendencias}</p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">planejamentos · diários</p>
+          <p className="mt-2 text-[10px] text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]">Ver detalhes →</p>
         </button>
 
         {/* Diários */}
         <button
           onClick={onDiariosClick}
-          className="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white text-left hover:bg-slate-800 transition-colors group"
+          className="ds-card p-4 text-left hover:bg-[var(--surface-card-hover)] transition-colors group"
         >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">Diários</p>
-          <p className="mt-1.5 text-3xl font-bold group-hover:text-amber-300 transition-colors">{diariosEstaSemana ?? 0}</p>
-          <p className="mt-1 text-xs text-slate-400">{diariosPublicados} publicados · {diariosRascunho} rascunho(s)</p>
-          <p className="mt-2 text-[10px] text-slate-500 group-hover:text-slate-300">Analisar →</p>
+          <p className="text-[11px] font-normal uppercase tracking-[0.15em] text-[var(--text-tertiary)]">Diários</p>
+          <p className="mt-1.5 text-3xl font-normal text-[var(--accent-cyan)] group-hover:text-[var(--text-brand)] transition-colors">{diariosEstaSemana ?? 0}</p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">{diariosPublicados} publicados · {diariosRascunho} rascunho(s)</p>
+          <p className="mt-2 text-[10px] text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]">Analisar →</p>
         </button>
       </div>
 
@@ -85,14 +85,14 @@ export function ModuloAvaliacaoPlano({
         {planejamentosParaRevisar > 0 && (
           <button
             onClick={onPlanejamentosClick}
-            className="flex items-center gap-3 p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl text-left hover:bg-amber-100 transition-all"
+            className="ds-surface flex items-center gap-3 p-4 rounded-2xl text-left hover:bg-[var(--surface-card-hover)] transition-all"
           >
-            <span className="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0">
+            <span className="w-10 h-10 ds-icon-tile rounded-xl flex items-center justify-center text-lg font-normal flex-shrink-0">
               {planejamentosParaRevisar}
             </span>
             <div>
-              <p className="text-sm font-bold text-amber-800">Planejamentos</p>
-              <p className="text-xs text-amber-600">aguardando revisão</p>
+              <p className="text-sm font-normal text-[var(--text-primary)]">Planejamentos</p>
+              <p className="text-xs text-[var(--warning)]">aguardando revisão</p>
             </div>
           </button>
         )}
@@ -100,14 +100,14 @@ export function ModuloAvaliacaoPlano({
         {diariosEmRascunho > 0 && (
           <button
             onClick={onDiariosRascunhoClick}
-            className="flex items-center gap-3 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl text-left hover:bg-blue-100 transition-all"
+            className="ds-surface flex items-center gap-3 p-4 rounded-2xl text-left hover:bg-[var(--surface-card-hover)] transition-all"
           >
-            <span className="w-10 h-10 bg-blue-500 text-white rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0">
+            <span className="w-10 h-10 ds-icon-tile rounded-xl flex items-center justify-center text-lg font-normal flex-shrink-0">
               {diariosEmRascunho}
             </span>
             <div>
-              <p className="text-sm font-bold text-blue-800">Diários</p>
-              <p className="text-xs text-blue-600">em rascunho</p>
+              <p className="text-sm font-normal text-[var(--text-primary)]">Diários</p>
+              <p className="text-xs text-[var(--text-brand-soft)]">em rascunho</p>
             </div>
           </button>
         )}

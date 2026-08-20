@@ -289,32 +289,32 @@ export default function DailyCollectionPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-      <header className="rounded-2xl bg-gradient-to-r from-indigo-700 via-violet-700 to-brand-700 p-6 text-white shadow-ds-lg">
+      <header className="ds-card p-6 shadow-ds-lg">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-indigo-100">
+            <div className="mb-2 flex items-center gap-2 text-sm font-normal text-[var(--text-brand-soft)]">
               <ClipboardCheck className="h-5 w-5" /> Coleta diária estruturada
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">Registrar o desenvolvimento em poucos segundos</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-indigo-100">
+            <h1 className="text-2xl font-normal tracking-tight text-[var(--text-primary)]">Registrar o desenvolvimento em poucos segundos</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
               Use o catálogo pedagógico real para registrar uma habilidade, nível observado e contexto. Cada ação cria um evento auditável no diário da turma e pode ser sincronizada quando a conexão retornar.
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs text-indigo-50">
+          <div className="ds-badge-brand flex items-center gap-2 px-3 py-2 text-xs">
             <ShieldCheck className="h-4 w-4" /> Escopo da turma e revisão humana
           </div>
         </div>
       </header>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="ds-card p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <label className="block flex-1 text-sm font-medium text-slate-700">
+            <label className="block flex-1 text-sm font-normal text-[var(--text-primary)]">
               Turma autorizada
               <select
                 value={classroomId}
                 onChange={(event) => setClassroomId(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="ds-input mt-1.5 w-full px-3 py-2.5 text-sm outline-none transition"
               >
                 <option value="">Selecione uma turma</option>
                 {classrooms.map((classroom) => (
@@ -322,38 +322,38 @@ export default function DailyCollectionPage() {
                 ))}
               </select>
             </label>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-normal text-[var(--text-primary)]">
               Data pedagógica
               <span className="relative mt-1.5 flex items-center">
-                <CalendarDays className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400" />
+                <CalendarDays className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--text-tertiary)]" />
                 <input
                   type="date"
                   value={eventDate}
                   max={todayInputValue()}
                   onChange={(event) => setEventDate(event.target.value)}
-                  className="rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="ds-input py-2.5 pl-9 pr-3 text-sm outline-none transition"
                 />
               </span>
             </label>
             <button
               type="button"
               onClick={() => { void loadClassrooms(); void loadChildren(classroomId); void loadEvents(); void loadQuality(); }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              className="ds-btn-secondary inline-flex items-center justify-center gap-2 px-3 py-2.5 text-sm transition"
             >
               <RefreshCw className="h-4 w-4" /> Atualizar
             </button>
           </div>
 
           {!classroomId ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="ds-surface rounded-xl border-dashed p-8 text-center text-sm text-[var(--text-tertiary)]">
               Selecione uma turma para iniciar a coleta com crianças do escopo real.
             </div>
           ) : loadingChildren ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-50 p-8 text-sm text-slate-500">
+            <div className="ds-surface flex items-center justify-center gap-2 rounded-xl p-8 text-sm text-[var(--text-tertiary)]">
               <Loader2 className="h-4 w-4 animate-spin" /> Carregando crianças da turma...
             </div>
           ) : children.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-8 text-center text-sm text-amber-800">
+            <div className="ds-surface rounded-xl border-dashed p-8 text-center text-sm text-[var(--warning)]">
               Nenhuma criança está disponível no escopo desta turma. O Zelare não cria registros simulados; confirme as matrículas e vínculos reais.
             </div>
           ) : (
@@ -367,56 +367,56 @@ export default function DailyCollectionPage() {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <UsersRound className="h-4 w-4 text-indigo-600" /> Contexto real
+          <div className="ds-card p-5 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 text-sm font-normal text-[var(--text-primary)]">
+              <UsersRound className="h-4 w-4 text-[var(--text-brand-soft)]" /> Contexto real
             </div>
-            <p className="text-sm text-slate-500">{selectedClassroom?.name ?? 'Nenhuma turma selecionada'}</p>
+            <p className="text-sm text-[var(--text-secondary)]">{selectedClassroom?.name ?? 'Nenhuma turma selecionada'}</p>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-indigo-50 p-3">
-                <p className="text-2xl font-bold text-indigo-700">{children.length}</p>
-                <p className="text-xs text-indigo-700/70">crianças no escopo</p>
+              <div className="ds-surface p-3">
+                <p className="text-2xl font-normal text-[var(--accent-violet)]">{children.length}</p>
+                <p className="text-xs text-[var(--text-tertiary)]">crianças no escopo</p>
               </div>
-              <div className="rounded-xl bg-emerald-50 p-3">
-                <p className="text-2xl font-bold text-emerald-700">{events.length}</p>
-                <p className="text-xs text-emerald-700/70">registros no dia</p>
+              <div className="ds-surface p-3">
+                <p className="text-2xl font-normal text-[var(--success)]">{events.length}</p>
+                <p className="text-xs text-[var(--text-tertiary)]">registros no dia</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <ClipboardCheck className="h-4 w-4 text-indigo-600" /> Qualidade do preenchimento
+          <div className="ds-card p-5 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 text-sm font-normal text-[var(--text-primary)]">
+              <ClipboardCheck className="h-4 w-4 text-[var(--text-brand-soft)]" /> Qualidade do preenchimento
             </div>
             {quality ? (
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-lg bg-indigo-50 p-2"><strong className="text-indigo-700">{quality.coverage.structuredPercent}%</strong><span className="block text-indigo-700/70">estruturados</span></div>
-                <div className="rounded-lg bg-emerald-50 p-2"><strong className="text-emerald-700">{quality.coverage.documentationPercent}%</strong><span className="block text-emerald-700/70">documentados</span></div>
-                <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.distinctChildren}</strong><span className="block text-slate-500">crianças alcançadas</span></div>
-                <div className="rounded-lg bg-slate-50 p-2"><strong className="text-slate-700">{quality.totals.authored}</strong><span className="block text-slate-500">com autoria</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--accent-violet)]">{quality.coverage.structuredPercent}%</strong><span className="block text-[var(--text-tertiary)]">estruturados</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--success)]">{quality.coverage.documentationPercent}%</strong><span className="block text-[var(--text-tertiary)]">documentados</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--text-primary)]">{quality.totals.distinctChildren}</strong><span className="block text-[var(--text-tertiary)]">crianças alcançadas</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--text-primary)]">{quality.totals.authored}</strong><span className="block text-[var(--text-tertiary)]">com autoria</span></div>
               </div>
             ) : null}
             {quality?.collection ? (
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                <div className="rounded-lg bg-violet-50 p-2"><strong className="text-violet-700">{quality.collection.events}</strong><span className="block text-violet-700/70">coletas versionadas</span></div>
-                <div className="rounded-lg bg-cyan-50 p-2"><strong className="text-cyan-700">{quality.collection.observedOpportunityPercent}%</strong><span className="block text-cyan-700/70">com oportunidade</span></div>
-                <div className="rounded-lg bg-amber-50 p-2"><strong className="text-amber-700">{quality.collection.abc}</strong><span className="block text-amber-700/70">registros ABC</span></div>
-                <div className="rounded-lg bg-rose-50 p-2"><strong className="text-rose-700">{quality.collection.teacherConcerns}</strong><span className="block text-rose-700/70">para revisão</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--accent-violet)]">{quality.collection.events}</strong><span className="block text-[var(--text-tertiary)]">coletas versionadas</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--accent-cyan)]">{quality.collection.observedOpportunityPercent}%</strong><span className="block text-[var(--text-tertiary)]">com oportunidade</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--warning)]">{quality.collection.abc}</strong><span className="block text-[var(--text-tertiary)]">registros ABC</span></div>
+                <div className="ds-surface p-2"><strong className="text-[var(--error)]">{quality.collection.teacherConcerns}</strong><span className="block text-[var(--text-tertiary)]">para revisão</span></div>
               </div>
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                {offlineCount > 0 ? <WifiOff className="h-4 w-4 text-amber-600" /> : <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+          <div className="ds-card p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm font-normal text-[var(--text-primary)]">
+                {offlineCount > 0 ? <WifiOff className="h-4 w-4 text-[var(--warning)]" /> : <CheckCircle2 className="h-4 w-4 text-[var(--success)]" />}
                 Sincronização
               </div>
-              <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${offlineCount > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+              <span className={`ds-badge rounded-full px-2 py-1 text-[11px] ${offlineCount > 0 ? 'ds-badge-amber' : 'ds-badge-green'}`}>
                 {offlineCount > 0 ? `${offlineCount} pendente(s)` : 'Em dia'}
               </span>
             </div>
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-xs leading-5 text-[var(--text-secondary)]">
               {offlineCount > 0
                 ? 'Há registros aguardando conexão. Eles serão reenviados automaticamente quando o dispositivo voltar a ficar online.'
                 : 'Os registros são enviados ao backend real e permanecem auditáveis por autoria, turma e data.'}
@@ -425,25 +425,25 @@ export default function DailyCollectionPage() {
         </aside>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="ds-card p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-slate-800">Registros do dia</h2>
-            <p className="text-xs text-slate-500">Leitura dos eventos reais retornados pelo diário da turma.</p>
+            <h2 className="text-base font-normal text-[var(--text-primary)]">Registros do dia</h2>
+            <p className="text-xs text-[var(--text-secondary)]">Leitura dos eventos reais retornados pelo diário da turma.</p>
           </div>
-          {loadingEvents && <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />}
+          {loadingEvents && <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-violet)]" />}
         </div>
         {events.length === 0 ? (
-          <p className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">Ainda não há registros estruturados para esta turma e data.</p>
+          <p className="ds-surface rounded-xl p-5 text-sm text-[var(--text-tertiary)]">Ainda não há registros estruturados para esta turma e data.</p>
         ) : (
           <div className="grid gap-2 md:grid-cols-2">
             {events.slice(0, 12).map((event) => (
-              <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <div key={event.id} className="ds-surface flex items-start justify-between gap-3 rounded-xl p-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-800">{event.childName}</p>
-                  <p className="truncate text-xs text-slate-500">{event.title}</p>
+                  <p className="truncate text-sm font-normal text-[var(--text-primary)]">{event.childName}</p>
+                  <p className="truncate text-xs text-[var(--text-secondary)]">{event.title}</p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${event.optimistic ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                <span className={`ds-badge shrink-0 rounded-full px-2 py-1 text-[10px] ${event.optimistic ? 'ds-badge-amber' : 'ds-badge-green'}`}>
                   {event.optimistic ? 'Offline' : 'Salvo'}
                 </span>
               </div>
@@ -453,12 +453,12 @@ export default function DailyCollectionPage() {
       </section>
 
       {saving && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-xl">
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl ds-card px-4 py-3 text-sm text-[var(--text-primary)] shadow-xl">
           <Loader2 className="h-4 w-4 animate-spin" /> Salvando registros reais...
         </div>
       )}
       {message && !saving && (
-        <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm text-slate-700 shadow-xl">
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl ds-card px-4 py-3 text-sm text-[var(--text-primary)] shadow-xl">
           {message}
         </div>
       )}

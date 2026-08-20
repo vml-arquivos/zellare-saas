@@ -193,7 +193,7 @@ export default function ChildSelector({
 
       {/* Grid de crianças */}
       {filteredChildren.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-[var(--text-tertiary)]">
           Nenhuma criança encontrada
         </div>
       ) : (
@@ -206,8 +206,8 @@ export default function ChildSelector({
                 onClick={() => toggleSelection(child.id)}
                 className={`cursor-pointer transition-all duration-200 ${
                   isSelected
-                    ? 'bg-blue-600 border-blue-500 shadow-lg scale-105'
-                    : 'bg-gray-800 border-gray-700 hover:bg-gray-750 hover:border-gray-600'
+                    ? 'bg-[var(--surface-brand)] border-[var(--border-brand)] shadow-lg scale-105'
+                    : 'bg-[var(--surface-card)] border-[var(--border-default)] hover:bg-[var(--surface-card-hover)] hover:border-[var(--border-strong)]'
                 }`}
               >
                 <CardContent className="p-4 flex flex-col items-center gap-2">
@@ -221,10 +221,10 @@ export default function ChildSelector({
                       />
                     ) : (
                       <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold ${
+                        className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-normal ${
                           isSelected
-                            ? 'bg-blue-700 text-white'
-                            : 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
+                            ? 'bg-[var(--accent-violet)] text-[var(--on-accent)]'
+                            : 'bg-[var(--surface-brand)] text-[var(--text-brand-soft)]'
                         }`}
                       >
                         {getInitials(child)}
@@ -232,18 +232,18 @@ export default function ChildSelector({
                     )}
                     {/* Checkbox visual */}
                     {isSelected && (
-                      <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
-                        <Check className="h-4 w-4 text-blue-600" />
+                      <div className="absolute -top-1 -right-1 bg-[var(--surface-card)] border border-[var(--border-default)] rounded-full p-1">
+                        <Check className="h-4 w-4 text-[var(--accent-violet)]" />
                       </div>
                     )}
                   </div>
 
                   {/* Nome */}
                   <div className="text-center">
-                    <p className={`font-semibold ${isSelected ? 'text-white' : 'text-white'}`}>
+                    <p className="font-normal text-[var(--text-primary)]">
                       {child.firstName}
                     </p>
-                    <p className={`text-xs ${isSelected ? 'text-blue-100' : 'text-gray-400'}`}>
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {child.lastName}
                     </p>
                   </div>
@@ -253,8 +253,8 @@ export default function ChildSelector({
                     variant="outline"
                     className={`text-xs ${
                       isSelected
-                        ? 'bg-blue-700 border-blue-500 text-white'
-                        : 'bg-gray-700 border-gray-600 text-gray-300'
+                        ? 'ds-badge-brand'
+                        : 'ds-badge-neutral'
                     }`}
                   >
                     {getAge(child.dateOfBirth)}
