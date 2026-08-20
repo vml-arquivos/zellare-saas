@@ -37,18 +37,18 @@ interface IndicatorsCardsProps {
 }
 
 const TONE_CLASSES: Record<IndicatorTone, { card: string; value: string }> = {
-  default: { card: 'bg-gray-50 border-gray-200',    value: 'text-gray-800' },
-  success: { card: 'bg-green-50 border-green-200',  value: 'text-green-700' },
-  warning: { card: 'bg-yellow-50 border-yellow-200',value: 'text-yellow-700' },
-  danger:  { card: 'bg-red-50 border-red-200',      value: 'text-red-700' },
-  info:    { card: 'bg-blue-50 border-blue-200',    value: 'text-blue-700' },
+  default: { card: 'ds-card', value: 'text-[var(--text-primary)]' },
+  success: { card: 'ds-card', value: 'text-[var(--success)]' },
+  warning: { card: 'ds-card', value: 'text-[var(--warning)]' },
+  danger:  { card: 'ds-card', value: 'text-[var(--error)]' },
+  info:    { card: 'ds-card', value: 'text-[var(--info)]' },
 };
 
 function SkeletonCard() {
   return (
-    <div className="border border-gray-200 rounded-xl p-4 animate-pulse">
-      <div className="h-7 bg-gray-200 rounded w-1/2 mb-2" />
-      <div className="h-4 bg-gray-100 rounded w-3/4" />
+    <div className="ds-card p-4 animate-pulse">
+      <div className="h-7 bg-[var(--surface-muted)] rounded w-1/2 mb-2" />
+      <div className="h-4 bg-[var(--surface-subtle)] rounded w-3/4" />
     </div>
   );
 }
@@ -66,13 +66,13 @@ export function IndicatorsCards({
       {(title || onRefresh) && (
         <div className="flex items-center justify-between">
           {title && (
-            <p className="text-sm font-semibold text-gray-700">{title}</p>
+            <p className="text-sm font-normal text-[var(--text-primary)]">{title}</p>
           )}
           {onRefresh && (
             <button
               onClick={onRefresh}
               title="Atualizar indicadores"
-              className="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors"
+              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 rounded transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
@@ -89,7 +89,7 @@ export function IndicatorsCards({
 
       {/* Error state */}
       {!loading && error && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="ds-surface flex items-center gap-3 p-4">
           <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
           <div>
             <p className="text-sm font-medium text-red-700">
@@ -98,7 +98,7 @@ export function IndicatorsCards({
             {onRefresh && (
               <button
                 onClick={onRefresh}
-                className="text-xs text-red-500 underline mt-0.5 hover:text-red-700"
+                className="text-xs text-[var(--error)] underline mt-0.5 hover:opacity-80"
               >
                 Tente atualizar
               </button>
@@ -109,9 +109,9 @@ export function IndicatorsCards({
 
       {/* Empty state */}
       {!loading && !error && items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 border border-gray-200 rounded-xl">
-          <BarChart2 className="h-8 w-8 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-400">Sem dados para o período selecionado</p>
+        <div className="ds-surface flex flex-col items-center justify-center py-8">
+          <BarChart2 className="h-8 w-8 text-[var(--text-disabled)] mb-2" />
+          <p className="text-sm text-[var(--text-tertiary)]">Sem dados para o período selecionado</p>
         </div>
       )}
 
@@ -124,15 +124,15 @@ export function IndicatorsCards({
             return (
               <div
                 key={idx}
-                className={`border rounded-xl p-4 text-center ${cls.card}`}
+                className={`${cls.card} p-4 text-center`}
               >
                 {item.icon && (
                   <div className="flex justify-center mb-2">{item.icon}</div>
                 )}
-                <p className={`text-2xl font-bold ${cls.value}`}>{item.value}</p>
-                <p className="text-xs font-medium text-gray-600 mt-1">{item.label}</p>
+                <p className={`text-2xl font-normal ${cls.value}`}>{item.value}</p>
+                <p className="text-xs font-normal text-[var(--text-secondary)] mt-1">{item.label}</p>
                 {item.helperText && (
-                  <p className="text-xs text-gray-400 mt-0.5">{item.helperText}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{item.helperText}</p>
                 )}
               </div>
             );

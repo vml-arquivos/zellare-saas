@@ -28,23 +28,9 @@ function getInitials(name: string): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-/** Gera uma cor de fundo determinística a partir do nome */
-function getAvatarColor(name: string): string {
-  const colors = [
-    'from-brand-600 to-brand-800',
-    'from-violet-500 to-purple-700',
-    'from-emerald-500 to-teal-700',
-    'from-rose-500 to-pink-700',
-    'from-amber-500 to-orange-700',
-    'from-sky-500 to-blue-700',
-    'from-indigo-500 to-indigo-700',
-    'from-fuchsia-500 to-pink-700',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
+/** A identidade usa um único acento, sem gradientes decorativos por perfil. */
+function getAvatarColor(_name: string): string {
+  return 'bg-[var(--accent-violet)]';
 }
 
 const SIZE_MAP = {
@@ -85,10 +71,10 @@ export function ProfileAvatarUploader({
         />
       ) : (
         <div
-          className={`${s.container} rounded-full bg-gradient-to-br ${gradientColor} flex items-center justify-center ring-4 ring-white shadow-md select-none`}
+          className={`${s.container} rounded-full ${gradientColor} flex items-center justify-center ring-2 ring-[var(--border-brand)] shadow-md select-none`}
           aria-label={`Avatar de ${name}`}
         >
-          <span className={`${s.text} font-bold text-white tracking-tight`}>
+          <span className={`${s.text} font-normal text-white tracking-tight`}>
             {initials}
           </span>
         </div>
@@ -107,7 +93,7 @@ export function ProfileAvatarUploader({
             type="button"
             onClick={() => fileRef.current?.click()}
             title="Alterar foto de perfil"
-            className={`absolute bottom-0 right-0 ${s.camera} bg-brand-600 hover:bg-brand-700 rounded-full flex items-center justify-center text-white shadow-md transition-colors ring-2 ring-white`}
+            className={`absolute bottom-0 right-0 ${s.camera} bg-[var(--brand-600)] hover:bg-[var(--brand-700)] rounded-full flex items-center justify-center text-white shadow-md transition-colors ring-2 ring-[var(--surface-card)]`}
           >
             <Camera className={s.icon} />
           </button>

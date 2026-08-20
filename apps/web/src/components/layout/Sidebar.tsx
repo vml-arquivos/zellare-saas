@@ -336,7 +336,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   ];
 
   return (
-    <aside className="relative w-[var(--sidebar-width)] bg-[var(--surface-sidebar)] text-[var(--text-primary)] border-r border-[var(--border-subtle)] h-full min-h-screen flex flex-col overflow-hidden shadow-[var(--shadow-sm)]">
+    <aside className="zelare-sidebar relative w-[var(--sidebar-width)] bg-[var(--surface-sidebar)] text-[var(--text-primary)] border-r border-[var(--border-subtle)] h-full min-h-screen flex flex-col overflow-hidden shadow-[var(--shadow-sm)]">
       {/* Logo */}
       <div className="px-4 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center justify-between">

@@ -18,15 +18,15 @@ const DIMENSOES = [
   { id: 'eu-outro-nos',   short: 'Eu e o Nós',  cor: 'var(--brand-600)' },
   { id: 'corpo-gestos',   short: 'Corpo',        cor: 'var(--warning)' },
   { id: 'tracos-sons',    short: 'Arte',         cor: 'var(--brand-600)' },
-  { id: 'escuta-fala',    short: 'Linguagem',    cor: 'var(--brand-600)' },
-  { id: 'espacos-tempos', short: 'Matemática',   cor: 'var(--success)' },
+  { id: 'escuta-fala',    short: 'Linguagem',    cor: 'var(--accent-violet)' },
+  { id: 'espacos-tempos', short: 'Matemática',   cor: 'var(--accent-cyan)' },
 ] as const;
 
 const NIVEL_COR: Record<string, string> = {
   NAO_OBSERVADO: 'var(--border-default)', EM_DESENVOLVIMENTO: 'var(--warning-border)', CONSOLIDADO: 'var(--success-border)', AMPLIADO: 'var(--brand-300)',
 };
 
-const DIARY_CORES = ['var(--brand-600)','var(--success)','var(--warning)','var(--error)','var(--warning)','var(--brand-500)','var(--brand-600)','var(--brand-600)','var(--text-tertiary)','var(--brand-600)','var(--text-tertiary)'];
+const DIARY_CORES = ['var(--accent-violet)','var(--accent-cyan)','var(--warning)','var(--error)','var(--accent-cyan)','var(--brand-500)','var(--accent-violet)','var(--accent-cyan)','var(--text-tertiary)','var(--accent-violet)','var(--text-tertiary)'];
 const DIARY_LABELS: Record<string, string> = {
   ATIVIDADE_PEDAGOGICA:'Pedagógica', DESENVOLVIMENTO:'Desenvolvimento', COMPORTAMENTO:'Comportamento',
   SAUDE:'Saúde', REFEICAO:'Refeição', HIGIENE:'Higiene', SONO:'Sono',

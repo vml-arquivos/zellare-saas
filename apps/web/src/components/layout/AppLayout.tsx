@@ -48,7 +48,7 @@ export function AppLayout() {
           <Topbar onMenuToggle={toggleSidebar} />
 
           {/* Conteúdo com scroll independente */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--surface-page)]">
+          <main className="zelare-main flex-1 overflow-y-auto overflow-x-hidden bg-[var(--surface-page)]">
             <Outlet />
           </main>
 

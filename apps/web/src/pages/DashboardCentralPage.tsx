@@ -83,7 +83,7 @@ interface RdicCentral {
 
 // ─── Cores ───────────────────────────────────────────────────────────────────
 
-const CORES_GRAFICOS = ['var(--brand-600)', 'var(--success)', 'var(--warning)', 'var(--error)', 'var(--brand-600)', 'var(--brand-500)'];
+const CORES_GRAFICOS = ['var(--accent-violet)', 'var(--accent-cyan)', 'var(--accent-violet)', 'var(--success)', 'var(--accent-cyan)', 'var(--brand-500)'];
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 

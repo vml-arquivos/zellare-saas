@@ -98,7 +98,7 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
   }, [directClassroom?.id, isCoordRole]);
 
   return (
-    <header className="bg-[var(--surface-topbar)] backdrop-blur-md border-b border-[var(--border-subtle)] px-3 sm:px-5 sticky top-0 z-50 h-[var(--topbar-height)] flex items-center shadow-[var(--shadow-xs)]">
+    <header className="zelare-topbar bg-[var(--surface-topbar)] backdrop-blur-md border-b border-[var(--border-subtle)] px-3 sm:px-5 sticky top-0 z-50 h-[var(--topbar-height)] flex items-center shadow-[var(--shadow-xs)]">
       <div className="flex items-center justify-between w-full gap-2">
 
         {/* ── Esquerda: hamburguer + info pedagógica ── */}

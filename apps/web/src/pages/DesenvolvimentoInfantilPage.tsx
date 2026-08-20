@@ -166,14 +166,14 @@ const COR_CATEGORIA: Record<string, string> = {
 };
 
 const CHART_COLORS = [
-  'var(--brand-600)',
-  'var(--success)',
+  'var(--accent-violet)',
+  'var(--accent-cyan)',
   'var(--warning)',
   'var(--error)',
-  'var(--brand-600)',
+  'var(--accent-violet)',
   'var(--brand-500)',
-  'var(--brand-600)',
-  'var(--brand-500)',
+  'var(--accent-cyan)',
+  'var(--accent-violet)',
   'var(--warning)',
   'var(--success)',
 ];

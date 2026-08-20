@@ -34,11 +34,11 @@ export function Card({
 type Tone = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'purple';
 const TONE_STYLES: Record<Tone, { bg: string; text: string; sub: string; icon: string; border: string }> = {
   default: { bg: 'bg-[var(--surface-inset)]', text: 'text-[var(--text-primary)]', sub: 'text-[var(--text-tertiary)]', icon: 'text-[var(--text-secondary)]', border: 'border-[var(--border-default)]' },
-  success: { bg: 'bg-[var(--success-bg)]', text: 'text-[var(--success)]', sub: 'text-[var(--success)]', icon: 'text-[var(--success)]', border: 'border-[var(--success-border)]' },
-  warning: { bg: 'bg-[var(--warning-bg)]', text: 'text-[var(--warning)]', sub: 'text-[var(--warning)]', icon: 'text-[var(--warning)]', border: 'border-[var(--warning-border)]' },
-  danger: { bg: 'bg-[var(--error-bg)]', text: 'text-[var(--error)]', sub: 'text-[var(--error)]', icon: 'text-[var(--error)]', border: 'border-[var(--error-border)]' },
-  info: { bg: 'bg-[var(--info-bg)]', text: 'text-[var(--info)]', sub: 'text-[var(--info)]', icon: 'text-[var(--info)]', border: 'border-[var(--info-border)]' },
-  purple: { bg: 'bg-[var(--surface-brand)]', text: 'text-[var(--text-brand)]', sub: 'text-[var(--text-brand-soft)]', icon: 'text-[var(--text-brand-soft)]', border: 'border-[var(--border-brand)]' },
+  success: { bg: 'bg-[var(--surface-card)]', text: 'text-[var(--success)]', sub: 'text-[var(--success)]', icon: 'text-[var(--success)]', border: 'border-[var(--border-default)]' },
+  warning: { bg: 'bg-[var(--surface-card)]', text: 'text-[var(--warning)]', sub: 'text-[var(--warning)]', icon: 'text-[var(--warning)]', border: 'border-[var(--border-default)]' },
+    danger:  { bg: 'bg-[var(--surface-card)]', text: 'text-[var(--error)]', sub: 'text-[var(--error)]', icon: 'text-[var(--error)]', border: 'border-[var(--border-default)]' },
+    info:    { bg: 'bg-[var(--surface-card)]', text: 'text-[var(--info)]', sub: 'text-[var(--info)]', icon: 'text-[var(--info)]', border: 'border-[var(--border-default)]' },
+    purple:  { bg: 'bg-[var(--surface-card)]', text: 'text-[var(--text-brand)]', sub: 'text-[var(--text-brand-soft)]', icon: 'text-[var(--text-brand-soft)]', border: 'border-[var(--border-default)]' },
 };
 
 export function KpiCard({
