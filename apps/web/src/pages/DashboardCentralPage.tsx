@@ -83,7 +83,7 @@ interface RdicCentral {
 
 // ─── Cores ───────────────────────────────────────────────────────────────────
 
-const CORES_GRAFICOS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+const CORES_GRAFICOS = ['var(--brand-600)', 'var(--success)', 'var(--warning)', 'var(--error)', 'var(--brand-600)', 'var(--brand-500)'];
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
@@ -186,10 +186,10 @@ export function DashboardCentralPage() {
       { nome: 'Unidade II', alunos: 64, professores: 8, alertas: 3, cobertura: 82 },
     ]);
     setDadosAlertas([
-      { tipo: 'Comportamental', quantidade: 3, cor: '#EF4444' },
-      { tipo: 'Desenvolvimento', quantidade: 2, cor: '#F59E0B' },
-      { tipo: 'Saúde', quantidade: 1, cor: '#8B5CF6' },
-      { tipo: 'Alimentação', quantidade: 1, cor: '#06B6D4' },
+      { tipo: 'Comportamental', quantidade: 3, cor: 'var(--error)' },
+      { tipo: 'Desenvolvimento', quantidade: 2, cor: 'var(--warning)' },
+      { tipo: 'Saúde', quantidade: 1, cor: 'var(--brand-600)' },
+      { tipo: 'Alimentação', quantidade: 1, cor: 'var(--brand-500)' },
     ]);
   };
 
@@ -343,14 +343,14 @@ export function DashboardCentralPage() {
           </h3>
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={dadosMensais}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" />
               <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="registros" name="Registros" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="presencas" name="Presenças" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="alertas" name="Alertas" stroke="#EF4444" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="registros" name="Registros" stroke="var(--brand-600)" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="presencas" name="Presenças" stroke="var(--success)" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="alertas" name="Alertas" stroke="var(--error)" strokeWidth={2} dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -402,14 +402,14 @@ export function DashboardCentralPage() {
           </h3>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={dadosUnidades} barGap={4}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" />
               <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="alunos" name="Alunos" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="professores" name="Professores" fill="#10B981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="alertas" name="Alertas" fill="#EF4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="alunos" name="Alunos" fill="var(--brand-600)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="professores" name="Professores" fill="var(--success)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="alertas" name="Alertas" fill="var(--error)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

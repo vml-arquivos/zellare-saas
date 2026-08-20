@@ -11,19 +11,19 @@ import { Brain, Users, AlertTriangle, CheckCircle, ArrowLeft, RefreshCw, Activit
 
 const ANO = 2026;
 const TRIMESTRES = [
-  { id:1, label:'1º Trimestre', short:'1T', cor:'#6366f1' },
-  { id:2, label:'2º Trimestre', short:'2T', cor:'#22c55e' },
-  { id:3, label:'3º Trimestre', short:'3T', cor:'#f59e0b' },
+  { id:1, label:'1º Trimestre', short:'1T', cor:'var(--brand-600)' },
+  { id:2, label:'2º Trimestre', short:'2T', cor:'var(--success)' },
+  { id:3, label:'3º Trimestre', short:'3T', cor:'var(--warning)' },
 ] as const;
 
 const S_CFG: Record<string,{label:string,cor:string,bg:string}> = {
-  PENDENTE:  {label:'Pendente',   cor:'#94a3b8',bg:'bg-slate-100 text-slate-600'},
-  RASCUNHO:  {label:'Rascunho',   cor:'#6b7280',bg:'bg-gray-100 text-gray-600'},
-  DEVOLVIDO: {label:'Devolvido',  cor:'#f97316',bg:'bg-orange-100 text-orange-700'},
-  EM_REVISAO:{label:'Em Revisão', cor:'#eab308',bg:'bg-yellow-100 text-yellow-700'},
-  APROVADO:  {label:'Aprovado',   cor:'#22c55e',bg:'bg-emerald-100 text-emerald-700'},
-  FINALIZADO:{label:'Finalizado', cor:'#3b82f6',bg:'bg-blue-100 text-blue-700'},
-  PUBLICADO: {label:'Publicado',  cor:'#16a34a',bg:'bg-green-100 text-green-700'},
+  PENDENTE:  {label:'Pendente',   cor:'var(--text-tertiary)',bg:'bg-slate-100 text-slate-600'},
+  RASCUNHO:  {label:'Rascunho',   cor:'var(--text-tertiary)',bg:'bg-gray-100 text-gray-600'},
+  DEVOLVIDO: {label:'Devolvido',  cor:'var(--warning)',bg:'bg-orange-100 text-orange-700'},
+  EM_REVISAO:{label:'Em Revisão', cor:'var(--warning)',bg:'bg-yellow-100 text-yellow-700'},
+  APROVADO:  {label:'Aprovado',   cor:'var(--success)',bg:'bg-emerald-100 text-emerald-700'},
+  FINALIZADO:{label:'Finalizado', cor:'var(--brand-600)',bg:'bg-blue-100 text-blue-700'},
+  PUBLICADO: {label:'Publicado',  cor:'var(--success)',bg:'bg-green-100 text-green-700'},
 };
 function Dot({status}: {status:string}) {
   return <span className="inline-block w-2.5 h-2.5 rounded-full" style={{backgroundColor:(S_CFG[status]??S_CFG.PENDENTE).cor}} title={(S_CFG[status]??S_CFG.PENDENTE).label}/>;
@@ -143,16 +143,16 @@ export default function PainelTurmaPage() {
             <CardContent>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={statusData} margin={{top:5,right:5,bottom:5,left:-15}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)"/>
                   <XAxis dataKey="periodo" tick={{fontSize:11}}/>
                   <YAxis tick={{fontSize:10}} allowDecimals={false}/>
                   <Tooltip contentStyle={{fontSize:11}}/>
                   <Legend wrapperStyle={{fontSize:10}}/>
-                  <Bar dataKey="Aprovado" stackId="a" fill="#22c55e" maxBarSize={40}/>
-                  <Bar dataKey="Em Revisão" stackId="a" fill="#eab308" maxBarSize={40}/>
-                  <Bar dataKey="Rascunho" stackId="a" fill="#9ca3af" maxBarSize={40}/>
-                  <Bar dataKey="Devolvido" stackId="a" fill="#f97316" maxBarSize={40}/>
-                  <Bar dataKey="Pendente" stackId="a" fill="#e2e8f0" radius={[2,2,0,0]} maxBarSize={40}/>
+                  <Bar dataKey="Aprovado" stackId="a" fill="var(--success)" maxBarSize={40}/>
+                  <Bar dataKey="Em Revisão" stackId="a" fill="var(--warning)" maxBarSize={40}/>
+                  <Bar dataKey="Rascunho" stackId="a" fill="var(--text-tertiary)" maxBarSize={40}/>
+                  <Bar dataKey="Devolvido" stackId="a" fill="var(--warning)" maxBarSize={40}/>
+                  <Bar dataKey="Pendente" stackId="a" fill="var(--surface-muted)" radius={[2,2,0,0]} maxBarSize={40}/>
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -171,9 +171,9 @@ export default function PainelTurmaPage() {
             <CardContent>
               <div className="grid grid-cols-3 gap-3 mb-3">
                 {[
-                  {label:'Feito',val:resumoConferencias.feito,pct:resumoConferencias.pctFeito,cor:'#22c55e',bg:'bg-emerald-50',txt:'text-emerald-700'},
-                  {label:'Parcial',val:resumoConferencias.parcial,pct:resumoConferencias.pctParcial,cor:'#f59e0b',bg:'bg-amber-50',txt:'text-amber-700'},
-                  {label:'Não Realizado',val:resumoConferencias.naoRealizado,pct:resumoConferencias.pctNaoRealizado,cor:'#ef4444',bg:'bg-red-50',txt:'text-red-700'},
+                  {label:'Feito',val:resumoConferencias.feito,pct:resumoConferencias.pctFeito,cor:'var(--success)',bg:'bg-emerald-50',txt:'text-emerald-700'},
+                  {label:'Parcial',val:resumoConferencias.parcial,pct:resumoConferencias.pctParcial,cor:'var(--warning)',bg:'bg-amber-50',txt:'text-amber-700'},
+                  {label:'Não Realizado',val:resumoConferencias.naoRealizado,pct:resumoConferencias.pctNaoRealizado,cor:'var(--error)',bg:'bg-red-50',txt:'text-red-700'},
                 ].map((item,i)=>(
                   <div key={i} className={`${item.bg} rounded-lg p-3 text-center`}>
                     <p className={`text-2xl font-bold ${item.txt}`}>{item.pct}%</p>
@@ -199,10 +199,10 @@ export default function PainelTurmaPage() {
               {!health?<p className="text-sm text-gray-400 text-center py-4">Sem dados de saúde</p>:(
                 <div className="space-y-2">
                   {[
-                    {icon:<AlertTriangle className="h-4 w-4 text-red-500"/>,label:'Com alergias',val:health.stats?.comAlergia??0,cor:'#ef4444'},
-                    {icon:<Activity className="h-4 w-4 text-orange-500"/>,label:'Com dieta restritiva',val:health.stats?.comDieta??0,cor:'#f97316'},
-                    {icon:<Heart className="h-4 w-4 text-blue-500"/>,label:'Com condição médica',val:health.stats?.comCondicaoMedica??0,cor:'#3b82f6'},
-                    {icon:<Stethoscope className="h-4 w-4 text-purple-500"/>,label:'Com medicação',val:health.stats?.comMedicamento??0,cor:'#a855f7'},
+                    {icon:<AlertTriangle className="h-4 w-4 text-red-500"/>,label:'Com alergias',val:health.stats?.comAlergia??0,cor:'var(--error)'},
+                    {icon:<Activity className="h-4 w-4 text-orange-500"/>,label:'Com dieta restritiva',val:health.stats?.comDieta??0,cor:'var(--warning)'},
+                    {icon:<Heart className="h-4 w-4 text-blue-500"/>,label:'Com condição médica',val:health.stats?.comCondicaoMedica??0,cor:'var(--brand-600)'},
+                    {icon:<Stethoscope className="h-4 w-4 text-purple-500"/>,label:'Com medicação',val:health.stats?.comMedicamento??0,cor:'var(--brand-600)'},
                   ].map((item,i)=>(
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">{item.icon}</div>
@@ -225,11 +225,11 @@ export default function PainelTurmaPage() {
               {diarioSemanal.length===0?<div className="flex items-center justify-center h-[160px] text-gray-400 text-xs">Sem observações nas últimas 8 semanas.</div>:(
                 <ResponsiveContainer width="100%" height={170}>
                   <BarChart data={diarioSemanal} margin={{top:5,right:5,bottom:5,left:-15}}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)"/>
                     <XAxis dataKey="semana" tick={{fontSize:9}}/>
                     <YAxis tick={{fontSize:10}} allowDecimals={false}/>
                     <Tooltip contentStyle={{fontSize:11}}/>
-                    <Bar dataKey="Observações" fill="#6366f1" radius={[3,3,0,0]} maxBarSize={24}/>
+                    <Bar dataKey="Observações" fill="var(--brand-600)" radius={[3,3,0,0]} maxBarSize={24}/>
                   </BarChart>
                 </ResponsiveContainer>
               )}

@@ -29,12 +29,12 @@ interface RelatorioConsumo {
 }
 
 const PALETTE = {
-  indigo: '#6366f1', green: '#10b981', amber: '#f59e0b', red: '#ef4444',
-  purple: '#8b5cf6', cyan: '#06b6d4', teal: '#14b8a6',
+  indigo: 'var(--brand-600)', green: 'var(--success)', amber: 'var(--warning)', red: 'var(--error)',
+  purple: 'var(--brand-600)', cyan: 'var(--brand-500)', teal: 'var(--brand-500)',
 };
 const STATUS_COLORS: Record<string, string> = {
-  APROVADO: '#10b981', SOLICITADO: '#6366f1', RASCUNHO: '#f59e0b',
-  REJEITADO: '#ef4444', ENTREGUE: '#06b6d4', CANCELADO: '#94a3b8',
+  APROVADO: 'var(--success)', SOLICITADO: 'var(--brand-600)', RASCUNHO: 'var(--warning)',
+  REJEITADO: 'var(--error)', ENTREGUE: 'var(--brand-500)', CANCELADO: 'var(--text-tertiary)',
 };
 const STATUS_LABEL: Record<string, string> = {
   APROVADO: 'Aprovado', SOLICITADO: 'Solicitado', RASCUNHO: 'Rascunho',
@@ -44,7 +44,7 @@ const CATEGORIA_LABEL: Record<string, string> = {
   PEDAGOGICO: 'Pedagógico', HIGIENE_PESSOAL: 'Higiene', OUTROS: 'Outros',
   CONSUMIVEL: 'Consumível', PERMANENTE: 'Permanente', LIMPEZA: 'Limpeza', ALIMENTACAO: 'Alimentação',
 };
-const CAT_COLORS = ['#6366f1', '#06b6d4', '#8b5cf6', '#14b8a6', '#ec4899', '#f97316', '#84cc16'];
+const CAT_COLORS = ['var(--brand-600)', 'var(--brand-500)', 'var(--brand-600)', 'var(--brand-500)', 'var(--brand-600)', 'var(--warning)', 'var(--success)'];
 
 const TooltipPremium = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -134,7 +134,7 @@ export default function DashboardConsumoMateriaisPage() {
   const taxaAprovacao = relatorio && relatorio.total > 0 ? Math.round((relatorio.aprovados / relatorio.total) * 100) : 0;
 
   const dadosStatus = relatorio
-    ? Object.entries(relatorio.porStatus).map(([k, v]) => ({ name: STATUS_LABEL[k] ?? k, value: v, fill: STATUS_COLORS[k] ?? '#94a3b8' })).filter(d => d.value > 0)
+    ? Object.entries(relatorio.porStatus).map(([k, v]) => ({ name: STATUS_LABEL[k] ?? k, value: v, fill: STATUS_COLORS[k] ?? 'var(--text-tertiary)' })).filter(d => d.value > 0)
     : [];
 
   const dadosCategoria = relatorio
@@ -277,7 +277,7 @@ export default function DashboardConsumoMateriaisPage() {
               <div className="relative">
                 <ResponsiveContainer width={150} height={150}>
                   <RadialBarChart cx="50%" cy="50%" innerRadius={48} outerRadius={72} startAngle={90} endAngle={-270}
-                    data={[{ value: taxaAprovacao, fill: '#10b981' }, { value: 100 - taxaAprovacao, fill: 'rgba(255,255,255,0.15)' }]}>
+                    data={[{ value: taxaAprovacao, fill: 'var(--success)' }, { value: 100 - taxaAprovacao, fill: 'rgba(255,255,255,0.15)' }]}>
                     <RadialBar dataKey="value" cornerRadius={8} background={false} />
                   </RadialBarChart>
                 </ResponsiveContainer>
@@ -318,10 +318,10 @@ export default function DashboardConsumoMateriaisPage() {
               <p className="text-xs text-gray-400 mb-5">Aprovados, pendentes e rejeitados por tipo de material</p>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={dadosCategoria} margin={{ top: 5, right: 20, left: 0, bottom: 5 }} barGap={2}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip content={<TooltipPremium />} cursor={{ fill: '#f8fafc' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip content={<TooltipPremium />} cursor={{ fill: 'var(--surface-inset)' }} />
                   <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
                   <Bar dataKey="Aprovados" fill={PALETTE.green} radius={[4, 4, 0, 0]} maxBarSize={32} />
                   <Bar dataKey="Pendentes" fill={PALETTE.amber} radius={[4, 4, 0, 0]} maxBarSize={32} />
@@ -337,9 +337,9 @@ export default function DashboardConsumoMateriaisPage() {
               <p className="text-xs text-gray-400 mb-5">Tendência ao longo do período selecionado</p>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={dadosMensal} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip content={<TooltipPremium />} />
                   <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
                   <Line type="monotone" dataKey="Requisições" stroke={PALETTE.indigo} strokeWidth={2.5} dot={{ r: 4, fill: PALETTE.indigo, strokeWidth: 0 }} activeDot={{ r: 6 }} />
@@ -358,10 +358,10 @@ export default function DashboardConsumoMateriaisPage() {
                 <p className="text-xs text-gray-400 mb-5">Top 8 turmas com mais requisições</p>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={dadosTurma} layout="vertical" margin={{ top: 0, right: 20, left: 8, bottom: 0 }} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} width={90} axisLine={false} tickLine={false} />
-                    <Tooltip content={<TooltipPremium />} cursor={{ fill: '#f8fafc' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} width={90} axisLine={false} tickLine={false} />
+                    <Tooltip content={<TooltipPremium />} cursor={{ fill: 'var(--surface-inset)' }} />
                     <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                     <Bar dataKey="Total" fill={PALETTE.indigo} radius={[0, 4, 4, 0]} maxBarSize={18} />
                     <Bar dataKey="Aprovados" fill={PALETTE.green} radius={[0, 4, 4, 0]} maxBarSize={18} />
@@ -375,10 +375,10 @@ export default function DashboardConsumoMateriaisPage() {
                 <p className="text-xs text-gray-400 mb-5">Top 8 professores por volume de requisições</p>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={dadosProfessor} layout="vertical" margin={{ top: 0, right: 20, left: 8, bottom: 0 }} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} width={110} axisLine={false} tickLine={false} />
-                    <Tooltip content={<TooltipPremium />} cursor={{ fill: '#f8fafc' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} width={110} axisLine={false} tickLine={false} />
+                    <Tooltip content={<TooltipPremium />} cursor={{ fill: 'var(--surface-inset)' }} />
                     <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                     <Bar dataKey="Requisições" fill={PALETTE.purple} radius={[0, 4, 4, 0]} maxBarSize={18} />
                     <Bar dataKey="Aprovadas" fill={PALETTE.teal} radius={[0, 4, 4, 0]} maxBarSize={18} />

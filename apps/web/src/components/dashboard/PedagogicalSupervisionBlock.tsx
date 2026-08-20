@@ -37,7 +37,7 @@ export function PedagogicalSupervisionBlock({
 }: PedagogicalSupervisionBlockProps) {
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+      <div className="ds-card p-6 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
@@ -49,28 +49,28 @@ export function PedagogicalSupervisionBlock({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="ds-card overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-900">Fiscalização Pedagógica</h2>
+          <h2 className="text-lg font-normal text-[var(--text-primary)]">Supervisão Pedagógica</h2>
         </div>
-        <p className="text-sm text-gray-500 mt-1">Status de planejamentos, diários e turmas</p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">Planejamentos, diários e turmas</p>
       </div>
 
       {/* Content */}
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-[var(--border-subtle)]">
         {/* Planejamentos */}
         <div className="px-6 py-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Status dos Planejamentos</p>
+          <p className="text-sm font-normal text-[var(--text-secondary)] mb-3">Status dos Planejamentos</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {planningMetrics.map((metric, idx) => (
-              <div key={idx} className={`${metric.bgColor} rounded-lg p-3`}>
-                <p className="text-xs text-gray-600 font-semibold">{metric.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+              <div key={idx} className="ds-surface rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] font-normal">{metric.label}</p>
+                <p className="text-2xl font-normal text-[var(--text-primary)] mt-1">{metric.value}</p>
                 {metric.percentage !== undefined && (
-                  <p className="text-xs text-gray-500 mt-1">{metric.percentage}%</p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">{metric.percentage}%</p>
                 )}
               </div>
             ))}
@@ -79,14 +79,14 @@ export function PedagogicalSupervisionBlock({
 
         {/* Diários */}
         <div className="px-6 py-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Status dos Diários</p>
+          <p className="text-sm font-normal text-[var(--text-secondary)] mb-3">Status dos Diários</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {diaryMetrics.map((metric, idx) => (
-              <div key={idx} className={`${metric.bgColor} rounded-lg p-3`}>
-                <p className="text-xs text-gray-600 font-semibold">{metric.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+              <div key={idx} className="ds-surface rounded-lg p-3">
+                <p className="text-xs text-[var(--text-secondary)] font-normal">{metric.label}</p>
+                <p className="text-2xl font-normal text-[var(--text-primary)] mt-1">{metric.value}</p>
                 {metric.percentage !== undefined && (
-                  <p className="text-xs text-gray-500 mt-1">{metric.percentage}%</p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">{metric.percentage}%</p>
                 )}
               </div>
             ))}
@@ -95,17 +95,17 @@ export function PedagogicalSupervisionBlock({
 
         {/* Turmas */}
         <div className="px-6 py-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Turmas em Dia vs Pendentes</p>
+          <p className="text-sm font-normal text-[var(--text-secondary)] mb-3">Turmas em Dia vs Pendentes</p>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {classrooms.map((classroom) => (
               <button
                 key={classroom.id}
                 onClick={() => onClassroomClick?.(classroom.id)}
-                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-[var(--surface-card-hover)] transition-colors border border-[var(--border-default)]"
               >
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-gray-900">{classroom.name}</p>
-                  <p className="text-xs text-gray-500">{classroom.professor}</p>
+                  <p className="text-sm font-normal text-[var(--text-primary)]">{classroom.name}</p>
+                  <p className="text-xs text-[var(--text-secondary)]">{classroom.professor}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
@@ -133,7 +133,7 @@ export function PedagogicalSupervisionBlock({
                     <span className="text-xs text-gray-600">Diário</span>
                   </div>
                   <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                    className={`text-xs font-normal px-2 py-1 rounded-full ${
                       classroom.status === 'on-time'
                         ? 'bg-emerald-100 text-emerald-700'
                         : classroom.status === 'pending'

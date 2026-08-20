@@ -267,7 +267,7 @@ export function OcorrenciasPanel({
       const data = formatData(o.eventDate);
       const fotos = Array.isArray(o.mediaUrls) && o.mediaUrls.length > 0
         ? o.mediaUrls.map((url, i) =>
-            `<img src="${url}" alt="Foto ${i + 1}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;margin:2px;" />`
+            `<img src="${url}" alt="Foto ${i + 1}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--border-default);margin:2px;" />`
           ).join('')
         : '';
 
@@ -276,14 +276,14 @@ export function OcorrenciasPanel({
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
             <div>
               <strong style="font-size:14px;">${nomeCrianca}</strong>
-              <span style="font-size:11px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:999px;padding:1px 8px;margin-left:6px;">${catLabel}</span>
+              <span style="font-size:11px;background:var(--warning-bg);color:var(--warning);border:1px solid #fed7aa;border-radius:999px;padding:1px 8px;margin-left:6px;">${catLabel}</span>
             </div>
-            <span style="font-size:11px;color:#6b7280;">${data}</span>
+            <span style="font-size:11px;color:var(--text-tertiary);">${data}</span>
           </div>
-          <div style="font-size:11px;color:#6b7280;margin-bottom:6px;">
+          <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px;">
             Turma: ${turma} &nbsp;|&nbsp; Professor(a): ${nomeProfessor}
           </div>
-          <p style="font-size:13px;color:#374151;margin:0 0 6px;">${o.description ?? ''}</p>
+          <p style="font-size:13px;color:var(--text-primary);margin:0 0 6px;">${o.description ?? ''}</p>
           ${fotos ? `<div style="display:flex;flex-wrap:wrap;gap:4px;">${fotos}</div>` : ''}
         </div>`;
     }).join('');
@@ -297,14 +297,14 @@ export function OcorrenciasPanel({
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; color: #111; }
           h1 { font-size: 18px; margin-bottom: 4px; }
-          .sub { font-size: 12px; color: #6b7280; margin-bottom: 16px; }
+          .sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px; }
           @media print { body { margin: 10mm; } }
         </style>
       </head>
       <body>
         <h1>${titulo}</h1>
         <p class="sub">Período: ${periodoLabel} &nbsp;|&nbsp; Total: ${filtradas.length} ocorrência(s) &nbsp;|&nbsp; Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-        ${linhas || '<p style="color:#9ca3af;text-align:center;padding:20px;">Nenhuma ocorrência no período selecionado.</p>'}
+        ${linhas || '<p style="color:var(--text-tertiary);text-align:center;padding:20px;">Nenhuma ocorrência no período selecionado.</p>'}
       </body>
       </html>`;
 
@@ -584,15 +584,15 @@ export function OcorrenciasPanel({
                             if (!win) return;
                             const fotos = Array.isArray(ocorr.mediaUrls) && ocorr.mediaUrls.length > 0
                               ? ocorr.mediaUrls.map((url, i) =>
-                                  `<img src="${url}" alt="Foto ${i + 1}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;margin:2px;" />`
+                                  `<img src="${url}" alt="Foto ${i + 1}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border-default);margin:2px;" />`
                                 ).join('')
                               : '';
                             win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/><title>Ocorrência</title><style>body{font-family:Arial,sans-serif;margin:20px;color:#111;}@media print{body{margin:10mm;}}</style></head><body>
                               <h2 style="font-size:16px;margin-bottom:4px;">Ocorrência — ${nomeCrianca}</h2>
-                              <p style="font-size:11px;color:#6b7280;margin-bottom:12px;">
+                              <p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px;">
                                 Turma: ${ocorr.classroom?.name ?? '—'} &nbsp;|&nbsp; Professor(a): ${nomeProfessor} &nbsp;|&nbsp; Data: ${formatData(ocorr.eventDate)}
                               </p>
-                              <p style="font-size:13px;color:#374151;white-space:pre-wrap;">${ocorr.description ?? ''}</p>
+                              <p style="font-size:13px;color:var(--text-primary);white-space:pre-wrap;">${ocorr.description ?? ''}</p>
                               ${fotos ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;">${fotos}</div>` : ''}
                             </body></html>`);
                             win.document.close();

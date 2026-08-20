@@ -132,10 +132,10 @@ const ROTINA_LABELS: Record<string, string> = {
 };
 
 const TIPO_OBS_LABELS: Record<string, { label: string; cor: string }> = {
-  DESCRITIVA:  { label: 'Descritiva',  cor: '#4f46e5' },
-  MICROGESTO:  { label: 'Microgesto', cor: '#0891b2' },
-  ALERTA:      { label: 'Alerta',     cor: '#dc2626' },
-  NARRATIVA:   { label: 'Narrativa',  cor: '#7c3aed' },
+  DESCRITIVA:  { label: 'Descritiva',  cor: 'var(--brand-700)' },
+  MICROGESTO:  { label: 'Microgesto', cor: 'var(--brand-600)' },
+  ALERTA:      { label: 'Alerta',     cor: 'var(--error)' },
+  NARRATIVA:   { label: 'Narrativa',  cor: 'var(--brand-700)' },
 };
 
 const GRUPO_LABELS: Record<string, string> = {
@@ -299,7 +299,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
             ${esc(item.label)}
           </div>`).join('')}
       </div>`
-    : '<p class="field-value" style="color:#9ca3af;">Rotina não registrada.</p>';
+    : '<p class="field-value" style="color:var(--text-tertiary);">Rotina não registrada.</p>';
 
   const presencaRotina = `
     <div class="block">
@@ -327,7 +327,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" style="width:${presencaPct}%;"></div>
         </div>
-        <p style="font-size:8.5pt;color:#6b7280;margin-top:4px;">${presencaPct}% de presença na turma</p>
+        <p style="font-size:8.5pt;color:var(--text-tertiary);margin-top:4px;">${presencaPct}% de presença na turma</p>
       </div>
       <div class="section">
         <div class="section-title">Rotina do Dia</div>
@@ -426,13 +426,13 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
 
     /* ── Cabeçalho ── */
     .header {
-      border-bottom: 3px solid #4f46e5;
+      border-bottom: 3px solid var(--brand-700);
       padding-bottom: 16px;
       margin-bottom: 20px;
     }
     .header-logo {
       font-size: 9pt;
-      color: #6366f1;
+      color: var(--brand-600);
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -447,7 +447,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
     }
     .header-subtitle {
       font-size: 9pt;
-      color: #6b7280;
+      color: var(--text-tertiary);
     }
 
     /* ── Meta ── */
@@ -462,12 +462,12 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       margin-bottom: 20px;
     }
     .meta-item { display: flex; flex-direction: column; gap: 2px; }
-    .meta-label { font-size: 7.5pt; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; }
-    .meta-value { font-size: 10pt; color: #111827; font-weight: 500; }
+    .meta-label { font-size: 7.5pt; font-weight: 700; color: var(--brand-600); text-transform: uppercase; letter-spacing: 0.5px; }
+    .meta-value { font-size: 10pt; color: var(--text-primary); font-weight: 500; }
 
     /* ── Blocos ── */
     .block {
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border-default);
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 16px;
@@ -479,28 +479,28 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       padding: 8px 14px;
       letter-spacing: 0.2px;
     }
-    .indigo-header  { background: #4f46e5; color: #fff; }
-    .emerald-header { background: #059669; color: #fff; }
-    .purple-header  { background: #7c3aed; color: #fff; }
-    .green-header   { background: #16a34a; color: #fff; }
-    .amber-header   { background: #d97706; color: #fff; }
+    .indigo-header  { background: var(--brand-700); color: #fff; }
+    .emerald-header { background: var(--success); color: #fff; }
+    .purple-header  { background: var(--brand-700); color: #fff; }
+    .green-header   { background: var(--success); color: #fff; }
+    .amber-header   { background: var(--warning); color: #fff; }
 
     /* ── Seções ── */
     .section {
       padding: 10px 14px;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--surface-subtle);
     }
     .section:last-child { border-bottom: none; }
     .section-title {
       font-size: 8pt;
       font-weight: 700;
-      color: #6366f1;
+      color: var(--brand-600);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
     }
     .highlight-section { background: #faf5ff; }
-    .field-value { font-size: 10.5pt; color: #374151; line-height: 1.55; }
+    .field-value { font-size: 10.5pt; color: var(--text-primary); line-height: 1.55; }
     .mt-8 { margin-top: 8px; }
 
     /* ── Objetivos ── */
@@ -512,9 +512,9 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       border-radius: 0 6px 6px 0;
     }
     .objective-card:last-child { margin-bottom: 0; }
-    .obj-campo { font-size: 8.5pt; font-weight: 700; color: #4338ca; text-transform: uppercase; margin-bottom: 3px; }
-    .obj-codigo { font-size: 7.5pt; color: #6b7280; font-family: monospace; margin-bottom: 3px; }
-    .obj-text { font-size: 10pt; color: #374151; line-height: 1.5; margin-bottom: 2px; }
+    .obj-campo { font-size: 8.5pt; font-weight: 700; color: var(--brand-800); text-transform: uppercase; margin-bottom: 3px; }
+    .obj-codigo { font-size: 7.5pt; color: var(--text-tertiary); font-family: monospace; margin-bottom: 3px; }
+    .obj-text { font-size: 10pt; color: var(--text-primary); line-height: 1.5; margin-bottom: 2px; }
 
     /* ── Badge status ── */
     .badge-row { margin-bottom: 6px; }
@@ -525,9 +525,9 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       font-size: 9pt;
       font-weight: 700;
     }
-    .badge-cumprido    { background: #d1fae5; color: #065f46; }
-    .badge-parcial     { background: #fef3c7; color: #92400e; }
-    .badge-nao_realizado { background: #fee2e2; color: #991b1b; }
+    .badge-cumprido    { background: var(--success-bg); color: #065f46; }
+    .badge-parcial     { background: var(--warning-bg); color: #92400e; }
+    .badge-nao_realizado { background: var(--error-bg); color: var(--error); }
 
     /* ── Presença ── */
     .presenca-row {
@@ -543,22 +543,22 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       padding: 10px 12px;
       text-align: center;
     }
-    .presenca-ok    { background: #d1fae5; border: 1px solid #6ee7b7; }
-    .presenca-aus   { background: #fee2e2; border: 1px solid #fca5a5; }
+    .presenca-ok    { background: var(--success-bg); border: 1px solid #6ee7b7; }
+    .presenca-aus   { background: var(--error-bg); border: 1px solid var(--error-border); }
     .presenca-total { background: #e0e7ff; border: 1px solid #a5b4fc; }
-    .presenca-clima { background: #fef3c7; border: 1px solid #fcd34d; }
-    .presenca-num   { font-size: 18pt; font-weight: 800; color: #111827; }
-    .presenca-label { font-size: 7.5pt; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 2px; }
+    .presenca-clima { background: var(--warning-bg); border: 1px solid #fcd34d; }
+    .presenca-num   { font-size: 18pt; font-weight: 800; color: var(--text-primary); }
+    .presenca-label { font-size: 7.5pt; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; margin-top: 2px; }
     .progress-bar-wrap {
       height: 8px;
-      background: #e5e7eb;
+      background: var(--border-default);
       border-radius: 999px;
       overflow: hidden;
       margin-top: 6px;
     }
     .progress-bar-fill {
       height: 100%;
-      background: #10b981;
+      background: var(--success);
       border-radius: 999px;
     }
 
@@ -577,8 +577,8 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       border-radius: 6px;
       font-size: 9.5pt;
     }
-    .rotina-ok  { background: #d1fae5; color: #065f46; }
-    .rotina-nao { background: #f3f4f6; color: #9ca3af; }
+    .rotina-ok  { background: var(--success-bg); color: #065f46; }
+    .rotina-nao { background: var(--surface-subtle); color: var(--text-tertiary); }
     .rotina-icon { font-size: 10pt; font-weight: 700; }
 
     /* ── Observações individuais ── */
@@ -592,7 +592,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       letter-spacing: 0.5px;
       margin-bottom: 6px;
       padding-bottom: 3px;
-      border-bottom: 1px solid #fde68a;
+      border-bottom: 1px solid var(--warning-border);
     }
     .obs-item {
       display: flex;
@@ -600,9 +600,9 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       gap: 10px;
       margin-bottom: 6px;
       padding: 6px 8px;
-      background: #fffbeb;
+      background: var(--warning-bg);
       border-radius: 6px;
-      border: 1px solid #fde68a;
+      border: 1px solid var(--warning-border);
     }
     .obs-comportamento {
       font-size: 9.5pt;
@@ -615,7 +615,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
     .obs-chip {
       display: inline-block;
       background: #fff;
-      border: 1px solid #d97706;
+      border: 1px solid var(--warning);
       border-radius: 999px;
       padding: 2px 8px;
       font-size: 8.5pt;
@@ -627,9 +627,9 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
     .footer {
       margin-top: 24px;
       padding-top: 10px;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid var(--border-default);
       font-size: 8pt;
-      color: #9ca3af;
+      color: var(--text-tertiary);
       display: flex;
       justify-content: space-between;
     }
@@ -638,7 +638,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
     .action-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
-      background: #4f46e5;
+      background: var(--brand-700);
       color: #fff;
       padding: 10px 24px;
       display: flex;
@@ -658,8 +658,8 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       transition: opacity 0.15s;
     }
     .btn:hover { opacity: 0.85; }
-    .btn-print  { background: #fff; color: #4f46e5; }
-    .btn-pdf    { background: #10b981; color: #fff; }
+    .btn-print  { background: #fff; color: var(--brand-700); }
+    .btn-pdf    { background: var(--success); color: #fff; }
     .btn-close  { background: rgba(255,255,255,0.15); color: #fff; }
 
     @media print {
@@ -668,7 +668,7 @@ export function buildDiaryPrintableHTML(d: DiaryPrintData): string {
       .page { padding: 20px 28px; }
     }
     @media screen {
-      body { padding-top: 56px; background: #f3f4f6; }
+      body { padding-top: 56px; background: var(--surface-subtle); }
       .page {
         background: #fff;
         box-shadow: 0 2px 16px rgba(0,0,0,0.08);

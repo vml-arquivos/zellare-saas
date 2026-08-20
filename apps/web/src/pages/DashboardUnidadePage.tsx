@@ -263,11 +263,11 @@ export function DashboardUnidadePage() {
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Requisições de Materiais por Prioridade</h3>
           <ResponsiveContainer width="100%" height={120}>
             <BarChart data={dadosMateriais} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
               <YAxis dataKey="categoria" type="category" tick={{ fontSize: 12 }} width={100} />
               <Tooltip />
-              <Bar dataKey="quantidade" name="Requisições" fill="#3B82F6" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="quantidade" name="Requisições" fill="var(--brand-600)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

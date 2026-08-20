@@ -21,7 +21,7 @@ interface VitalSignsAlertsBlockProps {
 export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAlertsBlockProps) {
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+      <div className="ds-card p-6 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
@@ -42,14 +42,14 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
   const infoAlerts = alerts.filter((a) => a.type === 'info');
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="ds-card overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-orange-500" />
-          <h2 className="text-lg font-bold text-gray-900">Sinais Vitais e Alertas</h2>
+          <AlertTriangle className="h-5 w-5 text-[var(--text-brand-soft)]" />
+          <h2 className="text-lg font-normal text-[var(--text-primary)]">Sinais e Alertas</h2>
         </div>
-        <p className="text-sm text-gray-500 mt-1">Faltas, ocorrências e desenvolvimento</p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">Faltas, ocorrências e desenvolvimento</p>
       </div>
 
       {/* Content */}
@@ -57,7 +57,7 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
         {/* Alertas Críticos */}
         {criticalAlerts.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">🔴 Crítico</p>
+            <p className="text-xs font-normal text-[var(--error)] uppercase tracking-wide mb-2">Crítico</p>
             <div className="space-y-2">
               {criticalAlerts.map((alert) => (
                 <button
@@ -69,12 +69,12 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
                     {alert.icon}
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-semibold text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600 mt-0.5">{alert.description}</p>
+                    <p className="text-sm font-normal text-[var(--text-primary)]">{alert.title}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">{alert.description}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-lg font-bold text-red-600">{alert.count}</p>
-                    <p className="text-xs text-gray-500">itens</p>
+                    <p className="text-lg font-normal text-[var(--error)]">{alert.count}</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">itens</p>
                   </div>
                 </button>
               ))}
@@ -85,7 +85,7 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
         {/* Alertas de Atenção */}
         {warningAlerts.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-2">🟠 Atenção</p>
+            <p className="text-xs font-normal text-[var(--warning)] uppercase tracking-wide mb-2">Atenção</p>
             <div className="space-y-2">
               {warningAlerts.map((alert) => (
                 <button
@@ -97,12 +97,12 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
                     {alert.icon}
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-semibold text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600 mt-0.5">{alert.description}</p>
+                    <p className="text-sm font-normal text-[var(--text-primary)]">{alert.title}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">{alert.description}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-lg font-bold text-amber-600">{alert.count}</p>
-                    <p className="text-xs text-gray-500">itens</p>
+                    <p className="text-lg font-normal text-[var(--warning)]">{alert.count}</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">itens</p>
                   </div>
                 </button>
               ))}
@@ -113,7 +113,7 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
         {/* Alertas Informativos */}
         {infoAlerts.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">ℹ️ Informativo</p>
+            <p className="text-xs font-normal text-[var(--text-brand-soft)] uppercase tracking-wide mb-2">Informativo</p>
             <div className="space-y-2">
               {infoAlerts.map((alert) => (
                 <button
@@ -125,12 +125,12 @@ export function VitalSignsAlertsBlock({ alerts, loading = false }: VitalSignsAle
                     {alert.icon}
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-semibold text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600 mt-0.5">{alert.description}</p>
+                    <p className="text-sm font-normal text-[var(--text-primary)]">{alert.title}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">{alert.description}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-lg font-bold text-blue-600">{alert.count}</p>
-                    <p className="text-xs text-gray-500">itens</p>
+                    <p className="text-lg font-normal text-[var(--text-brand-soft)]">{alert.count}</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">itens</p>
                   </div>
                 </button>
               ))}

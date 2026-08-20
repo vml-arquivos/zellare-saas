@@ -4159,11 +4159,11 @@ export function getSegmentosNaData(dataDDMM: string): SegmentoKey[] {
 
 // Metadados dos campos de experiência
 export const CAMPOS_EXPERIENCIA = [
-  { id: "eu-outro-nos", label: "O eu, o outro e o nós", emoji: "🤝", cor: "pink", corHex: "#ec4899" },
-  { id: "corpo-gestos", label: "Corpo, gestos e movimentos", emoji: "🕺", cor: "orange", corHex: "#f97316" },
-  { id: "tracos-sons", label: "Traços, sons, cores e formas", emoji: "🎨", cor: "purple", corHex: "#a855f7" },
-  { id: "escuta-fala", label: "Escuta, fala, pensamento e imaginação", emoji: "📖", cor: "blue", corHex: "#3b82f6" },
-  { id: "espacos-tempos", label: "Espaços, tempos, quantidades, relações e transformações", emoji: "🔬", cor: "green", corHex: "#22c55e" },
+  { id: "eu-outro-nos", label: "O eu, o outro e o nós", emoji: "🤝", cor: "pink", corHex: "var(--brand-600)" },
+  { id: "corpo-gestos", label: "Corpo, gestos e movimentos", emoji: "🕺", cor: "orange", corHex: "var(--warning)" },
+  { id: "tracos-sons", label: "Traços, sons, cores e formas", emoji: "🎨", cor: "purple", corHex: "var(--brand-600)" },
+  { id: "escuta-fala", label: "Escuta, fala, pensamento e imaginação", emoji: "📖", cor: "blue", corHex: "var(--brand-600)" },
+  { id: "espacos-tempos", label: "Espaços, tempos, quantidades, relações e transformações", emoji: "🔬", cor: "green", corHex: "var(--success)" },
 ];
 
 // Metadados dos segmentos

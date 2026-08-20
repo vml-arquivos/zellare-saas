@@ -79,17 +79,17 @@ function imprimirPedido(pedido: PedidoCompra): void {
   const linhasItens = pedido.itens.map((item, idx) => {
     const precoUnit = item.custoEstimado ?? 0;
     const total = precoUnit * item.quantidade;
-    return `<tr style="background:${idx % 2 === 0 ? '#fff' : '#f9fafb'}">
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb">${item.categoria}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb">${item.descricao}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:center">${item.quantidade}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:center">${item.unidadeMedida ?? ''}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right">${precoUnit > 0 ? precoUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : ''}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right">${total > 0 ? total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : ''}</td>
+    return `<tr style="background:${idx % 2 === 0 ? '#fff' : 'var(--surface-inset)'}">
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default)">${item.categoria}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default)">${item.descricao}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default);text-align:center">${item.quantidade}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default);text-align:center">${item.unidadeMedida ?? ''}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default);text-align:right">${precoUnit > 0 ? precoUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : ''}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid var(--border-default);text-align:right">${total > 0 ? total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : ''}</td>
     </tr>`;
   }).join('');
   const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pedido de Compra</title>
-  <style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:24px}h1{font-size:16px;margin-bottom:4px}h2{font-size:13px;color:#374151;margin-bottom:16px}table{width:100%;border-collapse:collapse}th{background:#1e293b;color:#fff;padding:7px 10px;text-align:left;font-size:11px}tfoot td{font-weight:bold;background:#f1f5f9;padding:7px 10px;border-top:2px solid #1e293b}.meta{display:flex;gap:24px;margin-bottom:16px;font-size:11px;color:#6b7280}@media print{body{margin:0}}</style>
+  <style>body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:24px}h1{font-size:16px;margin-bottom:4px}h2{font-size:13px;color:var(--text-primary);margin-bottom:16px}table{width:100%;border-collapse:collapse}th{background:var(--text-primary);color:#fff;padding:7px 10px;text-align:left;font-size:11px}tfoot td{font-weight:bold;background:var(--surface-subtle);padding:7px 10px;border-top:2px solid var(--text-primary)}.meta{display:flex;gap:24px;margin-bottom:16px;font-size:11px;color:var(--text-tertiary)}@media print{body{margin:0}}</style>
   </head><body>
   <h1>Pedido de Compra</h1>
   <h2>${pedido.unit?.name ?? ''} &mdash; ${pedido.mesReferencia}</h2>

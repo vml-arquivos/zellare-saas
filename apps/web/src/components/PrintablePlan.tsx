@@ -228,14 +228,14 @@ export function buildPrintableHTML(plan: Planning): string {
 
     /* ── Cabeçalho ── */
     .header {
-      border-bottom: 3px solid #4f46e5;
+      border-bottom: 3px solid var(--brand-700);
       padding-bottom: 16px;
       margin-bottom: 20px;
     }
 
     .header-logo {
       font-size: 10pt;
-      color: #6366f1;
+      color: var(--brand-600);
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -252,7 +252,7 @@ export function buildPrintableHTML(plan: Planning): string {
 
     .header-subtitle {
       font-size: 9pt;
-      color: #6b7280;
+      color: var(--text-tertiary);
     }
 
     /* ── Metadados ── */
@@ -276,14 +276,14 @@ export function buildPrintableHTML(plan: Planning): string {
     .meta-label {
       font-size: 8pt;
       font-weight: 700;
-      color: #6366f1;
+      color: var(--brand-600);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .meta-value {
       font-size: 10.5pt;
-      color: #111827;
+      color: var(--text-primary);
       font-weight: 500;
     }
 
@@ -294,12 +294,12 @@ export function buildPrintableHTML(plan: Planning): string {
       font-size: 9pt;
       font-weight: 700;
       background: #e0e7ff;
-      color: #3730a3;
+      color: var(--brand-900);
     }
 
     /* ── Dias ── */
     .day-block {
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border-default);
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 18px;
@@ -307,7 +307,7 @@ export function buildPrintableHTML(plan: Planning): string {
     }
 
     .day-header {
-      background: #4f46e5;
+      background: var(--brand-700);
       color: #fff;
       font-size: 10pt;
       font-weight: 700;
@@ -318,7 +318,7 @@ export function buildPrintableHTML(plan: Planning): string {
     /* ── Seções ── */
     .section {
       padding: 10px 14px;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--surface-subtle);
     }
 
     .section:last-child {
@@ -328,7 +328,7 @@ export function buildPrintableHTML(plan: Planning): string {
     .section-title {
       font-size: 8.5pt;
       font-weight: 700;
-      color: #6366f1;
+      color: var(--brand-600);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
@@ -336,7 +336,7 @@ export function buildPrintableHTML(plan: Planning): string {
 
     .field-value {
       font-size: 10.5pt;
-      color: #374151;
+      color: var(--text-primary);
       line-height: 1.55;
     }
 
@@ -356,21 +356,21 @@ export function buildPrintableHTML(plan: Planning): string {
     .obj-campo {
       font-size: 9pt;
       font-weight: 700;
-      color: #4338ca;
+      color: var(--brand-800);
       text-transform: uppercase;
       margin-bottom: 3px;
     }
 
     .obj-codigo {
       font-size: 8pt;
-      color: #6b7280;
+      color: var(--text-tertiary);
       font-family: monospace;
       margin-bottom: 3px;
     }
 
     .obj-text {
       font-size: 10pt;
-      color: #374151;
+      color: var(--text-primary);
       line-height: 1.5;
       margin-bottom: 2px;
     }
@@ -379,9 +379,9 @@ export function buildPrintableHTML(plan: Planning): string {
     .footer {
       margin-top: 28px;
       padding-top: 12px;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid var(--border-default);
       font-size: 8.5pt;
-      color: #9ca3af;
+      color: var(--text-tertiary);
       display: flex;
       justify-content: space-between;
     }
@@ -392,7 +392,7 @@ export function buildPrintableHTML(plan: Planning): string {
       top: 0;
       left: 0;
       right: 0;
-      background: #4f46e5;
+      background: var(--brand-700);
       color: #fff;
       padding: 10px 24px;
       display: flex;
@@ -425,7 +425,7 @@ export function buildPrintableHTML(plan: Planning): string {
 
     .btn-print {
       background: #fff;
-      color: #4f46e5;
+      color: var(--brand-700);
     }
 
     .btn-close {
@@ -440,7 +440,7 @@ export function buildPrintableHTML(plan: Planning): string {
     }
 
     @media screen {
-      body { padding-top: 56px; background: #f3f4f6; }
+      body { padding-top: 56px; background: var(--surface-subtle); }
       .page {
         background: #fff;
         box-shadow: 0 2px 16px rgba(0,0,0,0.08);
@@ -498,14 +498,14 @@ export function buildPrintableHTML(plan: Planning): string {
         (plan as any).reviewComment
           ? `<div class="meta-item" style="grid-column: span 2;">
               <span class="meta-label">Comentário da Revisão</span>
-              <span class="meta-value" style="color:#dc2626;">${(plan as any).reviewComment}</span>
+              <span class="meta-value" style="color:var(--error);">${(plan as any).reviewComment}</span>
             </div>`
           : ''
       }
     </div>
 
     <!-- Conteúdo por dia -->
-    ${diasHTML || '<div class="day-block"><div class="section"><div class="field-value" style="color:#9ca3af;">Nenhum conteúdo registrado neste planejamento.</div></div></div>'}
+    ${diasHTML || '<div class="day-block"><div class="section"><div class="field-value" style="color:var(--text-tertiary);">Nenhum conteúdo registrado neste planejamento.</div></div></div>'}
 
     <!-- Rodapé -->
     <div class="footer">

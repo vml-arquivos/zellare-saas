@@ -79,12 +79,12 @@ const RDIC_STATUS: Record<string, { label: string; bg: string; text: string }> =
 };
 
 const OBS_CATEGORY: Record<string, { label: string; color: string }> = {
-  COGNITIVO:      { label: 'Cognitivo',      color: '#3b82f6' },
-  SOCIOAFETIVO:   { label: 'Socioafetivo',   color: '#10b981' },
-  MOTOR:          { label: 'Motor',          color: '#f59e0b' },
-  LINGUAGEM:      { label: 'Linguagem',      color: '#8b5cf6' },
-  COMPORTAMENTAL: { label: 'Comportamental', color: '#ef4444' },
-  OUTRO:          { label: 'Outro',          color: '#6b7280' },
+  COGNITIVO:      { label: 'Cognitivo',      color: 'var(--brand-600)' },
+  SOCIOAFETIVO:   { label: 'Socioafetivo',   color: 'var(--success)' },
+  MOTOR:          { label: 'Motor',          color: 'var(--warning)' },
+  LINGUAGEM:      { label: 'Linguagem',      color: 'var(--brand-600)' },
+  COMPORTAMENTAL: { label: 'Comportamental', color: 'var(--error)' },
+  OUTRO:          { label: 'Outro',          color: 'var(--text-tertiary)' },
 };
 
 function fmt(n?: number | null): string {
@@ -237,7 +237,7 @@ export default function DashboardPsicologoPage() {
   ).map(([cat, count]) => ({
     name: OBS_CATEGORY[cat]?.label ?? cat,
     value: count,
-    fill: OBS_CATEGORY[cat]?.color ?? '#6b7280',
+    fill: OBS_CATEGORY[cat]?.color ?? 'var(--text-tertiary)',
   }));
 
   // Relatórios filtrados
@@ -382,11 +382,11 @@ export default function DashboardPsicologoPage() {
                 {rdicsPorUnidade.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={rdicsPorUnidade} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                       <XAxis dataKey="nome" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 11 }} />
                       <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                      <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Relatórios" />
+                      <Bar dataKey="count" fill="var(--brand-600)" radius={[4, 4, 0, 0]} name="Relatórios" />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -531,7 +531,7 @@ export default function DashboardPsicologoPage() {
           ) : (
             <div className="space-y-2">
               {obsFiltradas.slice(0, 30).map(o => {
-                const catCfg = OBS_CATEGORY[o.category] ?? { label: o.category, color: '#6b7280' };
+                const catCfg = OBS_CATEGORY[o.category] ?? { label: o.category, color: 'var(--text-tertiary)' };
                 return (
                   <div key={o.id} className="p-3 bg-white border border-gray-200 rounded-xl hover:border-purple-200 transition-all">
                     <div className="flex items-start justify-between mb-2">

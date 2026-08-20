@@ -72,7 +72,7 @@ export function WorkQueueBlock({ items, loading = false, onFilterChange }: WorkQ
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+      <div className="ds-card p-6 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -84,14 +84,14 @@ export function WorkQueueBlock({ items, loading = false, onFilterChange }: WorkQ
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="ds-card overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2">
           <Search className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-900">Fila de Trabalho</h2>
+          <h2 className="text-lg font-normal text-[var(--text-primary)]">Fila de Trabalho</h2>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           {filteredItems.length} de {items.length} itens
         </p>
       </div>
@@ -106,7 +106,7 @@ export function WorkQueueBlock({ items, loading = false, onFilterChange }: WorkQ
             placeholder="Buscar por título ou descrição..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+            className="ds-input w-full pl-10 pr-4 py-2"
           />
         </div>
 
@@ -148,28 +148,28 @@ export function WorkQueueBlock({ items, loading = false, onFilterChange }: WorkQ
       <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
         {filteredItems.length === 0 ? (
           <div className="px-6 py-8 text-center">
-            <p className="text-gray-500 text-sm">Nenhum item encontrado</p>
+            <p className="text-[var(--text-secondary)] text-sm">Nenhum item encontrado</p>
           </div>
         ) : (
           filteredItems.map((item) => (
             <button
               key={item.id}
               onClick={item.onClick}
-              className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface-card-hover)] transition-colors"
             >
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm">{getStatusIcon(item.status)}</span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${getTypeColor(item.type)}`}>
+                  <span className={`ds-badge text-xs font-normal px-2 py-0.5 rounded-full ${getTypeColor(item.type)}`}>
                     {getTypeLabel(item.type)}
                   </span>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${getPriorityColor(item.priority)}`}>
+                  <span className={`ds-badge text-xs font-normal px-2 py-0.5 rounded-full ${getPriorityColor(item.priority)}`}>
                     {item.priority === 'high' ? 'Alta' : item.priority === 'medium' ? 'Média' : 'Baixa'}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.subtitle}</p>
-                <p className="text-xs text-gray-400 mt-1">{item.date}</p>
+                <p className="text-sm font-normal text-[var(--text-primary)]">{item.title}</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">{item.subtitle}</p>
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">{item.date}</p>
               </div>
               <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
             </button>

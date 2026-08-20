@@ -15,18 +15,18 @@ import { Brain, BookOpen, ArrowLeft, Activity, TrendingUp, BarChart2, Award, Che
 import { ChildQuickActions } from '../components/children/ChildQuickActions';
 
 const DIMENSOES = [
-  { id: 'eu-outro-nos',   short: 'Eu e o Nós',  cor: '#ec4899' },
-  { id: 'corpo-gestos',   short: 'Corpo',        cor: '#f97316' },
-  { id: 'tracos-sons',    short: 'Arte',         cor: '#a855f7' },
-  { id: 'escuta-fala',    short: 'Linguagem',    cor: '#3b82f6' },
-  { id: 'espacos-tempos', short: 'Matemática',   cor: '#22c55e' },
+  { id: 'eu-outro-nos',   short: 'Eu e o Nós',  cor: 'var(--brand-600)' },
+  { id: 'corpo-gestos',   short: 'Corpo',        cor: 'var(--warning)' },
+  { id: 'tracos-sons',    short: 'Arte',         cor: 'var(--brand-600)' },
+  { id: 'escuta-fala',    short: 'Linguagem',    cor: 'var(--brand-600)' },
+  { id: 'espacos-tempos', short: 'Matemática',   cor: 'var(--success)' },
 ] as const;
 
 const NIVEL_COR: Record<string, string> = {
-  NAO_OBSERVADO: '#e5e7eb', EM_DESENVOLVIMENTO: '#fde68a', CONSOLIDADO: '#86efac', AMPLIADO: '#93c5fd',
+  NAO_OBSERVADO: 'var(--border-default)', EM_DESENVOLVIMENTO: 'var(--warning-border)', CONSOLIDADO: 'var(--success-border)', AMPLIADO: 'var(--brand-300)',
 };
 
-const DIARY_CORES = ['#6366f1','#22c55e','#f59e0b','#ef4444','#f97316','#06b6d4','#8b5cf6','#ec4899','#6b7280','#3b82f6','#9ca3af'];
+const DIARY_CORES = ['var(--brand-600)','var(--success)','var(--warning)','var(--error)','var(--warning)','var(--brand-500)','var(--brand-600)','var(--brand-600)','var(--text-tertiary)','var(--brand-600)','var(--text-tertiary)'];
 const DIARY_LABELS: Record<string, string> = {
   ATIVIDADE_PEDAGOGICA:'Pedagógica', DESENVOLVIMENTO:'Desenvolvimento', COMPORTAMENTO:'Comportamento',
   SAUDE:'Saúde', REFEICAO:'Refeição', HIGIENE:'Higiene', SONO:'Sono',
@@ -233,10 +233,10 @@ export default function PainelAnaliticoCriancaPage() {
                     <CardContent>
                       <ResponsiveContainer width="100%" height={220}>
                         <RadarChart data={radarData} margin={{top:10,right:20,bottom:10,left:20}}>
-                          <PolarGrid stroke="#e5e7eb"/>
-                          <PolarAngleAxis dataKey="campo" tick={{fontSize:10,fill:'#6b7280'}}/>
-                          <Radar name="Consolidado" dataKey="pct" stroke="#6366f1" fill="#6366f1" fillOpacity={0.25} strokeWidth={2}/>
-                          <Radar name="Em Desenvolvimento" dataKey="pctED" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 2"/>
+                          <PolarGrid stroke="var(--border-default)"/>
+                          <PolarAngleAxis dataKey="campo" tick={{fontSize:10,fill:'var(--text-tertiary)'}}/>
+                          <Radar name="Consolidado" dataKey="pct" stroke="var(--brand-600)" fill="var(--brand-600)" fillOpacity={0.25} strokeWidth={2}/>
+                          <Radar name="Em Desenvolvimento" dataKey="pctED" stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 2"/>
                           <Tooltip formatter={(v:number)=>[`${v}%`]} contentStyle={{fontSize:11}}/>
                           <Legend wrapperStyle={{fontSize:10}}/>
                         </RadarChart>
@@ -281,7 +281,7 @@ export default function PainelAnaliticoCriancaPage() {
                     ):(
                       <ResponsiveContainer width="100%" height={210}>
                         <BarChart data={evolData} margin={{top:5,right:10,bottom:5,left:-10}}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)"/>
                           <XAxis dataKey="periodo" tick={{fontSize:10}}/>
                           <YAxis domain={[0,100]} tick={{fontSize:10}} unit="%"/>
                           <Tooltip formatter={(v:any)=>v!==null?[`${v}%`]:['—']} contentStyle={{fontSize:11}}/>
@@ -328,14 +328,14 @@ export default function PainelAnaliticoCriancaPage() {
                   <CardContent>
                     <ResponsiveContainer width="100%" height={200}>
                       <LineChart data={lineData} margin={{top:5,right:10,bottom:5,left:-10}}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)"/>
                         <XAxis dataKey="mes" tick={{fontSize:10}}/>
                         <YAxis tick={{fontSize:10}} allowDecimals={false}/>
                         <Tooltip contentStyle={{fontSize:11}}/>
                         <Legend wrapperStyle={{fontSize:10}}/>
-                        <Line type="monotone" dataKey="Total" stroke="#6366f1" strokeWidth={2} dot={{r:3}}/>
-                        <Line type="monotone" dataKey="Pedagógico" stroke="#22c55e" strokeWidth={1.5} strokeDasharray="4 2" dot={{r:2}}/>
-                        <Line type="monotone" dataKey="Ocorrências" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 2" dot={{r:2}}/>
+                        <Line type="monotone" dataKey="Total" stroke="var(--brand-600)" strokeWidth={2} dot={{r:3}}/>
+                        <Line type="monotone" dataKey="Pedagógico" stroke="var(--success)" strokeWidth={1.5} strokeDasharray="4 2" dot={{r:2}}/>
+                        <Line type="monotone" dataKey="Ocorrências" stroke="var(--warning)" strokeWidth={1.5} strokeDasharray="4 2" dot={{r:2}}/>
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>

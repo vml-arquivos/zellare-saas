@@ -635,8 +635,8 @@ export default function DashboardCoordenacaoPedagogicaPage() {
 
   return (
     <PageShell
-      title={`Painel da Coordenação Pedagógica`}
-      subtitle={`Olá, ${primeiroNome}. Acompanhe diários, planejamentos, chamadas e pendências da unidade.`}
+      title="Coordenação Pedagógica"
+      subtitle={`Hoje na unidade · ${primeiroNome}`}
     >
       {/* Modal motivo rejeição */}
       {itemParaRejeitar && canApprove && (
@@ -703,7 +703,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
           <Eye className="h-5 w-5 text-blue-500 flex-shrink-0" />
           <div>
             <p className="text-sm font-semibold text-blue-800">Modo Análise — Coordenação Geral</p>
-            <p className="text-xs text-blue-600">Unidade atual. Aprovação da coordenação.</p>
+            <p className="text-xs text-blue-600">Unidade atual · leitura.</p>
           </div>
         </div>
       )}
@@ -1355,8 +1355,8 @@ export default function DashboardCoordenacaoPedagogicaPage() {
               statusCount[s] = (statusCount[s] ?? 0) + 1;
             }
             const CORES_STATUS: Record<string, string> = {
-              PUBLICADO: '#10b981', REVISADO: '#6366f1', ARQUIVADO: '#94a3b8',
-              RASCUNHO: '#f59e0b', DEVOLVIDO: '#ef4444',
+              PUBLICADO: 'var(--success)', REVISADO: 'var(--brand-600)', ARQUIVADO: 'var(--text-tertiary)',
+              RASCUNHO: 'var(--warning)', DEVOLVIDO: 'var(--error)',
             };
             const dadosPizza = Object.entries(statusCount).map(([name, value]) => ({ name, value }));
 
@@ -1378,8 +1378,8 @@ export default function DashboardCoordenacaoPedagogicaPage() {
               planStatus[s] = (planStatus[s] ?? 0) + 1;
             }
             const CORES_PLAN: Record<string, string> = {
-              APROVADO: '#10b981', EM_REVISAO: '#6366f1', RASCUNHO: '#f59e0b',
-              DEVOLVIDO: '#ef4444', EM_EXECUCAO: '#3b82f6', CONCLUIDO: '#8b5cf6',
+              APROVADO: 'var(--success)', EM_REVISAO: 'var(--brand-600)', RASCUNHO: 'var(--warning)',
+              DEVOLVIDO: 'var(--error)', EM_EXECUCAO: 'var(--brand-600)', CONCLUIDO: 'var(--brand-600)',
             };
             const dadosPlanPizza = Object.entries(planStatus).map(([name, value]) => ({ name, value }));
 
@@ -1394,11 +1394,11 @@ export default function DashboardCoordenacaoPedagogicaPage() {
                     <CardContent className="pt-0">
                       <ResponsiveContainer width="100%" height={180}>
                         <BarChart data={dadosBarras} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                           <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                           <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                           <Tooltip formatter={(v: any) => [v, 'Diários']} />
-                          <Bar dataKey="total" fill="#6366f1" radius={[4,4,0,0]} />
+                          <Bar dataKey="total" fill="var(--brand-600)" radius={[4,4,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -1416,7 +1416,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
                         <PieChart>
                           <Pie data={dadosPizza} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
                             {dadosPizza.map((entry, i) => (
-                              <Cell key={i} fill={CORES_STATUS[entry.name] ?? '#94a3b8'} />
+                              <Cell key={i} fill={CORES_STATUS[entry.name] ?? 'var(--text-tertiary)'} />
                             ))}
                           </Pie>
                           <Tooltip formatter={(v: any, n: any) => [v, n]} />
@@ -1438,7 +1438,7 @@ export default function DashboardCoordenacaoPedagogicaPage() {
                         <PieChart>
                           <Pie data={dadosPlanPizza} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
                             {dadosPlanPizza.map((entry, i) => (
-                              <Cell key={i} fill={CORES_PLAN[entry.name] ?? '#94a3b8'} />
+                              <Cell key={i} fill={CORES_PLAN[entry.name] ?? 'var(--text-tertiary)'} />
                             ))}
                           </Pie>
                           <Tooltip formatter={(v: any, n: any) => [v, n]} />

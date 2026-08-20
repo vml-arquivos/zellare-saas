@@ -473,7 +473,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                           {isNonSchoolCell ? (
                             <div className="w-full min-h-[60px] flex items-center justify-center rounded-lg bg-gray-100 border border-dashed border-gray-200">
                               <span className="text-xs text-gray-400 text-center">
-                                <span className="block text-base">&#128683;</span>
+                                <span className="block text-base">&var(--brand-600);</span>
                                 Não letivo
                               </span>
                             </div>
@@ -3241,7 +3241,7 @@ function AbaTurmasNutricional({
   );
 }
 // ─── Constantes de cores para gráficos ──────────────────────────────────────
-const CORES_RELATORIO = ['#f97316', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#84cc16'];
+const CORES_RELATORIO = ['var(--warning)', 'var(--brand-600)', 'var(--success)', 'var(--warning)', 'var(--brand-600)', 'var(--error)', 'var(--brand-500)', 'var(--success)'];
 
 // ─── AbaRelatorioConsolidado ─────────────────────────────────────────────────────────────────────────────────
 function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
@@ -3362,18 +3362,18 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
       <meta charset="UTF-8"><title>Relatório Nutricional</title>
       <style>
         body { font-family: Arial, sans-serif; font-size: 12px; color: #111; margin: 24px; }
-        h1 { font-size: 18px; color: #f97316; margin-bottom: 4px; }
-        h2 { font-size: 14px; color: #374151; margin: 16px 0 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+        h1 { font-size: 18px; color: var(--warning); margin-bottom: 4px; }
+        h2 { font-size: 14px; color: var(--text-primary); margin: 16px 0 8px; border-bottom: 1px solid var(--border-default); padding-bottom: 4px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        th { background: #f3f4f6; text-align: left; padding: 6px 8px; font-size: 11px; color: #6b7280; }
-        td { padding: 5px 8px; border-bottom: 1px solid #f3f4f6; }
+        th { background: var(--surface-subtle); text-align: left; padding: 6px 8px; font-size: 11px; color: var(--text-tertiary); }
+        td { padding: 5px 8px; border-bottom: 1px solid var(--surface-subtle); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; }
-        .pub { background: #d1fae5; color: #065f46; }
-        .ras { background: #fef3c7; color: #92400e; }
+        .pub { background: var(--success-bg); color: #065f46; }
+        .ras { background: var(--warning-bg); color: #92400e; }
         .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; min-width: 120px; }
-        .card p { margin: 0; font-size: 10px; color: #6b7280; }
-        .card strong { font-size: 22px; color: #111827; }
+        .card { border: 1px solid var(--border-default); border-radius: 8px; padding: 12px 16px; min-width: 120px; }
+        .card p { margin: 0; font-size: 10px; color: var(--text-tertiary); }
+        .card strong { font-size: 22px; color: var(--text-primary); }
         @media print { body { margin: 0; } }
       </style></head><body>
       <h1>Relatório Nutricional Consolidado</h1>
@@ -3572,13 +3572,13 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
               ) : (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={dadosCardapiosPorSemana} barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" />
                     <XAxis dataKey="semana" tick={{ fontSize: 10 }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
                     <Tooltip />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="publicado" name="Publicado" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="rascunho" name="Rascunho" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="publicado" name="Publicado" fill="var(--success)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="rascunho" name="Rascunho" fill="var(--warning)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -3594,12 +3594,12 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
               </h3>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={dadosTendencia}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" />
                   <XAxis dataKey="semana" tick={{ fontSize: 10 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
                   <Tooltip />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Line type="monotone" dataKey="itens" name="Itens Planejados" stroke="#f97316" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="itens" name="Itens Planejados" stroke="var(--warning)" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -3795,19 +3795,19 @@ function AbaHistorico({ unitId, onEditarNoPlayjador }: { unitId: string; onEdita
         body { font-family: Arial, sans-serif; font-size: 12px; padding: 24px; }
         h1 { font-size: 18px; margin-bottom: 4px; }
         .status { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px;
-          background:${c.publicado ? '#dcfce7' : '#fef9c3'}; color:${c.publicado ? '#166534' : '#854d0e'}; }
+          background:${c.publicado ? 'var(--success-bg)' : 'var(--warning-bg)'}; color:${c.publicado ? 'var(--success)' : 'var(--warning)'}; }
         table { width:100%; border-collapse:collapse; margin-top:16px; }
-        th { background:#f3f4f6; text-align:left; padding:6px 8px; font-size:11px; }
-        td { padding:5px 8px; border-bottom:1px solid #e5e7eb; vertical-align:top; }
+        th { background:var(--surface-subtle); text-align:left; padding:6px 8px; font-size:11px; }
+        td { padding:5px 8px; border-bottom:1px solid var(--border-default); vertical-align:top; }
         @media print { button { display:none; } }
       </style></head><body>
       <h1>Cardápio Semanal — ${formatarSemana(c.semana)}</h1>
       <span class="status">${c.publicado ? 'Publicado' : 'Rascunho'}</span>
-      ${c.titulo ? `<p style="color:#6b7280;margin-top:4px">${c.titulo}</p>` : ''}
+      ${c.titulo ? `<p style="color:var(--text-tertiary);margin-top:4px">${c.titulo}</p>` : ''}
       <table><thead><tr><th>Dia</th><th>Refeição</th><th>Itens</th><th>Calorias</th></tr></thead>
       <tbody>${linhas}</tbody></table>
-      ${c.observacoes ? `<p style="margin-top:16px;background:#fefce8;padding:8px;border-radius:6px"><strong>Obs:</strong> ${c.observacoes}</p>` : ''}
-      <button onclick="window.print()" style="margin-top:20px;padding:8px 16px;background:#16a34a;color:white;border:none;border-radius:6px;cursor:pointer">Imprimir / Salvar PDF</button>
+      ${c.observacoes ? `<p style="margin-top:16px;background:var(--warning-bg);padding:8px;border-radius:6px"><strong>Obs:</strong> ${c.observacoes}</p>` : ''}
+      <button onclick="window.print()" style="margin-top:20px;padding:8px 16px;background:var(--success);color:white;border:none;border-radius:6px;cursor:pointer">Imprimir / Salvar PDF</button>
     </body></html>`);
     janela.document.close();
   };

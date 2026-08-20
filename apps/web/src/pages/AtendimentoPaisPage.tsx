@@ -240,7 +240,7 @@ export function AtendimentoPaisPage() {
         h2 { font-size: 13px; text-align: center; margin-bottom: 20px; color: #555; }
         .section { margin-bottom: 16px; }
         .label { font-weight: bold; font-size: 11px; text-transform: uppercase; color: #666; margin-bottom: 4px; }
-        .value { border: 1px solid #ccc; border-radius: 4px; padding: 8px; min-height: 40px; background: #fafafa; white-space: pre-wrap; }
+        .value { border: 1px solid #ccc; border-radius: 4px; padding: 8px; min-height: 40px; background: var(--surface-base); white-space: pre-wrap; }
         .assinaturas { display: flex; gap: 40px; margin-top: 40px; }
         .ass-box { flex: 1; border-top: 2px solid #333; padding-top: 8px; text-align: center; font-size: 12px; }
         .rodape { text-align: center; font-size: 10px; color: #999; margin-top: 30px; }

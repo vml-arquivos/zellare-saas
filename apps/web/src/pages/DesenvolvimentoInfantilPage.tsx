@@ -166,16 +166,16 @@ const COR_CATEGORIA: Record<string, string> = {
 };
 
 const CHART_COLORS = [
-  '#6366f1',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#06b6d4',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-  '#84cc16',
+  'var(--brand-600)',
+  'var(--success)',
+  'var(--warning)',
+  'var(--error)',
+  'var(--brand-600)',
+  'var(--brand-500)',
+  'var(--brand-600)',
+  'var(--brand-500)',
+  'var(--warning)',
+  'var(--success)',
 ];
 
 function formatDate(iso: string) {
@@ -401,11 +401,11 @@ function ModalResumoAluno({
                   <p className="text-sm font-semibold text-gray-700 mb-3">Distribuição por Categoria</p>
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={chartData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                       <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="value" fill="var(--brand-600)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -567,7 +567,7 @@ function VisaoTurmaPanel({ classroomId }: { classroomId: string }) {
           <p className="text-sm font-semibold text-gray-700 mb-3">Distribuição por Categoria</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-subtle)" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
@@ -1238,7 +1238,7 @@ export default function DesenvolvimentoInfantilPage() {
                 <p className="text-sm font-semibold text-gray-700 mb-4">Observações por Categoria</p>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={chartDataCategoria} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />

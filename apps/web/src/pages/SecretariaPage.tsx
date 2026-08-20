@@ -51,7 +51,7 @@ const MODULOS_SECRETARIA = [
   { label: 'Funcionários da Unidade', desc: 'Profissionais, contatos, documentação e apoio administrativo da unidade.', path: '/app/secretaria/funcionarios', icon: <UserCog className="h-5 w-5" />, accent: 'border-l-indigo-500' },
 ];
 
-const CORES = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16'];
+const CORES = ['var(--brand-600)','var(--brand-500)','var(--success)','var(--warning)','var(--error)','var(--brand-600)','var(--brand-500)','var(--success)'];
 
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 
@@ -63,11 +63,11 @@ function BarrasSVG({ dados }: { dados: Array<{ dia: string; pct: number }> }) {
       {dados.map((d, i) => {
         const x = pad + i * (barW + gap);
         const h = Math.max(2, (d.pct / 100) * H);
-        const cor = d.pct >= 80 ? '#10b981' : d.pct >= 60 ? '#f59e0b' : d.pct > 0 ? '#ef4444' : '#e2e8f0';
+        const cor = d.pct >= 80 ? 'var(--success)' : d.pct >= 60 ? 'var(--warning)' : d.pct > 0 ? 'var(--error)' : 'var(--surface-muted)';
         return (
           <g key={i}>
             <rect x={x} y={H - h} width={barW} height={h} rx={4} fill={cor} />
-            <text x={x + barW / 2} y={H + 14} textAnchor="middle" fontSize={10} fill="#94a3b8">{d.dia}</text>
+            <text x={x + barW / 2} y={H + 14} textAnchor="middle" fontSize={10} fill="var(--text-tertiary)">{d.dia}</text>
             {d.pct > 0 && <text x={x + barW / 2} y={H - h - 4} textAnchor="middle" fontSize={9} fill={cor}>{d.pct}%</text>}
           </g>
         );
@@ -95,7 +95,7 @@ function PizzaSVG({ dados }: { dados: Array<{ name: string; value: number }> }) 
       {dados.slice(0, 5).map((d, i) => (
         <g key={i}>
           <rect x={140} y={10 + i * 22} width={10} height={10} rx={2} fill={CORES[i % CORES.length]} />
-          <text x={154} y={19 + i * 22} fontSize={9} fill="#64748b">{d.name.slice(0, 12)} ({d.value})</text>
+          <text x={154} y={19 + i * 22} fontSize={9} fill="var(--text-secondary)">{d.name.slice(0, 12)} ({d.value})</text>
         </g>
       ))}
     </svg>

@@ -89,9 +89,9 @@ function calcStatus(u: UnidadeConsolidado): 'otimo' | 'atencao' | 'critico' {
 }
 
 const STATUS_CFG = {
-  otimo:   { label: 'Ótimo',   bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200',  dot: 'bg-green-500',  bar: 'bg-green-500' },
-  atencao: { label: 'Atenção', bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-500', bar: 'bg-yellow-400' },
-  critico: { label: 'Crítico', bg: 'bg-red-50',    text: 'text-red-700',    border: 'border-red-200',    dot: 'bg-red-500',    bar: 'bg-red-500' },
+  otimo:   { label: 'Ótimo',   bg: 'bg-[var(--success-bg)]',  text: 'text-[var(--success)]',  border: 'border-[var(--success-border)]',  dot: 'bg-[var(--success)]',  bar: 'bg-[var(--success)]' },
+  atencao: { label: 'Atenção', bg: 'bg-[var(--warning-bg)]', text: 'text-[var(--warning)]', border: 'border-[var(--warning-border)]', dot: 'bg-[var(--warning)]', bar: 'bg-[var(--warning)]' },
+  critico: { label: 'Crítico', bg: 'bg-[var(--error-bg)]',    text: 'text-[var(--error)]',    border: 'border-[var(--error-border)]',    dot: 'bg-[var(--error)]',    bar: 'bg-[var(--error)]' },
 };
 
 function fmt(n?: number | null): string {
@@ -119,23 +119,23 @@ function KpiCard({
   onClick?: () => void;
 }) {
   const tones: Record<string, string> = {
-    default: 'bg-white border-gray-200 text-gray-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    danger:  'bg-red-50 border-red-200 text-red-800',
-    info:    'bg-blue-50 border-blue-200 text-blue-800',
+    default: 'bg-[var(--surface-card)] border-[var(--border-default)] text-[var(--text-primary)]',
+    success: 'bg-[var(--success-bg)] border-[var(--success-border)] text-[var(--success)]',
+    warning: 'bg-[var(--warning-bg)] border-[var(--warning-border)] text-[var(--warning)]',
+    danger:  'bg-[var(--error-bg)] border-[var(--error-border)] text-[var(--error)]',
+    info:    'bg-[var(--surface-brand)] border-[var(--border-brand)] text-[var(--text-brand)]',
   };
   return (
     <div
       onClick={onClick}
-      className={`border rounded-2xl p-4 flex flex-col gap-2 shadow-sm transition-all ${tones[tone]} ${onClick ? 'cursor-pointer hover:shadow-md hover:scale-[1.02]' : ''}`}
+      className={`border rounded-2xl p-4 flex flex-col gap-2 shadow-[var(--shadow-card)] transition-all ${tones[tone]} ${onClick ? 'cursor-pointer hover:shadow-[var(--shadow-card-hover)]' : ''}`}
     >
       <div className="flex items-center justify-between">
         <span className="opacity-60">{icon}</span>
         {onClick && <ChevronRight className="h-4 w-4 opacity-30" />}
       </div>
-      <p className="text-2xl font-bold leading-none">{value}</p>
-      <p className="text-xs font-medium opacity-70">{label}</p>
+      <p className="text-2xl font-normal leading-none">{value}</p>
+      <p className="text-xs font-normal opacity-70">{label}</p>
       {helper && <p className="text-xs opacity-50">{helper}</p>}
     </div>
   );
@@ -146,9 +146,9 @@ function SectionCard({ title, icon, children, action }: {
   action?: { label: string; onClick: () => void };
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
-        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+    <div className="ds-card overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2 text-sm font-normal text-[var(--text-secondary)]">
           {icon}{title}
         </div>
         {action && (
@@ -166,7 +166,7 @@ function SkeletonGrid({ n = 8 }: { n?: number }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {Array.from({ length: n }).map((_, i) => (
-        <div key={i} className="border border-gray-200 rounded-2xl p-4 animate-pulse">
+        <div key={i} className="ds-card p-4 animate-pulse">
           <div className="h-5 bg-gray-200 rounded w-1/2 mb-3" />
           <div className="h-8 bg-gray-300 rounded w-3/4 mb-2" />
           <div className="h-3 bg-gray-100 rounded w-full" />
@@ -388,17 +388,17 @@ export default function DashboardCoordenacaoGeralPage() {
 
   // Pizza — status das unidades
   const dadosPizza = [
-    { name: 'Ótimo',   value: unidades.filter(u => u._status === 'otimo').length,   fill: '#10b981' },
-    { name: 'Atenção', value: unidades.filter(u => u._status === 'atencao').length, fill: '#f59e0b' },
-    { name: 'Crítico', value: unidades.filter(u => u._status === 'critico').length, fill: '#ef4444' },
+    { name: 'Ótimo',   value: unidades.filter(u => u._status === 'otimo').length,   fill: 'var(--success)' },
+    { name: 'Atenção', value: unidades.filter(u => u._status === 'atencao').length, fill: 'var(--warning)' },
+    { name: 'Crítico', value: unidades.filter(u => u._status === 'critico').length, fill: 'var(--error)' },
   ].filter(d => d.value > 0);
 
   // Funil pedagógico
   const funilDados = funil ? [
-    { etapa: 'Criados',    valor: funil.funnel.created,   cor: '#3b82f6' },
-    { etapa: 'Enviados',   valor: funil.funnel.submitted, cor: '#8b5cf6' },
-    { etapa: 'Aprovados',  valor: funil.funnel.approved,  cor: '#10b981' },
-    { etapa: 'Executados', valor: funil.funnel.executed,  cor: '#f59e0b' },
+    { etapa: 'Criados',    valor: funil.funnel.created,   cor: 'var(--brand-600)' },
+    { etapa: 'Enviados',   valor: funil.funnel.submitted, cor: 'var(--brand-600)' },
+    { etapa: 'Aprovados',  valor: funil.funnel.approved,  cor: 'var(--success)' },
+    { etapa: 'Executados', valor: funil.funnel.executed,  cor: 'var(--warning)' },
   ] : [];
 
   // Radar BNCC
@@ -513,13 +513,13 @@ export default function DashboardCoordenacaoGeralPage() {
                 {dadosPresenca.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={dadosPresenca} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" />
                       <XAxis dataKey="nome" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
                       <Tooltip formatter={(v: number) => [`${v}%`, 'Presença']} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                       <Bar dataKey="presenca" radius={[4, 4, 0, 0]}>
                         {dadosPresenca.map((e, i) => (
-                          <Cell key={i} fill={e.presenca >= 85 ? '#10b981' : e.presenca >= 70 ? '#f59e0b' : '#ef4444'} />
+                          <Cell key={i} fill={e.presenca >= 85 ? 'var(--success)' : e.presenca >= 70 ? 'var(--warning)' : 'var(--error)'} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -782,9 +782,9 @@ export default function DashboardCoordenacaoGeralPage() {
             <SectionCard title="Cobertura BNCC — Campos de Experiência" icon={<Star className="h-4 w-4 text-yellow-500" />}>
               <ResponsiveContainer width="100%" height={250}>
                 <RadarChart data={radarDados}>
-                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarGrid stroke="var(--border-default)" />
                   <PolarAngleAxis dataKey="campo" tick={{ fontSize: 10 }} />
-                  <Radar name="Cobertura" dataKey="cobertura" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.25} />
+                  <Radar name="Cobertura" dataKey="cobertura" stroke="var(--brand-600)" fill="var(--brand-600)" fillOpacity={0.25} />
                   <Tooltip formatter={(v: number) => [`${v}%`, 'Cobertura']} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
                 </RadarChart>
               </ResponsiveContainer>

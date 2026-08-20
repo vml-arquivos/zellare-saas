@@ -249,7 +249,7 @@ export default function FaltasSecretariaPage() {
                                   className="h-2 rounded-full transition-all duration-500"
                                   style={{
                                     width: `${t.taxaPresenca}%`,
-                                    backgroundColor: t.taxaPresenca >= 80 ? '#10b981' : t.taxaPresenca >= 60 ? '#f59e0b' : '#ef4444',
+                                    backgroundColor: t.taxaPresenca >= 80 ? 'var(--success)' : t.taxaPresenca >= 60 ? 'var(--warning)' : 'var(--error)',
                                   }}
                                 />
                               </div>
