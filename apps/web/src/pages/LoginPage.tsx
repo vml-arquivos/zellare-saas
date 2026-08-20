@@ -227,10 +227,6 @@ export function LoginPage() {
       </button>
       {/* Painel esquerdo — identidade visual */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden">
-        {/* Círculos decorativos */}
-        <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, var(--brand-500), transparent)', transform: 'translate(-30%, -30%)' }} />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, var(--brand-300), transparent)', transform: 'translate(30%, 30%)' }} />
-
         <div className="relative z-10 max-w-md text-center">
           {/* Logo desktop — Zelare institucional */}
           <div className="flex items-center justify-center mb-8">

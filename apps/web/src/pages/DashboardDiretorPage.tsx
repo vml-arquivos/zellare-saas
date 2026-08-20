@@ -61,7 +61,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   ENVIADO:    { label: 'Enviado',    color: 'text-blue-700',   bg: 'bg-blue-100'   },
   EM_ANALISE: { label: 'Em Análise', color: 'text-yellow-700', bg: 'bg-yellow-100' },
   APROVADO:   { label: 'Aprovado',   color: 'text-green-700',  bg: 'bg-green-100'  },
-  COMPRADO:   { label: 'Comprado',   color: 'text-purple-700', bg: 'bg-purple-100' },
+  COMPRADO:   { label: 'Comprado',   color: 'text-brand', bg: 'bg-purple-100' },
   EM_ENTREGA: { label: 'Em Entrega', color: 'text-indigo-700', bg: 'bg-indigo-100' },
   ENTREGUE:   { label: 'Entregue',   color: 'text-green-800',  bg: 'bg-green-200'  },
   CANCELADO:  { label: 'Cancelado',  color: 'text-red-700',    bg: 'bg-red-100'    },
@@ -334,81 +334,81 @@ export function DashboardDiretorPage() {
               {/* ── Cards operacionais ── */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: 'Crianças',       value: dados?.totalCriancas ?? 0,    icon: Users,       color: 'text-blue-600',   bg: 'bg-blue-50',   border: 'border-blue-100' },
-                  { label: 'Turmas',         value: dados?.totalTurmas ?? 0,      icon: BookOpen,    color: 'text-green-600',  bg: 'bg-green-50',  border: 'border-green-100' },
-                  { label: 'Professores',    value: dados?.totalProfessores ?? 0, icon: Users,       color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-                  { label: 'Pedidos Pend.',  value: dados?.pedidosPendentes ?? 0, icon: ShoppingCart,color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
-                ].map(({ label, value, icon: Icon, color, bg, border }) => (
-                  <div key={label} className={`${bg} ${border} rounded-2xl border p-4`}>
+                  { label: 'Crianças',       value: dados?.totalCriancas ?? 0,    icon: Users,       color: 'text-brand-soft' },
+                  { label: 'Turmas',         value: dados?.totalTurmas ?? 0,      icon: BookOpen,    color: 'text-brand-soft' },
+                  { label: 'Professores',    value: dados?.totalProfessores ?? 0, icon: Users,       color: 'text-brand-soft' },
+                  { label: 'Pedidos Pend.',  value: dados?.pedidosPendentes ?? 0, icon: ShoppingCart,color: 'text-[var(--warning)]' },
+                ].map(({ label, value, icon: Icon, color }) => (
+                  <div key={label} className="ds-card p-4">
                     <div className="flex items-center gap-1.5 mb-2">
                       <Icon className={`w-3.5 h-3.5 ${color}`} />
                       <span className="text-xs font-medium text-gray-500">{label}</span>
                     </div>
-                    <span className={`text-3xl font-bold ${color}`}>{value}</span>
+                    <span className={`text-3xl font-normal ${color}`}>{value}</span>
                   </div>
                 ))}
               </div>
 
               {/* ── Pulso pedagógico de hoje ── */}
-              <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <div className="ds-card p-5">
+                <h3 className="text-sm font-normal text-gray-800 mb-4 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
                   Pulso Pedagógico — Hoje
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {/* Chamada */}
-                  <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
+                  <div className="ds-surface rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       {(dados?.turmasComChamadaHoje ?? 0) >= (dados?.totalTurmas ?? 1)
                         ? <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
                         : <Clock className="h-3.5 w-3.5 text-amber-500" />
                       }
                     </div>
-                    <p className="text-xl font-bold text-gray-800">
+                    <p className="text-xl font-normal text-gray-800">
                       {dados?.turmasComChamadaHoje ?? 0}/{dados?.totalTurmas ?? 0}
                     </p>
                     <p className="text-[11px] text-gray-500 mt-0.5">Chamadas feitas</p>
                   </div>
 
                   {/* Diários */}
-                  <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
+                  <div className="ds-surface rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <BookOpen className="h-3.5 w-3.5 text-blue-400" />
                     </div>
-                    <p className="text-xl font-bold text-gray-800">{dados?.diariosHoje ?? 0}</p>
+                    <p className="text-xl font-normal text-gray-800">{dados?.diariosHoje ?? 0}</p>
                     <p className="text-[11px] text-gray-500 mt-0.5">Diários hoje</p>
                   </div>
 
                   {/* Planejamentos em revisão */}
-                  <div className={`rounded-xl border p-3 text-center ${(dados?.planejamentosEmRevisao ?? 0) > 0 ? 'bg-amber-50 border-amber-100' : 'bg-gray-50 border-gray-100'}`}>
+                  <div className="ds-surface rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <Eye className={`h-3.5 w-3.5 ${(dados?.planejamentosEmRevisao ?? 0) > 0 ? 'text-amber-500' : 'text-gray-400'}`} />
+                      <Eye className={`h-3.5 w-3.5 ${(dados?.planejamentosEmRevisao ?? 0) > 0 ? 'text-[var(--warning)]' : 'text-gray-400'}`} />
                     </div>
-                    <p className={`text-xl font-bold ${(dados?.planejamentosEmRevisao ?? 0) > 0 ? 'text-amber-700' : 'text-gray-800'}`}>
+                    <p className={`text-xl font-normal ${(dados?.planejamentosEmRevisao ?? 0) > 0 ? 'text-[var(--warning)]' : 'text-gray-800'}`}>
                       {dados?.planejamentosEmRevisao ?? 0}
                     </p>
                     <p className="text-[11px] text-gray-500 mt-0.5">Planos p/ revisar</p>
                   </div>
 
                   {/* Desenvolvimento oficial */}
-                  <div className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
+                  <div className="ds-surface rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
                     </div>
-                    <p className="text-xl font-bold text-gray-800">
+                    <p className="text-xl font-normal text-gray-800">
                       {dados?.rdicAprovadosTrimestre ?? 0}
                     </p>
                     <p className="text-[11px] text-gray-500 mt-0.5">Desenvolvimentos oficiais aprovados</p>
                   </div>
                   {/* Evidências integradas do Diário */}
-                  <div className="rounded-xl bg-purple-50 border border-purple-100 p-3 text-center">
+                  <div className="ds-surface rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <BookOpen className="h-3.5 w-3.5 text-purple-500" />
+                      <BookOpen className="h-3.5 w-3.5 text-brand-soft" />
                     </div>
-                    <p className="text-xl font-bold text-purple-700">
+                    <p className="text-xl font-normal text-brand">
                       {dados?.desenvolvimento?.totalRegistros ?? 0}
                     </p>
-                    <p className="text-[11px] text-purple-600 mt-0.5">Evidências dos últimos 30 dias</p>
+                    <p className="text-[11px] text-brand-soft mt-0.5">Evidências dos últimos 30 dias</p>
                   </div>
                 </div>
 
@@ -468,7 +468,7 @@ export function DashboardDiretorPage() {
                       onClick={() => setAba('equipe')}
                       className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left transition-colors"
                     >
-                      <Users className="w-4 h-4 text-purple-500" />
+                      <Users className="w-4 h-4 text-brand-soft" />
                       <span className="text-sm text-gray-700">Ver equipe da unidade</span>
                       <ChevronRight className="w-4 h-4 text-gray-400 ml-auto" />
                     </button>

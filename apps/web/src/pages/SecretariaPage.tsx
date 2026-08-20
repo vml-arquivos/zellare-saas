@@ -205,16 +205,16 @@ export default function SecretariaPage() {
       title="Secretaria da Unidade"
       description={`${unidadeNome} · administrativo, matrículas, frequência, atendimento e documentação`}
       headerActions={
-        <button onClick={carregar} disabled={carregando} className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+        <button onClick={carregar} disabled={carregando} className="ds-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs">
           <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} /> Atualizar
         </button>
       }
     >
       <div className="space-y-5">
-        {erro && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center gap-2"><XCircle className="h-4 w-4 flex-shrink-0" />{erro}</div>}
+        {erro && <div className="ds-alert ds-alert-error p-3 text-sm"><XCircle className="h-4 w-4 flex-shrink-0" />{erro}</div>}
 
         {/* Saudação */}
-        <section className="bg-white border border-slate-100 rounded-2xl shadow-sm p-4">
+        <section className="ds-card p-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Cockpit operacional</p>
@@ -222,10 +222,10 @@ export default function SecretariaPage() {
               <p className="text-sm text-slate-500 mt-0.5">Priorize matrícula, frequência, ocorrências de saúde e contato com responsáveis.</p>
             </div>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-              <button onClick={() => navigate('/app/secretaria/matriculas/nova')} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"><UserPlus className="h-4 w-4" /> Nova matrícula</button>
-              <button onClick={() => navigate('/app/secretaria/faltas')} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium bg-red-50 text-red-700 border-red-200 hover:bg-red-100"><ClipboardList className="h-4 w-4" /> Faltas</button>
-              <button onClick={() => navigate('/app/secretaria/ocorrencias')} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"><HeartPulse className="h-4 w-4" /> Ocorrência</button>
-              <button onClick={() => navigate('/app/atendimentos-pais')} className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100"><MessageCircle className="h-4 w-4" /> Pais</button>
+              <button onClick={() => navigate('/app/secretaria/matriculas/nova')} className="ds-btn-secondary flex items-center justify-center gap-1.5 px-3 py-2 text-xs"><UserPlus className="h-4 w-4" /> Nova matrícula</button>
+              <button onClick={() => navigate('/app/secretaria/faltas')} className="ds-btn-secondary flex items-center justify-center gap-1.5 px-3 py-2 text-xs"><ClipboardList className="h-4 w-4" /> Faltas</button>
+              <button onClick={() => navigate('/app/secretaria/ocorrencias')} className="ds-btn-secondary flex items-center justify-center gap-1.5 px-3 py-2 text-xs"><HeartPulse className="h-4 w-4" /> Ocorrência</button>
+              <button onClick={() => navigate('/app/atendimentos-pais')} className="ds-btn-secondary flex items-center justify-center gap-1.5 px-3 py-2 text-xs"><MessageCircle className="h-4 w-4" /> Pais</button>
             </div>
           </div>
         </section>
@@ -240,7 +240,7 @@ export default function SecretariaPage() {
 
         {/* Gráficos SVG */}
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <div className="ds-card p-4">
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="h-4 w-4 text-indigo-500" />
               <p className="text-sm font-semibold text-slate-800">Frequência da semana</p>
@@ -248,7 +248,7 @@ export default function SecretariaPage() {
             {carregando ? <div className="h-36 flex items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-slate-300" /></div>
               : <BarrasSVG dados={frequenciaSemanal} />}
           </div>
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <div className="ds-card p-4">
             <div className="flex items-center gap-2 mb-3">
               <Users className="h-4 w-4 text-sky-500" />
               <p className="text-sm font-semibold text-slate-800">Alunos por turma</p>
@@ -260,7 +260,7 @@ export default function SecretariaPage() {
 
         {/* Fila + Checklist */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className="xl:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="xl:col-span-2 ds-card overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-800">Fila da Secretaria</p>
@@ -281,7 +281,7 @@ export default function SecretariaPage() {
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+          <div className="ds-card p-4">
             <p className="text-sm font-semibold text-slate-800 mb-3">Checklist diário</p>
             <div className="space-y-2">
               <Checklist ok={turmasSemChamada === 0} label="Todas as chamadas conferidas" />
@@ -313,7 +313,7 @@ export default function SecretariaPage() {
           <p className="text-xs font-medium text-slate-400 mb-2.5 tracking-wide uppercase">Módulos administrativos</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {MODULOS_SECRETARIA.map((m) => (
-              <button key={m.path} onClick={() => navigate(m.path)} className={`group text-left bg-white border border-slate-100 border-l-4 ${m.accent} rounded-2xl p-4 hover:shadow-sm hover:border-slate-200 transition-all`}>
+              <button key={m.path} onClick={() => navigate(m.path)} className={`group text-left ds-card rounded-2xl p-4 hover:shadow-sm hover:border-slate-200 transition-all`}>
                 <div className="text-slate-500 group-hover:text-brand-600 transition-colors">{m.icon}</div>
                 <p className="text-sm font-medium text-slate-700 group-hover:text-brand-700 mt-2">{m.label}</p>
                 <p className="text-xs text-slate-400 mt-1 line-clamp-2">{m.desc}</p>
@@ -324,7 +324,7 @@ export default function SecretariaPage() {
 
         {/* Atendimentos */}
         {atendimentos.length > 0 && (
-          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <section className="ds-card overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-800">Últimos atendimentos aos pais</p>
               <button onClick={() => navigate('/app/atendimentos-pais')} className="text-xs text-brand-600 font-medium">Ver todos</button>
@@ -350,9 +350,9 @@ export default function SecretariaPage() {
 
 function KpiCard({ label, value, icon, cor }: { label: string; value: number | string; icon: React.ReactNode; cor: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+    <div className="ds-kpi">
       <div className="flex items-center justify-between mb-2">{icon}</div>
-      <p className={`text-2xl font-semibold tabular-nums ${cor}`}>{value}</p>
+      <p className={`text-2xl font-normal tabular-nums ${cor}`}>{value}</p>
       <p className="text-xs text-slate-400 mt-1">{label}</p>
     </div>
   );

@@ -49,33 +49,33 @@ const CAT_COLORS = ['var(--brand-600)', 'var(--brand-500)', 'var(--brand-600)', 
 const TooltipPremium = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-3 text-sm min-w-[140px]">
-      {label && <p className="text-gray-300 font-medium mb-2 text-xs">{label}</p>}
+    <div className="ds-card p-3 text-sm min-w-[140px]">
+      {label && <p className="text-secondary font-normal mb-2 text-xs">{label}</p>}
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-gray-400 text-xs">
+          <span className="flex items-center gap-1.5 text-secondary text-xs">
             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color || p.fill }} />
             {p.name}
           </span>
-          <span className="font-bold text-white text-xs">{p.value}</span>
+          <span className="font-normal text-primary text-xs">{p.value}</span>
         </div>
       ))}
     </div>
   );
 };
 
-function MetricCard({ label, value, icon, color, bg, sub }: {
-  label: string; value: number | string; icon: React.ReactNode; color: string; bg: string; sub?: string;
+function MetricCard({ label, value, icon, color, sub }: {
+  label: string; value: number | string; icon: React.ReactNode; color: string; bg?: string; sub?: string;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl p-5 ${bg} border border-white/60 shadow-sm`}>
+    <div className="ds-card relative overflow-hidden p-5">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
-          <p className={`text-3xl font-black ${color}`}>{value}</p>
+          <p className={`text-3xl font-normal ${color}`}>{value}</p>
           {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
         </div>
-        <div className="p-2.5 rounded-xl bg-white/60">
+        <div className="ds-surface p-2.5 rounded-xl">
           <span className={color}>{icon}</span>
         </div>
       </div>
@@ -160,16 +160,16 @@ export default function DashboardConsumoMateriaisPage() {
   return (
     <PageShell title="Dashboard de Consumo de Materiais" subtitle="Métricas, gráficos e estatísticas de requisições por período">
       {isCentral && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-4 mb-5 flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 rounded-lg"><BarChart2 className="h-4 w-4 text-indigo-600" /></div>
+        <div className="ds-card p-4 mb-5 flex items-center gap-3">
+          <div className="ds-surface p-2 rounded-lg"><BarChart2 className="h-4 w-4 text-indigo-600" /></div>
           <span className="text-sm font-semibold text-indigo-700">Escopo da análise:</span>
           <UnitScopeSelector showNetworkOption compact />
           {!ctxUnitId && <span className="text-xs text-indigo-400 ml-auto">Exibindo toda a rede</span>}
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6 overflow-hidden">
-        <button onClick={() => setFiltrosAbertos(v => !v)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+      <div className="ds-card mb-6 overflow-hidden">
+        <button onClick={() => setFiltrosAbertos(v => !v)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-surface-subtle transition-colors">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-indigo-500" />
             <span className="font-semibold text-gray-700 text-sm">Filtros</span>
@@ -187,17 +187,17 @@ export default function DashboardConsumoMateriaisPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Data início</label>
                 <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50" />
+                  className="ds-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Data fim</label>
                 <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50" />
+                  className="ds-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Turma</label>
                 <select value={classroomId} onChange={(e) => setClassroomId(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+                  className="ds-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                   <option value="">Todas as turmas</option>
                   {turmas.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
@@ -206,14 +206,14 @@ export default function DashboardConsumoMateriaisPage() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Professor</label>
                   <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+                    className="ds-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
                     <option value="">Todos os professores</option>
                     {professores.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
               )}
               <button onClick={carregar} disabled={loading}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md shadow-indigo-200 disabled:opacity-60">
+                className="ds-btn-primary flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-normal disabled:opacity-60">
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 {loading ? 'Carregando…' : 'Atualizar'}
               </button>

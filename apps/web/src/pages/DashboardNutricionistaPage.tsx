@@ -319,7 +319,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
   return (
     <div className="space-y-4">
       {/* Navegação de semana */}
-      <div className="flex items-center justify-between bg-white rounded-xl border p-4">
+      <div className="ds-card flex items-center justify-between p-4">
         <button
           onClick={() => setSemana(getSemanaAnterior(semana))}
           className="flex items-center gap-1 px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
@@ -342,14 +342,14 @@ function AbaCardapio({ unitId }: { unitId: string }) {
 
       {/* Painel de refeições configuradas da unidade (FASE 7) */}
       {configsRefeicao.length > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+        <div className="ds-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <Settings className="w-4 h-4 text-orange-600" />
-            <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">Refeições Configuradas da Unidade</p>
+            <p className="text-xs font-normal text-brand uppercase tracking-wide">Refeições Configuradas da Unidade</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {configsRefeicao.map((c) => (
-              <span key={c.id} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-orange-200 rounded-full text-xs text-gray-700">
+              <span key={c.id} className="ds-surface inline-flex items-center gap-1.5 px-3 py-1 text-xs text-secondary">
                 <span className="font-medium">{c.nome}</span>
                 {c.horario && <span className="text-gray-400">&nbsp;{c.horario}</span>}
               </span>
@@ -364,7 +364,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
       {loading ? (
         <div className="text-center py-12 text-gray-500">Carregando cardápio...</div>
       ) : !cardapio ? (
-        <div className="text-center py-12 bg-white rounded-xl border">
+        <div className="text-center py-12 ds-card">
           <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-medium text-gray-600 mb-1">Nenhum cardápio para esta semana</p>
           <p className="text-sm text-gray-400 mb-4">Crie o cardápio para começar a preencher as refeições</p>
@@ -379,7 +379,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
       ) : (
         <div className="space-y-3">
           {/* Header do cardápio */}
-          <div className="flex items-center justify-between bg-white rounded-xl border p-4">
+          <div className="ds-card flex items-center justify-between p-4">
             <div>
               <p className="font-semibold text-gray-800">{cardapio.titulo ?? `Cardápio ${formatarSemana(semana)}`}</p>
               <p className="text-xs text-gray-500">
@@ -427,7 +427,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
 
           {/* Grade semanal */}
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse bg-white rounded-xl border overflow-hidden text-sm">
+            <table className="ds-card w-full border-collapse overflow-hidden text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b">
                   <th className="text-left p-3 font-medium text-gray-600 w-32">Refeição</th>
@@ -514,15 +514,15 @@ function AbaCardapio({ unitId }: { unitId: string }) {
       {/* Modal de edição de refeição — Planejador Moderno */}
       {editando && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="ds-modal w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
 
             {/* ── Header ── */}
-            <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-400 text-white">
+            <div className="flex items-center justify-between px-6 py-4 bg-[var(--brand-600)] text-white">
               <div>
-                <p className="font-bold text-lg tracking-tight">
+                <p className="font-normal text-lg tracking-tight">
                   {DIA_SEMANA_LABELS[editando.dia]} — {TIPO_REFEICAO_LABELS[editando.tipo]}
                 </p>
-                <p className="text-xs text-orange-100">Planejador de Refeição · valores por peso (g)</p>
+                <p className="text-xs text-white/70">Planejador de Refeição · valores por peso (g)</p>
               </div>
               <button
                 onClick={() => setEditando(null)}
@@ -540,8 +540,8 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                 </div>
               )}
               {/* ── Seletor duplo encadeado ── */}
-              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-3">
-                <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">Adicionar Alimento</p>
+              <div className="ds-card p-4 space-y-3">
+                <p className="text-xs font-normal text-brand uppercase tracking-wide">Adicionar Alimento</p>
 
                 {loadingAlimentos && (
                   <p className="text-xs text-gray-400">Carregando banco de alimentos...</p>
@@ -617,21 +617,21 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                 })()}
                 {/* Preview nutricional do alimento selecionado (por 100g) */}
                 {alimentoAtual && (
-                  <div className="bg-white border border-orange-100 rounded-lg p-3">
+                  <div className="ds-surface p-3">
                     <p className="text-xs text-gray-500 mb-2 font-medium">
-                      Valores nutricionais por 100g — <span className="text-orange-600">{alimentoAtual.nome}</span>
+                      Valores nutricionais por 100g — <span className="text-brand-soft">{alimentoAtual.nome}</span>
                     </p>
                     <div className="grid grid-cols-5 gap-2 text-center">
                       {[
-                        { label: 'Kcal',    value: alimentoAtual.nutricaoPor100g.calorias,     color: 'text-orange-600', bg: 'bg-orange-50' },
-                        { label: 'Prot(g)', value: alimentoAtual.nutricaoPor100g.proteinas,    color: 'text-blue-600',   bg: 'bg-blue-50'   },
-                        { label: 'Carb(g)', value: alimentoAtual.nutricaoPor100g.carboidratos, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-                        { label: 'Gord(g)', value: alimentoAtual.nutricaoPor100g.gorduras,     color: 'text-red-500',    bg: 'bg-red-50'    },
-                        { label: 'Fibr(g)', value: alimentoAtual.nutricaoPor100g.fibras,       color: 'text-green-600',  bg: 'bg-green-50'  },
-                      ].map(({ label, value, color, bg }) => (
-                        <div key={label} className={`${bg} rounded-lg py-1.5`}>
+                        { label: 'Kcal',    value: alimentoAtual.nutricaoPor100g.calorias,     color: 'text-brand-soft', bg: 'bg-surface-subtle' },
+                        { label: 'Prot(g)', value: alimentoAtual.nutricaoPor100g.proteinas,    color: 'text-brand-soft', bg: 'bg-surface-subtle' },
+                        { label: 'Carb(g)', value: alimentoAtual.nutricaoPor100g.carboidratos, color: 'text-brand-soft', bg: 'bg-surface-subtle' },
+                        { label: 'Gord(g)', value: alimentoAtual.nutricaoPor100g.gorduras,     color: 'text-brand-soft', bg: 'bg-surface-subtle' },
+                        { label: 'Fibr(g)', value: alimentoAtual.nutricaoPor100g.fibras,       color: 'text-brand-soft', bg: 'bg-surface-subtle' },
+                      ].map(({ label, value, color }) => (
+                        <div key={label} className="ds-surface rounded-lg py-1.5">
                           <p className="text-[10px] text-gray-400">{label}</p>
-                          <p className={`text-xs font-bold ${color}`}>{Number(value).toFixed(1)}</p>
+                          <p className={`text-xs font-normal ${color}`}>{Number(value).toFixed(1)}</p>
                         </div>
                       ))}
                     </div>
@@ -680,9 +680,9 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                       const p = Number(pesoInput);
                       const m = calcularMacrosPorQuantidade(alimentoAtual, p);
                       return (
-                        <div className="text-center bg-orange-100 rounded-lg px-3 py-2 min-w-[80px]">
-                          <p className="text-[10px] text-orange-600">= {p}g</p>
-                          <p className="text-sm font-bold text-orange-700">{m.calorias.toFixed(0)} kcal</p>
+                        <div className="ds-surface text-center px-3 py-2 min-w-[80px]">
+                          <p className="text-[10px] text-brand-soft">= {p}g</p>
+                          <p className="text-sm font-normal text-brand">{m.calorias.toFixed(0)} kcal</p>
                           <p className="text-[10px] text-gray-500">{m.proteinas.toFixed(1)}p · {m.carboidratos.toFixed(1)}c</p>
                         </div>
                       );
@@ -724,7 +724,7 @@ function AbaCardapio({ unitId }: { unitId: string }) {
 
                         {/* Macros inline */}
                         <div className="hidden sm:flex items-center gap-3 text-xs">
-                          <span className="text-orange-600 font-bold">{Number(item.calorias ?? 0).toFixed(0)} kcal</span>
+                          <span className="text-orange-600 font-normal">{Number(item.calorias ?? 0).toFixed(0)} kcal</span>
                           <span className="text-blue-500">{Number(item.proteinas ?? 0).toFixed(1)}p</span>
                           <span className="text-yellow-500">{Number(item.carboidratos ?? 0).toFixed(1)}c</span>
                           <span className="text-red-400">{Number(item.gorduras ?? 0).toFixed(1)}g</span>
@@ -765,8 +765,8 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                   { calorias: 0, proteinas: 0, carboidratos: 0, gorduras: 0, fibras: 0 }
                 );
                 return (
-                  <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl p-4 text-white">
-                    <p className="text-xs font-semibold uppercase tracking-wide mb-3 text-orange-100">Total da Refeição</p>
+                  <div className="ds-card rounded-xl p-4">
+                    <p className="text-xs font-normal uppercase tracking-wide mb-3 text-secondary">Total da Refeição</p>
                     <div className="grid grid-cols-5 gap-3 text-center">
                       {[
                         { label: 'Kcal',    value: tot.calorias.toFixed(0)     },
@@ -775,9 +775,9 @@ function AbaCardapio({ unitId }: { unitId: string }) {
                         { label: 'Gord(g)', value: tot.gorduras.toFixed(1)     },
                         { label: 'Fibr(g)', value: tot.fibras.toFixed(1)       },
                       ].map(({ label, value }) => (
-                        <div key={label} className="bg-white/20 rounded-lg py-2">
-                          <p className="text-[10px] text-orange-100">{label}</p>
-                          <p className="text-sm font-bold">{value}</p>
+                        <div key={label} className="ds-surface rounded-lg py-2">
+                          <p className="text-[10px] text-secondary">{label}</p>
+                          <p className="text-sm font-normal">{value}</p>
                         </div>
                       ))}
                     </div>
@@ -894,7 +894,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
   return (
     <div className="space-y-4">
       {/* Navegação de semana + ações */}
-      <div className="flex items-center justify-between bg-white rounded-xl border p-4">
+      <div className="ds-card flex items-center justify-between p-4">
         <button onClick={() => setSemana(getSemanaAnterior(semana))} className="flex items-center gap-1 px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">
           <ChevronLeft className="w-4 h-4" /> Anterior
         </button>
@@ -971,7 +971,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
       </div>
 
        {/* Seletor de faixa etária */}
-      <div className="bg-white rounded-xl border p-4 flex items-center gap-3 flex-wrap">
+      <div className="ds-card p-4 flex items-center gap-3 flex-wrap">
         <span className="text-sm font-semibold text-gray-700">Faixa etária de referência (PNAE):</span>
         <div className="flex gap-2 flex-wrap">
           {Object.entries(METAS_ETARIAS).map(([key, meta]) => (
@@ -995,7 +995,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
       {loading ? (
         <div className="text-center py-12 text-gray-500">Calculando valores nutricionais...</div>
       ) : !nutricao ? (
-        <div className="text-center py-12 bg-white rounded-xl border">
+        <div className="text-center py-12 ds-card">
           <BarChart2 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-medium text-gray-600">Nenhum cardápio encontrado para esta semana</p>
           <p className="text-sm text-gray-400">Crie o cardápio na aba Cardápio para ver os valores nutricionais</p>
@@ -1014,7 +1014,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
             ].map((card) => (
               <div key={card.label} className={`${card.bg} rounded-xl border p-4`}>
                 <p className="text-xs text-gray-500 font-medium">{card.label} (semana)</p>
-                <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
+                <p className={`text-xl font-normal ${card.color}`}>{card.value}</p>
                 <p className="text-xs text-gray-400">{card.unit}</p>
               </div>
             ))}
@@ -1032,7 +1032,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
               { key: 'sodio', label: 'Sódio', unit: 'mg' },
             ];
             return (
-              <div className="bg-white rounded-xl border overflow-hidden">
+              <div className="ds-card overflow-hidden">
                 <div className="px-5 py-3 bg-orange-50 border-b flex items-center justify-between">
                   <p className="font-semibold text-gray-700 text-sm">Média Diária vs. Meta PNAE</p>
                   <span className="text-xs text-orange-600 font-medium">{meta.label}</span>
@@ -1077,7 +1077,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
           {/* Detalhamento por dia */}
           <div className="space-y-3">
             {nutricao.resumoDiario.map((dia) => (
-              <div key={dia.dia} className="bg-white rounded-xl border overflow-hidden">
+              <div key={dia.dia} className="ds-card overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b">
                   <p className="font-semibold text-gray-700">{DIA_LABELS[dia.dia] ?? dia.dia}</p>
                   <span className="text-sm text-orange-600 font-medium">{dia.totais.calorias.toFixed(0)} kcal</span>
@@ -1113,7 +1113,7 @@ function AbaNutricao({ unitId }: { unitId: string }) {
       )}
       {/* PARTE 4+5: Alertas de Dietas Especiais */}
       {restricoes.length > 0 && (
-        <div className="bg-white rounded-xl border p-5">
+        <div className="ds-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-orange-500" />
             <h3 className="font-semibold text-gray-800">Alertas de Dietas Especiais</h3>
@@ -1278,7 +1278,7 @@ function AbaConfiguracoes({ unitId }: { unitId: string }) {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="ds-card p-6">
         <div className="flex items-center gap-3 mb-2">
           <Settings className="w-5 h-5 text-orange-500" />
           <h2 className="text-lg font-semibold text-gray-800">Configurações de Refeição</h2>
@@ -1290,7 +1290,7 @@ function AbaConfiguracoes({ unitId }: { unitId: string }) {
       </div>
 
       {/* Formulário de adição */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="ds-card p-6">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">Adicionar Nova Refeição</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -1330,7 +1330,7 @@ function AbaConfiguracoes({ unitId }: { unitId: string }) {
       </div>
 
       {/* Lista de refeições ativas */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="ds-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-gray-700">Refeições Ativas ({ativas.length})</h3>
           <button onClick={carregar} className="text-gray-400 hover:text-gray-600">
@@ -1423,7 +1423,7 @@ function AbaConfiguracoes({ unitId }: { unitId: string }) {
 
       {/* Lista de refeições inativas */}
       {inativas.length > 0 && (
-        <div className="bg-white rounded-xl border p-6">
+        <div className="ds-card p-6">
           <h3 className="text-sm font-semibold text-gray-500 mb-4">Refeições Inativas ({inativas.length})</h3>
           <div className="space-y-2">
             {inativas.map((config) => (
@@ -1573,7 +1573,7 @@ function AbaObservacoesProfessores({ unitId }: { unitId: string }) {
       {loading ? (
         <div className="text-center py-12 text-gray-500">Carregando observações...</div>
       ) : filtrados.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+        <div className="text-center py-12 text-gray-400 ds-card">
           <Eye className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-medium">Nenhuma observação encontrada</p>
           <p className="text-sm mt-1">Os professores ainda não registraram observações alimentares no período selecionado.</p>
@@ -1581,7 +1581,7 @@ function AbaObservacoesProfessores({ unitId }: { unitId: string }) {
       ) : (
         <div className="space-y-3">
           {filtrados.map((e) => (
-            <div key={e.id} className="bg-white rounded-xl border p-4 flex gap-4">
+            <div key={e.id} className="ds-card p-4 flex gap-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-lg">
                 {e.type === 'REFEICAO' ? '🍽️' : '🥕'}
               </div>
@@ -1752,7 +1752,7 @@ function AbaAnotacoesNutricionais({ unitId, userId }: { unitId: string; userId: 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Coluna esquerda: seletor de criança */}
-      <div className="bg-white rounded-xl border p-4 space-y-3 lg:col-span-1">
+      <div className="ds-card p-4 space-y-3 lg:col-span-1">
         <h3 className="font-semibold text-gray-800 text-sm">Selecionar Criança</h3>
         {turmasAnot.length > 0 && (
           <select
@@ -1802,7 +1802,7 @@ function AbaAnotacoesNutricionais({ unitId, userId }: { unitId: string; userId: 
       {/* Coluna direita: formulário e histórico */}
       <div className="lg:col-span-2 space-y-4">
         {!criancaSelecionada ? (
-          <div className="bg-white rounded-xl border p-12 text-center text-gray-400">
+          <div className="ds-card p-12 text-center text-gray-400">
             <FileEdit className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="font-medium">Selecione uma criança</p>
             <p className="text-sm mt-1">Escolha uma criança na lista ao lado para ver ou criar anotações nutricionais.</p>
@@ -1810,7 +1810,7 @@ function AbaAnotacoesNutricionais({ unitId, userId }: { unitId: string; userId: 
         ) : (
           <>
             {/* Formulário */}
-            <div className="bg-white rounded-xl border p-5 space-y-4">
+            <div className="ds-card p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-gray-800">
                   {editandoId ? 'Editar Anotação' : 'Nova Anotação'} — {criancaAtual?.firstName} {criancaAtual?.lastName}
@@ -1866,7 +1866,7 @@ function AbaAnotacoesNutricionais({ unitId, userId }: { unitId: string; userId: 
             </div>
 
             {/* Histórico */}
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-800">Histórico de Anotações</h3>
                 <button onClick={carregarObs} className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
@@ -2194,7 +2194,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
             { label: 'Reavaliação Vencida', value: resumo.vencidosReavaliacao, color: 'text-purple-700', bg: 'bg-purple-50' },
           ].map((s) => (
             <div key={s.label} className={`${s.bg} rounded-xl border p-3 text-center`}>
-              <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+              <div className={`text-2xl font-normal ${s.color}`}>{s.value}</div>
               <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
             </div>
           ))}
@@ -2244,7 +2244,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
           {loading ? (
             <div className="text-center py-12 text-gray-500">Carregando...</div>
           ) : listafiltrada.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+            <div className="text-center py-12 text-gray-400 ds-card">
               <Activity className="w-12 h-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">Nenhum caso encontrado</p>
               <p className="text-sm mt-1">Clique em "Novo Acompanhamento" para iniciar um caso.</p>
@@ -2286,7 +2286,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
         <div className="lg:col-span-2">
           {/* ── Formulário de criação/edição ── */}
           {modoForm && (
-            <div className="bg-white rounded-xl border p-5 space-y-4">
+            <div className="ds-card p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-gray-800 flex items-center gap-2">
                   <Clipboard className="w-4 h-4 text-orange-500" />
@@ -2472,18 +2472,18 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
             return (
               <div className="space-y-4">
                 {/* Cabeçalho da criança */}
-                <div className={`bg-white rounded-xl border ${cfg.border} p-5`}>
+                <div className={`ds-card ${cfg.border} p-5`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                       {child?.photoUrl ? (
                         <img src={child.photoUrl} alt="" className="w-12 h-12 rounded-full object-cover border" />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 font-bold text-lg">
+                        <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 font-normal text-lg">
                           {child?.firstName?.[0]}{child?.lastName?.[0]}
                         </div>
                       )}
                       <div>
-                        <h3 className="font-bold text-gray-800 text-lg">{child?.firstName} {child?.lastName}</h3>
+                        <h3 className="font-normal text-gray-800 text-lg">{child?.firstName} {child?.lastName}</h3>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {turma && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{turma}</span>}
                           {idade && <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{idade}</span>}
@@ -2520,7 +2520,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
                 {/* Resumo atual */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Medições */}
-                  <div className="bg-white rounded-xl border p-4">
+                  <div className="ds-card p-4">
                     <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                       <Activity className="w-4 h-4 text-orange-500" /> Última Medição
                     </h4>
@@ -2588,7 +2588,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
                 </div>
 
                 {/* Plano de cuidado */}
-                <div className="bg-white rounded-xl border p-5 space-y-4">
+                <div className="ds-card p-5 space-y-4">
                   <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                     <Clipboard className="w-4 h-4 text-orange-500" /> Plano de Cuidado Nutricional
                   </h4>
@@ -2610,7 +2610,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
                 </div>
 
                 {/* Linha do tempo nutricional */}
-                <div className="bg-white rounded-xl border p-5">
+                <div className="ds-card p-5">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                       <History className="w-4 h-4 text-orange-500" /> Linha do Tempo Nutricional
@@ -2667,7 +2667,7 @@ function AbaAcompanhamentoIndividual({ unitId, userId }: { unitId: string; userI
 
           {/* ── Estado vazio ── */}
           {!modoForm && !selecionado && (
-            <div className="text-center py-16 text-gray-400 bg-white rounded-xl border">
+            <div className="text-center py-16 text-gray-400 ds-card">
               <Activity className="w-16 h-16 mx-auto mb-4 text-gray-200" />
               <p className="font-medium text-gray-500">Selecione um caso ou crie um novo</p>
               <p className="text-sm mt-1">Clique em uma criança na lista ou em "Novo Acompanhamento".</p>
@@ -2878,7 +2878,7 @@ function TurmaCard({
   const allCriancas: CriancaTurma[] = criancas.length > 0 ? criancas : (healthData?.children ?? []);
 
   return (
-    <div className="bg-white rounded-xl border flex flex-col">
+    <div className="ds-card flex flex-col">
       <div className="p-4 flex items-center justify-between">
         <div>
           <p className="font-semibold text-gray-800">{turma.name}</p>
@@ -2944,7 +2944,7 @@ function TurmaCard({
                 ) : (
                   allCriancas.map((c) => (
                     <div key={c.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-xs flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-normal text-xs flex-shrink-0">
                         {c.firstName?.[0]}{c.lastName?.[0]}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -2979,15 +2979,15 @@ function TurmaCard({
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-green-50 rounded-lg p-2">
                         <p className="text-xs text-green-600">Presentes</p>
-                        <p className="font-bold text-green-700">{presenca.presentes}</p>
+                        <p className="font-normal text-green-700">{presenca.presentes}</p>
                       </div>
                       <div className="bg-red-50 rounded-lg p-2">
                         <p className="text-xs text-red-600">Ausentes</p>
-                        <p className="font-bold text-red-700">{presenca.ausentes}</p>
+                        <p className="font-normal text-red-700">{presenca.ausentes}</p>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-2">
                         <p className="text-xs text-gray-500">Total</p>
-                        <p className="font-bold text-gray-700">{presenca.total}</p>
+                        <p className="font-normal text-gray-700">{presenca.total}</p>
                       </div>
                     </div>
                     <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -3152,7 +3152,7 @@ function TurmaCard({
                       return (
                         <div className="bg-white border border-orange-200 rounded px-3 py-1.5 text-xs flex items-center gap-2">
                           <span className="text-gray-500">IMC calculado:</span>
-                          <span className={`font-bold ${imcColor}`}>{imcStr}</span>
+                          <span className={`font-normal ${imcColor}`}>{imcStr}</span>
                         </div>
                       );
                     })()}
@@ -3411,7 +3411,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
   return (
     <div className="space-y-6" ref={printRef}>
       {/* Filtros */}
-      <div className="bg-white rounded-xl border p-5">
+      <div className="ds-card p-5">
         <h3 className="font-semibold text-gray-800 mb-4">Parâmetros do Relatório</h3>
         <div className="flex flex-wrap gap-4 items-end">
           <div>
@@ -3488,7 +3488,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
       </div>
 
       {!gerado && (
-        <div className="bg-white rounded-xl border p-10 text-center">
+        <div className="ds-card p-10 text-center">
           <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="text-gray-500 font-medium">Selecione o período e clique em Gerar Relatório</p>
           <p className="text-xs text-gray-400 mt-1">Os gráficos e dados serão exibidos aqui</p>
@@ -3505,9 +3505,9 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
               { label: 'Restrições Ativas', value: dietasFiltradas.length, color: 'red' },
               { label: 'Tipos de Restrição', value: dadosPizza.length, color: 'blue' },
             ].map(({ label, value, color }) => (
-              <div key={label} className={`bg-white rounded-xl border p-4 border-l-4 border-l-${color}-400`}>
+              <div key={label} className={`ds-card p-4 border-l-4 border-l-${color}-400`}>
                 <p className="text-xs text-gray-500">{label}</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">{value}</p>
+                <p className="text-2xl font-normal text-gray-800 mt-1">{value}</p>
               </div>
             ))}
           </div>
@@ -3515,7 +3515,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
           {/* Gráficos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Gráfico de pizza: distribuição de restrições por tipo */}
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-orange-500" />
                 Distribuição de Restrições por Tipo
@@ -3559,7 +3559,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
             </div>
 
             {/* Gráfico de barras: cardápios por semana */}
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-orange-500" />
                 Cardápios por Semana
@@ -3587,7 +3587,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
 
           {/* Gráfico de linha: tendência de itens por semana */}
           {dadosTendencia.length > 1 && (
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-orange-500" />
                 Tendência de Itens Planejados por Semana
@@ -3606,7 +3606,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
           )}
 
           {/* Tabela: Cardápios */}
-          <div className="bg-white rounded-xl border p-5">
+          <div className="ds-card p-5">
             <h3 className="font-semibold text-gray-800 mb-3">Cardápios no Período ({cardapios.length})</h3>
             {cardapios.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">Nenhum cardápio encontrado no período.</p>
@@ -3647,7 +3647,7 @@ function AbaRelatorioConsolidado({ unitId }: { unitId: string }) {
           </div>
 
           {/* Tabela: Restrições */}
-          <div className="bg-white rounded-xl border p-5">
+          <div className="ds-card p-5">
             <h3 className="font-semibold text-gray-800 mb-3">Restrições Alimentares ({dietasFiltradas.length})</h3>
             {dietasFiltradas.length === 0 ? (
               <div className="text-center py-6">
@@ -3815,7 +3815,7 @@ function AbaHistorico({ unitId, onEditarNoPlayjador }: { unitId: string; onEdita
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <div className="bg-white rounded-xl border p-4 flex flex-wrap gap-3 items-end">
+      <div className="ds-card p-4 flex flex-wrap gap-3 items-end">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-gray-500">Status</label>
           <select
@@ -3864,7 +3864,7 @@ function AbaHistorico({ unitId, onEditarNoPlayjador }: { unitId: string; onEdita
       {loading ? (
         <div className="text-center py-12 text-gray-400"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" /><p>Carregando...</p></div>
       ) : cardapios.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+        <div className="text-center py-12 text-gray-400 ds-card">
           <History className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="font-medium">Nenhum cardápio encontrado</p>
           <p className="text-sm mt-1">Ajuste os filtros ou crie um novo cardápio na aba &ldquo;Cardápio Semanal&rdquo;.</p>
@@ -3872,7 +3872,7 @@ function AbaHistorico({ unitId, onEditarNoPlayjador }: { unitId: string; onEdita
       ) : (
         <div className="space-y-2">
           {cardapios.map((c) => (
-            <div key={c.id} className="bg-white rounded-xl border overflow-hidden">
+            <div key={c.id} className="ds-card overflow-hidden">
               {/* ── Cabeçalho do card (clicável para expandir) ── */}
               <button
                 onClick={() => setExpandido(expandido === c.id ? null : c.id)}
@@ -4374,21 +4374,21 @@ function DashboardNutricionistaPage() {
       {/* KPIs rápidos sempre visíveis */}
       {secao === 'visao-geral' && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
-          <div className="bg-white rounded-xl border p-3 flex flex-col gap-0.5">
+          <div className="ds-card p-3 flex flex-col gap-0.5">
             <span className="text-xs text-gray-500">C/ Restrição</span>
-            <span className="text-2xl font-bold text-gray-800">{totalCriancasComRestricao}</span>
+            <span className="text-2xl font-normal text-gray-800">{totalCriancasComRestricao}</span>
           </div>
           <div className="bg-red-50 rounded-xl border border-red-200 p-3 flex flex-col gap-0.5">
             <span className="text-xs text-red-600">Alergias</span>
-            <span className="text-2xl font-bold text-red-700">{totalAlergias}</span>
+            <span className="text-2xl font-normal text-red-700">{totalAlergias}</span>
           </div>
           <div className="bg-orange-50 rounded-xl border border-orange-200 p-3 flex flex-col gap-0.5">
             <span className="text-xs text-orange-600">Severidade Alta</span>
-            <span className="text-2xl font-bold text-orange-700">{totalSeveras}</span>
+            <span className="text-2xl font-normal text-orange-700">{totalSeveras}</span>
           </div>
-          <div className="bg-white rounded-xl border p-3 flex flex-col gap-0.5">
+          <div className="ds-card p-3 flex flex-col gap-0.5">
             <span className="text-xs text-gray-500">Total Restrições</span>
-            <span className="text-2xl font-bold text-gray-800">{dietas.filter((d) => d.isActive).length}</span>
+            <span className="text-2xl font-normal text-gray-800">{dietas.filter((d) => d.isActive).length}</span>
           </div>
         </div>
       )}
@@ -4399,7 +4399,7 @@ function DashboardNutricionistaPage() {
       {secao === 'visao-geral' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <h3 className="font-semibold text-gray-800 mb-3">Acesso Rápido</h3>
               <div className="space-y-2">
                 {([
@@ -4419,7 +4419,7 @@ function DashboardNutricionistaPage() {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-xl border p-5">
+            <div className="ds-card p-5">
               <h3 className="font-semibold text-gray-800 mb-3">Alertas</h3>
               {totalSeveras > 0 ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
@@ -4499,7 +4499,7 @@ function DashboardNutricionistaPage() {
           {loadingDietas ? (
             <div className="text-center py-12 text-gray-500">Carregando restrições...</div>
           ) : dietasFiltradas.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+            <div className="text-center py-12 text-gray-400 ds-card">
               <Apple className="w-12 h-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">Nenhuma restrição alimentar cadastrada</p>
               <p className="text-sm mt-1 text-gray-400 max-w-xs mx-auto">
@@ -4516,13 +4516,13 @@ function DashboardNutricionistaPage() {
                 const turmasCrianca = turmasNomes.length > 0 ? turmasNomes.join(', ') : 'Turma não atribuída';
                 const isExp = expandido === d.id;
                 return (
-                  <div key={d.id} className="bg-white rounded-xl border overflow-hidden">
+                  <div key={d.id} className="ds-card overflow-hidden">
                     <div
                       className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50"
                       onClick={() => setExpandido(isExp ? null : d.id)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-normal text-sm">
                           {d.child.firstName[0]}{d.child.lastName[0]}
                         </div>
                         <div>
@@ -4667,7 +4667,7 @@ function DashboardNutricionistaPage() {
           {loadingPedidos ? (
             <div className="text-center py-12 text-gray-500">Carregando pedidos...</div>
           ) : pedidos.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+            <div className="text-center py-12 text-gray-400 ds-card">
               <ShoppingCart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">Nenhum pedido de alimentação para este mês</p>
               <p className="text-sm mt-1">Clique em "Adicionar Item de Alimentação" para criar o primeiro pedido</p>
@@ -4679,7 +4679,7 @@ function DashboardNutricionistaPage() {
                 const itensFeed = p.itens.filter((i) => i.categoria === 'ALIMENTACAO');
                 const totalEst = itensFeed.reduce((acc, i) => acc + (i.custoEstimado ?? 0) * i.quantidade, 0);
                 return (
-                  <div key={p.id} className="bg-white rounded-xl border overflow-hidden">
+                  <div key={p.id} className="ds-card overflow-hidden">
                     <div className="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
                       <div>
                         <p className="font-semibold text-gray-800">Pedido — {p.mesReferencia}</p>
@@ -4745,7 +4745,7 @@ function DashboardNutricionistaPage() {
           {loadingTurmas ? (
             <div className="text-center py-12 text-gray-500">Carregando turmas...</div>
           ) : turmas.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 bg-white rounded-xl border">
+            <div className="text-center py-12 text-gray-400 ds-card">
               <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium">Nenhuma turma encontrada</p>
             </div>
@@ -4759,49 +4759,49 @@ function DashboardNutricionistaPage() {
       {secao === 'observacoes-prof' && (
         unitId
           ? <AbaObservacoesProfessores unitId={unitId} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Anotações Nutricionais ── */}
       {secao === 'anotacoes-nutri' && (
         unitId
           ? <AbaAnotacoesNutricionais unitId={unitId} userId={(user as any)?.id ?? ''} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Acompanhamento Individual Nutricional ── */}
       {secao === 'acompanhamento-individual' && (
         unitId
           ? <AbaAcompanhamentoIndividual unitId={unitId} userId={(user as any)?.id ?? ''} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Cardápios (planejador semanal + histórico unificados) ── */}
       {secao === 'cardapios' && (
         unitId
           ? <ModuloCardapios unitId={unitId} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Cálculo Nutricional ── */}
       {secao === 'cardapios-nutricao' && (
         unitId
           ? <AbaNutricao unitId={unitId} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Relatórios ── */}
       {secao === 'relatorio' && (
         unitId
           ? <AbaRelatorioConsolidado unitId={unitId} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       {/* ── Seção: Configurações de Refeição ── */}
       {secao === 'configuracoes' && (
         unitId
           ? <AbaConfiguracoes unitId={unitId} />
-          : <div className="text-center py-12 text-gray-400 bg-white rounded-xl border"><p className="font-medium">Unidade não identificada.</p></div>
+          : <div className="text-center py-12 text-gray-400 ds-card"><p className="font-medium">Unidade não identificada.</p></div>
       )}
 
       </div>{/* fim conteudo */}
