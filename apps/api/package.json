@@ -4,7 +4,8 @@
   "description": "_Gerado por MANUZ, IA Engenheira de Software Sênior._",
   "main": "index.js",
   "scripts": {
-    "build": "nest build && node scripts/copy-data-to-dist.js",
+    "build": "nest build && node dist/src/scripts/generate-openapi.js && node scripts/copy-data-to-dist.js",
+    "openapi:generate": "nest build && node dist/src/scripts/generate-openapi.js",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
@@ -73,6 +74,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
     "@google/generative-ai": "^0.24.1",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.1.13",
@@ -84,6 +86,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.13",
     "@nestjs/schedule": "^6.1.3",
+    "@nestjs/swagger": "^11.4.7",
     "@prisma/client": "^5.22.0",
     "@types/multer": "^2.0.0",
     "bcrypt": "^6.0.0",
@@ -96,11 +99,10 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "keyv": "^5.6.0",
+    "mammoth": "^1.8.0",
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
     "openai": "^6.22.0",
-    "mammoth": "^1.8.0",
-    "@aws-sdk/client-s3": "^3.700.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pdf-parse": "^2.4.5",

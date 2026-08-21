@@ -906,11 +906,27 @@ export default function CoordenacaoPedagogicaPage() {
                       onClick={async () => {
                         setSavingPauta(true);
                         try {
-                          await http.post('/coordenacao/pautas', formPauta);
+                          const reuniao = await http.post('/coordenacao/reunioes', {
+                            tipo: formPauta.tipo === 'SEMANAL_UNIDADE' ? 'UNIDADE' : 'REDE',
+                            titulo: formPauta.titulo.trim(),
+                            dataRealizacao: `${formPauta.data}T12:00:00.000Z`,
+                            descricao: [formPauta.pautaItens.trim(), formPauta.participantes.trim() ? `Participantes: ${formPauta.participantes.trim()}` : '']
+                              .filter(Boolean)
+                              .join('\n\n'),
+                          });
+                          const id = reuniao.data?.id;
+                          if (!id) throw new Error('A API não retornou o identificador da reunião');
+                          if (formPauta.status === 'AGENDADA') {
+                            await http.patch(`/coordenacao/reunioes/${id}/status`, { status: 'AGENDADA' });
+                          }
+                          if (formPauta.ata.trim()) {
+                            await http.post(`/coordenacao/reunioes/${id}/ata`, { conteudo: formPauta.ata.trim() });
+                          }
+                          setPautas(p => [{ ...formPauta, id, status: formPauta.status }, ...p]);
+                          await loadReunioes();
                           toast.success('Pauta criada com sucesso!');
-                        } catch {
-                          setPautas(p => [{ ...formPauta, id: Date.now().toString() }, ...p]);
-                          toast.success('Pauta criada (modo local)');
+                        } catch (error: any) {
+                          toast.error(error?.response?.data?.message ?? error?.message ?? 'Não foi possível salvar a pauta.');
                         } finally {
                           setSavingPauta(false);
                           setModalPauta(false);

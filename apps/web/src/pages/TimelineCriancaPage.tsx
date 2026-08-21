@@ -158,7 +158,7 @@ async function loadLegacyTimeline(childId: string): Promise<ChildSummary> {
     http.get(`/rdic/child/${childId}/central`),
     // Tarefa 2.1 — novas fontes
     http.get('/attendance', { params: { childId, limit: '200' } }).catch(() => ({ data: [] })),
-    http.get('/planning', { params: { childId, status: 'APROVADO', limit: '50' } }).catch(() => ({ data: [] })),
+    http.get('/plannings', { params: { childId, status: 'APROVADO', limit: '50' } }).catch(() => ({ data: [] })),
     http.get('/atendimentos-pais', { params: { childId, limit: '50' } }).catch(() => ({ data: [] })),
     http.get(`/children/${childId}`).catch(() => ({ data: null })),
   ]);

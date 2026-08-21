@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AttendanceStatus } from '@prisma/client';
+import { AttendanceStatus, RoleLevel } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { assertSchoolDay } from '../common/utils/date.utils';
 import { EvidenceService } from '../evidence/evidence.service';
@@ -236,6 +236,104 @@ export class AttendanceService {
       totalRegistros: attendances.length,
       resumoPorAluno: resumo,
     };
+  }
+
+  /**
+   * Consulta registros de frequência de uma criança no período informado.
+   * A resposta é detalhada para timeline/painéis; o escopo é sempre aplicado
+   * antes da leitura para impedir acesso cruzado entre unidades/tenants.
+   */
+  async getByChild(
+    childId: string,
+    startDate: string | undefined,
+    endDate: string | undefined,
+    user: JwtPayload,
+  ) {
+    if (!childId || !user?.mantenedoraId) {
+      throw new BadRequestException('childId e escopo são obrigatórios');
+    }
+
+    const where: any = { childId, mantenedoraId: user.mantenedoraId };
+    if (user.roles.some((role) => role.level === RoleLevel.UNIDADE)) {
+      if (!user.unitId) throw new ForbiddenException('Usuário sem unidade vinculada');
+      where.unitId = user.unitId;
+    } else if (user.roles.some((role) => role.level === RoleLevel.PROFESSOR)) {
+      const classrooms = await this.prisma.classroomTeacher.findMany({
+        where: { teacherId: user.sub },
+        select: { classroomId: true },
+      });
+      where.classroomId = { in: classrooms.map((item) => item.classroomId) };
+    } else if (user.roles.some((role) => role.level === RoleLevel.STAFF_CENTRAL)) {
+      const scopes = await this.prisma.userRoleUnitScope.findMany({
+        where: { userRole: { userId: user.sub, isActive: true } },
+        select: { unitId: true },
+      });
+      if (scopes.length > 0) where.unitId = { in: scopes.map((item) => item.unitId) };
+    }
+
+    const start = startDate ? new Date(`${startDate}T00:00:00.000Z`) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    const end = endDate ? new Date(`${endDate}T23:59:59.999Z`) : new Date();
+    where.date = { gte: start, lte: end };
+
+    return this.prisma.attendance.findMany({
+      where,
+      select: {
+        id: true,
+        childId: true,
+        classroomId: true,
+        unitId: true,
+        date: true,
+        status: true,
+        justification: true,
+      },
+      orderBy: { date: 'asc' },
+      take: 500,
+    });
+  }
+
+  /**
+   * Resumo semanal de frequência por unidade para o painel administrativo.
+   */
+  async getWeeklySummary(user: JwtPayload) {
+    if (!user?.mantenedoraId || !user?.unitId) {
+      throw new ForbiddenException('Escopo de unidade ausente');
+    }
+    const end = new Date();
+    end.setUTCHours(23, 59, 59, 999);
+    const start = new Date(end);
+    start.setUTCDate(start.getUTCDate() - 4);
+    start.setUTCHours(0, 0, 0, 0);
+
+    const records = await this.prisma.attendance.findMany({
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        unitId: user.unitId,
+        date: { gte: start, lte: end },
+      },
+      select: { date: true, status: true },
+      orderBy: { date: 'asc' },
+    });
+    const byDay = new Map<string, { total: number; presentes: number }>();
+    for (const record of records) {
+      const date = record.date.toISOString().slice(0, 10);
+      const value = byDay.get(date) ?? { total: 0, presentes: 0 };
+      value.total += 1;
+      if (record.status === AttendanceStatus.PRESENTE) value.presentes += 1;
+      byDay.set(date, value);
+    }
+    const dias = Array.from({ length: 5 }, (_, index) => {
+      const date = new Date(start);
+      date.setUTCDate(start.getUTCDate() + index);
+      const key = date.toISOString().slice(0, 10);
+      const value = byDay.get(key) ?? { total: 0, presentes: 0 };
+      return {
+        date: key,
+        total: value.total,
+        presentes: value.presentes,
+        pct: value.total > 0 ? Math.round((value.presentes / value.total) * 100) : 0,
+      };
+    });
+    return { startDate: start.toISOString().slice(0, 10), endDate: end.toISOString().slice(0, 10), dias };
   }
 
   /**

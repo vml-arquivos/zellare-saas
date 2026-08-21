@@ -58,13 +58,34 @@ export function PendenciasPanel({ classroomId }: PendenciasPanelProps) {
   const loadPendencias = useCallback(async () => {
     try {
       setLoading(true);
-      // Tentar buscar pendências reais do backend
       const params: Record<string, string> = {};
       if (classroomId) params.classroomId = classroomId;
-      const response = await http.get('/reports/teacher/pendencias', { params });
-      setPendencias(response.data || []);
+      const response = await http.get('/reports/dashboard/teacher', { params });
+      const classrooms: any[] = response.data?.classrooms ?? [];
+      const derived: Pendencia[] = classrooms.flatMap((classroom) => {
+        const items: Pendencia[] = [];
+        if (!classroom.activePlanningStatus || !['APROVADO', 'PUBLICADO', 'CONCLUIDO'].includes(classroom.activePlanningStatus)) {
+          items.push({
+            id: `planning-${classroom.classroomId}`,
+            tipo: 'PLANEJAMENTO',
+            titulo: `Planejamento — ${classroom.classroomName}`,
+            descricao: 'A turma não possui planejamento ativo aprovado para a data selecionada.',
+            urgente: false,
+          });
+        }
+        if (Number(classroom.unplannedEvents) > 0) {
+          items.push({
+            id: `diary-${classroom.classroomId}`,
+            tipo: 'DIARIO',
+            titulo: `Registros sem planejamento — ${classroom.classroomName}`,
+            descricao: `${classroom.unplannedEvents} registro(s) precisam de conferência pedagógica.`,
+            urgente: false,
+          });
+        }
+        return items;
+      });
+      setPendencias(derived);
     } catch {
-      // Se o endpoint não existir ainda, mostrar estado vazio
       setPendencias([]);
     } finally {
       setLoading(false);

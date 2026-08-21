@@ -79,22 +79,6 @@ export default function MeuPerfilPage() {
     } finally { setLoading(false); }
   }
 
-  async function uploadFoto(file: File) {
-    if (!file.type.startsWith('image/')) { toast.error('Selecione uma imagem válida (PNG, JPG ou WebP)'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Imagem muito grande. Máximo 5 MB.'); return; }
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await http.post('/auth/upload-photo', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      const url = res.data?.photoUrl || URL.createObjectURL(file);
-      setFotoUrl(url);
-      toast.success('Foto de perfil atualizada!');
-    } catch {
-      setFotoUrl(URL.createObjectURL(file));
-      toast.success('Foto atualizada localmente');
-    }
-  }
-
   async function salvarDados() {
     if (!formDados.firstName.trim() || !formDados.lastName.trim()) { toast.error('Nome e sobrenome são obrigatórios'); return; }
     setSalvando(true);
@@ -164,8 +148,7 @@ export default function MeuPerfilPage() {
                   name={nomeCompleto}
                   photoUrl={fotoUrl}
                   size="md"
-                  editable={true}
-                  onUpload={uploadFoto}
+                  editable={false}
                 />
               </div>
               <div className="flex-1 pb-1">

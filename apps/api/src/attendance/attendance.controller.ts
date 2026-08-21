@@ -23,6 +23,21 @@ export class AttendanceController {
   }
 
   /**
+   * GET /attendance?childId=&startDate=&endDate=
+   * Registros detalhados de frequência de uma criança para timeline/painéis.
+   */
+  @Get()
+  @RequireRoles(RoleLevel.PROFESSOR, RoleLevel.UNIDADE, RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  getByChild(
+    @Query('childId') childId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.svc.getByChild(childId, startDate, endDate, user);
+  }
+
+  /**
    * GET /attendance/today
    * Busca chamada de hoje para a turma do professor
    */
@@ -49,6 +64,16 @@ export class AttendanceController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.svc.getSummary(classroomId, startDate, endDate, user);
+  }
+
+  /**
+   * GET /attendance/weekly-summary
+   * Resumo dos últimos cinco dias úteis/operacionais da unidade.
+   */
+  @Get('weekly-summary')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  getWeeklySummary(@CurrentUser() user: JwtPayload) {
+    return this.svc.getWeeklySummary(user);
   }
 
   /**
