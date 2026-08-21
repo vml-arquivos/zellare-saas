@@ -420,6 +420,9 @@ export class AdminService {
     if (!elevatedActor && target.unitId !== actor.unitId) {
       throw new ForbiddenException('Sem permissão para editar usuário de outra unidade');
     }
+    if (!elevatedActor && (dto.roleType !== undefined || dto.unitCode !== undefined || dto.password !== undefined)) {
+      throw new ForbiddenException('Este perfil só pode alterar dados cadastrais e status dentro da própria unidade');
+    }
 
     // Verificar e-mail duplicado (se estiver mudando)
     if (dto.email && dto.email.trim().toLowerCase() !== target.email) {

@@ -45,6 +45,21 @@ describe('AdminService — escopo de atualização de usuário', () => {
     expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 
+  it('rejeita alteração de capacidade ou credencial para perfil de unidade', async () => {
+    const prisma = makePrisma();
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'target',
+      mantenedoraId: 'mantenedora-1',
+      unitId: 'unit-a',
+      email: 'target@example.com',
+    });
+    const service = new AdminService(prisma);
+
+    await expect(service.updateUser(unidadeActor, 'target', { roleType: 'UNIDADE_DIRETOR' as any }))
+      .rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
   it('permite perfil de unidade atualizar usuário da própria unidade', async () => {
     const prisma = makePrisma();
     prisma.user.findUnique.mockResolvedValue({
