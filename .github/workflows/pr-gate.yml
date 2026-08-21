@@ -220,7 +220,7 @@ jobs:
       - name: Containers e smoke não destrutivo
         if: matrix.step == 'containers-smoke'
         run: |
-          docker build --label org.opencontainers.image.revision=${{ github.sha }} -f apps/api/Dockerfile -t zelare-api:ci .
+          docker build --label org.opencontainers.image.revision=${{ github.sha }} -f Dockerfile -t zelare-api:ci apps/api
           docker build --label org.opencontainers.image.revision=${{ github.sha }} -f apps/web/Dockerfile -t zelare-web:ci .
           docker run --rm zelare-api:ci node --version
           docker run --rm zelare-web:ci nginx -t
