@@ -6,35 +6,44 @@
  * atualização: pede update do SW, limpa os caches e recarrega a página.
  */
 
+import { isZelareCacheName, readPwaEnvironment } from './pwaEligibility';
+
 export const BUILD_ID: string =
-  typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'dev';
+  typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'local';
 
 /**
  * Força atualização total do PWA:
- * 1. Atualiza/desregistra Service Workers
- * 2. Limpa todos os caches do Cache Storage
- * 3. Recarrega a página a partir da rede
+ * 1. Atualiza/desregistra o Service Worker do escopo Zelare
+ * 2. Limpa somente caches identificados do Zelare
+ * 3. Recarrega a página se houve recuperação efetiva
  */
 export async function hardRefreshPWA(): Promise<void> {
+  const origin = readPwaEnvironment().origin;
+  let shouldReload = false;
   try {
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
+    if ('serviceWorker' in navigator && origin) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(
-        regs.map(async (reg) => {
-          try { await reg.update(); } catch { /* ignore */ }
-          // Desregistrar garante que o próximo load pegue o SW novo do servidor
-          try { await reg.unregister(); } catch { /* ignore */ }
+        registrations
+          .filter((registration) => registration.scope.startsWith(`${origin}/`))
+          .map(async (registration) => {
+            try { await registration.update(); } catch { /* segue com a limpeza */ }
+            try { shouldReload = (await registration.unregister()) || shouldReload; } catch { /* segue com a limpeza */ }
+          }),
+      );
+    }
+    if ('caches' in window && origin) {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((key) => isZelareCacheName(key, origin)).map(async (key) => {
+          shouldReload = (await caches.delete(key)) || shouldReload;
         }),
       );
     }
-    if ('caches' in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    }
   } catch {
-    // Mesmo se algo falhar, seguimos para o reload
-  } finally {
-    // reload "forçado" — busca o index.html novo
-    window.location.reload();
+    // A navegação continua disponível mesmo se a recuperação for parcial.
   }
+
+  // O botão é uma ação explícita do usuário; um único reload não cria loop.
+  if (shouldReload) window.location.reload();
 }

@@ -4,18 +4,23 @@ import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  // Carimbo de build: injeta a data/hora do build para verificação visual no PWA.
-  // Permite confirmar EXATAMENTE qual build está no ar (resolve "fiz deploy e não vejo mudança").
+  // Release observável e não sensível. Em produção o Coolify/CI deve fornecer
+  // VITE_RELEASE_ID com o SHA do commit; o fallback mantém builds locais explícitos.
   define: {
     __BUILD_ID__: JSON.stringify(
-      new Date().toISOString().slice(0, 16).replace('T', ' ')
+      process.env.VITE_RELEASE_ID || process.env.VITE_APP_VERSION || process.env.GIT_COMMIT || 'local'
     ),
   },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'brand/zelare-logo-square.png'],
+      // O registro universal do plugin é desativado; PwaRuntime registra
+      // somente em mobile/tablet elegível e a instalação é sempre manual.
+      injectRegister: null,
+      registerType: 'prompt',
+      // Ícones mínimos; logos grandes ficam fora do precache e entram por
+      // CacheFirst quando realmente usados, evitando carregar branding duplicado.
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Zelare',
         short_name: 'Zelare',
@@ -44,7 +49,8 @@ export default defineConfig({
         // O Cache Storage contém apenas o app shell e assets estáticos.
         // Respostas autenticadas infantis nunca recebem fallback stale do Workbox;
         // o offline de dados permanece no fluxo dedicado por usuário/tenant.
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,woff2}'],
+        globIgnores: ['branding/**', 'brand/**', 'vite.svg'],
         runtimeCaching: [
           {
             // Assets estáticos: cache-first (imagens, fontes)
@@ -56,7 +62,8 @@ export default defineConfig({
             },
           },
         ],
-        // Background sync para ações offline
+        cleanupOutdatedCaches: true,
+        // O shell pode funcionar offline; API autenticada nunca entra em runtime cache.
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/, /^\/health/],
       },
