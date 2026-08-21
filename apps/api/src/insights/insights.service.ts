@@ -368,16 +368,28 @@ export class InsightsService {
    * GET /insights/unit/alerts
    * Alertas operacionais ativos para a unidade (lê AlertaOperacional do banco).
    */
-  async getUnitAlerts(user: JwtPayload, unitIdOverride?: string) {
+  async getUnitAlerts(
+    user: JwtPayload,
+    unitIdOverride?: string,
+    filters: { canal?: 'OPERACIONAL' | 'ACOMPANHAMENTO'; prioridade?: 'NORMAL' | 'URGENTE' } = {},
+  ) {
     if (!user?.mantenedoraId) throw new ForbiddenException('Escopo inválido');
     const { unitId, mantenedoraId } = resolveUnitScope(user, unitIdOverride);
 
+    const where: Record<string, any> = {
+      mantenedoraId,
+      ...(unitId ? { unitId } : {}),
+      resolvido: false,
+    };
+    const metadataFilters = [
+      filters.canal ? { path: ['canal'], equals: filters.canal } : null,
+      filters.prioridade ? { path: ['prioridadeOperacional'], equals: filters.prioridade } : null,
+    ].filter(Boolean);
+    if (metadataFilters.length === 1) where.metadados = metadataFilters[0];
+    if (metadataFilters.length > 1) where.AND = metadataFilters.map((filter) => ({ metadados: filter }));
+
     const alertas = await this.prisma.alertaOperacional.findMany({
-      where: {
-        mantenedoraId,
-        ...(unitId ? { unitId } : {}),
-        resolvido: false,
-      },
+      where,
       orderBy: [{ severidade: 'desc' }, { criadoEm: 'desc' }],
       take: 30,
       select: {
@@ -397,16 +409,23 @@ export class InsightsService {
     const mapNivel = (s: string) =>
       s === 'CRITICA' || s === 'ALTA' ? 'critico' : s === 'MEDIA' ? 'atencao' : 'info';
 
-    const resultado = alertas.map((a) => ({
-      id: a.id,
-      tipo: a.tipo,
-      nivel: mapNivel(a.severidade as string),
-      titulo: a.titulo,
-      descricao: a.descricao,
-      classroomId: a.classroomId,
-      childId: a.childId,
-      criadoEm: a.criadoEm,
-    }));
+    const resultado = alertas.map((a) => {
+      const metadados = a.metadados && typeof a.metadados === 'object'
+        ? a.metadados as Record<string, unknown>
+        : {};
+      return {
+        id: a.id,
+        tipo: a.tipo,
+        nivel: mapNivel(a.severidade as string),
+        canal: metadados.canal === 'ACOMPANHAMENTO' ? 'ACOMPANHAMENTO' : 'OPERACIONAL',
+        prioridadeOperacional: metadados.prioridadeOperacional === 'URGENTE' ? 'URGENTE' : 'NORMAL',
+        titulo: a.titulo,
+        descricao: a.descricao,
+        classroomId: a.classroomId,
+        childId: a.childId,
+        criadoEm: a.criadoEm,
+      };
+    });
 
     return {
       unitId: unitId ?? null,
@@ -414,6 +433,8 @@ export class InsightsService {
       criticos: resultado.filter((a) => a.nivel === 'critico'),
       atencao: resultado.filter((a) => a.nivel === 'atencao'),
       info: resultado.filter((a) => a.nivel === 'info'),
+      urgentes: resultado.filter((a) => a.canal === 'OPERACIONAL' && a.prioridadeOperacional === 'URGENTE'),
+      acompanhamento: resultado.filter((a) => a.canal === 'ACOMPANHAMENTO'),
     };
   }
 

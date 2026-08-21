@@ -7,6 +7,8 @@ export interface OperationalAlert {
   classroomId?: string | null;
   childId?: string | null;
   tipo: string;
+  canal?: 'OPERACIONAL' | 'ACOMPANHAMENTO' | string;
+  prioridadeOperacional?: 'NORMAL' | 'URGENTE' | string;
   severidade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA' | string;
   titulo: string;
   descricao?: string | null;
@@ -21,6 +23,10 @@ export interface OperationalAlertSummary {
   total: number;
   criticos: number;
   atencao: number;
+  urgentes?: OperationalAlert[];
+  acompanhamento?: OperationalAlert[];
+  urgentesTotal?: number;
+  acompanhamentoTotal?: number;
   alertas: OperationalAlert[];
 }
 
@@ -29,6 +35,8 @@ export async function getOperationalAlerts(params?: {
   classroomId?: string;
   limit?: number;
   unread?: boolean;
+  canal?: 'OPERACIONAL' | 'ACOMPANHAMENTO';
+  prioridade?: 'NORMAL' | 'URGENTE';
 }): Promise<OperationalAlertSummary> {
   const response = await http.get<OperationalAlertSummary>('/alertas', {
     params: {

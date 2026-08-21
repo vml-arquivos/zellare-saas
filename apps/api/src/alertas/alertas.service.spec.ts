@@ -40,6 +40,8 @@ describe('AlertasService.analisarCoberturaDiario', () => {
         severidade: 'MEDIA',
         metadados: expect.objectContaining({
           regra: 'COBERTURA_DIARIO_TURMA',
+          canal: 'OPERACIONAL',
+          prioridadeOperacional: 'NORMAL',
           alunosAtivos: 8,
           eventosEncontrados: 0,
         }),
@@ -107,6 +109,8 @@ describe('AlertasService.analisarMicrogestos', () => {
         descricao: expect.stringContaining('não é diagnóstico'),
         metadados: expect.objectContaining({
           regra: 'DESENVOLVIMENTO_ESTRUTURADO_REGULACAO_EMOCIONAL',
+          canal: 'ACOMPANHAMENTO',
+          prioridadeOperacional: 'NORMAL',
           observacoesAtencao: 3,
           contextos: expect.arrayContaining(['TRANSICAO', 'RODA']),
         }),

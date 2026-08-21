@@ -99,8 +99,10 @@ export class InsightsController {
   getUnitAlerts(
     @Query('unitId') unitId: string,
     @Request() req: any,
+    @Query('canal') canal?: 'OPERACIONAL' | 'ACOMPANHAMENTO',
+    @Query('prioridade') prioridade?: 'NORMAL' | 'URGENTE',
   ) {
-    return this.insightsService.getUnitAlerts(req.user, unitId);
+    return this.insightsService.getUnitAlerts(req.user, unitId, { canal, prioridade });
   }
 
   @Get('classroom/score')

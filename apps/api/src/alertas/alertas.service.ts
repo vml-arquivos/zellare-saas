@@ -4,6 +4,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EvidenceService } from '../evidence/evidence.service';
 import { SeveridadeAlerta, TipoAlerta } from '@prisma/client';
 
+export type AlertaCanal = 'OPERACIONAL' | 'ACOMPANHAMENTO';
+export type PrioridadeOperacional = 'NORMAL' | 'URGENTE';
+
 @Injectable()
 export class AlertasService {
   private readonly logger = new Logger(AlertasService.name);
@@ -82,7 +85,7 @@ export class AlertasService {
             severidade: maxConsec >= 5 ? SeveridadeAlerta.ALTA : SeveridadeAlerta.MEDIA,
             titulo: `${matricula.child.firstName} — ${maxConsec} faltas consecutivas`,
             descricao: `A criança ${matricula.child.firstName} ${matricula.child.lastName} acumulou ${maxConsec} faltas consecutivas. Verificar com a família.`,
-            metadados: { regra: 'FALTAS_CONSECUTIVAS', maxConsec, totalFaltas: ausencias.length, totalDias },
+            metadados: { regra: 'FALTAS_CONSECUTIVAS', canal: 'OPERACIONAL', prioridadeOperacional: maxConsec >= 5 ? 'URGENTE' : 'NORMAL', maxConsec, totalFaltas: ausencias.length, totalDias },
           });
         }
 
@@ -98,6 +101,8 @@ export class AlertasService {
             descricao: `${ausencias.length} faltas nos últimos 30 dias (${Math.round(taxaFalta * 100)}%). Risco de evasão.`,
             metadados: {
               regra: 'FALTAS_FREQUENTES',
+              canal: 'OPERACIONAL',
+              prioridadeOperacional: taxaFalta >= 0.4 ? 'URGENTE' : 'NORMAL',
               taxaFalta,
               ausencias: ausencias.length,
               presentes: presentes.length,
@@ -166,6 +171,8 @@ export class AlertasService {
           descricao: 'A turma não possui evento de diário registrado na data corrente. Conferir se houve atividade, sincronização offline ou necessidade de registro retroativo.',
           metadados: {
             regra: 'COBERTURA_DIARIO_TURMA',
+            canal: 'OPERACIONAL',
+            prioridadeOperacional: 'NORMAL',
             data: inicio.toISOString().slice(0, 10),
             alunosAtivos: turma._count.enrollments,
             eventosEncontrados: eventos,
@@ -305,6 +312,8 @@ export class AlertasService {
           descricao: `Foram registradas ${grupo.negativeCount} observações de acompanhamento em ${grupo.contexts.size || 1} contexto(s) nos últimos 14 dias. Revisar as evidências, os suportes oferecidos e a necessidade de acompanhamento. Este sinal não é diagnóstico.`,
           metadados: {
             regra,
+            canal: 'ACOMPANHAMENTO',
+            prioridadeOperacional: 'NORMAL',
             origem: 'coleta-estruturada',
             janelaDias: 14,
             observacoesAtencao: grupo.negativeCount,
@@ -334,8 +343,13 @@ export class AlertasService {
     titulo: string;
     descricao: string;
     metadados: Record<string, any>;
+    canal?: AlertaCanal;
+    prioridadeOperacional?: PrioridadeOperacional;
   }) {
     const regra = String(params.metadados?.regra ?? params.tipo);
+    const canal: AlertaCanal = params.canal ?? params.metadados?.canal ?? 'OPERACIONAL';
+    const prioridadeOperacional: PrioridadeOperacional = params.prioridadeOperacional ?? params.metadados?.prioridadeOperacional ?? 'NORMAL';
+    const metadados = { ...params.metadados, canal, prioridadeOperacional };
 
     const existente = await this.prisma.alertaOperacional.findFirst({
       where: {
@@ -358,7 +372,7 @@ export class AlertasService {
           severidade: params.severidade,
           titulo: params.titulo,
           descricao: params.descricao,
-          metadados: params.metadados,
+          metadados,
         },
       });
       await this.evidenceService?.syncSafely('ALERTA_OPERACIONAL', () => this.evidenceService!.syncOperationalAlert(updated));
@@ -375,7 +389,7 @@ export class AlertasService {
         severidade: params.severidade,
         titulo: params.titulo,
         descricao: params.descricao,
-        metadados: params.metadados,
+        metadados,
       },
     });
     await this.evidenceService?.syncSafely('ALERTA_OPERACIONAL', () => this.evidenceService!.syncOperationalAlert(created));
