@@ -125,21 +125,77 @@ CREATE INDEX IF NOT EXISTS "alerta_aluno_classroomId_idx" ON "alerta_aluno"("cla
 CREATE INDEX IF NOT EXISTS "alerta_aluno_unitId_idx"      ON "alerta_aluno"("unitId");
 CREATE INDEX IF NOT EXISTS "alerta_aluno_status_idx"      ON "alerta_aluno"("status");
 
--- Foreign keys (additive — não destrutivo)
-ALTER TABLE "microgesto_registro"
-  ADD CONSTRAINT IF NOT EXISTS "microgesto_registro_childId_fkey"
-    FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT IF NOT EXISTS "microgesto_registro_classroomId_fkey"
-    FOREIGN KEY ("classroomId") REFERENCES "Classroom"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT IF NOT EXISTS "microgesto_registro_professorId_fkey"
-    FOREIGN KEY ("professorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- Foreign keys (additive — não destrutivo).
+-- PostgreSQL não suporta ADD CONSTRAINT IF NOT EXISTS; os blocos abaixo
+-- mantêm a migration idempotente sem alterar a semântica das relações.
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'microgesto_registro_childId_fkey'
+      AND conrelid = 'microgesto_registro'::regclass
+  ) THEN
+    ALTER TABLE "microgesto_registro"
+      ADD CONSTRAINT "microgesto_registro_childId_fkey"
+      FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
 
-ALTER TABLE "child_profile_stats"
-  ADD CONSTRAINT IF NOT EXISTS "child_profile_stats_childId_fkey"
-    FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'microgesto_registro_classroomId_fkey'
+      AND conrelid = 'microgesto_registro'::regclass
+  ) THEN
+    ALTER TABLE "microgesto_registro"
+      ADD CONSTRAINT "microgesto_registro_classroomId_fkey"
+      FOREIGN KEY ("classroomId") REFERENCES "Classroom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
 
-ALTER TABLE "alerta_aluno"
-  ADD CONSTRAINT IF NOT EXISTS "alerta_aluno_childId_fkey"
-    FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT IF NOT EXISTS "alerta_aluno_classroomId_fkey"
-    FOREIGN KEY ("classroomId") REFERENCES "Classroom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'microgesto_registro_professorId_fkey'
+      AND conrelid = 'microgesto_registro'::regclass
+  ) THEN
+    ALTER TABLE "microgesto_registro"
+      ADD CONSTRAINT "microgesto_registro_professorId_fkey"
+      FOREIGN KEY ("professorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'child_profile_stats_childId_fkey'
+      AND conrelid = 'child_profile_stats'::regclass
+  ) THEN
+    ALTER TABLE "child_profile_stats"
+      ADD CONSTRAINT "child_profile_stats_childId_fkey"
+      FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'alerta_aluno_childId_fkey'
+      AND conrelid = 'alerta_aluno'::regclass
+  ) THEN
+    ALTER TABLE "alerta_aluno"
+      ADD CONSTRAINT "alerta_aluno_childId_fkey"
+      FOREIGN KEY ("childId") REFERENCES "Child"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'alerta_aluno_classroomId_fkey'
+      AND conrelid = 'alerta_aluno'::regclass
+  ) THEN
+    ALTER TABLE "alerta_aluno"
+      ADD CONSTRAINT "alerta_aluno_classroomId_fkey"
+      FOREIGN KEY ("classroomId") REFERENCES "Classroom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;

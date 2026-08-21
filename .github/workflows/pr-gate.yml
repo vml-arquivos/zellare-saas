@@ -160,7 +160,7 @@ jobs:
           psql "$ci_db_url" -v ON_ERROR_STOP=1 -f apps/api/scripts/ci-prepare-historical-prerequisites.sql
           copy_migrations_range 20260223000000 20260404100000
           pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
-          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "development_report"; DROP TABLE IF EXISTS "material_request_item";'
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "development_report"; DROP TABLE IF EXISTS "material_request_item"; DROP TABLE IF EXISTS "child" CASCADE; DROP TABLE IF EXISTS "classroom" CASCADE; DROP TABLE IF EXISTS "unit" CASCADE; DROP TABLE IF EXISTS "mantenedora" CASCADE;'
           copy_migrations_from 20260404100000
           pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
           psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "DevelopmentObservation"; DROP TABLE IF EXISTS "material_request_item";'

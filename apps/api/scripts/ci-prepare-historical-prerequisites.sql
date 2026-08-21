@@ -1,6 +1,29 @@
 -- Fixture somente estrutural para o PostgreSQL efêmero do Gate 0.2.
 -- Não contém dados de pessoas e nunca deve ser executada em produção.
 -- A migration 20260223 assume estas relações legadas pré-existentes.
+-- As migrations iniciais criam Child/Classroom/Unit em PascalCase, mas o SQL
+-- histórico referencia aliases lowercase que existiam no banco de produção.
+-- Estes stubs são removidos pelo workflow antes das migrations posteriores.
+
+CREATE TABLE IF NOT EXISTS "child" (
+  "id" TEXT NOT NULL,
+  CONSTRAINT "ci_child_stub_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "classroom" (
+  "id" TEXT NOT NULL,
+  CONSTRAINT "ci_classroom_stub_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "unit" (
+  "id" TEXT NOT NULL,
+  CONSTRAINT "ci_unit_stub_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "mantenedora" (
+  "id" TEXT NOT NULL,
+  CONSTRAINT "ci_mantenedora_stub_pkey" PRIMARY KEY ("id")
+);
 
 CREATE TABLE IF NOT EXISTS "development_observation" (
   "id" TEXT NOT NULL,
