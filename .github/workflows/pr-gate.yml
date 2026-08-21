@@ -165,7 +165,7 @@ jobs:
           pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
           psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "DevelopmentObservation"; DROP TABLE IF EXISTS "material_request_item";'
           pnpm --filter @zelare/api exec prisma migrate status --schema "$ci_prisma/schema.prisma"
-          pnpm --filter @zelare/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel "$ci_prisma/schema.prisma" --script > prisma-drift.sql
+          pnpm --filter @zelare/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel "$ci_prisma/schema.prisma" --script | sed '/The field "pnpm" was found in/d' > prisma-drift.sql
           if grep -vE '^[[:space:]]*(--|$)' prisma-drift.sql | grep -q .; then
             echo 'Drift não nulo'
             cat prisma-drift.sql
