@@ -1160,6 +1160,20 @@ export class RdicService {
       }
     }
 
+    let longitudinal: unknown = null;
+    if (this.evidenceService) {
+      try {
+        const crossAnalysis = await this.evidenceService.crossAnalysis(
+          childId,
+          { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+          user,
+        );
+        longitudinal = crossAnalysis.longitudinal ?? null;
+      } catch (error) {
+        console.warn('[rdic] análise longitudinal indisponível; mantendo resumo express legado', error);
+      }
+    }
+
     const observacoesComAlerta = observations.filter((item) => Boolean(item.developmentAlerts)).length;
     const totalAtencao = porNivel.REQUER_ATENCAO ?? 0;
     const tendencia = totalMicrogestos === 0 && observations.length === 0
@@ -1199,6 +1213,7 @@ export class RdicService {
       tendencia,
       pontosAtencao,
       proximosPassos,
+      longitudinal,
     };
   }
 
