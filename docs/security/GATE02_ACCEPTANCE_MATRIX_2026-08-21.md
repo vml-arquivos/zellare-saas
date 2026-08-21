@@ -1,12 +1,12 @@
 # Zelare — Matriz final de aceite do Gate 0.2
 
-**Data:** 21 de agosto de 2026. **Branch:** `fix/zelare-gate-0-2-20260821`. **Base:** `08f335664ac5f714a787fd5f2038758b5b18efac` (`08f3356`). **HEAD avaliado:** `ca8bfbe3560c683c2849a5c6545092f76f1b4149` (`ca8bfbe`). **PR:** [#12 — Gate 0.2: contratos reais, OpenAPI, PWA e privacidade](https://github.com/vml-arquivos/zellare-saas/pull/12).
+**Data:** 21 de agosto de 2026. **Branch:** `fix/zelare-gate-0-2-20260821`. **Base:** `08f335664ac5f714a787fd5f2038758b5b18efac` (`08f3356`). **HEAD de código validado:** `947d2aeefd1fe35662af85bfe1cac56c5122a9dc` (`947d2ae`). **PR:** [#12 — Gate 0.2: contratos reais, OpenAPI, PWA e privacidade](https://github.com/vml-arquivos/zellare-saas/pull/12).
 
 > Esta matriz registra a aprovação técnica do Gate 0.2 no CI, mas **não autoriza merge, migration de produção, deploy, redeploy ou remoção de dados**. O PR permanece aberto para revisão e decisão humana. O repositório Conexa/COCRIS não foi alterado.
 
 ## Resultado executivo
 
-O Gate 0.2 está **verde no GitHub Actions**. A execução final [32453168092](https://github.com/vml-arquivos/zellare-saas/actions/runs/32453168092), run #16, no HEAD `ca8bfbe`, terminou com conclusão `success`. A execução técnica anterior [32452784952](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952), no commit `58cbe02`, também terminou com os 14 jobs verdes. O PR #12 está aberto, não é draft e aparece com estado de merge `CLEAN`; nenhuma operação de merge ou produção foi executada por esta tarefa.
+O Gate 0.2 está **verde no GitHub Actions**. A execução mais recente [32520772822](https://github.com/vml-arquivos/zellare-saas/actions/runs/32520772822), no commit `947d2ae`, terminou com conclusão `success` em todos os 14 jobs. O PR #12 está aberto, não é draft e aparece com estado de merge `CLEAN`; nenhuma operação de merge ou produção foi executada por esta tarefa.
 
 O bloqueador histórico de PostgreSQL foi resolvido sem `migrate resolve`, `db push`, reescrita de histórico ou alteração do Conexa. A prova remota aplicou as migrations em PostgreSQL 17 efêmero, executou o cleanup da fixture e confirmou drift nulo. A reprodução local equivalente também terminou com status de migrations atualizado e saída de drift vazia; o único texto adicional local foi o warning conhecido do pnpm, que passou a ser filtrado exclusivamente na captura do artefato de drift do workflow.
 
@@ -24,7 +24,7 @@ O bloqueador histórico de PostgreSQL foi resolvido sem `migrate resolve`, `db p
 | Comparações de faixa de migrations no workflow | **IMPLEMENTADO E PROVADO** | Commit `ecf1909` | Comparações Bash inclusivas corrigidas sem alterar a seleção lógica das migrations. |
 | Sintaxe idempotente de constraints históricas | **IMPLEMENTADO E PROVADO** | Commit `a57b1f3`; migration `20260420010000_microgesto_registro_child_stats_alertas` | `ADD CONSTRAINT IF NOT EXISTS` inválido foi substituído por blocos `DO $$` com consulta a `pg_constraint`. |
 | Normalização de índices legados | **IMPLEMENTADO E PROVADO** | Commit `2fe7da5`; migration `20260821110000_normalize_legacy_index_names` | 26 nomes de índices históricos foram normalizados para o schema canônico; operação de metadata, sem dados. |
-| Reconciliação do drift do schema histórico | **IMPLEMENTADO E PROVADO NO BANCO EFÊMERO** | Commit `58cbe02`; migration `20260821120000_reconcile_historical_schema_drift`; job `prisma-postgresql` verde | A migration contém diferenças históricas de enums, defaults, constraints, índices, colunas e tabela `Fornecedor`; **não deve ser aplicada em produção sem revisão e autorização humana explícitas**. |
+| Reconciliação do drift do schema histórico | **IMPLEMENTADO E PROVADO NO BANCO EFÊMERO** | Commit `947d2ae`; migration `20260821120000_reconcile_historical_schema_drift`; job `prisma-postgresql` verde | A migration contém diferenças históricas de enums, defaults, constraints, índices, colunas e tabela `Fornecedor`; **não deve ser aplicada em produção sem revisão e autorização humana explícitas**. |
 | Migration SaaS aditiva | **IMPLEMENTADO E PROVADO** | Commit `8f16742`; migration `20260821100000_add_tenant_framework_content_models` | Seis modelos, índices, uniques e FKs presentes; nenhuma operação de produção foi executada. |
 | PII fora da imagem e dos artifacts | **IMPLEMENTADO E PROVADO** | `.dockerignore`, scanner de artifacts; jobs `privacy` e `artifacts` verdes | Nenhuma reescrita ou remoção do histórico Git foi feita; o risco P0-2 permanece documentado. |
 | OpenAPI gerado | **IMPLEMENTADO E PROVADO** | `generate-openapi.ts`; job `openapi-contracts` verde | 254 operações documentadas. |
@@ -50,8 +50,8 @@ O segundo bloqueio era a sintaxe `ALTER TABLE ... ADD CONSTRAINT IF NOT EXISTS` 
 
 | Execução | Commit | Resultado | Link |
 |---|---|---|---|
-| `32453168092` — run #16 | `ca8bfbe` | **SUCCESS — HEAD documental validado** | [abrir execução final](https://github.com/vml-arquivos/zellare-saas/actions/runs/32453168092) |
-| `32452784952` — run #15 | `58cbe02` | **SUCCESS — 14/14 jobs verdes** | [abrir execução técnica](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952) |
+| `32520772822` | `947d2ae` | **SUCCESS — 14/14 jobs verdes** | [abrir execução final](https://github.com/vml-arquivos/zellare-saas/actions/runs/32520772822) |
+| `32453168092` — run #16 | `ca8bfbe` | **SUCCESS — HEAD documental anterior validado** | [abrir execução anterior](https://github.com/vml-arquivos/zellare-saas/actions/runs/32453168092) |
 | `32452220722` — run #14 | `2fe7da5` | Falhou apenas no drift histórico antes da reconciliação final | [abrir execução intermediária](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452220722) |
 
 ## Riscos residuais e decisão operacional
@@ -70,6 +70,6 @@ O PR [#12](https://github.com/vml-arquivos/zellare-saas/pull/12) está **aberto 
 
 [1]: https://github.com/vml-arquivos/zellare-saas/pull/12 "PR #12 do Zelare"
 
-[2]: https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952 "Execução final verde do Gate 0.2"
+[2]: https://github.com/vml-arquivos/zellare-saas/actions/runs/32520772822 "Execução final verde do Gate 0.2"
 
 [3]: https://github.com/vml-arquivos/zellare-saas/tree/fix/zelare-gate-0-2-20260821 "Branch corretiva do Gate 0.2"
