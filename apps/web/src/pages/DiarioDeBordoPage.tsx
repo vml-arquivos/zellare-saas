@@ -79,7 +79,7 @@ export default function DiarioDeBordoPage() {
     if (!form.alunoId) { toast.error('Selecione um aluno'); return; }
     if (!form.atividade) { toast.error('Descreva a atividade realizada'); return; }
     try {
-      await http.post('/diary-event', {
+      await http.post('/diary-events', {
         childId: form.alunoId,
         date: new Date().toISOString(),
         activities: form.atividade,

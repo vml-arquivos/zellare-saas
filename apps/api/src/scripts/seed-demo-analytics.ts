@@ -18,7 +18,12 @@ const PREFIX = 'demo-zelare-2026';
 const MANTENEDORA_ID = `${PREFIX}-mantenedora`;
 const UNIT_ID = `${PREFIX}-unidade`;
 const MATRIX_ID = `${PREFIX}-matriz-2026`;
-const PASSWORD = 'Demo@2026';
+const PASSWORD = process.env.ZELARE_DEMO_SEED_PASSWORD;
+
+function getDemoPassword(): string {
+  if (!PASSWORD) throw new Error('ZELARE_DEMO_SEED_PASSWORD é obrigatória para executar o seed demo');
+  return PASSWORD;
+}
 
 const CLASSROOMS = [
   { id: `${PREFIX}-classroom-bercario`, name: 'Berçário Demonstrativo', code: 'DEMO-EI01', min: 0, max: 24, capacity: 10 },
@@ -111,7 +116,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const passwordHash = await bcrypt.hash(PASSWORD, 10);
+  const passwordHash = await bcrypt.hash(getDemoPassword(), 10);
   const now = new Date();
 
   await prisma.mantenedora.upsert({

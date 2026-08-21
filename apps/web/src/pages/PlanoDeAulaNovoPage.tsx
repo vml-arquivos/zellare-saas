@@ -897,7 +897,7 @@ export default function PlanoDeAulaNovoPage() {
                 onClick={async () => {
                   try {
                     setAprovando(true);
-                    await http.patch(`/plannings/${planningId}/approve`);
+                    await http.post(`/plannings/${planningId}/aprovar`);
                     setStatus('APROVADO');
                     setLoadedPlanning(prev => prev ? { ...prev, status: 'APROVADO' } : prev);
                     toast.success('Planejamento aprovado!');

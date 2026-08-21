@@ -16,6 +16,7 @@ import { useOfflineSync } from '../../hooks/useOfflineSync';
 import { useAuth } from '../../app/AuthProvider';
 import { useTheme } from '../../app/ThemeProvider';
 import { hardRefreshPWA, BUILD_ID } from '../../lib/pwaUpdate';
+import PwaInstallAction from './PwaInstallAction';
 
 const NAV = [
   { path: '/app/mobile/chamada',    label: 'Chamada',    Icon: ClipboardList },
@@ -84,6 +85,8 @@ export default function MobileShell() {
 
         {/* Ações */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <PwaInstallAction />
+
           {/* Atualizar app (força nova versão — destrava cache do PWA no iOS) */}
           <button
             type="button"

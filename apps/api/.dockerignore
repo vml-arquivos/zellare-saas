@@ -1,0 +1,44 @@
+# Build context hygiene
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+dist
+coverage
+.git
+.gitignore
+Dockerfile*
+*.log
+*.tmp
+*.bak
+
+# Local configuration and operational artifacts
+.env*
+imports/
+docs/
+ops/
+
+# Personal-data datasets and spreadsheets — never ship in the API image
+*.xlsx
+*.xls
+**/ALUNOS*.xlsx
+**/*alunos*.json
+**/*turmas_alunos*.json
+**/*funcionarios-reais*.json
+**/*profissionais*.xlsx
+**/*dados-*.xlsx
+
+# Real-data seed sources are development-only and are not needed by the migration job/runtime
+prisma/seed*.ts
+prisma/seed*.js
+prisma/seeds/
+
+# Keep only public, non-personal data catalogs in the copied data directories.
+# The negated entries are intentionally explicit documentation for future edits.
+!data/catalogo_administrativo.csv
+!data/catalogo_alimentos.csv
+!data/catalogo_higiene_pessoal.csv
+!data/catalogo_materiais_higiene_pedagogico.csv
+!data/catalogo_pedagogico.csv
+!data/matriz-curricular-2026-sample.json
+!datasets/materiais_seed.json

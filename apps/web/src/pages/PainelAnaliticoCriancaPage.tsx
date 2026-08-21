@@ -120,11 +120,24 @@ export default function PainelAnaliticoCriancaPage() {
   }, [childId]);
 
   useEffect(() => {
-    if (aba !== 'microgestos' || microgestos.length > 0) return;
+    if (aba !== 'microgestos' || microgestos.length > 0 || !childId) return;
     setLoadingMg(true);
-    http.get(`/microgesto/child/${childId}`)
-      .then(r => setMicrogestos(Array.isArray(r?.data) ? r.data : []))
-      .catch(() => {})
+    const start = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    http.get('/diary-events', { params: { childId, startDate: start, limit: '300' } })
+      .then(r => {
+        const events: any[] = Array.isArray(r?.data) ? r.data : (r?.data?.data ?? []);
+        const registros = events.flatMap((event) => {
+          const context = event.aiContext && typeof event.aiContext === 'object' ? event.aiContext : {};
+          const values = Array.isArray(context.microgestos) ? context.microgestos : [];
+          return values.map((microgesto: any) => ({
+            ...microgesto,
+            data: microgesto.data ?? event.eventDate,
+            descricao: microgesto.descricao ?? event.description ?? event.observations ?? '',
+          }));
+        });
+        setMicrogestos(registros);
+      })
+      .catch(() => setMicrogestos([]))
       .finally(() => setLoadingMg(false));
   }, [aba, childId, microgestos.length]);
 

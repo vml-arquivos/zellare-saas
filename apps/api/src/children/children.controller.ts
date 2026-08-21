@@ -128,6 +128,40 @@ export class ChildrenController {
   }
 
   /**
+   * Upload de documento administrativo da matrícula.
+   */
+  @Post(':id/document')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async uploadEnrollmentDocument(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('type') type: string,
+    @Request() req,
+  ) {
+    return this.childrenService.attachEnrollmentDocument(id, type, file, req.user);
+  }
+
+  /**
+   * Atualizar status de matrícula sem remover o registro histórico.
+   */
+  @Patch(':id/enrollment/:enrollmentId')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  async updateEnrollmentStatus(
+    @Param('id') id: string,
+    @Param('enrollmentId') enrollmentId: string,
+    @Body() body: { status: string },
+    @Request() req,
+  ) {
+    return this.childrenService.updateEnrollmentStatus(id, enrollmentId, body?.status, req.user);
+  }
+
+  /**
    * Listar matrículas da criança
    */
   @Get(':id/enrollments')

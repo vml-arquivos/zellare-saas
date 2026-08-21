@@ -1,0 +1,261 @@
+name: Zelare Gate 0.2 PR
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zelare-gate-0-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.19.1"
+  PNPM_VERSION: "8.15.1"
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
+  DIRECT_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
+  JWT_SECRET: ci-only-not-production
+  VITE_RELEASE_ID: ${{ github.sha }}
+
+jobs:
+  gate:
+    name: Gate 0.2 — ${{ matrix.step }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        step:
+          - install
+          - lint
+          - typecheck
+          - privacy
+          - prisma-postgresql
+          - api-tests
+          - web-tests
+          - e2e
+          - builds
+          - openapi-contracts
+          - bundle-pwa-budget
+          - containers-smoke
+          - sbom-licenses
+          - artifacts
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: zelare_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d zelare_ci"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - name: Checkout com histórico para auditoria
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Versões e SHA
+        if: matrix.step == 'install'
+        run: |
+          node --version
+          npm --version
+          pnpm --version
+          git rev-parse HEAD
+          git rev-parse origin/main
+          git ls-remote --heads origin main
+
+      - name: Instalação congelada
+        if: matrix.step == 'install'
+        run: pnpm install --frozen-lockfile
+
+      - name: Hashes dos lockfiles
+        if: matrix.step == 'install'
+        run: sha256sum pnpm-lock.yaml apps/web/pnpm-lock.yaml apps/api/package-lock.json 2>/dev/null | tee artifacts-lockfiles.sha256
+
+      - name: Lint com baseline explícita
+        if: matrix.step == 'lint'
+        run: |
+          pnpm install --frozen-lockfile
+          set +e
+          cd apps/web
+          pnpm exec eslint . --format json > ../../web-lint.json
+          status=$?
+          cd ../..
+          set -e
+          node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('web-lint.json', 'utf8'));
+          const totals = data.reduce((a, file) => ({ errors: a.errors + file.errorCount, warnings: a.warnings + file.warningCount }), { errors: 0, warnings: 0 });
+          console.log(JSON.stringify(totals));
+          if (totals.errors > 800 || totals.warnings > 35) process.exit(1);
+          NODE
+          test "$status" -eq 0 || echo "Lint legado permanece acima de zero; limites baseline documentados: 800 erros/35 avisos."
+
+      - name: Typecheck API e web
+        if: matrix.step == 'typecheck'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api typecheck
+          pnpm --filter @zelare/web exec tsc -b
+
+      - name: Secret/PII scan por allowlist
+        if: matrix.step == 'privacy'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api security:artifacts
+          ! git grep -nI -E 'Carol270412|Demo@2026|sk_(live|test)_[A-Za-z0-9]+|AIza[0-9A-Za-z_-]{20,}' -- ':!.github/**' ':!docs/**' ':!*.md'
+
+      - name: Prisma + PostgreSQL + drift
+        if: matrix.step == 'prisma-postgresql'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api exec prisma validate --schema prisma/schema.prisma
+          pnpm --filter @zelare/api exec prisma generate --schema prisma/schema.prisma
+          ci_prisma="$RUNNER_TEMP/zelare-prisma-ci"
+          rm -rf "$ci_prisma"
+          mkdir -p "$ci_prisma/migrations"
+          cp apps/api/prisma/schema.prisma "$ci_prisma/schema.prisma"
+          copy_migrations_before() {
+            local boundary="$1"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ "$name" < "$boundary" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          copy_migrations_range() {
+            local start="$1" end="$2"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ ( "$name" == "$start" || "$name" > "$start" ) && "$name" < "$end" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          copy_migrations_from() {
+            local start="$1"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ "$name" == "$start" || "$name" > "$start" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          ci_db_url="${DATABASE_URL%%\?*}"
+          copy_migrations_before 20260223000000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -f apps/api/scripts/ci-prepare-historical-prerequisites.sql
+          copy_migrations_range 20260223000000 20260404100000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "development_report"; DROP TABLE IF EXISTS "material_request_item"; DROP TABLE IF EXISTS "child" CASCADE; DROP TABLE IF EXISTS "classroom" CASCADE; DROP TABLE IF EXISTS "unit" CASCADE; DROP TABLE IF EXISTS "mantenedora" CASCADE;'
+          copy_migrations_from 20260404100000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "DevelopmentObservation"; DROP TABLE IF EXISTS "material_request_item";'
+          pnpm --filter @zelare/api exec prisma migrate status --schema "$ci_prisma/schema.prisma"
+          pnpm --filter @zelare/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel "$ci_prisma/schema.prisma" --script | sed '/The field "pnpm" was found in/d' > prisma-drift.sql
+          if grep -vE '^[[:space:]]*(--|$)' prisma-drift.sql | grep -q .; then
+            echo 'Drift não nulo'
+            cat prisma-drift.sql
+            exit 1
+          fi
+
+      - name: Testes API
+        if: matrix.step == 'api-tests'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api test -- --runInBand
+          bash apps/api/scripts/test-migrate-deploy.sh
+
+      - name: Testes Vitest frontend
+        if: matrix.step == 'web-tests'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/web test
+
+      - name: E2E crítico de navegador
+        if: matrix.step == 'e2e'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/web build
+          pnpm --filter @zelare/web exec playwright install --with-deps chromium
+          pnpm --filter @zelare/web test:e2e
+
+      - name: Builds API, web e site
+        if: matrix.step == 'builds'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api build
+          pnpm --filter @zelare/web build
+          pnpm --filter @zelare/site build
+
+      - name: OpenAPI e contratos frontend
+        if: matrix.step == 'openapi-contracts'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api openapi:generate
+          pnpm --filter @zelare/web contracts:check
+          pnpm --filter @zelare/web exec node scripts/validate-openapi.mjs
+
+      - name: Bundle, gzip e precache PWA
+        if: matrix.step == 'bundle-pwa-budget'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/web build
+          pnpm --filter @zelare/web budget:check
+          test "$(grep -c 'registerSW' apps/web/dist/index.html || true)" -eq 0
+
+      - name: Containers e smoke não destrutivo
+        if: matrix.step == 'containers-smoke'
+        run: |
+          docker build --label org.opencontainers.image.revision=${{ github.sha }} -f apps/api/Dockerfile -t zelare-api:ci apps/api
+          docker build --label org.opencontainers.image.revision=${{ github.sha }} -f apps/web/Dockerfile -t zelare-web:ci .
+          docker run --rm zelare-api:ci node --version
+          docker run --rm zelare-web:ci nginx -t
+
+      - name: SBOM e licenças
+        if: matrix.step == 'sbom-licenses'
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          output-file: zelare-sbom.spdx.json
+          format: spdx-json
+          artifact-name: zelare-gate-0-2-sbom.spdx.json
+
+      - name: Inventário final de artifacts
+        if: matrix.step == 'artifacts'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api security:artifacts
+          ! find . -path '*/dist/*' -type f \( -iname '*.xlsx' -o -iname '*.xls' \) -print -quit | grep -q .
+          ! find . -path '*/dist/*' -type f -iname '*.json' -print0 | xargs -0 grep -IlE 'Carol270412|Demo@2026|ALUNOS2026|funcionarios-reais' | grep -q .
+          find apps/api/dist apps/web/dist -type f -printf '%p %s bytes\n' 2>/dev/null | sort > artifacts-inventory.txt
+
+      - name: Upload de evidências redigidas
+        if: always() && (matrix.step == 'install' || matrix.step == 'privacy' || matrix.step == 'prisma-postgresql' || matrix.step == 'web-tests' || matrix.step == 'openapi-contracts' || matrix.step == 'bundle-pwa-budget' || matrix.step == 'artifacts')
+        uses: actions/upload-artifact@v4
+        with:
+          name: zelare-gate-0-2-${{ matrix.step }}
+          if-no-files-found: ignore
+          path: |
+            artifacts-lockfiles.sha256
+            web-lint.json
+            prisma-drift.sql
+            prisma-drift-report.txt
+            apps/api/dist/openapi.json
+            apps/web/dist/manifest.webmanifest
+            apps/web/dist/sw.js
+            artifacts-inventory.txt
+            zelare-sbom.spdx.json

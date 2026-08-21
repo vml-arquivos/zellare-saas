@@ -5,6 +5,7 @@ import { ChildrenController } from './children.controller';
 import { ChildrenService } from './children.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EvidenceModule } from '../evidence/evidence.module';
+import { StorageService } from '../common/services/storage.service';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { EvidenceModule } from '../evidence/evidence.module';
     MulterModule.register({ storage: memoryStorage() }),
   ],
   controllers: [ChildrenController],
-  providers: [ChildrenService],
+  providers: [ChildrenService, StorageService],
   exports: [ChildrenService],
 })
 export class ChildrenModule {}

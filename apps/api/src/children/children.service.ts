@@ -6,6 +6,7 @@ import { UpdateChildDto } from './dto/update-child.dto';
 import { FilterChildDto } from './dto/filter-child.dto';
 import { canAccessUnit } from '../common/utils/can-access-unit';
 import { EvidenceService } from '../evidence/evidence.service';
+import { StorageService } from '../common/services/storage.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -54,6 +55,7 @@ function normalizeChildJsonFields(
 export class ChildrenService {
   constructor(
     private prisma: PrismaService,
+    @Optional() private readonly storage?: StorageService,
     @Optional() private readonly evidenceService?: EvidenceService,
   ) {}
 
@@ -451,6 +453,79 @@ export class ChildrenService {
     }
 
     return { message: 'Nenhuma alteração realizada.' };
+  }
+
+  /**
+   * Persistir um documento administrativo da matrícula.
+   */
+  async attachEnrollmentDocument(
+    childId: string,
+    type: string,
+    file: Express.Multer.File,
+    user: any,
+  ) {
+    const child = await this.findOne(childId, user);
+    if (!file) throw new BadRequestException('Arquivo do documento é obrigatório');
+    if (!type?.trim()) throw new BadRequestException('Tipo do documento é obrigatório');
+
+    if (!this.storage) throw new InternalServerErrorException('Storage de documentos não configurado');
+    const stored = await this.storage.save(file.buffer, file.originalname, user.mantenedoraId);
+    const current = child.documentosMatricula && typeof child.documentosMatricula === 'object'
+      ? child.documentosMatricula as Record<string, unknown>
+      : {};
+    const anexos = current.anexos && typeof current.anexos === 'object'
+      ? current.anexos as Record<string, unknown>
+      : {};
+    const anteriores = Array.isArray(anexos[type]) ? anexos[type] : [];
+    const documento = {
+      url: stored.url,
+      nome: file.originalname,
+      tipo: type,
+      mimeType: file.mimetype,
+      tamanho: file.size,
+      enviadoEm: new Date().toISOString(),
+    };
+
+    await this.prisma.child.update({
+      where: { id: childId },
+      data: {
+        documentosMatricula: toPrismaJson({
+          ...current,
+          [type]: true,
+          anexos: { ...anexos, [type]: [...anteriores, documento] },
+        }),
+      },
+    });
+    return { documento };
+  }
+
+  /**
+   * Atualizar status de uma matrícula específica sem apagar histórico.
+   * Usado por cancelamento e transferência administrativa.
+   */
+  async updateEnrollmentStatus(
+    childId: string,
+    enrollmentId: string,
+    status: string,
+    user: any,
+  ) {
+    await this.findOne(childId, user);
+    if (!Object.values(EnrollmentStatus).includes(status as EnrollmentStatus)) {
+      throw new BadRequestException(`Status de matrícula inválido: ${status}`);
+    }
+
+    const enrollment = await this.prisma.enrollment.findFirst({
+      where: { id: enrollmentId, childId },
+    });
+    if (!enrollment) {
+      throw new NotFoundException('Matrícula não encontrada para esta criança');
+    }
+
+    return this.prisma.enrollment.update({
+      where: { id: enrollment.id },
+      data: { status: status as EnrollmentStatus },
+      include: { classroom: { select: { id: true, name: true } } },
+    });
   }
 
   /**

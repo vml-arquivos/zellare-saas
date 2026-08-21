@@ -27,6 +27,9 @@ const forbidden = [
   { needle: 'conexa-relatorio-central', reason: 'o exportador central não pode usar nome legado COCRIS/Conexa' },
   { needle: 'Exibindo dados de demonstração', reason: 'falhas reais não podem ser apresentadas como dados demo' },
   { needle: 'Exibindo dados de demonstracao', reason: 'falhas reais não podem ser apresentadas como dados demo' },
+  { needle: 'reset-password', reason: 'reset-password não possui rota backend canônica implementada' },
+  { needle: "http.delete(`/admin/users/", reason: 'delete de usuário não possui rota backend canônica implementada' },
+  { needle: "params: { limit: 1 }", reason: 'não selecionar automaticamente a primeira unidade sem escopo explícito' },
 ];
 
 const errors = [];
@@ -60,6 +63,9 @@ if (settings.includes("http.get('/units/my'") || settings.includes("http.put('/u
 }
 if (settings.includes("http.put(`/users/") || settings.includes("http.post('/admin/users', novoUsuario)")) {
   errors.push('ConfiguracoesPage.tsx contém contrato legado de usuários; use /admin/users/:id e DTO rico');
+}
+if (settings.includes("params: { limit: 1 }")) {
+  errors.push('ConfiguracoesPage.tsx não pode escolher a primeira unidade automaticamente');
 }
 
 if (errors.length > 0) {

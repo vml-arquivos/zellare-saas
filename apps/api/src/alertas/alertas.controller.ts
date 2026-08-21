@@ -21,6 +21,8 @@ import {
   Controller,
   Get,
   Patch,
+  ForbiddenException,
+  NotFoundException,
   Param,
   Query,
   UseGuards,
@@ -58,6 +60,8 @@ export class AlertasController {
     @Query('classroomId') classroomId?: string,
     @Query('unread') unread?: string,
     @Query('limit') limit?: string,
+    @Query('canal') canal?: 'OPERACIONAL' | 'ACOMPANHAMENTO',
+    @Query('prioridade') prioridade?: 'NORMAL' | 'URGENTE',
   ) {
     const take = Math.min(Number(limit ?? 50), 200);
     const apenasNaoResolvidos = unread !== 'false';
@@ -71,6 +75,12 @@ export class AlertasController {
     // Filtros opcionais
     if (unitId) where.unitId = unitId;
     if (classroomId) where.classroomId = classroomId;
+    const metadataFilters = [
+      canal ? { path: ['canal'], equals: canal } : null,
+      prioridade ? { path: ['prioridadeOperacional'], equals: prioridade } : null,
+    ].filter(Boolean);
+    if (metadataFilters.length === 1) where.metadados = metadataFilters[0];
+    if (metadataFilters.length > 1) where.AND = metadataFilters.map((filter) => ({ metadados: filter }));
 
     // Professor: restringir à turma vinculada se não informou classroomId
     // user.roles é um array; verificar se algum role tem level PROFESSOR
@@ -97,18 +107,35 @@ export class AlertasController {
       // buscar o nome se necessário.
     });
 
-    // Resumo para os cards do dashboard
-    const total = alertas.length;
-    const criticos = alertas.filter(
+    const normalizados = alertas.map((alerta) => {
+      const metadados = alerta.metadados && typeof alerta.metadados === 'object'
+        ? alerta.metadados as Record<string, unknown>
+        : {};
+      return {
+        ...alerta,
+        canal: metadados.canal === 'ACOMPANHAMENTO' ? 'ACOMPANHAMENTO' : 'OPERACIONAL',
+        prioridadeOperacional: metadados.prioridadeOperacional === 'URGENTE' ? 'URGENTE' : 'NORMAL',
+      };
+    });
+
+    // Mantém o resumo legado e acrescenta contadores sem misturar os canais.
+    const total = normalizados.length;
+    const criticos = normalizados.filter(
       (a) => a.severidade === 'ALTA' || a.severidade === 'CRITICA',
     ).length;
-    const atencao = alertas.filter((a) => a.severidade === 'MEDIA').length;
+    const atencao = normalizados.filter((a) => a.severidade === 'MEDIA').length;
+    const urgentes = normalizados.filter((a) => a.prioridadeOperacional === 'URGENTE' && a.canal === 'OPERACIONAL').length;
+    const acompanhamento = normalizados.filter((a) => a.canal === 'ACOMPANHAMENTO').length;
 
     return {
       total,
       criticos,
       atencao,
-      alertas,
+      urgentes: normalizados.filter((a) => a.prioridadeOperacional === 'URGENTE' && a.canal === 'OPERACIONAL'),
+      acompanhamento: normalizados.filter((a) => a.canal === 'ACOMPANHAMENTO'),
+      urgentesTotal: urgentes,
+      acompanhamentoTotal: acompanhamento,
+      alertas: normalizados,
     };
   }
 
@@ -128,6 +155,19 @@ export class AlertasController {
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
   ) {
+    const alvo = await this.prisma.alertaOperacional.findUnique({
+      where: { id },
+      select: { id: true, mantenedoraId: true, unitId: true },
+    });
+    if (!alvo || alvo.mantenedoraId !== user.mantenedoraId) {
+      throw new NotFoundException('Alerta não encontrado');
+    }
+    const isGlobal = user.roles?.some(
+      (role) => role.level === RoleLevel.DEVELOPER || role.level === RoleLevel.MANTENEDORA || role.level === RoleLevel.STAFF_CENTRAL,
+    );
+    if (!isGlobal && alvo.unitId && alvo.unitId !== user.unitId) {
+      throw new ForbiddenException('Sem acesso ao alerta de outra unidade');
+    }
     return this.prisma.alertaOperacional.update({
       where: { id },
       data: {
