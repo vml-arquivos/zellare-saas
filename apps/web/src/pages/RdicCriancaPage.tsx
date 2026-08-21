@@ -54,6 +54,23 @@ function calcularIdade(dateOfBirth?: string | null): number {
   return Math.max(0, anos);
 }
 
+function normalizarAluno(raw: any): Aluno {
+  const nomeCompleto = String(raw?.name ?? raw?.nome ?? raw?.fullName ?? raw?.nomeCompleto ?? '').trim();
+  const partes = nomeCompleto.split(/\s+/).filter(Boolean);
+  const firstName = String(raw?.firstName ?? raw?.first_name ?? partes.shift() ?? '').trim() || 'Criança';
+  const lastName = String(raw?.lastName ?? raw?.last_name ?? partes.join(' ')).trim();
+  return {
+    id: String(raw?.id ?? ''),
+    nome: `${firstName} ${lastName}`.trim(),
+    firstName,
+    lastName,
+    idade: calcularIdade(raw?.dateOfBirth ?? raw?.birthDate ?? null),
+    dateOfBirth: raw?.dateOfBirth ?? raw?.birthDate ?? null,
+    gender: String(raw?.gender ?? ''),
+    photoUrl: raw?.photoUrl ?? raw?.photo_url ?? raw?.fotoUrl ?? undefined,
+  };
+}
+
 interface Turma {
   id: string;
   name: string;
@@ -557,7 +574,7 @@ export default function RdicCriancaPage() {
         if (res.data?.hasClassroom) {
           setTurma(res.data.classroom);
           void carregarResumoExpressTurma(res.data.classroom.id, trimestre);
-          const lista: Aluno[] = res.data.alunos ?? [];
+          const lista: Aluno[] = (res.data.alunos ?? []).map(normalizarAluno).filter((aluno: Aluno) => aluno.id);
           setAlunos(lista);
           carregarRdicsMapParaTurma(lista, res.data?.classroom?.id);
           if (preselectedChildId) {
@@ -614,16 +631,9 @@ export default function RdicCriancaPage() {
         setTurma(turmaObj);
         void carregarResumoExpressTurma(turmaObj.id, trimestre);
         const childrenRes = await http.get(`/lookup/classrooms/${turmaInfo.id}/children`);
-        const lista: Aluno[] = (Array.isArray(childrenRes.data) ? childrenRes.data : childrenRes.data?.data ?? []).map((c: any) => ({
-          id: c.id,
-          nome: `${c.firstName} ${c.lastName}`,
-          firstName: c.firstName,
-          lastName: c.lastName,
-          dateOfBirth: c.dateOfBirth ?? null,
-          idade: calcularIdade(c.dateOfBirth),
-          gender: c.gender ?? '',
-          photoUrl: c.photoUrl ?? undefined,
-        }));
+        const lista: Aluno[] = (Array.isArray(childrenRes.data) ? childrenRes.data : childrenRes.data?.data ?? [])
+          .map(normalizarAluno)
+          .filter((aluno: Aluno) => aluno.id);
         setAlunos(lista);
         carregarRdicsMapParaTurma(lista, turmaInfo.id);
         if (preselectedChildId) {
