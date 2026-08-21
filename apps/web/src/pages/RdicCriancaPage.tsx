@@ -340,8 +340,9 @@ const AVATAR_PALETTE: Record<string, string> = {
   W:'from-blue-400 to-cyan-500', X:'from-fuchsia-400 to-violet-500',
   Y:'from-yellow-400 to-lime-500', Z:'from-rose-400 to-fuchsia-500',
 };
-function getAvatarGradient(nome: string): string {
-  return AVATAR_PALETTE[nome[0]?.toUpperCase() ?? 'A'] ?? 'from-indigo-400 to-purple-500';
+function getAvatarGradient(nome?: string | null): string {
+  const inicial = nome?.trim().charAt(0).toUpperCase() || 'A';
+  return AVATAR_PALETTE[inicial] ?? 'from-indigo-400 to-purple-500';
 }
 
 // ─── Componente de Card de Criança ────────────────────────────────────────────
@@ -358,7 +359,7 @@ function CardCrianca({
   rdicsCount: number;
   evidencias?: EvidenciasResumo;
 }) {
-  const iniciais = `${aluno.firstName[0] ?? ''}${aluno.lastName[0] ?? ''}`.toUpperCase();
+  const iniciais = `${aluno.firstName?.trim().charAt(0) ?? ''}${aluno.lastName?.trim().charAt(0) ?? ''}`.toUpperCase() || '—';
   const gradient = getAvatarGradient(aluno.firstName);
   const genero = aluno.gender === 'FEMININO' ? 'Menina' : aluno.gender === 'MASCULINO' ? 'Menino' : '';
   const generoIcon = aluno.gender === 'FEMININO' ? '♀' : aluno.gender === 'MASCULINO' ? '♂' : '';
