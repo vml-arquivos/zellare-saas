@@ -1,4 +1,5 @@
 import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, useLocation } from 'react-router-dom';
 import {
   BookOpen, ClipboardList,   BarChart2, ShoppingCart, GraduationCap, ClipboardCheck,
@@ -45,6 +46,7 @@ const PROFESSOR_FERRAMENTAS: MenuItem[] = [
 
 const FAMILY_ITEMS: MenuItem[] = [
   { path: '/app/timeline-familiar', label: 'Timeline da Criança', icon: <HeartPulse className="h-4 w-4" />, badge: 'Privado' },
+  { path: '/app/family-circle', label: 'Family Circle', icon: <MessageCircle className="h-4 w-4" />, badge: 'Privado' },
 ];
 
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
@@ -62,6 +64,7 @@ const COORD_PEDAGOGICO: MenuItem[] = [
   { path: '/app/coleta-diaria',     label: 'Diário de Bordo',       icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
   { path: '/app/atendimentos-pais', label: 'Famílias',  icon: <MessageCircle className="h-4 w-4" /> },
   { path: '/app/rdic-coord',        label: 'Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
+  { path: '/app/review-hub',         label: 'Review Hub',   icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdic-crianca',    label: 'Desenvolvimento',    icon: <Brain className="h-4 w-4" /> },
   { path: '/app/inteligencia',    label: 'Inteligência',        icon: <Sparkles className="h-4 w-4" /> },
   { path: '/app/reports',         label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
@@ -139,6 +142,7 @@ const UNIDADE_PEDAGOGICO: MenuItem[] = [
   { path: '/app/rdic-coord',        label: 'Revisão', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
   { path: '/app/rdic-crianca',      label: 'Desenvolvimento',           icon: <Brain className="h-4 w-4" /> },
   { path: '/app/inteligencia',      label: 'Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/review-hub',         label: 'Review Hub',        icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/rdx',               label: 'Fotos da Turma',             icon: <Camera className="h-4 w-4" /> },
   { path: '/app/matriz-pedagogica', label: 'Matriz 2026',                icon: <Layers className="h-4 w-4" /> },
   { path: '/app/atendimentos-pais', label: 'Famílias',          icon: <MessageCircle className="h-4 w-4" /> },
@@ -161,6 +165,7 @@ const CENTRAL_ITEMS: MenuItem[] = [
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/central',                  label: 'Análises',        icon: <TrendingUp className="h-4 w-4" /> },
   { path: '/app/inteligencia',             label: 'Inteligência',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
+  { path: '/app/review-hub',                label: 'Review Hub',       icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/coordenacao-geral',        label: 'Coordenação Geral',        icon: <Network className="h-4 w-4" /> },
   { path: '/app/rdic-geral',               label: 'Relatórios',         icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },

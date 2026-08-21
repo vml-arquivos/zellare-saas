@@ -58,6 +58,7 @@ import { TeacherRankingModule } from './teacher-ranking/teacher-ranking.module';
 import { FamilyModule } from './family/family.module';
 import { CareModule } from './care/care.module';
 import { EvidenceModule } from './evidence/evidence.module';
+import { Onda1Module } from './onda1/onda1.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { EvidenceModule } from './evidence/evidence.module';
     FamilyModule,
     CareModule,
     EvidenceModule,
+    Onda1Module,
   ],
   controllers: [AppController],
   providers: [

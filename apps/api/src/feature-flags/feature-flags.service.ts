@@ -16,6 +16,14 @@ export interface FeatureFlags {
   exemploAtividade: boolean;
   /** SuperSaaS: acesso a todas as unidades da mantenedora */
   superSaas: boolean;
+  /** Evidence Loop da Onda 1 — desligado por padrão */
+  evidenceLoopV1: boolean;
+  /** Review Hub da Onda 1 — desligado por padrão */
+  reviewHubV1: boolean;
+  /** Family Circle da Onda 1 — desligado por padrão */
+  familyCircleV1: boolean;
+  /** Tradução assistida da Onda 1 — desligada por padrão */
+  familyTranslationV1: boolean;
 }
 
 @Injectable()
@@ -41,6 +49,10 @@ export class FeatureFlagsService {
       aprovacaoPlanejamento: isUnidade || isDeveloper,
       exemploAtividade: isCoordOrAbove,
       superSaas: isCentralOrAbove,
+      evidenceLoopV1: false,
+      reviewHubV1: false,
+      familyCircleV1: false,
+      familyTranslationV1: false,
     };
   }
 }
