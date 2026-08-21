@@ -59,6 +59,7 @@ import { FamilyModule } from './family/family.module';
 import { CareModule } from './care/care.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { Onda1Module } from './onda1/onda1.module';
+import { Onda2Module } from './onda2/onda2.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { Onda1Module } from './onda1/onda1.module';
     CareModule,
     EvidenceModule,
     Onda1Module,
+    Onda2Module,
   ],
   controllers: [AppController],
   providers: [

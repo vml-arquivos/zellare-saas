@@ -86,6 +86,7 @@ import CareOverviewPage from '../pages/CareOverviewPage';
 import DailyCollectionPage from '../pages/DailyCollectionPage';
 import FamilyGuardiansPage from '../pages/FamilyGuardiansPage';
 import MetricsCoveragePage from '../pages/MetricsCoveragePage';
+import Onda2CommandCenterPage from '../pages/Onda2CommandCenterPage';
 import Child360Page from '../pages/Child360Page';
 import ReviewHubPage from '../pages/ReviewHubPage';
 import FamilyCirclePage from '../pages/FamilyCirclePage';
@@ -721,6 +722,16 @@ export const router = createBrowserRouter([
         element: (
           <RoleProtectedRoute allowedRoles={['FAMILIA', 'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
             <FamilyTimelinePage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      // ─── Onda 2 — Command Center Pulse + Facilities ──────────────────────────
+      {
+        path: 'onda2',
+        element: (
+          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+            <Onda2CommandCenterPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,

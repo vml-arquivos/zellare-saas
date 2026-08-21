@@ -51,6 +51,7 @@ const FAMILY_ITEMS: MenuItem[] = [
 
 // UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
 const COORD_GESTAO: MenuItem[] = [
+  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
   { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/coordenacao-pedagogica', label: 'Painel da Coordenação',    icon: <Home className="h-4 w-4" /> },
@@ -73,7 +74,9 @@ const COORD_PEDAGOGICO: MenuItem[] = [
 
 // UNIDADE — Diretor ────────────────────────────────────────────────────────────
 const DIRETOR_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
+  { path: '/app/onda2',              label: 'Command Center',      icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
+  { path: '/app/familia/vinculos',
+     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/diretor',           label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
   { path: '/app/pedidos-compra',    label: 'Aprovar Pedidos',        icon: <ShoppingBag className="h-4 w-4" />, badge: 'Aprovação' },
@@ -123,6 +126,7 @@ const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
 
 // UNIDADE — Genérico (sem roleType específico) ─────────────────────────────────
 const UNIDADE_GESTAO: MenuItem[] = [
+  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
   { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
@@ -160,6 +164,7 @@ const PSICOLOGA_ITEMS: MenuItem[] = [
 ];
 // STAFF_CENTRAL ──────────────────────────────────────────────────────────────────────────────────
 const CENTRAL_ITEMS: MenuItem[] = [
+  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
   { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
@@ -175,6 +180,7 @@ const CENTRAL_ITEMS: MenuItem[] = [
 
 // MANTENEDORA ──────────────────────────────────────────────────────────────────
 const MANTENEDORA_ITEMS: MenuItem[] = [
+  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
   { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
@@ -191,6 +197,7 @@ const MANTENEDORA_ITEMS: MenuItem[] = [
 
 // DEVELOPER — acesso completo ──────────────────────────────────────────────────
 const DEV_EXTRA: MenuItem[] = [
+  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
   { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
   { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
   { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
