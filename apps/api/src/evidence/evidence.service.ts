@@ -581,9 +581,14 @@ export class EvidenceService {
   }
 
   async summary(childId: string, user: JwtPayload) {
-    const evidence = await this.list({ childId, limit: '1000' }, user);
     const endDate = new Date();
     const startDate = new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const evidence = await this.list({
+      childId,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      limit: '1000',
+    }, user);
     const longitudinal = analyzeLongitudinalEvidence(evidence, { startDate, endDate });
     const byType: Record<string, number> = {};
     const bySource: Record<string, number> = {};

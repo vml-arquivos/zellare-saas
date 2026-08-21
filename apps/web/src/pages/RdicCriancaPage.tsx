@@ -54,6 +54,17 @@ function calcularIdade(dateOfBirth?: string | null): number {
   return Math.max(0, anos);
 }
 
+function isRegistroDeCrianca(raw: any): boolean {
+  if (!raw?.id) return false;
+  // Evita que um payload de turma (id/name/code/unitId) seja tratado como criança
+  // quando uma camada intermediária devolver a coleção errada para o endpoint.
+  const registroSomenteTurma = Boolean(
+    raw?.unitId && raw?.code && !raw?.classroomId && !raw?.dateOfBirth && !raw?.birthDate
+      && !raw?.firstName && !raw?.lastName && !raw?.first_name && !raw?.last_name,
+  );
+  return !registroSomenteTurma;
+}
+
 function normalizarAluno(raw: any): Aluno {
   const nomeCompleto = String(raw?.name ?? raw?.nome ?? raw?.fullName ?? raw?.nomeCompleto ?? '').trim();
   const partes = nomeCompleto.split(/\s+/).filter(Boolean);
@@ -574,7 +585,10 @@ export default function RdicCriancaPage() {
         if (res.data?.hasClassroom) {
           setTurma(res.data.classroom);
           void carregarResumoExpressTurma(res.data.classroom.id, trimestre);
-          const lista: Aluno[] = (res.data.alunos ?? []).map(normalizarAluno).filter((aluno: Aluno) => aluno.id);
+          const lista: Aluno[] = (res.data.alunos ?? [])
+            .filter(isRegistroDeCrianca)
+            .map(normalizarAluno)
+            .filter((aluno: Aluno) => aluno.id);
           setAlunos(lista);
           carregarRdicsMapParaTurma(lista, res.data?.classroom?.id);
           if (preselectedChildId) {
@@ -630,8 +644,11 @@ export default function RdicCriancaPage() {
         };
         setTurma(turmaObj);
         void carregarResumoExpressTurma(turmaObj.id, trimestre);
-        const childrenRes = await http.get(`/lookup/classrooms/${turmaInfo.id}/children`);
+        // A barra final evita a resposta cacheada de `/accessible` observada no proxy
+        // atual; a validação abaixo impede que uma turma chegue ao estado de crianças.
+        const childrenRes = await http.get(`/lookup/classrooms/${turmaInfo.id}/children/`);
         const lista: Aluno[] = (Array.isArray(childrenRes.data) ? childrenRes.data : childrenRes.data?.data ?? [])
+          .filter(isRegistroDeCrianca)
           .map(normalizarAluno)
           .filter((aluno: Aluno) => aluno.id);
         setAlunos(lista);

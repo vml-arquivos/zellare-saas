@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PageShell } from '../components/ui/PageShell';
+import { useAuth } from '../app/AuthProvider';
+import { hasRole } from '../api/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -259,6 +261,8 @@ function ModalUsuario({
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export default function AdminUsuariosPage() {
+  const { user } = useAuth() as any;
+  const podeCriarUsuarios = hasRole(user, 'MANTENEDORA') || hasRole(user, 'DEVELOPER');
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -381,10 +385,18 @@ export default function AdminUsuariosPage() {
             <option key={s} value={s}>{cfg.label}</option>
           ))}
         </select>
-        <Button onClick={() => { setUsuarioEditando(null); setModalAberto(true); }} className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Novo Usuário
-        </Button>
+        {podeCriarUsuarios && (
+          <Button onClick={() => { setUsuarioEditando(null); setModalAberto(true); }} className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Novo Usuário
+          </Button>
+        )}
       </div>
+
+      {!podeCriarUsuarios && (
+        <p className="mb-3 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
+          Este perfil pode consultar e atualizar usuários da unidade. A criação de novos acessos é exclusiva da mantenedora e do desenvolvedor.
+        </p>
+      )}
 
       {/* Contagem */}
       <p className="text-sm text-gray-500 mb-3">
@@ -402,7 +414,7 @@ export default function AdminUsuariosPage() {
             <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
               <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p className="text-gray-500 font-medium">Nenhum usuário encontrado</p>
-              <p className="text-gray-400 text-sm mt-1">Tente ajustar os filtros ou crie um novo usuário</p>
+              <p className="text-gray-400 text-sm mt-1">Tente ajustar os filtros ou solicite um novo acesso à mantenedora</p>
             </div>
           )}
 

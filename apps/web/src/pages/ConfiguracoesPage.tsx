@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { PageShell } from '../components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -34,13 +34,14 @@ interface PerfilUsuario {
 interface ConfiguracaoUnidade {
   id: string;
   name: string;
-  unitCode: string;
+  unitCode?: string;
+  code?: string;
   endereco?: string;
+  address?: string;
   telefone?: string;
+  phone?: string;
   email?: string;
-  capacidade?: number;
-  horarioFuncionamento?: string;
-  coordenadora?: string;
+  isActive?: boolean;
 }
 
 interface UsuarioSistema {
@@ -56,11 +57,34 @@ interface UsuarioSistema {
 const ROLES_LABELS: Record<string, string> = {
   DEVELOPER: 'Desenvolvedor',
   MANTENEDORA: 'Mantenedora',
+  MANTENEDORA_ADMIN: 'Mantenedora — Admin',
+  MANTENEDORA_FINANCEIRO: 'Mantenedora — Financeiro',
   STAFF_CENTRAL: 'Equipe Central',
+  STAFF_CENTRAL_PEDAGOGICO: 'Coord. Pedagógica Geral',
+  STAFF_CENTRAL_PSICOLOGIA: 'Psicóloga Central',
   UNIDADE: 'Gestão de Unidade',
+  UNIDADE_DIRETOR: 'Diretor(a) de Unidade',
+  UNIDADE_COORDENADOR_PEDAGOGICO: 'Coord. Pedagógica',
+  UNIDADE_ADMINISTRATIVO: 'Secretaria / Adm.',
+  UNIDADE_NUTRICIONISTA: 'Nutricionista',
   PROFESSOR: 'Professor(a)',
   PROFESSOR_AUXILIAR: 'Professor(a) Auxiliar',
+  FAMILIA_RESPONSAVEL: 'Responsável familiar',
 };
+
+const CREATE_ROLE_TYPES = [
+  'MANTENEDORA_ADMIN',
+  'MANTENEDORA_FINANCEIRO',
+  'STAFF_CENTRAL_PEDAGOGICO',
+  'STAFF_CENTRAL_PSICOLOGIA',
+  'UNIDADE_DIRETOR',
+  'UNIDADE_COORDENADOR_PEDAGOGICO',
+  'UNIDADE_ADMINISTRATIVO',
+  'UNIDADE_NUTRICIONISTA',
+  'PROFESSOR',
+  'PROFESSOR_AUXILIAR',
+  'FAMILIA_RESPONSAVEL',
+] as const;
 
 const ROLES_COR: Record<string, string> = {
   DEVELOPER: 'bg-red-100 text-red-700',
@@ -87,7 +111,6 @@ export default function ConfiguracoesPage() {
   );
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const photoRef = useRef<HTMLInputElement>(null);
 
   // Perfil
   const [perfil, setPerfil] = useState<Partial<PerfilUsuario>>({});
@@ -111,6 +134,7 @@ export default function ConfiguracoesPage() {
     emailRdic: true,
     pushAtivado: true,
   });
+  const preferenciasKey = user?.id ? `zelare:preferencias:${user.id}` : null;
 
   // FIX p0.5: user.roles pode ser array de objetos {roleId, level, unitScopes} (após fix p0.1)
   // Extrair .level se for objeto, ou usar string diretamente
@@ -134,13 +158,28 @@ export default function ConfiguracoesPage() {
   const isAdmin = !isNutricionistaUser &&
     ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL', 'UNIDADE'].includes(userRole);
   const isDev = userRole === 'DEVELOPER';
+  const podeCriarUsuarios = isDev || userRole === 'MANTENEDORA';
+  const podeEditarUnidade = ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL'].includes(userRole);
 
   // Perfil carregado apenas para dados de contexto (nome/email no header)
   useEffect(() => { loadPerfil(); }, []);
   useEffect(() => {
+    if (!preferenciasKey) return;
+    try {
+      const saved = localStorage.getItem(preferenciasKey);
+      if (saved) setNotifs(prev => ({ ...prev, ...JSON.parse(saved) }));
+    } catch { /* preferência local inválida: mantém padrão */ }
+  }, [preferenciasKey]);
+  useEffect(() => {
     if (abaAtiva === 'usuarios' && isAdmin) loadUsuarios();
     if (abaAtiva === 'unidade' && isAdmin) loadUnidade();
-  }, [abaAtiva]);
+  }, [abaAtiva, isAdmin]);
+
+  function salvarPreferencias() {
+    if (!preferenciasKey) return;
+    localStorage.setItem(preferenciasKey, JSON.stringify(notifs));
+    toast.success('Preferências salvas neste dispositivo.');
+  }
 
   async function loadPerfil() {
     setLoading(true);
@@ -171,7 +210,16 @@ export default function ConfiguracoesPage() {
     try {
       const res = await http.get('/admin/users', { params: { limit: 50 } });
       const d = res.data;
-      setUsuarios(Array.isArray(d) ? d : d?.data ?? []);
+      const rawUsers = Array.isArray(d) ? d : d?.users ?? d?.data ?? d?.items ?? [];
+      setUsuarios(rawUsers.map((item: any) => ({
+        id: String(item.id ?? ''),
+        nome: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() || item.nome || 'Usuário',
+        email: String(item.email ?? ''),
+        role: item.roles?.[0]?.roleType ?? item.roles?.[0]?.level ?? item.role ?? '',
+        ativo: item.status === 'ATIVO',
+        ultimoAcesso: item.lastLogin,
+        unidade: item.unit,
+      })));
     } catch (error) {
       console.error('[Configuracoes] Falha ao carregar usuários:', error);
       toast.error('Não foi possível carregar os usuários.');
@@ -180,8 +228,17 @@ export default function ConfiguracoesPage() {
 
   async function loadUnidade() {
     try {
-      const res = await http.get('/units/my');
-      setUnidade(res.data || {});
+      const unitId = user?.unitId;
+      const res = unitId ? await http.get(`/units/${unitId}`) : await http.get('/units', { params: { limit: 1 } });
+      const raw = Array.isArray(res.data) ? res.data[0] : res.data?.units?.[0] ?? res.data?.data?.[0] ?? res.data;
+      if (raw) {
+        setUnidade({
+          ...raw,
+          unitCode: raw.unitCode ?? raw.code,
+          endereco: raw.endereco ?? raw.address,
+          telefone: raw.telefone ?? raw.phone,
+        });
+      }
     } catch { /* silencioso */ }
   }
 
@@ -217,28 +274,21 @@ export default function ConfiguracoesPage() {
     } finally { setSaving(false); }
   }
 
-  async function uploadFotoPerfil(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Selecione uma imagem'); return; }
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await http.post('/auth/upload-photo', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      const url = res.data?.photoUrl || URL.createObjectURL(file);
-      setPerfil(p => ({ ...p, photoUrl: url }));
-      toast.success('Foto atualizada!');
-    } catch {
-      const url = URL.createObjectURL(file);
-      setPerfil(p => ({ ...p, photoUrl: url }));
-      toast.success('Foto atualizada localmente');
-    }
-  }
-
   async function salvarUnidade() {
+    if (!podeEditarUnidade) {
+      toast.error('Somente a mantenedora, a equipe central e o desenvolvedor podem editar dados da unidade.');
+      return;
+    }
+    if (!unidade.id) { toast.error('Unidade não identificada.'); return; }
     setSaving(true);
     try {
-      await http.put('/units/my', unidade);
+      const res = await http.put(`/units/${unidade.id}`, {
+        name: unidade.name?.trim(),
+        address: unidade.endereco ?? unidade.address ?? '',
+        phone: unidade.telefone ?? unidade.phone ?? '',
+        email: unidade.email ?? '',
+      });
+      setUnidade(prev => ({ ...prev, ...res.data, unitCode: res.data?.code ?? prev.unitCode }));
       toast.success('Dados da unidade atualizados!');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Erro ao salvar dados da unidade');
@@ -246,13 +296,35 @@ export default function ConfiguracoesPage() {
   }
 
   async function criarUsuario() {
+    if (!podeCriarUsuarios) {
+      toast.error('A criação de usuários é exclusiva da mantenedora e do desenvolvedor.');
+      return;
+    }
     if (!novoUsuario.email || !novoUsuario.nome || !novoUsuario.senha) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
+    const partes = novoUsuario.nome.trim().split(/\s+/).filter(Boolean);
+    if (partes.length < 2) {
+      toast.error('Informe nome e sobrenome.');
+      return;
+    }
+    const roleType = novoUsuario.role;
+    const precisaUnidade = roleType.startsWith('UNIDADE_') || roleType === 'PROFESSOR' || roleType === 'PROFESSOR_AUXILIAR';
+    if (precisaUnidade && !user?.unit?.unitCode) {
+      toast.error('Selecione uma unidade no cadastro completo de usuários.');
+      return;
+    }
     setSaving(true);
     try {
-      await http.post('/admin/users', novoUsuario);
+      await http.post('/admin/users', {
+        firstName: partes[0],
+        lastName: partes.slice(1).join(' '),
+        email: novoUsuario.email.trim().toLowerCase(),
+        password: novoUsuario.senha,
+        roleType,
+        ...(precisaUnidade ? { unitCode: user.unit.unitCode } : {}),
+      });
       toast.success('Usuário criado com sucesso!');
       setShowNovoUsuario(false);
       setNovoUsuario({ nome: '', email: '', role: 'PROFESSOR', senha: '' });
@@ -264,7 +336,7 @@ export default function ConfiguracoesPage() {
 
   async function toggleUsuario(id: string, ativo: boolean) {
     try {
-      await http.put(`/users/${id}`, { ativo: !ativo });
+      await http.put(`/admin/users/${id}`, { status: ativo ? 'INATIVO' : 'ATIVO' });
       setUsuarios(prev => prev.map(u => u.id === id ? { ...u, ativo: !ativo } : u));
       toast.success(ativo ? 'Usuário desativado' : 'Usuário ativado');
     } catch {
@@ -314,7 +386,7 @@ export default function ConfiguracoesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Nome da Unidade</Label>
-                    <Input value={unidade.name || ''} onChange={e => setUnidade(u => ({ ...u, name: e.target.value }))} />
+                    <Input value={unidade.name || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, name: e.target.value }))} />
                   </div>
                   <div>
                     <Label>Código da Unidade</Label>
@@ -322,29 +394,25 @@ export default function ConfiguracoesPage() {
                   </div>
                   <div>
                     <Label>Telefone</Label>
-                    <Input placeholder="(00) 0000-0000" value={unidade.telefone || ''} onChange={e => setUnidade(u => ({ ...u, telefone: e.target.value }))} />
+                    <Input placeholder="(00) 0000-0000" value={unidade.telefone || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, telefone: e.target.value }))} />
                   </div>
                   <div>
                     <Label>E-mail da Unidade</Label>
-                    <Input type="email" value={unidade.email || ''} onChange={e => setUnidade(u => ({ ...u, email: e.target.value }))} />
-                  </div>
-                  <div>
-                    <Label>Coordenadora</Label>
-                    <Input placeholder="Nome da coordenadora" value={unidade.coordenadora || ''} onChange={e => setUnidade(u => ({ ...u, coordenadora: e.target.value }))} />
-                  </div>
-                  <div>
-                    <Label>Horário de Funcionamento</Label>
-                    <Input placeholder="Ex: 07h às 18h" value={unidade.horarioFuncionamento || ''} onChange={e => setUnidade(u => ({ ...u, horarioFuncionamento: e.target.value }))} />
+                    <Input type="email" value={unidade.email || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, email: e.target.value }))} />
                   </div>
                 </div>
                 <div>
                   <Label>Endereço</Label>
-                  <Textarea rows={2} value={unidade.endereco || ''} onChange={e => setUnidade(u => ({ ...u, endereco: e.target.value }))} />
+                  <Textarea rows={2} value={unidade.endereco || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, endereco: e.target.value }))} />
                 </div>
-                <Button onClick={salvarUnidade} disabled={saving} className="bg-green-600 hover:bg-green-700">
-                  {saving ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                  Salvar Dados da Unidade
-                </Button>
+                {podeEditarUnidade ? (
+                  <Button onClick={salvarUnidade} disabled={saving} className="bg-green-600 hover:bg-green-700">
+                    {saving ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                    Salvar Dados da Unidade
+                  </Button>
+                ) : (
+                  <p className="text-xs text-gray-500">Dados da unidade em modo de consulta.</p>
+                )}
               </CardContent>
             </Card>
           )}
@@ -354,13 +422,15 @@ export default function ConfiguracoesPage() {
             <div className="space-y-4">
               <div className="flex gap-3">
                 <Input placeholder="Buscar usuário..." value={buscaUsuario} onChange={e => setBuscaUsuario(e.target.value)} className="flex-1" />
-                <Button onClick={() => setShowNovoUsuario(!showNovoUsuario)} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> Novo Usuário
-                </Button>
+                {podeCriarUsuarios && (
+                  <Button onClick={() => setShowNovoUsuario(!showNovoUsuario)} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" /> Novo Usuário
+                  </Button>
+                )}
               </div>
 
               {/* Formulário novo usuário */}
-              {showNovoUsuario && (
+              {showNovoUsuario && podeCriarUsuarios && (
                 <Card className="border-2 border-blue-100 bg-blue-50">
                   <CardHeader><CardTitle className="text-blue-700 text-base flex items-center gap-2"><UserCheck className="h-5 w-5" /> Criar Novo Usuário</CardTitle></CardHeader>
                   <CardContent className="space-y-3">
@@ -376,8 +446,8 @@ export default function ConfiguracoesPage() {
                       <div>
                         <Label>Perfil *</Label>
                         <select className="w-full px-3 py-2 border rounded-lg text-sm" value={novoUsuario.role} onChange={e => setNovoUsuario(f => ({ ...f, role: e.target.value }))}>
-                          {Object.entries(ROLES_LABELS).filter(([r]) => r !== 'DEVELOPER').map(([role, label]) => (
-                            <option key={role} value={role}>{label}</option>
+                          {CREATE_ROLE_TYPES.map((role) => (
+                            <option key={role} value={role}>{ROLES_LABELS[role]}</option>
                           ))}
                         </select>
                       </div>
@@ -465,7 +535,7 @@ export default function ConfiguracoesPage() {
                   </div>
                 ))}
 
-                <Button onClick={() => toast.success('Preferências salvas!')} className="w-full">
+                <Button onClick={salvarPreferencias} className="w-full">
                   <Save className="h-4 w-4 mr-2" /> Salvar Preferências
                 </Button>
               </CardContent>

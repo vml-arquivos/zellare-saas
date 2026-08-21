@@ -55,6 +55,12 @@ const settings = contents.get(join(sourceRoot, 'pages/ConfiguracoesPage.tsx')) ?
 if (!settings.includes("http.get('/admin/users'")) {
   errors.push('ConfiguracoesPage.tsx não contém /admin/users');
 }
+if (settings.includes("http.get('/units/my'") || settings.includes("http.put('/units/my'")) {
+  errors.push('ConfiguracoesPage.tsx não pode usar /units/my: a rota canônica é /units/:id ou /units');
+}
+if (settings.includes("http.put(`/users/") || settings.includes("http.post('/admin/users', novoUsuario)")) {
+  errors.push('ConfiguracoesPage.tsx contém contrato legado de usuários; use /admin/users/:id e DTO rico');
+}
 
 if (errors.length > 0) {
   console.error('Falha no contrato frontend:');
