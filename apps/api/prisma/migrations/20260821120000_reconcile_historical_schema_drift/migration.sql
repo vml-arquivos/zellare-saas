@@ -144,19 +144,19 @@ ALTER TABLE "ia_request" DROP CONSTRAINT "ia_request_unitId_fkey";
 ALTER TABLE "ia_response" DROP CONSTRAINT "ia_response_requestId_fkey";
 
 -- DropIndex
-DROP INDEX "Planning_anoLetivo_idx";
+DROP INDEX IF EXISTS "Planning_anoLetivo_idx";
 
 -- DropIndex
-DROP INDEX "Planning_professorId_idx";
+DROP INDEX IF EXISTS "Planning_professorId_idx";
 
 -- DropIndex
-DROP INDEX "Unit_rdicProfileId_idx";
+DROP INDEX IF EXISTS "Unit_rdicProfileId_idx";
 
 -- DropIndex
-DROP INDEX "ClassroomPost_createdAt_idx";
+DROP INDEX IF EXISTS "ClassroomPost_createdAt_idx";
 
 -- DropIndex
-DROP INDEX "RecadoTurma_criadoEm_idx";
+DROP INDEX IF EXISTS "RecadoTurma_criadoEm_idx";
 
 -- AlterTable
 ALTER TABLE "AIContext" ALTER COLUMN "mantenedoraId" DROP NOT NULL;
