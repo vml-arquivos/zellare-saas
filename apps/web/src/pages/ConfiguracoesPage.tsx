@@ -8,6 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import { LoadingState } from '../components/ui/LoadingState';
 import { toast } from 'sonner';
 import { useAuth } from '../app/AuthProvider';
+import { useUnitScope } from '../contexts/UnitScopeContext';
 import http from '../api/http';
 import {
   Settings, User, Building2, Users, Shield, Bell,
@@ -98,6 +99,7 @@ const ROLES_COR: Record<string, string> = {
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export default function ConfiguracoesPage() {
   const { user } = useAuth() as any;
+  const { selectedUnitId } = useUnitScope();
   // Para professores e perfis sem isAdmin, a aba inicial é 'notificacoes'
   // pois 'unidade' e 'usuarios' ficam ocultas. Calculado antes do isAdmin
   // para evitar dependência circular — usa a mesma lógica de userRole abaixo.
@@ -173,7 +175,7 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     if (abaAtiva === 'usuarios' && isAdmin) loadUsuarios();
     if (abaAtiva === 'unidade' && isAdmin) loadUnidade();
-  }, [abaAtiva, isAdmin]);
+  }, [abaAtiva, isAdmin, selectedUnitId]);
 
   function salvarPreferencias() {
     if (!preferenciasKey) return;
@@ -227,10 +229,14 @@ export default function ConfiguracoesPage() {
   }
 
   async function loadUnidade() {
+    const unitId = user?.unitId || user?.unit?.id || selectedUnitId;
+    if (!unitId) {
+      setUnidade({});
+      return;
+    }
     try {
-      const unitId = user?.unitId;
-      const res = unitId ? await http.get(`/units/${unitId}`) : await http.get('/units', { params: { limit: 1 } });
-      const raw = Array.isArray(res.data) ? res.data[0] : res.data?.units?.[0] ?? res.data?.data?.[0] ?? res.data;
+      const res = await http.get(`/units/${unitId}`);
+      const raw = Array.isArray(res.data) ? res.data[0] : res.data?.unit ?? res.data?.data ?? res.data;
       if (raw) {
         setUnidade({
           ...raw,
@@ -379,7 +385,16 @@ export default function ConfiguracoesPage() {
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* ─── UNIDADE ─── */}
-          {abaAtiva === 'unidade' && isAdmin && (
+          {abaAtiva === 'unidade' && isAdmin && !unidade.id && (
+            <Card className="border-2 border-amber-100 bg-amber-50">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-amber-800">Nenhuma unidade selecionada.</p>
+                <p className="text-xs text-amber-700 mt-1">Selecione uma unidade no escopo do sistema para consultar ou editar seus dados.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {abaAtiva === 'unidade' && isAdmin && unidade.id && (
             <Card className="border-2 border-green-100">
               <CardHeader><CardTitle className="flex items-center gap-2 text-green-700"><Building2 className="h-5 w-5" /> Dados da Unidade</CardTitle></CardHeader>
               <CardContent className="space-y-4">

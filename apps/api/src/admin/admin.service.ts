@@ -408,11 +408,18 @@ export class AdminService {
 
     const target = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, mantenedoraId: true, email: true },
+      select: { id: true, mantenedoraId: true, unitId: true, email: true },
     });
     if (!target) throw new NotFoundException('Usuário não encontrado');
     if (target.mantenedoraId !== actor.mantenedoraId)
       throw new ForbiddenException('Sem permissão para editar este usuário');
+
+    const elevatedActor =
+      this.isDeveloper(actor) ||
+      actor.roles.some((r) => r.level === RoleLevel.MANTENEDORA);
+    if (!elevatedActor && target.unitId !== actor.unitId) {
+      throw new ForbiddenException('Sem permissão para editar usuário de outra unidade');
+    }
 
     // Verificar e-mail duplicado (se estiver mudando)
     if (dto.email && dto.email.trim().toLowerCase() !== target.email) {

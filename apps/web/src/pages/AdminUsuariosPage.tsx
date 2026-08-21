@@ -13,7 +13,7 @@ import {
   UserX, Key, Mail, Phone, Building2, Shield, ChevronDown,
   RefreshCw, X, Eye, EyeOff, CheckCircle, AlertCircle,
   Crown, GraduationCap, Stethoscope, Briefcase, User,
-  MoreVertical, Lock, Unlock, Send, Download,
+  MoreVertical, Lock, Unlock,
 } from 'lucide-react';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -64,12 +64,13 @@ const STATUS_CONFIG = {
 
 // ─── Modal de Criar/Editar Usuário ────────────────────────────────────────────
 function ModalUsuario({
-  usuario, unidades, onClose, onSave,
+  usuario, unidades, onClose, onSave, podeAtribuirPapelElevado,
 }: {
   usuario?: Usuario | null;
   unidades: Unidade[];
   onClose: () => void;
   onSave: () => void;
+  podeAtribuirPapelElevado: boolean;
 }) {
   const isEdit = !!usuario;
   const [form, setForm] = useState({
@@ -105,8 +106,8 @@ function ModalUsuario({
         email: form.email.trim().toLowerCase(),
         phone: form.phone || undefined,
         cpf: form.cpf || undefined,
-        roleType: form.roleType,
-        unitCode: precisaUnidade ? form.unitId || undefined : undefined,
+        ...(podeAtribuirPapelElevado ? { roleType: form.roleType } : {}),
+        ...(podeAtribuirPapelElevado && precisaUnidade ? { unitCode: form.unitId || undefined } : {}),
         status: form.status,
       };
       if (form.password) payload.password = form.password;
@@ -171,20 +172,24 @@ function ModalUsuario({
             </div>
           </div>
 
-          {/* Perfil de Acesso */}
+          {/* Perfil de Acesso — somente quem pode administrar credenciais */}
+          {(!isEdit || podeAtribuirPapelElevado) && (
           <div>
             <Label className="text-sm font-semibold text-gray-700">Perfil de Acesso *</Label>
             <div className="mt-1 grid grid-cols-2 gap-2">
-              {Object.entries(ROLE_CONFIG).filter(([r]) => r !== 'DEVELOPER').map(([role, cfg]) => (
+              {Object.entries(ROLE_CONFIG)
+                .filter(([r]) => r !== 'DEVELOPER' && (podeAtribuirPapelElevado || ['UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO', 'UNIDADE_ADMINISTRATIVO', 'UNIDADE_NUTRICIONISTA', 'PROFESSOR', 'PROFESSOR_AUXILIAR'].includes(r)))
+                .map(([role, cfg]) => (
                 <button key={role} onClick={() => setForm(f => ({ ...f, roleType: role }))}
                   className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${form.roleType === role ? 'border-blue-500 bg-blue-50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}>
                   <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.cor}`}>
                     {cfg.icon} {cfg.label}
                   </span>
                 </button>
-              ))}
+                ))}
             </div>
           </div>
+          )}
 
           {/* Unidade (condicional) */}
           {precisaUnidade && (
@@ -192,7 +197,7 @@ function ModalUsuario({
               <Label className="text-sm font-semibold text-gray-700">Unidade {precisaUnidade ? '*' : ''}</Label>
               <div className="relative mt-1">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <select className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <select disabled={!podeAtribuirPapelElevado} className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                   value={form.unitId} onChange={e => setForm(f => ({ ...f, unitId: e.target.value }))}>
                   <option value="">Selecione a unidade...</option>
                   {unidades.map(u => (
@@ -218,7 +223,8 @@ function ModalUsuario({
             </div>
           )}
 
-          {/* Senha */}
+          {/* Senha — somente mantenedora/developer */}
+          {podeAtribuirPapelElevado && (
           <div className="border-t border-gray-100 pt-4">
             <p className="text-sm font-semibold text-gray-700 mb-3">{isEdit ? 'Alterar Senha (opcional)' : 'Senha de Acesso *'}</p>
             <div className="grid grid-cols-2 gap-4">
@@ -244,6 +250,7 @@ function ModalUsuario({
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -263,6 +270,7 @@ function ModalUsuario({
 export default function AdminUsuariosPage() {
   const { user } = useAuth() as any;
   const podeCriarUsuarios = hasRole(user, 'MANTENEDORA') || hasRole(user, 'DEVELOPER');
+  const podeEditarUsuarios = podeCriarUsuarios || hasRole(user, 'UNIDADE');
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +280,6 @@ export default function AdminUsuariosPage() {
   const [modalAberto, setModalAberto] = useState(false);
   const [usuarioEditando, setUsuarioEditando] = useState<Usuario | null>(null);
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => { loadDados(); }, []);
 
@@ -304,23 +311,6 @@ export default function AdminUsuariosPage() {
       toast.success(`Usuário ${novoStatus === 'ATIVO' ? 'ativado' : novoStatus === 'SUSPENSO' ? 'suspenso' : 'inativado'}`);
     } catch { toast.error('Erro ao alterar status'); }
     setMenuAberto(null);
-  }
-
-  async function resetarSenha(id: string, email: string) {
-    try {
-      await http.post(`/admin/users/${id}/reset-password`);
-      toast.success(`Link de redefinição enviado para ${email}`);
-    } catch { toast.error('Erro ao enviar link de redefinição'); }
-    setMenuAberto(null);
-  }
-
-  async function excluirUsuario(id: string) {
-    try {
-      await http.delete(`/admin/users/${id}`);
-      setUsuarios(prev => prev.filter(u => u.id !== id));
-      toast.success('Usuário excluído');
-    } catch { toast.error('Erro ao excluir usuário'); }
-    setConfirmDelete(null);
   }
 
   // Filtros
@@ -461,45 +451,37 @@ export default function AdminUsuariosPage() {
                       </div>
                     </div>
 
-                    {/* Ações */}
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => { setUsuarioEditando(u); setModalAberto(true); }}
-                        className="p-2 rounded-lg text-blue-500 hover:bg-blue-50 transition-all" title="Editar usuário">
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-
-                      {/* Menu de ações */}
-                      <div className="relative">
-                        <button onClick={() => setMenuAberto(menuAberto === u.id ? null : u.id)}
-                          className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-all">
-                          <MoreVertical className="h-4 w-4" />
+                    {/* Ações respaldadas pela capacidade do perfil */}
+                    {podeEditarUsuarios && (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => { setUsuarioEditando(u); setModalAberto(true); }}
+                          className="p-2 rounded-lg text-blue-500 hover:bg-blue-50 transition-all" title="Editar usuário">
+                          <Edit3 className="h-4 w-4" />
                         </button>
-                        {menuAberto === u.id && (
-                          <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-10 overflow-hidden">
-                            {u.status === 'ATIVO' ? (
-                              <button onClick={() => alterarStatus(u.id, 'SUSPENSO')}
-                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50">
-                                <Lock className="h-4 w-4" /> Suspender acesso
-                              </button>
-                            ) : (
-                              <button onClick={() => alterarStatus(u.id, 'ATIVO')}
-                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-green-600 hover:bg-green-50">
-                                <Unlock className="h-4 w-4" /> Reativar acesso
-                              </button>
-                            )}
-                            <button onClick={() => resetarSenha(u.id, u.email)}
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50">
-                              <Send className="h-4 w-4" /> Enviar link de senha
-                            </button>
-                            <div className="border-t border-gray-100" />
-                            <button onClick={() => { setConfirmDelete(u.id); setMenuAberto(null); }}
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
-                              <Trash2 className="h-4 w-4" /> Excluir usuário
-                            </button>
-                          </div>
-                        )}
+
+                        <div className="relative">
+                          <button onClick={() => setMenuAberto(menuAberto === u.id ? null : u.id)}
+                            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-all" title="Ações de acesso">
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {menuAberto === u.id && (
+                            <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-10 overflow-hidden">
+                              {u.status === 'ATIVO' ? (
+                                <button onClick={() => alterarStatus(u.id, 'SUSPENSO')}
+                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50">
+                                  <Lock className="h-4 w-4" /> Suspender acesso
+                                </button>
+                              ) : (
+                                <button onClick={() => alterarStatus(u.id, 'ATIVO')}
+                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-green-600 hover:bg-green-50">
+                                  <Unlock className="h-4 w-4" /> Reativar acesso
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -513,26 +495,10 @@ export default function AdminUsuariosPage() {
         <ModalUsuario
           usuario={usuarioEditando}
           unidades={unidades}
+          podeAtribuirPapelElevado={podeCriarUsuarios}
           onClose={() => { setModalAberto(false); setUsuarioEditando(null); }}
           onSave={loadDados}
         />
-      )}
-
-      {/* Confirmação de exclusão */}
-      {confirmDelete && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-            <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="h-7 w-7 text-red-500" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Excluir Usuário</h3>
-            <p className="text-gray-500 text-sm mb-6">Esta ação não pode ser desfeita. O usuário perderá acesso imediatamente.</p>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => setConfirmDelete(null)}>Cancelar</Button>
-              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => excluirUsuario(confirmDelete)}>Excluir</Button>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Fechar menu ao clicar fora */}
