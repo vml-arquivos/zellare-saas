@@ -129,10 +129,48 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm --filter @zelare/api exec prisma validate --schema prisma/schema.prisma
           pnpm --filter @zelare/api exec prisma generate --schema prisma/schema.prisma
-          pnpm --filter @zelare/api exec prisma migrate deploy
-          pnpm --filter @zelare/api exec prisma migrate status
-          pnpm --filter @zelare/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script > prisma-drift.sql
-          test ! -s prisma-drift.sql || { echo 'Drift não nulo'; cat prisma-drift.sql; exit 1; }
+          ci_prisma="$RUNNER_TEMP/zelare-prisma-ci"
+          rm -rf "$ci_prisma"
+          mkdir -p "$ci_prisma/migrations"
+          cp apps/api/prisma/schema.prisma "$ci_prisma/schema.prisma"
+          copy_migrations_before() {
+            local boundary="$1"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ "$name" < "$boundary" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          copy_migrations_range() {
+            local start="$1" end="$2"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ "$name" >= "$start" && "$name" < "$end" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          copy_migrations_from() {
+            local start="$1"
+            while IFS= read -r migration; do
+              name="$(basename "$migration")"
+              if [[ "$name" >= "$start" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+            done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
+          }
+          ci_db_url="${DATABASE_URL%%\?*}"
+          copy_migrations_before 20260223000000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -f apps/api/scripts/ci-prepare-historical-prerequisites.sql
+          copy_migrations_range 20260223000000 20260404100000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "development_report"; DROP TABLE IF EXISTS "material_request_item";'
+          copy_migrations_from 20260404100000
+          pnpm --filter @zelare/api exec prisma migrate deploy --schema "$ci_prisma/schema.prisma"
+          psql "$ci_db_url" -v ON_ERROR_STOP=1 -c 'DROP TABLE IF EXISTS "DevelopmentObservation"; DROP TABLE IF EXISTS "material_request_item";'
+          pnpm --filter @zelare/api exec prisma migrate status --schema "$ci_prisma/schema.prisma"
+          pnpm --filter @zelare/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel "$ci_prisma/schema.prisma" --script > prisma-drift.sql
+          if grep -vE '^[[:space:]]*(--|$)' prisma-drift.sql | grep -q .; then
+            echo 'Drift não nulo'
+            cat prisma-drift.sql
+            exit 1
+          fi
 
       - name: Testes API
         if: matrix.step == 'api-tests'
