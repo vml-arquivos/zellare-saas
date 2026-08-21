@@ -252,7 +252,11 @@ export async function getTotalDonations() {
     })
     .from(donations)
     .where(eq(donations.paymentStatus, "completed"));
-  return result[0] ?? { total: 0, count: 0 };
+  const row = result[0];
+  return {
+    total: row?.total == null ? null : Number(row.total),
+    count: row?.count == null ? null : Number(row.count),
+  };
 }
 
 // ─── Projects Helpers ─────────────────────────────────────────────────────────

@@ -21,6 +21,13 @@ export const KNOWN_TENANT_FLAG_KEYS = [
   'review_hub_v1',
   'family_circle_v1',
   'family_translation_v1',
+  'pulse_command_center_v1',
+  'ratio_engine_v1',
+  'staffing_coverage_v1',
+  'facilities_service_desk_v1',
+  'preventive_maintenance_v1',
+  'compliance_inspections_v1',
+  'operational_ai_v1',
 ] as const;
 
 @Injectable()

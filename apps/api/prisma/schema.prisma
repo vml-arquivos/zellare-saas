@@ -339,6 +339,38 @@ model Mantenedora {
   acknowledgments             Acknowledgment[]
   communicationPreferences    CommunicationPreference[]
   domainOutboxEvents          DomainOutboxEvent[]
+  operationalPresenceSessions OperationalPresenceSession[]
+  operationalPresenceEvents   OperationalPresenceEvent[]
+  staffingAssignments         StaffingAssignment[]
+  staffQualifications         StaffQualification[]
+  substitutionRequests        SubstitutionRequest[]
+  ratioPolicies               RatioPolicy[]
+  ratioRuleVersions           RatioRuleVersion[]
+  ratioSnapshots              RatioSnapshot[]
+  ratioBreaches               RatioBreach[]
+  facilitySpaces              FacilitySpace[]
+  facilityAssets              FacilityAsset[]
+  assetMovements              AssetMovement[]
+  assetDocuments              AssetDocument[]
+  assetMeterReadings          AssetMeterReading[]
+  maintenanceRequests         MaintenanceRequest[]
+  workOrders                  WorkOrder[]
+  workOrderAssignments        WorkOrderAssignment[]
+  workOrderStatusEvents       WorkOrderStatusEvent[]
+  workOrderAttachments        WorkOrderAttachment[]
+  serviceLevelPolicies        ServiceLevelPolicy[]
+  serviceLevelClockEvents     ServiceLevelClockEvent[]
+  preventiveMaintenancePlans  PreventiveMaintenancePlan[]
+  preventivePlanTasks          PreventivePlanTask[]
+  checklistTemplates           ChecklistTemplate[]
+  checklistTemplateVersions    ChecklistTemplateVersion[]
+  checklistExecutions          ChecklistExecution[]
+  checklistItemResults         ChecklistItemResult[]
+  inspections                  Inspection[]
+  nonconformities              Nonconformity[]
+  correctiveActions            CorrectiveAction[]
+  complianceRequirements      ComplianceRequirement[]
+  complianceEvidences          ComplianceEvidence[]
 
   @@index([cnpj])
   @@index([isActive])
@@ -622,7 +654,39 @@ model Unit {
   familyContributions   FamilyContribution[]
   consentGrants         ConsentGrant[]
   publicationRecords    PublicationRecord[]
-  acknowledgments       Acknowledgment[]
+  acknowledgments             Acknowledgment[]
+  operationalPresenceSessions OperationalPresenceSession[]
+  operationalPresenceEvents   OperationalPresenceEvent[]
+  staffingAssignments         StaffingAssignment[]
+  staffQualifications         StaffQualification[]
+  substitutionRequests        SubstitutionRequest[]
+  ratioPolicies               RatioPolicy[]
+  ratioRuleVersions           RatioRuleVersion[]
+  ratioSnapshots              RatioSnapshot[]
+  ratioBreaches               RatioBreach[]
+  facilitySpaces              FacilitySpace[]
+  facilityAssets              FacilityAsset[]
+  assetMovements              AssetMovement[]
+  assetDocuments              AssetDocument[]
+  assetMeterReadings          AssetMeterReading[]
+  maintenanceRequests         MaintenanceRequest[]
+  workOrders                  WorkOrder[]
+  workOrderAssignments        WorkOrderAssignment[]
+  workOrderStatusEvents       WorkOrderStatusEvent[]
+  workOrderAttachments        WorkOrderAttachment[]
+  serviceLevelPolicies        ServiceLevelPolicy[]
+  serviceLevelClockEvents     ServiceLevelClockEvent[]
+  preventiveMaintenancePlans  PreventiveMaintenancePlan[]
+  preventivePlanTasks          PreventivePlanTask[]
+  checklistTemplates           ChecklistTemplate[]
+  checklistTemplateVersions    ChecklistTemplateVersion[]
+  checklistExecutions          ChecklistExecution[]
+  checklistItemResults         ChecklistItemResult[]
+  inspections                  Inspection[]
+  nonconformities              Nonconformity[]
+  correctiveActions            CorrectiveAction[]
+  complianceRequirements      ComplianceRequirement[]
+  complianceEvidences          ComplianceEvidence[]
 
   @@unique([mantenedoraId, code])
   @@index([mantenedoraId])
@@ -4018,4 +4082,927 @@ model DomainOutboxEvent {
   @@index([mantenedoraId, eventType, createdAt])
   @@index([aggregateType, aggregateId])
   @@map("domain_outbox_event")
+}
+
+
+// ============================================================================
+// 18. ONDA 2 — PULSE + FACILITIES (EXPAND-ONLY)
+// ============================================================================
+
+/// Presença operacional em tempo próximo do real; não substitui Attendance.
+enum Onda2PresenceSessionStatus {
+  OPEN
+  CLOSED
+  RECONCILING
+}
+
+enum Onda2PresenceEventType {
+  CHECK_IN
+  CHECK_OUT
+  MOVE
+  CORRECTION
+}
+
+enum Onda2PresenceEventStatus {
+  ACCEPTED
+  REJECTED
+  RECONCILED
+  EXCEPTION
+}
+
+enum Onda2AssignmentStatus {
+  DRAFT
+  PROPOSED
+  PUBLISHED
+  CANCELLED
+}
+
+enum Onda2SubstitutionStatus {
+  OPEN
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum Onda2ApprovalStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+enum Onda2RatioState {
+  UNKNOWN
+  COMPLIANT
+  ATTENTION
+  VIOLATION
+}
+
+enum Onda2BreachStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum Onda2SpaceStatus {
+  AVAILABLE
+  LIMITED
+  BLOCKED
+  UNKNOWN
+}
+
+enum Onda2AssetStatus {
+  OPERATIONAL
+  LIMITED
+  OUT_OF_SERVICE
+  RETIRED
+}
+
+enum Onda2Priority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum Onda2MaintenanceRequestStatus {
+  SUBMITTED
+  TRIAGE
+  REJECTED
+  DUPLICATE
+  APPROVED
+  CONVERTED
+  CLOSED
+}
+
+enum Onda2WorkOrderStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_PARTS
+  COMPLETED
+  VALIDATED
+  CLOSED
+  REOPENED
+  CANCELLED
+}
+
+enum Onda2PlanStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  RETIRED
+}
+
+enum Onda2ExecutionStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Onda2InspectionResult {
+  COMPLIANT
+  NON_COMPLIANT
+  NOT_APPLICABLE
+  NOT_OBSERVED
+}
+
+enum Onda2InspectionStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+  CANCELLED
+}
+
+enum Onda2NonconformityStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_VERIFICATION
+  VERIFIED
+  CLOSED
+}
+
+model OperationalPresenceSession {
+  id            String                     @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  spaceId       String?
+  classroomId   String?
+  sessionDate   DateTime
+  status        Onda2PresenceSessionStatus @default(OPEN)
+  openedAt      DateTime                   @default(now())
+  closedAt      DateTime?
+  createdBy     String                      @db.VarChar(255)
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, spaceId, sessionDate])
+  @@index([mantenedoraId, unitId, status])
+  @@index([sessionDate])
+  @@map("operational_presence_session")
+}
+
+model OperationalPresenceEvent {
+  id             String                    @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  sessionId      String?
+  spaceId        String?
+  subjectType    String                    @db.VarChar(40)
+  subjectId      String                    @db.VarChar(255)
+  eventType      Onda2PresenceEventType
+  status         Onda2PresenceEventStatus @default(ACCEPTED)
+  occurredAt     DateTime
+  recordedAt     DateTime                  @default(now())
+  source         String                    @default("MOBILE") @db.VarChar(40)
+  idempotencyKey String                    @unique @db.VarChar(255)
+  correlationId  String?                   @db.VarChar(120)
+  payload        Json?
+  createdBy      String                     @db.VarChar(255)
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, occurredAt])
+  @@index([spaceId, occurredAt])
+  @@index([subjectType, subjectId, occurredAt])
+  @@index([status, occurredAt])
+  @@map("operational_presence_event")
+}
+
+model StaffingAssignment {
+  id             String                @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  spaceId        String
+  employeeId     String                @db.VarChar(255)
+  functionLabel  String                @db.VarChar(100)
+  startsAt       DateTime
+  endsAt         DateTime
+  status         Onda2AssignmentStatus @default(DRAFT)
+  version        Int                   @default(1)
+  idempotencyKey String?               @unique @db.VarChar(255)
+  createdBy      String                @db.VarChar(255)
+  updatedBy      String?               @db.VarChar(255)
+  publishedBy    String?               @db.VarChar(255)
+  publishedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, startsAt, endsAt])
+  @@index([spaceId, status, startsAt])
+  @@index([employeeId, startsAt, endsAt])
+  @@map("staffing_assignment")
+}
+
+model StaffQualification {
+  id             String   @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  employeeId     String   @db.VarChar(255)
+  qualification  String   @db.VarChar(120)
+  validFrom      DateTime
+  validUntil     DateTime?
+  source         String   @db.VarChar(255)
+  verifiedBy     String?  @db.VarChar(255)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, employeeId])
+  @@index([qualification, validFrom, validUntil])
+  @@map("staff_qualification")
+}
+
+model SubstitutionRequest {
+  id                    String                  @id @default(cuid())
+  mantenedoraId         String
+  unitId                String
+  spaceId               String
+  assignmentId          String?
+  requestedBy           String                  @db.VarChar(255)
+  replacementEmployeeId String?                 @db.VarChar(255)
+  startsAt              DateTime
+  endsAt                DateTime
+  reason                String                  @db.Text
+  status                Onda2SubstitutionStatus @default(OPEN)
+  decisionBy            String?                 @db.VarChar(255)
+  decisionAt            DateTime?
+  version               Int                     @default(1)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([spaceId, startsAt, endsAt])
+  @@map("substitution_request")
+}
+
+model RatioPolicy {
+  id            String             @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  name          String             @db.VarChar(180)
+  jurisdiction  String             @db.VarChar(120)
+  sourceUrl     String?            @db.VarChar(500)
+  timezone      String             @default("America/Sao_Paulo") @db.VarChar(80)
+  version       Int                @default(1)
+  status        Onda2ApprovalStatus @default(DRAFT)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  definition    Json
+  createdBy     String             @db.VarChar(255)
+  reviewedBy    String?            @db.VarChar(255)
+  publishedBy   String?            @db.VarChar(255)
+  publishedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, name, version])
+  @@index([mantenedoraId, unitId, status])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("ratio_policy")
+}
+
+model RatioRuleVersion {
+  id                    String             @id @default(cuid())
+  mantenedoraId         String
+  unitId                String
+  policyId              String
+  version               Int
+  sourceRef             String             @db.VarChar(255)
+  effectiveFrom         DateTime
+  effectiveTo           DateTime?
+  definition            Json
+  status                Onda2ApprovalStatus @default(DRAFT)
+  reviewedBy            String?            @db.VarChar(255)
+  publishedBy           String?            @db.VarChar(255)
+  publishedAt           DateTime?
+  createdBy             String             @db.VarChar(255)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([policyId, version])
+  @@index([mantenedoraId, unitId, status])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("ratio_rule_version")
+}
+
+model RatioSnapshot {
+  id             String          @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  spaceId        String
+  snapshotAt     DateTime
+  state          Onda2RatioState
+  capacity       Int?
+  childCount     Int?
+  requiredAdults Int?
+  validAdults    Int?
+  policyId       String?
+  ruleVersionId  String?
+  inputSnapshot  Json
+  explanation    String?         @db.Text
+  freshnessAt    DateTime?
+  createdAt      DateTime         @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, snapshotAt])
+  @@index([spaceId, snapshotAt])
+  @@index([state, snapshotAt])
+  @@map("ratio_snapshot")
+}
+
+model RatioBreach {
+  id            String           @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  spaceId       String
+  snapshotId    String?
+  priority      Onda2Priority
+  status        Onda2BreachStatus @default(ACTIVE)
+  openedAt      DateTime          @default(now())
+  acknowledgedAt DateTime?
+  acknowledgedBy String?          @db.VarChar(255)
+  resolvedAt    DateTime?
+  resolvedBy    String?            @db.VarChar(255)
+  resolutionNote String?           @db.Text
+  version       Int                @default(1)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([spaceId, openedAt])
+  @@map("ratio_breach")
+}
+
+model FacilitySpace {
+  id            String            @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  parentId      String?
+  code          String            @db.VarChar(80)
+  name          String            @db.VarChar(180)
+  spaceType     String            @db.VarChar(80)
+  capacity      Int?
+  status        Onda2SpaceStatus  @default(AVAILABLE)
+  isActive      Boolean           @default(true)
+  metadata      Json?
+  createdBy     String            @db.VarChar(255)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, code])
+  @@index([mantenedoraId, unitId, status])
+  @@index([parentId])
+  @@map("facility_space")
+}
+
+model FacilityAsset {
+  id            String          @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  spaceId       String?
+  code          String          @db.VarChar(100)
+  qrToken       String          @unique @db.VarChar(180)
+  name          String          @db.VarChar(180)
+  category      String          @db.VarChar(100)
+  manufacturer  String?         @db.VarChar(120)
+  model         String?         @db.VarChar(120)
+  serialNumber  String?         @db.VarChar(120)
+  status        Onda2AssetStatus @default(OPERATIONAL)
+  criticality   Onda2Priority    @default(NORMAL)
+  warrantyEndsAt DateTime?
+  supplierId    String?         @db.VarChar(255)
+  metadata      Json?
+  version       Int             @default(1)
+  createdBy     String          @db.VarChar(255)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, code])
+  @@index([mantenedoraId, unitId, status])
+  @@index([spaceId])
+  @@map("facility_asset")
+}
+
+model AssetMovement {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  assetId       String
+  fromSpaceId   String?
+  toSpaceId     String?
+  occurredAt    DateTime
+  reason        String   @db.Text
+  createdBy     String   @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, occurredAt])
+  @@index([assetId, occurredAt])
+  @@map("asset_movement")
+}
+
+model AssetDocument {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  assetId       String
+  storageKey    String   @db.VarChar(500)
+  fileName      String   @db.VarChar(255)
+  mimeType      String   @db.VarChar(120)
+  sizeBytes     Int
+  checksum      String?  @db.VarChar(128)
+  status        String   @default("PENDING") @db.VarChar(40)
+  createdBy     String   @db.VarChar(255)
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, assetId])
+  @@map("asset_document")
+}
+
+model AssetMeterReading {
+  id             String   @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  assetId        String
+  meterCode      String   @db.VarChar(80)
+  value          Decimal  @db.Decimal(14, 4)
+  occurredAt     DateTime
+  idempotencyKey String   @unique @db.VarChar(255)
+  createdBy      String   @db.VarChar(255)
+  createdAt      DateTime @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, assetId, occurredAt])
+  @@map("asset_meter_reading")
+}
+
+model MaintenanceRequest {
+  id             String                       @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  spaceId        String?
+  assetId        String?
+  code           String                       @db.VarChar(80)
+  category       String                       @db.VarChar(100)
+  description    String                       @db.Text
+  impact         String?                      @db.Text
+  priority       Onda2Priority                @default(NORMAL)
+  safetyRisk     Boolean                      @default(false)
+  status         Onda2MaintenanceRequestStatus @default(SUBMITTED)
+  requesterId    String                       @db.VarChar(255)
+  idempotencyKey String                       @unique @db.VarChar(255)
+  submittedAt   DateTime                     @default(now())
+  triagedAt     DateTime?
+  triagedBy     String?                      @db.VarChar(255)
+  triageReason  String?                      @db.Text
+  version       Int                          @default(1)
+  createdAt     DateTime                     @default(now())
+  updatedAt     DateTime                     @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, code])
+  @@index([mantenedoraId, unitId, status, priority])
+  @@index([spaceId, submittedAt])
+  @@index([assetId, submittedAt])
+  @@map("maintenance_request")
+}
+
+model WorkOrder {
+  id               String             @id @default(cuid())
+  mantenedoraId    String
+  unitId           String
+  requestId        String?
+  spaceId          String?
+  assetId          String?
+  code             String             @db.VarChar(80)
+  category         String             @db.VarChar(100)
+  description      String             @db.Text
+  priority         Onda2Priority     @default(NORMAL)
+  status           Onda2WorkOrderStatus @default(OPEN)
+  assignedEmployeeId String?          @db.VarChar(255)
+  supplierId       String?            @db.VarChar(255)
+  slaPolicyId      String?
+  dueAt            DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  validatedAt      DateTime?
+  closedAt         DateTime?
+  reopenedAt       DateTime?
+  costSnapshot     Json?
+  version          Int                @default(1)
+  createdBy        String             @db.VarChar(255)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, code])
+  @@index([mantenedoraId, unitId, status, priority])
+  @@index([requestId])
+  @@index([spaceId, status])
+  @@index([assetId, status])
+  @@map("work_order")
+}
+
+model WorkOrderAssignment {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  workOrderId   String
+  employeeId    String?  @db.VarChar(255)
+  supplierId    String?  @db.VarChar(255)
+  assignedBy    String   @db.VarChar(255)
+  assignedAt    DateTime @default(now())
+  unassignedAt  DateTime?
+  active        Boolean  @default(true)
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, active])
+  @@index([workOrderId, active])
+  @@map("work_order_assignment")
+}
+
+model WorkOrderStatusEvent {
+  id             String             @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  workOrderId    String
+  fromStatus     Onda2WorkOrderStatus?
+  toStatus       Onda2WorkOrderStatus
+  reason         String?            @db.Text
+  actorId        String             @db.VarChar(255)
+  idempotencyKey String             @unique @db.VarChar(255)
+  createdAt      DateTime           @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, createdAt])
+  @@index([workOrderId, createdAt])
+  @@map("work_order_status_event")
+}
+
+model WorkOrderAttachment {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  workOrderId   String
+  storageKey    String   @db.VarChar(500)
+  mimeType      String   @db.VarChar(120)
+  sizeBytes     Int
+  checksum      String?  @db.VarChar(128)
+  kind          String   @db.VarChar(60)
+  createdBy     String   @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, workOrderId])
+  @@map("work_order_attachment")
+}
+
+model ServiceLevelPolicy {
+  id            String             @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  name          String             @db.VarChar(180)
+  category      String             @db.VarChar(100)
+  priority      Onda2Priority
+  targetMinutes Int
+  pauseAllowed  Boolean            @default(true)
+  version       Int                @default(1)
+  status        Onda2ApprovalStatus @default(DRAFT)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  createdBy     String             @db.VarChar(255)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, name, version])
+  @@index([mantenedoraId, unitId, status])
+  @@map("service_level_policy")
+}
+
+model ServiceLevelClockEvent {
+  id            String   @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  workOrderId   String
+  eventType     String   @db.VarChar(40)
+  occurredAt    DateTime
+  reason        String?  @db.Text
+  actorId       String   @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, occurredAt])
+  @@index([workOrderId, occurredAt])
+  @@map("service_level_clock_event")
+}
+
+model PreventiveMaintenancePlan {
+  id            String         @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  assetId       String?
+  spaceId       String?
+  name          String         @db.VarChar(180)
+  scheduleType  String         @db.VarChar(40)
+  intervalDays  Int?
+  nextDueAt     DateTime?
+  status        Onda2PlanStatus @default(DRAFT)
+  version       Int            @default(1)
+  createdBy     String         @db.VarChar(255)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([assetId, nextDueAt])
+  @@map("preventive_maintenance_plan")
+}
+
+model PreventivePlanTask {
+  id                 String         @id @default(cuid())
+  mantenedoraId      String
+  unitId             String
+  planId             String
+  checklistTemplateId String?
+  dueAt              DateTime
+  generatedWorkOrderId String?
+  status             Onda2ExecutionStatus @default(DRAFT)
+  idempotencyKey     String         @unique @db.VarChar(255)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, dueAt, status])
+  @@index([planId])
+  @@map("preventive_plan_task")
+}
+
+model ChecklistTemplate {
+  id            String             @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  name          String             @db.VarChar(180)
+  category      String             @db.VarChar(100)
+  currentVersion Int               @default(1)
+  status        Onda2ApprovalStatus @default(DRAFT)
+  createdBy     String             @db.VarChar(255)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, name])
+  @@index([mantenedoraId, unitId, status])
+  @@map("checklist_template")
+}
+
+model ChecklistTemplateVersion {
+  id            String             @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  templateId    String
+  version       Int
+  definition    Json
+  status        Onda2ApprovalStatus @default(DRAFT)
+  publishedAt   DateTime?
+  createdBy     String             @db.VarChar(255)
+  createdAt     DateTime           @default(now())
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, version])
+  @@index([mantenedoraId, unitId, status])
+  @@map("checklist_template_version")
+}
+
+model ChecklistExecution {
+  id               String              @id @default(cuid())
+  mantenedoraId    String
+  unitId           String
+  templateId       String?
+  templateVersionId String?
+  workOrderId      String?
+  inspectionId     String?
+  spaceId          String?
+  assetId          String?
+  status           Onda2ExecutionStatus @default(DRAFT)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  executedBy       String              @db.VarChar(255)
+  version          Int                 @default(1)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([workOrderId])
+  @@index([inspectionId])
+  @@map("checklist_execution")
+}
+
+model ChecklistItemResult {
+  id            String                @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  executionId   String
+  itemCode      String                @db.VarChar(100)
+  result        Onda2InspectionResult
+  comment       String?               @db.Text
+  evidenceRef   String?               @db.VarChar(255)
+  observedAt    DateTime?
+  createdBy     String                @db.VarChar(255)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([executionId, itemCode])
+  @@index([mantenedoraId, unitId, result])
+  @@map("checklist_item_result")
+}
+
+model Inspection {
+  id                String                @id @default(cuid())
+  mantenedoraId     String
+  unitId            String
+  templateId        String?
+  templateVersionId String?
+  spaceId           String?
+  assetId           String?
+  status            Onda2InspectionStatus @default(DRAFT)
+  scheduledAt       DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  executedBy        String?               @db.VarChar(255)
+  verifiedBy        String?               @db.VarChar(255)
+  version           Int                   @default(1)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([scheduledAt])
+  @@map("inspection")
+}
+
+model Nonconformity {
+  id             String                  @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  inspectionId   String?
+  workOrderId    String?
+  code           String                  @db.VarChar(80)
+  severity       Onda2Priority
+  description    String                  @db.Text
+  status         Onda2NonconformityStatus @default(OPEN)
+  dueAt          DateTime?
+  ownerId        String?                 @db.VarChar(255)
+  verifiedBy     String?                 @db.VarChar(255)
+  version        Int                     @default(1)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status, severity])
+  @@index([inspectionId])
+  @@index([workOrderId])
+  @@map("nonconformity")
+}
+
+model CorrectiveAction {
+  id             String                  @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  nonconformityId String
+  action         String                  @db.Text
+  ownerId        String?                 @db.VarChar(255)
+  dueAt          DateTime?
+  status         Onda2NonconformityStatus @default(OPEN)
+  verifiedBy     String?                 @db.VarChar(255)
+  verifiedAt     DateTime?
+  createdBy      String                  @db.VarChar(255)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([nonconformityId])
+  @@map("corrective_action")
+}
+
+model ComplianceRequirement {
+  id            String             @id @default(cuid())
+  mantenedoraId String
+  unitId        String
+  name          String             @db.VarChar(180)
+  source        String             @db.VarChar(255)
+  version       Int                @default(1)
+  renewalDays   Int?
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  status        Onda2ApprovalStatus @default(DRAFT)
+  createdBy     String             @db.VarChar(255)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, name, version])
+  @@index([mantenedoraId, unitId, status])
+  @@map("compliance_requirement")
+}
+
+model ComplianceEvidence {
+  id             String             @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  requirementId  String
+  inspectionId   String?
+  assetId        String?
+  storageKey     String?            @db.VarChar(500)
+  status         Onda2ApprovalStatus @default(DRAFT)
+  expiresAt      DateTime?
+  reviewedBy     String?            @db.VarChar(255)
+  reviewedAt     DateTime?
+  createdBy      String             @db.VarChar(255)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([mantenedoraId, unitId, status])
+  @@index([requirementId, expiresAt])
+  @@map("compliance_evidence")
 }

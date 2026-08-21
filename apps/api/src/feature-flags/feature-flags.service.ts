@@ -24,6 +24,14 @@ export interface FeatureFlags {
   familyCircleV1: boolean;
   /** Tradução assistida da Onda 1 — desligada por padrão */
   familyTranslationV1: boolean;
+  /** Onda 2 — catálogo canônico também desligado por papel */
+  pulseCommandCenterV1: boolean;
+  ratioEngineV1: boolean;
+  staffingCoverageV1: boolean;
+  facilitiesServiceDeskV1: boolean;
+  preventiveMaintenanceV1: boolean;
+  complianceInspectionsV1: boolean;
+  operationalAiV1: boolean;
 }
 
 @Injectable()
@@ -53,6 +61,13 @@ export class FeatureFlagsService {
       reviewHubV1: false,
       familyCircleV1: false,
       familyTranslationV1: false,
+      pulseCommandCenterV1: false,
+      ratioEngineV1: false,
+      staffingCoverageV1: false,
+      facilitiesServiceDeskV1: false,
+      preventiveMaintenanceV1: false,
+      complianceInspectionsV1: false,
+      operationalAiV1: false,
     };
   }
 }
