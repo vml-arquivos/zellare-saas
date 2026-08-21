@@ -17,6 +17,10 @@ export const KNOWN_TENANT_FLAG_KEYS = [
   'upload_conteudo_proprio',
   'multiplos_frameworks_pedagogicos',
   'modo_offline',
+  'evidence_loop_v1',
+  'review_hub_v1',
+  'family_circle_v1',
+  'family_translation_v1',
 ] as const;
 
 @Injectable()

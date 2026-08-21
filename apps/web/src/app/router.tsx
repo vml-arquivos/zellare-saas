@@ -86,6 +86,9 @@ import CareOverviewPage from '../pages/CareOverviewPage';
 import DailyCollectionPage from '../pages/DailyCollectionPage';
 import FamilyGuardiansPage from '../pages/FamilyGuardiansPage';
 import MetricsCoveragePage from '../pages/MetricsCoveragePage';
+import Child360Page from '../pages/Child360Page';
+import ReviewHubPage from '../pages/ReviewHubPage';
+import FamilyCirclePage from '../pages/FamilyCirclePage';
 import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleProtectedRoute } from './RoleProtectedRoute';
@@ -796,6 +799,9 @@ export const router = createBrowserRouter([
       // Nova rota: linha do tempo consolidada da criança
       { path:'crianca/:childId/timeline', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><TimelineCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
       { path:'crianca/:childId/observacoes', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><ObservacaoCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'crianca/:childId/child-360', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><Child360Page/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'review-hub', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><ReviewHubPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'family-circle', element:(<RoleProtectedRoute allowedRoles={['FAMILIA','PROFESSOR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><FamilyCirclePage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
       { path:'inteligencia', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><PainelInteligenciaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
     ],
   },
