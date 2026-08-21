@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:deploy:safe": "bash scripts/migrate-deploy.sh",
     "db:status": "prisma migrate status",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",

@@ -1,5 +1,5 @@
 # ============================================================================
-# CONEXA V3.0 - FRONTEND DOCKERFILE (MONOREPO)
+# ZELARE - FRONTEND DOCKERFILE (MONOREPO)
 # ============================================================================
 # Build: React 19 + Vite + TailwindCSS + pnpm workspaces
 # Runtime: Nginx Alpine
@@ -27,11 +27,11 @@ COPY packages/types/package.json ./packages/types/package.json
 COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/utils/package.json ./packages/utils/package.json
 
-# Instalar TODAS as deps do workspace com cache mount
-# Cache persiste entre builds — evita baixar 1433 pacotes toda vez (~90s → ~5s)
-# Fallback: se o lockfile estiver levemente desatualizado, instala sem frozen
+# Instalar todas as dependências do workspace exclusivamente pelo lockfile.
+# Falha fechada: um lockfile desatualizado deve ser corrigido no repositório,
+# nunca contornado durante o build de produção.
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+    pnpm install --frozen-lockfile
 
 # Copiar o código-fonte dos packages internos (dependências do web)
 COPY packages/ ./packages/
@@ -66,8 +66,8 @@ ENV VITE_DEFAULT_THEME=${VITE_DEFAULT_THEME}
 ENV VITE_DEFAULT_LANGUAGE=${VITE_DEFAULT_LANGUAGE}
 ENV VITE_STORAGE_PREFIX=${VITE_STORAGE_PREFIX}
 ENV VITE_API_TIMEOUT=${VITE_API_TIMEOUT}
-# Build apenas o app web usando vite diretamente (evita timeout SSH do tsc -b)
-RUN cd /app/apps/web && npx vite build
+# Build oficial do app web: `tsc -b && vite build`, incluindo typecheck e PWA.
+RUN pnpm --filter @zelare/web build
 # ---------- Runtime stage ----------
 FROM nginx:alpine
 

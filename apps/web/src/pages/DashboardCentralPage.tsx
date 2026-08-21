@@ -146,8 +146,12 @@ export function DashboardCentralPage() {
         setDadosMensais([]);
         setDadosAlertas([]);
       } else {
-        // Endpoint falhou — mostrar erro real, NÃO dados demo fictícios
+        // Endpoint falhou: não manter indicadores stale nem substituir por dados fictícios.
         const err = (dashRes as PromiseRejectedResult).reason;
+        setIndicators({ totalAlunos: 0, totalProfessores: 0, totalAlertas: 0, coberturaDiario: 0 });
+        setDadosUnidades([]);
+        setDadosMensais([]);
+        setDadosAlertas([]);
         setErro(getErrorMessage(err));
       }
 
@@ -171,27 +175,6 @@ export function DashboardCentralPage() {
     }
   }, [filtros]);
 
-  const gerarDadosDemo = () => {
-    setIndicators({ totalAlunos: 142, totalProfessores: 18, totalAlertas: 7, coberturaDiario: 87 });
-    setDadosMensais([
-      { mes: 'Set', registros: 312, presencas: 289, alertas: 4 },
-      { mes: 'Out', registros: 345, presencas: 310, alertas: 6 },
-      { mes: 'Nov', registros: 298, presencas: 275, alertas: 3 },
-      { mes: 'Dez', registros: 187, presencas: 168, alertas: 2 },
-      { mes: 'Jan', registros: 356, presencas: 328, alertas: 5 },
-      { mes: 'Fev', registros: 401, presencas: 372, alertas: 7 },
-    ]);
-    setDadosUnidades([
-      { nome: 'Arara-Canindé', alunos: 78, professores: 10, alertas: 4, cobertura: 91 },
-      { nome: 'Unidade II', alunos: 64, professores: 8, alertas: 3, cobertura: 82 },
-    ]);
-    setDadosAlertas([
-      { tipo: 'Comportamental', quantidade: 3, cor: 'var(--error)' },
-      { tipo: 'Desenvolvimento', quantidade: 2, cor: 'var(--warning)' },
-      { tipo: 'Saúde', quantidade: 1, cor: 'var(--brand-600)' },
-      { tipo: 'Alimentação', quantidade: 1, cor: 'var(--brand-500)' },
-    ]);
-  };
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
 
@@ -205,7 +188,7 @@ export function DashboardCentralPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `conexa-relatorio-central-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `zelare-relatorio-central-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -314,7 +297,7 @@ export function DashboardCentralPage() {
       {/* Erro */}
       {erro && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-          <strong>Aviso:</strong> {erro}. Exibindo dados de demonstração.
+          <strong>Não foi possível carregar os dados reais:</strong> {erro}. Tente novamente.
         </div>
       )}
 
