@@ -257,6 +257,49 @@ export default function CareOverviewPage() {
               </section>
             )}
 
+            {overview.evidenceSummary?.longitudinal && (
+              <section className="ds-card p-5">
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-normal text-brand"><Activity className="h-4 w-4" /> Sinais observados</div>
+                    <p className="mt-1 text-sm text-slate-600">Leitura descritiva das evidências reais, com revisão humana.</p>
+                  </div>
+                  <span className="ds-badge-brand px-3 py-1 text-xs">
+                    {overview.evidenceSummary.longitudinal.coverage.opportunityRecords > 0
+                      ? `${overview.evidenceSummary.longitudinal.coverage.coverageRate ?? 0}% de oportunidades observadas`
+                      : 'Sem oportunidades suficientes'}
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                  {overview.evidenceSummary.longitudinal.signals.length === 0 && (
+                    <EmptyState>Nenhum sinal longitudinal disponível no período.</EmptyState>
+                  )}
+                  {overview.evidenceSummary.longitudinal.signals.slice(0, 6).map((signalItem) => (
+                    <article key={signalItem.id} className="ds-surface rounded-xl p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-slate-800">{signalItem.domain}</p>
+                          <p className="mt-1 text-xs text-slate-500">{signalItem.indicatorId}</p>
+                        </div>
+                        <span className="ds-badge-brand px-2 py-1 text-[10px]">{signalItem.state}</span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{signalItem.explanation}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                        <span>{signalItem.recurrence.totalRecords} registro(s)</span>
+                        <span>{signalItem.contexts.length} contexto(s)</span>
+                        <span>Confiança {signalItem.confidence.level}</span>
+                      </div>
+                      <div className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-subtle)] p-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Próxima ação</p>
+                        <p className="mt-1 text-xs leading-5 text-slate-700">{signalItem.nextAction}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs text-slate-500">Sinais operacionais não são diagnósticos. A análise exige contexto, revisão humana e decisão institucional.</p>
+              </section>
+            )}
+
             <div className="grid gap-6 xl:grid-cols-2">
               <SectionCard title="Saúde, alergias e alimentação" icon={Utensils} tone="">
                 <div className="grid gap-3 sm:grid-cols-3">

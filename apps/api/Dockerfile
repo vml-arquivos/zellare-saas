@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # =========================
-# Builder (devDeps + prisma generate + build + prune)
+# Builder (devDeps + Prisma Client + build + prune)
 # =========================
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
@@ -10,12 +10,10 @@ RUN apt-get update -y \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
-# Copiar o schema.prisma antes do npm install para que qualquer mudanca no schema
-# invalide o cache do Docker e force rebuild completo (npm install + prisma generate).
-# Sem isto, o Docker pode usar o Prisma Client cacheado de um build anterior
-# que nao conhece modelos adicionados por migrations recentes (ex: MaterialRequestItem).
+# Copiar o schema.prisma antes do npm ci para invalidar o cache quando o contrato
+# de dados mudar e gerar o Prisma Client no mesmo build imutável.
 COPY prisma ./prisma
-RUN npm install --include=dev --ignore-scripts
+RUN npm ci --include=dev --ignore-scripts --no-audit --no-fund
 COPY . .
 RUN npx prisma generate --schema=./prisma/schema.prisma
 RUN npm run build
@@ -28,7 +26,6 @@ FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
-# postgresql-client: necessário para o entrypoint usar psql para resolver migrations FAILED
 # wget: usado pelo Coolify healthcheck
 # curl: usado pela aplicação
 # openssl + ca-certificates: necessários para Prisma e HTTPS
@@ -38,11 +35,11 @@ RUN apt-get update -y \
     curl \
     openssl \
     ca-certificates \
-    postgresql-client \
   && rm -rf /var/lib/apt/lists/*
 # Copia o node_modules já "podado" do builder (contém Prisma Client gerado)
 COPY --from=builder /app/node_modules ./node_modules
-# Copia artefatos e metadados do app
+# Copia artefatos e metadados do app; migrations ficam disponíveis para o job
+# explícito de deploy, nunca para execução automática no startup.
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts

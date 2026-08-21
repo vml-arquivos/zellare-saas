@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "pnpm run contracts:check && tsc -b && vite build",
+    "contracts:check": "node scripts/check-api-contracts.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

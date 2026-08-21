@@ -169,10 +169,13 @@ export default function ConfiguracoesPage() {
 
   async function loadUsuarios() {
     try {
-      const res = await http.get('/users?limit=50');
+      const res = await http.get('/admin/users', { params: { limit: 50 } });
       const d = res.data;
       setUsuarios(Array.isArray(d) ? d : d?.data ?? []);
-    } catch { /* silencioso */ }
+    } catch (error) {
+      console.error('[Configuracoes] Falha ao carregar usuários:', error);
+      toast.error('Não foi possível carregar os usuários.');
+    }
   }
 
   async function loadUnidade() {

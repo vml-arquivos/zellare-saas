@@ -41,27 +41,11 @@ export default defineConfig({
       workbox: {
         // Aumentar limite para arquivos grandes (chunks do recharts etc.)
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MiB
-        // Cache estratégico: app shell sempre do cache, dados da rede com fallback
+        // O Cache Storage contém apenas o app shell e assets estáticos.
+        // Respostas autenticadas infantis nunca recebem fallback stale do Workbox;
+        // o offline de dados permanece no fluxo dedicado por usuário/tenant.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
-          {
-            // API: network-first com fallback para cache (dados frescos quando online)
-            urlPattern: /^https:\/\/apizelare\.casadf\.com\.br\/(lookup|children|attendance\/today)/i,
-            method: 'GET',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Auth: sempre da rede (tokens não podem ser stale)
-            urlPattern: /^https:\/\/apizelare\.casadf\.com\.br\/auth.*/i,
-            method: 'GET',
-            handler: 'NetworkOnly',
-          },
           {
             // Assets estáticos: cache-first (imagens, fontes)
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff|woff2)$/i,

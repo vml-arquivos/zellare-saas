@@ -9,6 +9,43 @@ export interface CareChildOption {
   classroomName?: string | null;
 }
 
+export interface CareLongitudinalSignal {
+  id: string;
+  domain: string;
+  indicatorId: string;
+  state: string;
+  explanation: string;
+  nextAction: string;
+  recurrence: {
+    totalRecords: number;
+    eligibleRecords: number;
+    attentionRecords: number;
+    observedRecords: number;
+    refusalRecords: number;
+    noOpportunityRecords: number;
+  };
+  persistence: { firstObservedAt: string | null; lastObservedAt: string | null; days: number };
+  contexts: string[];
+  supports: { attempted: string[]; responses: string[]; effectiveRecords: number; ineffectiveRecords: number };
+  impactSignals: { teacherConcernRecords: number; highIntensityRecords: number; noResponseRecords: number; note: string };
+  contradictoryEvidence: Array<{ sourceType: string; sourceId: string; capturedAt: string; context: string | null; level: string | null }>;
+  confidence: { level: string; reason: string };
+  governance: { diagnosticInference: false; humanReviewRequired: true; ruleVersion: string };
+}
+
+export interface CareLongitudinalAnalysis {
+  signals: CareLongitudinalSignal[];
+  coverage: {
+    totalEvidence: number;
+    structuredObservationRecords: number;
+    legacyObservationRecords: number;
+    opportunityRecords: number;
+    observedOpportunityRecords: number;
+    noOpportunityRecords: number;
+    coverageRate: number | null;
+  };
+}
+
 export interface CareEvidenceSummary {
   childId: string;
   total: number;
@@ -16,6 +53,7 @@ export interface CareEvidenceSummary {
   bySource: Record<string, number>;
   bySensitivity: Record<string, number>;
   lastCapturedAt?: string | null;
+  longitudinal?: CareLongitudinalAnalysis;
   governance: {
     generatedAt: string;
     evidenceOnly: boolean;

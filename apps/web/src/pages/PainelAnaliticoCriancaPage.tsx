@@ -69,6 +69,7 @@ export default function PainelAnaliticoCriancaPage() {
   // Tarefa 2.2 — Frequência e restrições alimentares
   const [frequencia, setFrequencia] = useState<{ total: number; presentes: number; pct: number | null } | null>(null);
   const [restricoes, setRestricoes] = useState<any[]>([]);
+  const [longitudinal, setLongitudinal] = useState<any>(null);
 
   const carregarCentral = useCallback(async () => {
     if (!childId) return;
@@ -90,6 +91,12 @@ export default function PainelAnaliticoCriancaPage() {
 
   useEffect(() => { carregarCentral(); }, [carregarCentral]);
   useEffect(() => { if (aba === 'diario' && eventos.length === 0) carregarDiario(); }, [aba, carregarDiario, eventos.length]);
+  useEffect(() => {
+    if (!childId) return;
+    http.get(`/evidence/child/${childId}/cross-analysis`)
+      .then((response) => setLongitudinal(response?.data ?? null))
+      .catch(() => setLongitudinal(null));
+  }, [childId]);
 
   // Tarefa 2.2 — Buscar frequência e restrições ao montar
   useEffect(() => {
@@ -208,6 +215,41 @@ export default function PainelAnaliticoCriancaPage() {
             </Card>
           ))}
         </div>
+
+        {longitudinal?.longitudinal && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2"><Activity className="h-4 w-4 text-emerald-500" /> Sinais observados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                <span>{longitudinal.longitudinal.coverage.totalEvidence} evidência(s)</span>
+                <span>{longitudinal.longitudinal.coverage.observedOpportunityRecords} oportunidade(s) observada(s)</span>
+                <span>{longitudinal.longitudinal.signals.length} sinal(is) agrupado(s)</span>
+              </div>
+              {longitudinal.longitudinal.signals.length === 0 ? (
+                <p className="mt-3 text-xs text-gray-500">Nenhum sinal longitudinal disponível no período.</p>
+              ) : (
+                <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {longitudinal.longitudinal.signals.slice(0, 6).map((signalItem: any) => (
+                    <article key={signalItem.id} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-gray-800 truncate">{signalItem.domain}</p>
+                          <p className="mt-0.5 text-[11px] text-gray-500 truncate">{signalItem.indicatorId}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">{signalItem.state}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-gray-600">{signalItem.explanation}</p>
+                      <p className="mt-2 text-[11px] leading-5 text-gray-500"><strong>Próxima ação:</strong> {signalItem.nextAction}</p>
+                    </article>
+                  ))}
+                </div>
+              )}
+              <p className="mt-3 text-[11px] text-gray-500">Leitura descritiva, não diagnóstica, sujeita a revisão humana e contexto.</p>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex gap-1 border-b border-gray-200 overflow-x-auto">
           {(['bncc','diario','microgestos'] as const).map(a=>(

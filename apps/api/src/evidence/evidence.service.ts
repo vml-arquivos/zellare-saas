@@ -7,6 +7,7 @@ import {
 import { EvidenceReviewStatus, EvidenceSensitivity, EvidenceVisibility, Prisma, RoleLevel } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { PrismaService } from '../prisma/prisma.service';
+import { analyzeLongitudinalEvidence } from './longitudinal-analysis';
 
 export type EvidenceSourceInput = {
   sourceType: string;
@@ -581,6 +582,9 @@ export class EvidenceService {
 
   async summary(childId: string, user: JwtPayload) {
     const evidence = await this.list({ childId, limit: '1000' }, user);
+    const endDate = new Date();
+    const startDate = new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const longitudinal = analyzeLongitudinalEvidence(evidence, { startDate, endDate });
     const byType: Record<string, number> = {};
     const bySource: Record<string, number> = {};
     const bySensitivity: Record<string, number> = {};
@@ -597,6 +601,7 @@ export class EvidenceService {
       bySensitivity,
       lastCapturedAt: evidence[0]?.capturedAt ?? null,
       timeline: evidence.slice(0, 30),
+      longitudinal,
       governance: {
         generatedAt: new Date().toISOString(),
         evidenceOnly: true,
@@ -617,6 +622,7 @@ export class EvidenceService {
       endDate: endDate.toISOString(),
       limit: '1000',
     }, user);
+    const longitudinal = analyzeLongitudinalEvidence(evidence, { startDate, endDate });
 
     const byWeek: Record<string, { total: number; byType: Record<string, number>; bySource: Record<string, number> }> = {};
     const byType: Record<string, number> = {};
@@ -667,6 +673,7 @@ export class EvidenceService {
       },
       alerts: alertas,
       latest: evidence.slice(0, 20),
+      longitudinal,
       governance: {
         generatedAt: new Date().toISOString(),
         method: 'descriptive-cross-source-v1',

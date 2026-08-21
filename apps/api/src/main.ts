@@ -36,12 +36,11 @@ async function bootstrap() {
     ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
     : [];
 
-  const allowedOrigins: string[] = corsEnv.length
-    ? corsEnv
-    : [
-        'https://appcocris.casadf.com.br',
-        'https://cocris.casadf.com.br',
-      ];
+  if (process.env.NODE_ENV === 'production' && corsEnv.length === 0) {
+    throw new Error('CORS_ORIGIN é obrigatório em produção e deve conter apenas origens reais do Zelare.');
+  }
+
+  const allowedOrigins: string[] = [...corsEnv];
 
   if (process.env.NODE_ENV !== 'production') {
     allowedOrigins.push('http://localhost:5173', 'http://localhost:3000');
