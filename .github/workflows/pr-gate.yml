@@ -144,14 +144,14 @@ jobs:
             local start="$1" end="$2"
             while IFS= read -r migration; do
               name="$(basename "$migration")"
-              if [[ "$name" >= "$start" && "$name" < "$end" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+              if [[ ( "$name" == "$start" || "$name" > "$start" ) && "$name" < "$end" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
             done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
           }
           copy_migrations_from() {
             local start="$1"
             while IFS= read -r migration; do
               name="$(basename "$migration")"
-              if [[ "$name" >= "$start" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
+              if [[ "$name" == "$start" || "$name" > "$start" ]]; then cp -a "$migration" "$ci_prisma/migrations/$name"; fi
             done < <(find apps/api/prisma/migrations -mindepth 1 -maxdepth 1 -type d -name '20*' | sort)
           }
           ci_db_url="${DATABASE_URL%%\?*}"
