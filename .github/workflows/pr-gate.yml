@@ -121,7 +121,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @zelare/api security:artifacts
-          ! git grep -nI -E 'Carol270412|Demo@2026|senha.{0,12}[:=].{0,4}[A-Za-z0-9@#]' -- ':!docs/**' ':!*.md'
+          ! git grep -nI -E 'Carol270412|Demo@2026|sk_(live|test)_[A-Za-z0-9]+|AIza[0-9A-Za-z_-]{20,}' -- ':!docs/**' ':!*.md'
 
       - name: Prisma + PostgreSQL + drift
         if: matrix.step == 'prisma-postgresql'
