@@ -17,6 +17,7 @@
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
     "snapshot:manifest": "bash scripts/snapshot-manifest.sh",
+    "security:artifacts": "node scripts/check-sensitive-artifacts.mjs",
     "test": "jest",
     "seed:matriz-2026": "node dist/src/scripts/seed-matriz-2026.js",
     "seed:ensure-cocris-units": "node dist/src/scripts/ensure-cocris-units.js",

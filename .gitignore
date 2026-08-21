@@ -61,6 +61,8 @@ temp/
 
 # Docker
 .dockerignore
+# The API build context has a reviewed, versioned privacy policy.
+!apps/api/.dockerignore
 
 # Misc
 .vercel
