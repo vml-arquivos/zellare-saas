@@ -1,12 +1,12 @@
 # Zelare — Matriz final de aceite do Gate 0.2
 
-**Data:** 21 de agosto de 2026. **Branch:** `fix/zelare-gate-0-2-20260821`. **Base:** `08f335664ac5f714a787fd5f2038758b5b18efac` (`08f3356`). **HEAD avaliado:** `58cbe02af942a01f32bd966fe514a1824a390665` (`58cbe02`). **PR:** [#12 — Gate 0.2: contratos reais, OpenAPI, PWA e privacidade](https://github.com/vml-arquivos/zellare-saas/pull/12).
+**Data:** 21 de agosto de 2026. **Branch:** `fix/zelare-gate-0-2-20260821`. **Base:** `08f335664ac5f714a787fd5f2038758b5b18efac` (`08f3356`). **HEAD avaliado:** `ca8bfbe3560c683c2849a5c6545092f76f1b4149` (`ca8bfbe`). **PR:** [#12 — Gate 0.2: contratos reais, OpenAPI, PWA e privacidade](https://github.com/vml-arquivos/zellare-saas/pull/12).
 
 > Esta matriz registra a aprovação técnica do Gate 0.2 no CI, mas **não autoriza merge, migration de produção, deploy, redeploy ou remoção de dados**. O PR permanece aberto para revisão e decisão humana. O repositório Conexa/COCRIS não foi alterado.
 
 ## Resultado executivo
 
-O Gate 0.2 está **verde no GitHub Actions**. A execução final [32452784952](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952), no commit `58cbe02`, terminou com conclusão `success` em todos os 14 jobs do workflow. O PR #12 está aberto, não é draft e aparece com estado de merge `CLEAN`; nenhuma operação de merge ou produção foi executada por esta tarefa.
+O Gate 0.2 está **verde no GitHub Actions**. A execução final [32453168092](https://github.com/vml-arquivos/zellare-saas/actions/runs/32453168092), run #16, no HEAD `ca8bfbe`, terminou com conclusão `success`. A execução técnica anterior [32452784952](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952), no commit `58cbe02`, também terminou com os 14 jobs verdes. O PR #12 está aberto, não é draft e aparece com estado de merge `CLEAN`; nenhuma operação de merge ou produção foi executada por esta tarefa.
 
 O bloqueador histórico de PostgreSQL foi resolvido sem `migrate resolve`, `db push`, reescrita de histórico ou alteração do Conexa. A prova remota aplicou as migrations em PostgreSQL 17 efêmero, executou o cleanup da fixture e confirmou drift nulo. A reprodução local equivalente também terminou com status de migrations atualizado e saída de drift vazia; o único texto adicional local foi o warning conhecido do pnpm, que passou a ser filtrado exclusivamente na captura do artefato de drift do workflow.
 
@@ -50,9 +50,9 @@ O segundo bloqueio era a sintaxe `ALTER TABLE ... ADD CONSTRAINT IF NOT EXISTS` 
 
 | Execução | Commit | Resultado | Link |
 |---|---|---|---|
-| `32452784952` | `58cbe02` | **SUCCESS — 14/14 jobs verdes** | [abrir execução final](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952) |
-| `32452220722` | `2fe7da5` | Falhou apenas no drift histórico antes da reconciliação final | [abrir execução intermediária](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452220722) |
-| `32451881053` | `a57b1f3` | Avançou até identificar o drift de índices | [abrir execução intermediária](https://github.com/vml-arquivos/zellare-saas/actions/runs/32451881053) |
+| `32453168092` — run #16 | `ca8bfbe` | **SUCCESS — HEAD documental validado** | [abrir execução final](https://github.com/vml-arquivos/zellare-saas/actions/runs/32453168092) |
+| `32452784952` — run #15 | `58cbe02` | **SUCCESS — 14/14 jobs verdes** | [abrir execução técnica](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452784952) |
+| `32452220722` — run #14 | `2fe7da5` | Falhou apenas no drift histórico antes da reconciliação final | [abrir execução intermediária](https://github.com/vml-arquivos/zellare-saas/actions/runs/32452220722) |
 
 ## Riscos residuais e decisão operacional
 
@@ -60,7 +60,7 @@ O risco **P0-2** permanece: existem artifacts/PII no histórico Git legado. O Ga
 
 A migration `20260821120000_reconcile_historical_schema_drift` foi necessária para a prova de reprodutibilidade no PostgreSQL efêmero, mas contém alterações de schema além da simples criação dos seis modelos SaaS. Portanto, o fato de o CI estar verde **não equivale a autorização para aplicá-la na base de produção**. Antes de qualquer migration de produção, deve haver revisão humana da SQL, backup verificável, janela operacional e confirmação explícita.
 
-O deploy/redeploy do Coolify não foi executado por esta tarefa. O ambiente de produção permanece no último commit anteriormente publicado, `08f3356`, até que o PR seja revisado, mergeado manualmente e o redeploy seja autorizado e executado pelo responsável operacional. O Conexa/COCRIS permanece sem alterações.
+O deploy/redeploy do Coolify não foi executado por esta tarefa. O ambiente de produção permanece no último commit anteriormente publicado, `08f3356`, até que o PR seja revisado, mergeado manualmente e o redeploy seja autorizado e executado pelo responsável operacional. A atualização posterior da própria matriz é documental e não altera rotas, banco ou runtime. O Conexa/COCRIS permanece sem alterações.
 
 ## Próxima decisão humana
 
