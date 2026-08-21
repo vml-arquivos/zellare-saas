@@ -3,7 +3,13 @@
 -- alterações de enums, defaults, constraints, índices, colunas e a tabela Fornecedor.
 -- Esta migration existe para tornar o estado canônico reprodutível; nenhum deploy foi executado.
 -- CreateEnum
-CREATE TYPE "TaxIdType" AS ENUM ('CNPJ', 'CPF', 'EIN', 'NIF', 'VAT', 'OTHER', 'NONE');
+DO $$
+BEGIN
+  CREATE TYPE "TaxIdType" AS ENUM ('CNPJ', 'CPF', 'EIN', 'NIF', 'VAT', 'OTHER', 'NONE');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
 
 -- AlterEnum
 -- This migration adds more than one value to an enum.
@@ -13,9 +19,27 @@ CREATE TYPE "TaxIdType" AS ENUM ('CNPJ', 'CPF', 'EIN', 'NIF', 'VAT', 'OTHER', 'N
 -- the enum.
 
 
-ALTER TYPE "AuditLogAction" ADD VALUE 'SUBMIT_REVIEW';
-ALTER TYPE "AuditLogAction" ADD VALUE 'APPROVE_PLANNING';
-ALTER TYPE "AuditLogAction" ADD VALUE 'RETURN_PLANNING';
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogAction" ADD VALUE 'SUBMIT_REVIEW';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogAction" ADD VALUE 'APPROVE_PLANNING';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogAction" ADD VALUE 'RETURN_PLANNING';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
 
 -- AlterEnum
 -- This migration adds more than one value to an enum.
@@ -25,10 +49,34 @@ ALTER TYPE "AuditLogAction" ADD VALUE 'RETURN_PLANNING';
 -- the enum.
 
 
-ALTER TYPE "AuditLogEntity" ADD VALUE 'PEDAGOGICAL_FRAMEWORK';
-ALTER TYPE "AuditLogEntity" ADD VALUE 'TENANT_BRANDING';
-ALTER TYPE "AuditLogEntity" ADD VALUE 'FEATURE_FLAG';
-ALTER TYPE "AuditLogEntity" ADD VALUE 'INSTITUTION_CONTENT_UPLOAD';
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogEntity" ADD VALUE 'PEDAGOGICAL_FRAMEWORK';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogEntity" ADD VALUE 'TENANT_BRANDING';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogEntity" ADD VALUE 'FEATURE_FLAG';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+DO $$
+BEGIN
+  ALTER TYPE "AuditLogEntity" ADD VALUE 'INSTITUTION_CONTENT_UPLOAD';
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
 
 -- AlterEnum
 BEGIN;
