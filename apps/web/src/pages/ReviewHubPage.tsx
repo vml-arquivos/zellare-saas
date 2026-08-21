@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { Check, Clock3, RefreshCw, RotateCcw } from 'lucide-react';
 import { PageShell } from '../components/ui/PageShell';

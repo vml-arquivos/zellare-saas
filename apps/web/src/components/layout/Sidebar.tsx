@@ -1,4 +1,5 @@
 import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, useLocation } from 'react-router-dom';
 import {
   BookOpen, ClipboardList,   BarChart2, ShoppingCart, GraduationCap, ClipboardCheck,

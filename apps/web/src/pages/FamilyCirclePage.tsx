@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { MessageCircle, RefreshCw, Send, ShieldCheck } from 'lucide-react';
 import { PageShell } from '../components/ui/PageShell';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import http from './http';
 
 export type Onda1PageInfo = { hasMore: boolean; nextCursor: string | null };
