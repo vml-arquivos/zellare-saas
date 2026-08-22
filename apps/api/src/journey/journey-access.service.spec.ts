@@ -70,6 +70,7 @@ describe("JourneyAccessService", () => {
 
     const centralAdmissions = profiles[2];
     expect(access.isNetworkScoped(centralAdmissions)).toBe(true);
+    expect(access.can(centralAdmissions, "journey.offer.accept")).toBe(true);
     expect(access.can(centralAdmissions, "journey.privacy.manage")).toBe(false);
     expect(access.can(centralAdmissions, "journey.merge.review")).toBe(false);
   });

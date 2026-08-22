@@ -171,6 +171,7 @@ export class InsightsService {
             id: planning.id,
             title: planning.title,
             status: planning.status,
+            classroomId: planning.classroomId,
             turma: (planning as any).classroom?.name ?? null,
             objetivosHoje,
           }

@@ -16,7 +16,7 @@ const tabs = [
   ["Ofertas de vaga", "/app/journey/ofertas"],
   ["Relatórios", "/app/journey/relatorios"],
 ] as const;
-const viewports = [320, 360, 390, 412, 768] as const;
+const viewports = [320, 360, 390, 412, 768, 1280] as const;
 
 test.use({
   video: "on",
@@ -52,7 +52,7 @@ async function assertNoHorizontalOverflow(page: Page) {
   ).toBeLessThanOrEqual(dimensions.viewport);
 }
 
-test("Journey autenticada percorre abas, persiste cadastro e reflowa em 320/360/390/412/768", async ({
+test("Journey autenticada percorre abas, persiste cadastro e reflowa em 320/360/390/412/768 e desktop", async ({
   page,
 }) => {
   const consoleErrors: string[] = [];
@@ -92,9 +92,15 @@ test("Journey autenticada percorre abas, persiste cadastro e reflowa em 320/360/
   await expect(
     page.getByRole("heading", { name: "Interessados" }).first(),
   ).toBeVisible();
-  await page.getByLabel("Responsável").fill("Persistência Visual Sintética");
-  await page.getByLabel("Criança prospectiva").fill("Criança Visual Sintética");
-  await page.getByLabel("E-mail").fill("visual.synthetic@example.invalid");
+  await page
+    .getByRole("textbox", { name: "Responsável", exact: true })
+    .fill("Persistência Visual Sintética");
+  await page
+    .getByRole("textbox", { name: "Criança prospectiva", exact: true })
+    .fill("Criança Visual Sintética");
+  await page
+    .getByRole("textbox", { name: "E-mail", exact: true })
+    .fill("visual.synthetic@example.invalid");
   await page.getByLabel("Consentimento para registro da captação.").check();
   await page.getByLabel(/Consentimento para contato/).check();
   await page.getByRole("button", { name: "Cadastrar interessado" }).click();
