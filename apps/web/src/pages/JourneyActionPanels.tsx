@@ -116,12 +116,16 @@ export function JourneyVisitsPanel({
   prospects,
   unitId,
   units,
+  assignedTo,
+  assignedToLabel = "Usuário autenticado",
   onChanged,
 }: {
   visits: JourneyVisit[];
   prospects: JourneyProspect[];
   unitId: string;
   units: JourneyUnit[];
+  assignedTo?: string;
+  assignedToLabel?: string;
   onChanged: () => Promise<void>;
 }) {
   const [form, setForm] = useState({
@@ -129,7 +133,6 @@ export function JourneyVisitsPanel({
     unitId,
     startsAt: "",
     endsAt: "",
-    assignedTo: "",
     notes: "",
   });
   const [reschedules, setReschedules] = useState<
@@ -185,7 +188,7 @@ export function JourneyVisitsPanel({
                   unitId: form.unitId || unitId,
                   startsAt: toIso(form.startsAt),
                   endsAt: toIso(form.endsAt),
-                  assignedTo: form.assignedTo || undefined,
+                  assignedTo: assignedTo || undefined,
                   notes: form.notes || undefined,
                   idempotencyKey: journeyIdempotencyKey("visit"),
                 }),
@@ -257,10 +260,9 @@ export function JourneyVisitsPanel({
             Responsável pela visita
             <input
               className="ds-input mt-1 w-full"
-              value={form.assignedTo}
-              onChange={(event) =>
-                setForm({ ...form, assignedTo: event.target.value })
-              }
+              value={assignedToLabel}
+              readOnly
+              aria-readonly="true"
             />
           </label>
           <label className="min-w-0 text-xs text-[var(--text-secondary)]">

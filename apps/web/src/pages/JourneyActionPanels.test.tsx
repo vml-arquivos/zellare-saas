@@ -40,27 +40,85 @@ describe("JourneyActionPanels", () => {
   };
 
   it("submete uma visita ao cliente HTTP e relê após sucesso", async () => {
-    vi.mocked(createJourneyVisit).mockResolvedValueOnce({ id: "visit-1" } as never);
+    vi.mocked(createJourneyVisit).mockResolvedValueOnce({
+      id: "visit-1",
+    } as never);
     const onChanged = vi.fn();
-    render(<JourneyVisitsPanel visits={[]} prospects={[prospect]} unitId="unit-a" units={[{ id: "unit-a", name: "Unidade Sintética", code: "SYN", capacity: 10 }]} onChanged={onChanged} />);
+    render(
+      <JourneyVisitsPanel
+        visits={[]}
+        prospects={[prospect]}
+        unitId="unit-a"
+        units={[
+          {
+            id: "unit-a",
+            name: "Unidade Sintética",
+            code: "SYN",
+            capacity: 10,
+          },
+        ]}
+        assignedTo="operator-1"
+        onChanged={onChanged}
+      />,
+    );
 
-    fireEvent.change(screen.getByLabelText("Interessado"), { target: { value: "prospect-1" } });
-    fireEvent.change(screen.getByLabelText("Início"), { target: { value: "2026-08-30T10:00" } });
-    fireEvent.change(screen.getByLabelText("Fim"), { target: { value: "2026-08-30T11:00" } });
+    fireEvent.change(screen.getByLabelText("Interessado"), {
+      target: { value: "prospect-1" },
+    });
+    fireEvent.change(screen.getByLabelText("Início"), {
+      target: { value: "2026-08-30T10:00" },
+    });
+    fireEvent.change(screen.getByLabelText("Fim"), {
+      target: { value: "2026-08-30T11:00" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Agendar visita" }));
 
-    await waitFor(() => expect(createJourneyVisit).toHaveBeenCalledWith(expect.objectContaining({ prospectId: "prospect-1", unitId: "unit-a" })));
+    await waitFor(() =>
+      expect(createJourneyVisit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prospectId: "prospect-1",
+          unitId: "unit-a",
+          assignedTo: "operator-1",
+        }),
+      ),
+    );
     expect(onChanged).toHaveBeenCalledOnce();
   });
 
   it("confirma presença por ação persistida", async () => {
-    vi.mocked(confirmJourneyVisit).mockResolvedValueOnce({ id: "visit-1", status: "REALIZADA" } as never);
+    vi.mocked(confirmJourneyVisit).mockResolvedValueOnce({
+      id: "visit-1",
+      status: "REALIZADA",
+    } as never);
     const onChanged = vi.fn();
-    render(<JourneyVisitsPanel visits={[{ id: "visit-1", unitId: "unit-a", prospectId: "prospect-1", startsAt: "2026-08-30T10:00:00.000Z", endsAt: "2026-08-30T11:00:00.000Z", status: "AGENDADA", prospect }]} prospects={[prospect]} unitId="unit-a" units={[]} onChanged={onChanged} />);
+    render(
+      <JourneyVisitsPanel
+        visits={[
+          {
+            id: "visit-1",
+            unitId: "unit-a",
+            prospectId: "prospect-1",
+            startsAt: "2026-08-30T10:00:00.000Z",
+            endsAt: "2026-08-30T11:00:00.000Z",
+            status: "AGENDADA",
+            prospect,
+          },
+        ]}
+        prospects={[prospect]}
+        unitId="unit-a"
+        units={[]}
+        onChanged={onChanged}
+      />,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Confirmar presença" }));
 
-    await waitFor(() => expect(confirmJourneyVisit).toHaveBeenCalledWith("visit-1", expect.objectContaining({ idempotencyKey: "visit-confirm-test" })));
+    await waitFor(() =>
+      expect(confirmJourneyVisit).toHaveBeenCalledWith(
+        "visit-1",
+        expect.objectContaining({ idempotencyKey: "visit-confirm-test" }),
+      ),
+    );
     expect(onChanged).toHaveBeenCalledOnce();
   });
 });

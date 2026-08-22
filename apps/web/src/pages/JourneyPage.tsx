@@ -487,6 +487,7 @@ export default function JourneyPage() {
               prospects={prospects}
               unitId={unitId}
               units={units}
+              assignedTo={user?.id}
               onChanged={() => load(true)}
             />
           )}

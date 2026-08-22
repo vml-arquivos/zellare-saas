@@ -20,7 +20,19 @@ Ele apenas informa que o seed está desabilitado. Para executar o caminho sinté
 ALLOW_SYNTHETIC_SEED=true pnpm --filter @zelare/api seed:synthetic
 ```
 
-A fixture sintética atual não insere registros: o harness do CI cria e destrói o banco descartável quando precisa validar schema, migrations e contratos. Nenhum comando de seed deve apontar para produção.
+A fixture sintética de verificação do CI não insere registros no ambiente padrão: o harness do CI prepara o banco descartável quando precisa validar schema, migrations e contratos. Para a demonstração PR22 existe uma entrada separada, somente-upsert e bloqueada por ambiente:
+
+```bash
+ALLOW_SYNTHETIC_SEED=true \
+DEMO_DATA_CONFIRMATION=PR22-DEMO-ONLY \
+NODE_ENV=development \
+PR22_DEMO_PASSWORD='valor fornecido no momento da execução, nunca versionado' \
+JOURNEY_CONTACT_HMAC_SECRET="$JOURNEY_CONTACT_HMAC_SECRET" \
+JOURNEY_CONTACT_ENCRYPTION_SECRET="$JOURNEY_CONTACT_ENCRYPTION_SECRET" \
+pnpm --filter @zelare/api seed:demo
+```
+
+A fixture `scripts/fixtures/pr22-demo-seed.mjs` é reaplicável por IDs estáveis e `upsert`, não executa `DROP`, `TRUNCATE`, `deleteMany` ou `updateMany`, rejeita `NODE_ENV=production` e só aceita banco local/CI ou domínio explicitamente sintético. Ela cria apenas registros sintéticos de demonstração, mantém contatos Journey como HMAC/AES-GCM sem plaintext e não deve apontar para produção.
 
 ## Catálogos públicos
 

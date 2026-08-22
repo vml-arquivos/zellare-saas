@@ -89,7 +89,7 @@ export class JourneyAccessService {
     if (capability === JOURNEY_CAPABILITIES.reviewMerge)
       return developer || mantenedoraAdmin || director;
     if (capability === JOURNEY_CAPABILITIES.acceptOffer)
-      return developer || mantenedoraAdmin || director;
+      return developer || mantenedoraAdmin || director || centralAdmissions;
     if (capability === JOURNEY_CAPABILITIES.offerSeat)
       return developer || mantenedoraAdmin || unitAdmissions;
     if (capability === JOURNEY_CAPABILITIES.manageWaitlist)

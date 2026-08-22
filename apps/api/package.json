@@ -21,6 +21,7 @@
     "security:artifacts": "node scripts/check-sensitive-artifacts.mjs",
     "test": "jest",
     "seed:synthetic": "ALLOW_SYNTHETIC_SEED=true node scripts/fixtures/synthetic-seed.mjs",
+    "seed:demo": "node scripts/fixtures/pr22-demo-seed.mjs",
     "typecheck": "tsc --noEmit",
     "prepush": "npm run typecheck"
   },
