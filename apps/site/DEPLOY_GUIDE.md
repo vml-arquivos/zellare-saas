@@ -1,356 +1,114 @@
-# Guia Completo de Deploy - Site Zelare
+# Guia de deploy — Site público Zelare
 
-## 📋 Pré-requisitos
+Este guia se aplica ao site público do monorepo `vml-arquivos/zellare-saas`, publicado no Coolify como `site-zellare-saas`, no domínio `https://zelare.casadf.com.br`.
 
-- Servidor VPS com Ubuntu 20.04+ ou Debian 11+
-- Docker e Docker Compose instalados
-- Coolify instalado e configurado
-- Domínio zelare.casadef.com.br apontando para o servidor
-- Conta Stripe (para pagamentos)
-- Banco de dados MySQL/MariaDB
+## Pré-requisitos
 
----
+O ambiente deve possuir Coolify autenticado, DNS apontado para a VPS, certificado HTTPS ativo e o PostgreSQL do site disponível. O site não usa cadastro local de demonstração em produção: unidades, projetos, posts, transparência, candidaturas e contatos são lidos do banco autorizado.
 
-## 🚀 Deploy no Coolify
+## Configuração do recurso
 
-### 1. Preparar Banco de Dados
+| Campo | Valor |
+|---|---|
+| Repositório | `vml-arquivos/zellare-saas` |
+| Diretório-base | `/apps/site` |
+| Porta | `3001` |
+| Domínio | `https://zelare.casadf.com.br` |
+| Build | `pnpm install --frozen-lockfile && pnpm build` |
+| Start | `NODE_ENV=production node dist/index.js` |
 
-No painel do Coolify:
+Se o recurso existente usar Dockerfile, mantenha o Dockerfile e a porta já configurados no Coolify. Não altere a aplicação de API ou o banco da API ao configurar o site.
 
-1. **Criar novo serviço MySQL:**
-   - Nome: `zelare-db`
-   - Versão: MySQL 8.0 ou MariaDB 10.11
-   - Anotar credenciais: usuário, senha, porta, database
+## Variáveis de ambiente
 
-2. **Construir DATABASE_URL:**
-   ```
-   mysql://usuario:senha@zelare-db:3306/zelare
-   ```
+Configure no painel de Environment Variables do Coolify. Segredos devem ser obtidos do gerenciador de segredos e nunca devem ser escritos no Git.
 
-### 2. Configurar Aplicação
+```env
+SITE_DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
+DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
+JWT_SECRET=<SECRET_FROM_SECRET_MANAGER>
+NODE_ENV=production
+PORT=3001
+VITE_SITE_URL=https://zelare.casadf.com.br
 
-1. **Criar novo Application no Coolify:**
-   - Nome: `zelare-site`
-   - Tipo: GitHub Repository
-   - Repositório: `vml-arquivos/site-zelare`
-   - Branch: `main`
+# Canais institucionais públicos — obrigatórios no build de produção
+VITE_PUBLIC_CONTACT_EMAIL=contato@zelare.com.br
+VITE_PUBLIC_COMPLIANCE_EMAIL=denuncia@zelare.com.br
+VITE_PUBLIC_PHONE=(61) 2123-4567
+VITE_PUBLIC_ADDRESS=Brasília-DF
 
-2. **Build Settings:**
-   ```bash
-   # Build Command
-   pnpm install && pnpm run build
-   
-   # Start Command
-   NODE_ENV=production node dist/server/_core/index.js
-   
-   # Port
-   3000
-   ```
-
-3. **Environment Variables:**
-
-   Copie e configure todas as variáveis abaixo no painel de Environment do Coolify:
-
-   ```env
-   # Database
-   DATABASE_URL=mysql://usuario:senha@zelare-db:3306/zelare
-   
-   # Authentication (copiar do Manus)
-   JWT_SECRET=your-jwt-secret-min-32-chars
-   OAUTH_SERVER_URL=https://api.manus.im
-   VITE_OAUTH_PORTAL_URL=https://login.manus.im
-   OWNER_OPEN_ID=your-owner-open-id
-   OWNER_NAME=Administrator Name
-   
-   # Manus App (copiar do Manus)
-   VITE_APP_ID=your-app-id
-   VITE_APP_TITLE=CoCris - Educação Infantil
-   VITE_APP_LOGO=/images/zelare-logo-square.png
-   
-   # Manus Forge API (copiar do Manus)
-   BUILT_IN_FORGE_API_URL=https://forge.manus.im
-   BUILT_IN_FORGE_API_KEY=your-backend-key
-   VITE_FRONTEND_FORGE_API_URL=https://forge.manus.im
-   VITE_FRONTEND_FORGE_API_KEY=your-frontend-key
-   
-   # Analytics (copiar do Manus)
-   VITE_ANALYTICS_ENDPOINT=https://analytics.manus.im
-   VITE_ANALYTICS_WEBSITE_ID=your-website-id
-   
-   # Stripe (obter em https://dashboard.stripe.com)
-   STRIPE_SECRET_KEY=<SECRET_FROM_SECRET_MANAGER>
-   VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your_publishable_key
-   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-   
-   # Site Config
-   VITE_SITE_URL=https://site.example.invalid
-   NODE_ENV=production
-   ```
-
-### 3. Configurar Domínio
-
-1. **No painel DNS (Registro.br, Cloudflare, etc.):**
-   ```
-   Type: A
-   Name: zelare.casadef.com.br
-   Value: [IP do servidor Coolify]
-   TTL: 3600
-   ```
-
-2. **No Coolify:**
-   - Vá em Settings > Domains
-   - Adicione: `zelare.casadef.com.br`
-   - Habilite "Enable HTTPS" (Let's Encrypt)
-   - Aguarde propagação DNS (5-30 minutos)
-
-### 4. Deploy Inicial
-
-1. **Fazer primeiro deploy:**
-   - Clique em "Deploy" no painel do Coolify
-   - Aguarde build completar (3-5 minutos)
-   - Verifique logs em caso de erro
-
-2. **Executar migrações do banco:**
-   ```bash
-   # Conectar ao container
-   docker exec -it [container-id] bash
-   
-   # Executar migrações
-   pnpm db:push
-   
-   # O site não executa seed nominal. Configure o banco autorizado;
-   # sem banco, o fallback estático é exclusivamente sintético.
-   ```
-
-3. **Verificar site:**
-   - Acesse https://site.example.invalid
-   - Teste navegação entre páginas
-   - Verifique imagens e assets
-
----
-
-## 🔧 Configuração Stripe
-
-### 1. Criar Conta e Obter Chaves
-
-1. Acesse https://dashboard.stripe.com
-2. Complete o cadastro da organização
-3. Ative pagamentos no Brasil (BRL)
-4. Vá em Developers > API Keys
-5. Copie:
-   - Secret key (sk_live_...)
-   - Publishable key (pk_live_...)
-
-### 2. Configurar Webhook
-
-1. Vá em Developers > Webhooks
-2. Clique em "Add endpoint"
-3. Configure:
-   ```
-   Endpoint URL: https://site.example.invalid/api/webhooks/stripe
-   Description: Zelare Payment Webhook
-   Events to send:
-     - checkout.session.completed
-     - payment_intent.succeeded
-     - payment_intent.payment_failed
-   ```
-4. Copie o "Signing secret" (whsec_...)
-5. Adicione em STRIPE_WEBHOOK_SECRET
-
-### 3. Habilitar PIX
-
-1. No dashboard Stripe, vá em Settings > Payment methods
-2. Habilite "PIX" para Brasil
-3. Complete verificação de identidade se solicitado
-4. Aguarde aprovação (1-2 dias úteis)
-
-### 4. Testar Pagamentos
-
-**Modo Teste (sk_test_):**
-- Cartão de sucesso: consulte a documentação oficial do provedor em modo teste
-- Cartão de falha: consulte a documentação oficial do provedor em modo teste
-- Data/CVC: use valores fictícios aceitos pelo ambiente de teste
-
-**Modo Produção:**
-- Use cartões reais
-- Monitore transações no dashboard
-
----
-
-## 📧 Configuração de Email (Opcional)
-
-### Opção 1: Gmail
-
-1. Ative verificação em 2 etapas
-2. Gere senha de app: https://myaccount.google.com/apppasswords
-3. Configure variáveis:
-   ```env
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=contact@example.invalid
-   SMTP_PASSWORD=senha-de-app-gerada
-   SMTP_FROM=contact@example.invalid
-   ```
-
-### Opção 2: SendGrid
-
-1. Crie conta em https://sendgrid.com
-2. Gere API Key
-3. Configure:
-   ```env
-   SMTP_HOST=smtp.sendgrid.net
-   SMTP_PORT=587
-   SMTP_USER=apikey
-   SMTP_PASSWORD=SG.sua-api-key
-   SMTP_FROM=contact@example.invalid
-   ```
-
----
-
-## 🔍 SEO e Analytics
-
-### 1. Google Search Console
-
-1. Acesse https://search.google.com/search-console
-2. Adicione propriedade: `zelare.casadef.com.br`
-3. Verifique propriedade (DNS ou HTML)
-4. Envie sitemap: `https://site.example.invalid/sitemap.xml`
-
-### 2. Google Analytics (Opcional)
-
-1. Crie propriedade em https://analytics.google.com
-2. Copie Measurement ID (G-XXXXXXXXXX)
-3. Adicione ao código (já configurado via Manus Analytics)
-
-### 3. Meta Tags e Open Graph
-
-Já implementado automaticamente em todas as páginas via componente SEO.
-
----
-
-## 🛡️ Segurança
-
-### 1. Firewall
-
-```bash
-# Permitir apenas portas necessárias
-sudo ufw allow 22/tcp   # SSH
-sudo ufw allow 80/tcp   # HTTP
-sudo ufw allow 443/tcp  # HTTPS
-sudo ufw enable
+# Integrações opcionais, quando habilitadas
+STRIPE_SECRET_KEY=<SECRET_FROM_SECRET_MANAGER>
+VITE_STRIPE_PUBLISHABLE_KEY=<PUBLIC_KEY_FROM_PROVIDER>
+STRIPE_WEBHOOK_SECRET=<SECRET_FROM_SECRET_MANAGER>
+SMTP_HOST=<SMTP_HOST_FROM_SECRET_MANAGER>
+SMTP_PORT=587
+SMTP_USER=<SMTP_USER_FROM_SECRET_MANAGER>
+SMTP_PASSWORD=<SECRET_FROM_SECRET_MANAGER>
+SMTP_FROM=contato@zelare.com.br
+VITE_ANALYTICS_ENDPOINT=
+VITE_ANALYTICS_WEBSITE_ID=
 ```
 
-### 2. SSL/TLS
+Os quatro canais públicos são validados no build. O build deve falhar se faltar e-mail, telefone ou endereço, ou se algum valor for inválido. Não use contato fictício, telefone zerado, domínio inválido ou dados pessoais de teste.
 
-- Coolify configura automaticamente Let's Encrypt
-- Certificados renovam automaticamente
-- Force HTTPS habilitado por padrão
+## Banco de dados e unidades públicas
 
-### 3. Backup do Banco
+`SITE_DATABASE_URL` deve apontar para o PostgreSQL próprio do site. O site consulta somente unidades ativas e ordena os resultados pelo nome. Se o banco ou a consulta estiver indisponível, `/unidades` informa a indisponibilidade e oferece nova tentativa; não mostra unidades inventadas. Se não houver linhas ativas, a página informa que não há unidades cadastradas.
 
-```bash
-# Backup manual
-docker exec zelare-db mysqldump -u usuario -p zelare > backup-$(date +%Y%m%d).sql
+O startup do site não deve executar seed, importação de planilhas, backfill, correção de dados ou migration automaticamente. Alterações de schema devem ser preparadas como migration explícita, revisadas e executadas em job separado conforme o procedimento de mudança aprovado.
 
-# Backup automático (crontab)
-0 2 * * * docker exec zelare-db mysqldump -u usuario -p zelare > /backups/zelare-$(date +\%Y\%m\%d).sql
-```
+## Ordem de publicação
 
-### 4. Monitoramento
+1. Validar o diff na PR e confirmar que os 14 gates do CI estão verdes no HEAD final.
+2. Confirmar no Coolify todas as variáveis obrigatórias, domínios e portas.
+3. Executar migration somente se houver migration aprovada para o banco do site; registrar o resultado.
+4. Publicar o site pelo fluxo de branch/PR aprovado.
+5. Verificar `https://zelare.casadf.com.br`, `/unidades`, `/compliance` e `/contato`.
+6. Confirmar que os links de e-mail e telefone apontam para os canais institucionais configurados.
+7. Confirmar que o HTML e o bundle não contêm `example.invalid`, unidades fictícias ou credenciais.
 
-- Configure alertas no Coolify
-- Monitore logs: `docker logs -f [container-id]`
-- Configure uptime monitoring (UptimeRobot, Pingdom)
+Não execute scripts de seed, imports de planilhas ou comandos de criação de administrador no container de produção. A criação de usuários deve ocorrer por fluxo administrativo auditável no ambiente autorizado.
 
----
-
-## 🔄 Atualizações
-
-### Deploy de Novas Versões
-
-1. **Fazer alterações no código**
-2. **Commit e push para GitHub:**
-   ```bash
-   git add .
-   git commit -m "feat: nova funcionalidade"
-   git push origin main
-   ```
-3. **Deploy automático no Coolify** (se configurado)
-4. **Ou manual:** clique em "Redeploy" no painel
-
-### Rollback
-
-1. No Coolify, vá em Deployments
-2. Selecione versão anterior
-3. Clique em "Redeploy this version"
-
----
-
-## 🐛 Troubleshooting
-
-### Erro de Build
+## Validação pós-deploy
 
 ```bash
-# Limpar cache
-rm -rf node_modules .next dist
-pnpm install
-pnpm build
+curl -fsS https://zelare.casadf.com.br/ | head
+curl -fsS https://zelare.casadf.com.br/unidades | head
+curl -fsS https://zelare.casadf.com.br/compliance | head
+curl -fsS https://zelare.casadf.com.br/contato | head
 ```
 
-### Erro de Conexão com Banco
+Também valide visualmente o formulário de contato, o canal de denúncias, a lista de unidades e o estado de nova tentativa com a API de unidades temporariamente indisponível em ambiente de teste. Não simule indisponibilidade alterando produção.
 
-```bash
-# Testar conexão
-mysql -h zelare-db -u usuario -p zelare
+## Stripe e e-mail
 
-# Verificar se serviço está rodando
-docker ps | grep mysql
-```
+Integrações de pagamento e e-mail são opcionais. As chaves devem ser cadastradas somente no Coolify, com separação entre teste e produção. Webhooks devem usar o domínio real do site e o segredo correspondente ao ambiente. Nunca registre tokens, senhas de aplicativo, dados de cartão ou credenciais nos arquivos do projeto.
 
-### Site Não Carrega
+## Segurança e LGPD
 
-1. Verificar logs: `docker logs -f [container-id]`
-2. Verificar DNS: `nslookup zelare.casadef.com.br`
-3. Verificar porta: `curl http://localhost:3000`
-4. Verificar SSL: `curl https://site.example.invalid`
+Mantenha HTTPS, backups do PostgreSQL, controle de acesso ao Coolify e monitoramento de logs. Dados de crianças, famílias, profissionais e candidatos devem permanecer no banco autorizado, com acesso conforme finalidade e permissões. Não exporte dados pessoais para fixtures, planilhas versionadas, screenshots ou documentação pública.
 
-### Pagamentos Não Funcionam
+## Atualizações e rollback
 
-1. Verificar chaves Stripe (test vs live)
-2. Verificar webhook configurado
-3. Verificar logs do Stripe dashboard
-4. Testar com cartão de teste
+Toda alteração deve ser feita em branch própria, validada localmente e submetida por PR. Após o merge aprovado, o Coolify pode ser acionado pelo processo de publicação autorizado. Para rollback, selecione no Coolify o release anterior comprovadamente saudável; não reescreva histórico nem force-push.
 
----
+## Troubleshooting
 
-## 📞 Suporte
+Se o build falhar, leia a primeira mensagem de configuração ausente, confirme as quatro variáveis `VITE_PUBLIC_*` e repita o build com o ambiente correto. Se as unidades não carregarem, confirme `SITE_DATABASE_URL`, conectividade do PostgreSQL e logs do serviço; a resposta correta é indisponibilidade, não criação de dados locais. Se o domínio falhar, confirme DNS, certificado, porta `3001` e roteamento do Coolify.
 
-- **Documentação Coolify:** https://coolify.io/docs
-- **Documentação Stripe:** https://stripe.com/docs
-- **Issues GitHub:** https://github.com/vml-arquivos/site-zelare/issues
-- **Email:** contact@example.invalid
+## Checklist
 
----
+- [ ] PR validada e CI aprovado no HEAD final.
+- [ ] Domínio `zelare.casadf.com.br` e HTTPS ativos.
+- [ ] `SITE_DATABASE_URL` configurada no Coolify.
+- [ ] Quatro canais institucionais públicos configurados e válidos.
+- [ ] Nenhuma unidade fictícia no bundle ou no HTML publicado.
+- [ ] Nenhuma ocorrência funcional de `example.invalid`.
+- [ ] `/unidades` exibe dados reais ou indisponibilidade com nova tentativa.
+- [ ] `/compliance` exibe e-mail e telefone institucionais.
+- [ ] `/contato` exibe e-mail, telefone e endereço institucionais.
+- [ ] Nenhum seed, import ou migration automática no startup.
+- [ ] Backup e monitoramento confirmados.
 
-## ✅ Checklist Final
-
-Antes de colocar em produção:
-
-- [ ] Banco de dados configurado e populado
-- [ ] Todas as variáveis de ambiente configuradas
-- [ ] Domínio apontando e SSL ativo
-- [ ] Stripe configurado com chaves de produção
-- [ ] Webhook Stripe testado e funcionando
-- [ ] Email de notificações configurado (opcional)
-- [ ] Sitemap enviado ao Google Search Console
-- [ ] Backup automático do banco configurado
-- [ ] Monitoramento de uptime ativo
-- [ ] Todas as páginas testadas e funcionando
-- [ ] Pagamentos testados (teste e produção)
-- [ ] Performance verificada (PageSpeed, GTmetrix)
-- [ ] Acessibilidade verificada (WAVE, Lighthouse)
-
----
-
-**Última atualização:** Fevereiro 2026  
-**Versão:** 1.0.0
+**Última atualização:** agosto de 2026

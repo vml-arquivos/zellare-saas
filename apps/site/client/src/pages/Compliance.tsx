@@ -2,6 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { Shield, FileText, AlertCircle, Scale } from 'lucide-react';
+import { PUBLIC_CHANNELS, publicChannelMailto, publicChannelTel } from '@/config/public-channels';
 
 export default function Compliance() {
   return (
@@ -87,8 +88,8 @@ export default function Compliance() {
                       </p>
                       <div className="bg-white p-6 rounded-lg border border-amber-200 space-y-3">
                         <p className="font-semibold text-foreground">Como denunciar:</p>
-                        <p>📧 Email: <a href="mailto:denuncia@example.invalid" className="text-primary hover:underline">denuncia@example.invalid</a></p>
-                        <p>📞 Telefone: <a href="tel:+5500000000000" className="text-primary hover:underline">Canal informado pelo ambiente autorizado</a></p>
+                        <p>Email: <a href={publicChannelMailto(PUBLIC_CHANNELS.complianceEmail)} className="text-primary hover:underline">{PUBLIC_CHANNELS.complianceEmail}</a></p>
+                        <p>Telefone: <a href={publicChannelTel(PUBLIC_CHANNELS.phone)} className="text-primary hover:underline">{PUBLIC_CHANNELS.phone}</a></p>
                         <p className="text-sm text-foreground/60 mt-4">
                           * Todas as denúncias são tratadas com sigilo e investigadas por comissão independente.
                         </p>

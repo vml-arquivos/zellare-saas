@@ -1,114 +1,81 @@
-# Configuração Rápida Coolify
+# Configuração rápida do Zelare no Coolify
 
-## Backend API (api.zelare.seu-dominio.com.br)
+Este runbook descreve a configuração dos três serviços do Zelare no ambiente autorizado. **Segredos e credenciais devem ser inseridos somente no gerenciador de variáveis do Coolify**; não devem ser copiados para este repositório.
 
-### 1. General
-- **Name**: zelare-saas-api
-- **Build Pack**: Dockerfile
-- **Base Directory**: `/apps/api`
-- **Dockerfile Location**: `/Dockerfile`
+## Serviços
 
-### 2. Network
-- **Domains**: `https://api.zelare.seu-dominio.com.br`
-- **Ports Exposes**: `3000`
-- **Port Mappings**: `3000:3000`
+| Serviço | Domínio | Diretório | Porta | Build |
+|---|---|---|---:|---|
+| API | `https://apizelare.casadf.com.br` | `/apps/api` | 3000 | Dockerfile `/Dockerfile` |
+| Aplicação web | `https://appzelare.casadf.com.br` | `/apps/web` | 5173 | Nixpacks |
+| Site público | `https://zelare.casadf.com.br` | `/apps/site` | 3001 | Dockerfile ou Nixpacks conforme o recurso existente |
 
-### 3. Healthcheck
-- **Path**: `/health`
-- **Port**: `3000`
-- **Interval**: `30`
-- **Timeout**: `10`
-- **Retries**: `3`
+## API
 
-### 4. Environment Variables (14)
-```
-DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
-DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
-REDIS_URL=redis://default:EWCBWCNg0uX92uoCNTRLcL7zwjSpIMkEzXtqxIqi9QL6xCK1ieJbyTrzgkx8Vjzr@y0oso44kkssw40skk048ksgs:6379/0
-JWT_SECRET=0MsE4rEpC7FPosGYzlsXw9GNfD+YZmIDylHzDp2v9YIRRQMHIlbf2IF3fPMGz7tdXAhPVKf/bfJrNXRyL+LAGw==
+Configure no Coolify as variáveis obrigatórias usando valores do ambiente autorizado:
+
+```text
+DATABASE_URL=<DATABASE_URL_FROM_COOLIFY>
+DIRECT_URL=<DIRECT_URL_FROM_COOLIFY>
+REDIS_URL=<REDIS_URL_FROM_COOLIFY>
+JWT_SECRET=<SECRET_FROM_SECRET_MANAGER>
 JWT_EXPIRATION=7d
 NODE_ENV=production
 PORT=3000
 APP_TIMEZONE=America/Sao_Paulo
-API_URL=https://api.zelare.seu-dominio.com.br
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
-GEMINI_API_KEY=[SUA_CHAVE_AQUI]
-GEMINI_MODEL=gemini-2.0-flash-exp
+API_URL=https://apizelare.casadf.com.br
+CORS_ORIGIN=https://appzelare.casadf.com.br,https://zelare.casadf.com.br
+GEMINI_API_KEY=<SECRET_FROM_SECRET_MANAGER>
+GEMINI_MODEL=gemini-3.6-flash
 ENABLE_AI_ASSISTANT=true
 ENABLE_OFFLINE_MODE=true
 ```
 
-### 5. Após Deploy
-Execute no terminal do container:
-```bash
-cd /app
-node scripts/seed-admin.js
-```
+O entrypoint da API é deliberadamente seguro: não executa migration, seed, import, backfill ou correção de dados no startup. Qualquer migration deve ser executada como job explícito, revisado e registrado antes de uma publicação autorizada.
 
----
+## Aplicação web
 
-## Frontend Web (app.zelare.seu-dominio.com.br)
-
-### 1. General
-- **Name**: zelare-saas-web
-- **Build Pack**: nixpacks
-- **Base Directory**: `/apps/web`
-
-### 2. Network
-- **Domains**: `https://app.zelare.seu-dominio.com.br`
-- **Ports Exposes**: `5173`
-
-### 3. Environment Variables (3)
-```
-VITE_API_URL=https://api.zelare.seu-dominio.com.br
+```text
+VITE_API_URL=https://apizelare.casadf.com.br
 VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
 
----
+## Site público
 
-## Site (conexa3.casadf.com.br)
+O site usa o PostgreSQL próprio do site por meio de `SITE_DATABASE_URL`. As unidades exibidas publicamente vêm exclusivamente das linhas ativas desse banco; se a consulta falhar, a interface informa indisponibilidade e oferece nova tentativa. **Nenhuma unidade demonstrativa é usada em produção.**
 
-### 1. General
-- **Name**: zelare-saas-site
-- **Build Pack**: nixpacks
-- **Base Directory**: `/apps/site`
-
-### 2. Network
-- **Domains**: `https://conexa3.casadf.com.br`
-- **Ports Exposes**: `5174`
-
-### 3. Environment Variables (4)
-```
-DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
-API_URL=https://api.zelare.seu-dominio.com.br
+```text
+SITE_DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
+DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
 NODE_ENV=production
-PORT=5174
+PORT=3001
+VITE_SITE_URL=https://zelare.casadf.com.br
+VITE_PUBLIC_CONTACT_EMAIL=contato@zelare.com.br
+VITE_PUBLIC_COMPLIANCE_EMAIL=denuncia@zelare.com.br
+VITE_PUBLIC_PHONE=(61) 2123-4567
+VITE_PUBLIC_ADDRESS=Brasília-DF
 ```
 
----
+Os quatro canais públicos acima são obrigatórios no build de produção e devem ser confirmados pelo responsável institucional antes da publicação. Se qualquer um estiver ausente ou inválido, o build deve falhar; não substitua a configuração por e-mail, telefone ou endereço fictício.
 
-## Ordem de Deploy
+Para notificações por e-mail, configure os valores no Coolify sem armazená-los no Git:
 
-1. ✅ Backend API (já feito)
-2. ⏳ Criar admin (execute seed-admin.js)
-3. ⏳ Frontend Web
-4. ⏳ Site
-
-## Teste Final
-
-```bash
-# API
-curl https://api.zelare.seu-dominio.com.br/health
-
-# Login
-curl -X POST https://api.zelare.seu-dominio.com.br/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"contact@example.invalid","password":"<SECRET_FROM_SECRET_MANAGER>"}'
-
-# Frontend
-curl https://app.zelare.seu-dominio.com.br
-
-# Site
-curl https://conexa3.casadf.com.br
+```text
+SMTP_HOST=<SMTP_HOST_FROM_SECRET_MANAGER>
+SMTP_PORT=587
+SMTP_USER=<SMTP_USER_FROM_SECRET_MANAGER>
+SMTP_PASSWORD=<SECRET_FROM_SECRET_MANAGER>
+SMTP_FROM=contato@zelare.com.br
 ```
+
+## Ordem segura
+
+1. Validar variáveis e domínios no Coolify.
+2. Aplicar migrations somente em job explícito e após revisão humana.
+3. Publicar a API e validar `/health`.
+4. Publicar a aplicação web e validar login no ambiente autorizado.
+5. Publicar o site e validar `/`, `/unidades`, `/compliance` e `/contato`.
+6. Confirmar nos logs que o site não renderiza `example.invalid`, não exibe unidades fictícias e apresenta nova tentativa quando a fonte de unidades está indisponível.
+
+Não execute scripts de seed, imports de planilhas ou comandos de criação de administrador durante o deploy. Cadastros e acessos devem ser provisionados por fluxo administrativo auditável, com credenciais fornecidas somente pelo ambiente autorizado.

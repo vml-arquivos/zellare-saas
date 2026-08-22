@@ -1,165 +1,69 @@
-# Configuração de Variáveis de Ambiente - Zelare
+# Variáveis de ambiente do site Zelare
 
-## Variáveis Já Configuradas (Manus)
+O site público separa suas variáveis de runtime das variáveis da API. Segredos nunca devem ser versionados. Em produção, o build falha se os canais institucionais obrigatórios não estiverem configurados e válidos.
 
-As seguintes variáveis já estão configuradas automaticamente pelo Manus:
+## Banco e aplicação
 
-- `DATABASE_URL` - String de conexão MySQL
-- `JWT_SECRET` - Segredo para sessões
-- `OAUTH_SERVER_URL` - URL do servidor OAuth Manus
-- `VITE_OAUTH_PORTAL_URL` - URL do portal de login Manus
-- `OWNER_OPEN_ID` - ID do proprietário
-- `OWNER_NAME` - Nome do proprietário
-- `VITE_APP_ID` - ID da aplicação Manus
-- `VITE_APP_TITLE` - Título do site
-- `VITE_APP_LOGO` - Logo do site
-- `BUILT_IN_FORGE_API_URL` - URL da API Forge (backend)
-- `BUILT_IN_FORGE_API_KEY` - Chave da API Forge (backend)
-- `VITE_FRONTEND_FORGE_API_URL` - URL da API Forge (frontend)
-- `VITE_FRONTEND_FORGE_API_KEY` - Chave da API Forge (frontend)
-- `VITE_ANALYTICS_ENDPOINT` - Endpoint de analytics
-- `VITE_ANALYTICS_WEBSITE_ID` - ID do website para analytics
-
-## Variáveis Adicionais Necessárias
-
-### 1. Stripe (Pagamentos)
-
-Para habilitar pagamentos reais, configure as seguintes variáveis no painel de Secrets do Manus:
-
-```
-STRIPE_SECRET_KEY=sk_test_... ou sk_live_...
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_... ou pk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_... (opcional)
+```text
+SITE_DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
+DATABASE_URL=<SITE_DATABASE_URL_FROM_COOLIFY>
+JWT_SECRET=<SECRET_FROM_SECRET_MANAGER>
+NODE_ENV=production
+PORT=3001
+VITE_SITE_URL=https://zelare.casadf.com.br
 ```
 
-**Como obter:**
-1. Acesse https://dashboard.stripe.com/apikeys
-2. Copie a "Secret key" (sk_test_ ou sk_live_)
-3. Copie a "Publishable key" (pk_test_ ou pk_live_)
-4. Para webhook:
-   - Acesse https://dashboard.stripe.com/webhooks
-   - Crie endpoint: `https://zelare.casadef.com.br/api/webhooks/stripe`
-   - Selecione eventos: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`
-   - Copie o "Signing secret" (whsec_...)
+`SITE_DATABASE_URL` é a conexão usada pelo site para unidades, blog, projetos, transparência, candidaturas e contatos. O site não cria unidades locais quando o banco está ausente ou indisponível.
 
-### 2. Email (Opcional - para notificações)
+## Canais institucionais públicos
 
+Estas variáveis são incorporadas ao bundle público. Use os canais institucionais aprovados pela mantenedora:
+
+```text
+VITE_PUBLIC_CONTACT_EMAIL=contato@zelare.com.br
+VITE_PUBLIC_COMPLIANCE_EMAIL=denuncia@zelare.com.br
+VITE_PUBLIC_PHONE=(61) 2123-4567
+VITE_PUBLIC_ADDRESS=Brasília-DF
 ```
-SMTP_HOST=smtp.gmail.com
+
+As quatro variáveis são obrigatórias para `NODE_ENV=production`. O build rejeita e-mail inválido, domínio `example.invalid`, telefone vazio/zerado e endereço genérico. Em desenvolvimento e testes, os valores públicos históricos do Zelare são usados somente como defaults locais; eles não substituem a configuração do ambiente de produção.
+
+## Stripe e e-mail transacional
+
+Configure segredos do provedor diretamente no Coolify:
+
+```text
+STRIPE_SECRET_KEY=<SECRET_FROM_SECRET_MANAGER>
+VITE_STRIPE_PUBLISHABLE_KEY=<PUBLIC_KEY_FROM_PROVIDER>
+STRIPE_WEBHOOK_SECRET=<SECRET_FROM_SECRET_MANAGER>
+SMTP_HOST=<SMTP_HOST_FROM_SECRET_MANAGER>
 SMTP_PORT=587
-SMTP_USER=contact@example.invalid
-SMTP_PASSWORD=sua-senha-de-app
-SMTP_FROM=contact@example.invalid
+SMTP_USER=<SMTP_USER_FROM_SECRET_MANAGER>
+SMTP_PASSWORD=<SECRET_FROM_SECRET_MANAGER>
+SMTP_FROM=contato@zelare.com.br
 ```
 
-**Gmail:**
-1. Ative "Verificação em duas etapas"
-2. Gere uma "Senha de app" em https://myaccount.google.com/apppasswords
-3. Use a senha gerada em `SMTP_PASSWORD`
+Não coloque chaves, senhas, tokens, números de cartão ou credenciais de teste no repositório. Use apenas o ambiente de teste do provedor para testes de pagamento.
 
-**Alternativas:**
-- SendGrid: https://sendgrid.com
-- Mailgun: https://mailgun.com
-- AWS SES: https://aws.amazon.com/ses
+## Analytics opcional
+
+```text
+VITE_ANALYTICS_ENDPOINT=
+VITE_ANALYTICS_WEBSITE_ID=
+```
+
+Quando o endpoint estiver vazio, nenhum script de analytics é carregado.
 
 ## Deploy no Coolify
 
-### 1. Criar Banco de Dados MySQL
+No recurso do site, use `/apps/site` como diretório-base, a porta `3001` e o domínio `https://zelare.casadf.com.br`. O build deve executar a instalação congelada e o build do pacote; o start deve usar o bundle do site em modo de produção.
 
-No painel do Coolify:
-1. Crie um novo serviço MySQL
-2. Anote as credenciais (host, porta, usuário, senha, database)
-3. Configure `DATABASE_URL`:
-   ```
-   mysql://usuario:senha@host:porta/database
-   ```
+Migrations do banco do site não são executadas no startup. Se houver alteração de schema, gere e aplique a migration como job explícito, revisado e registrado. Nunca rode seed, importação de planilhas ou correção de dados pessoais durante o deploy.
 
-### 2. Configurar Aplicação
+## Comportamento de unidades
 
-1. **Build Command:**
-   ```bash
-   pnpm install && pnpm run build
-   ```
+A rota pública de unidades consulta somente unidades ativas no banco do site. Em caso de erro, a página mostra indisponibilidade real e um botão de nova tentativa. Em caso de lista vazia, mostra que não há unidades cadastradas. Nenhuma unidade fictícia é criada ou renderizada no bundle.
 
-2. **Start Command:**
-   ```bash
-   NODE_ENV=production node dist/server/_core/index.js
-   ```
+## Validação pós-publicação
 
-3. **Port:** `3000`
-
-4. **Environment Variables:**
-   - Copie todas as variáveis do Manus
-   - Adicione as variáveis Stripe
-   - Adicione `DATABASE_URL` do MySQL criado
-   - Adicione `VITE_SITE_URL=https://zelare.casadef.com.br`
-
-### 3. Configurar Domínio
-
-1. No painel DNS do seu provedor:
-   ```
-   Type: A ou CNAME
-   Name: zelare.casadef.com.br
-   Value: [IP do servidor Coolify]
-   ```
-
-2. No Coolify:
-   - Adicione o domínio na configuração da aplicação
-   - Habilite HTTPS automático (Let's Encrypt)
-
-### 4. Executar Migrações
-
-Após primeiro deploy:
-```bash
-pnpm db:push
-```
-
-Ou execute manualmente no container:
-```bash
-docker exec -it [container-id] pnpm db:push
-```
-
-## Testes
-
-### Desenvolvimento Local
-
-1. Copie `.env.example` para `.env`
-2. Preencha as variáveis necessárias
-3. Execute:
-   ```bash
-   pnpm install
-   pnpm db:push
-   pnpm dev
-   ```
-
-### Testes de Pagamento (Stripe)
-
-Use os cartões de teste documentados oficialmente pelo provedor no ambiente de teste. Não armazene números de cartão no repositório.
-
-Data, CVC e CEP: use valores fictícios aceitos pelo ambiente de teste.
-
-## Troubleshooting
-
-### Erro de Conexão com Banco
-
-- Verifique se `DATABASE_URL` está correta
-- Teste conexão: `mysql -h host -u user -p database`
-- Verifique firewall e whitelist de IPs
-
-### Erro Stripe
-
-- Verifique se as chaves estão corretas
-- Teste/Produção: não misture chaves sk_test_ com pk_live_
-- Webhook: verifique se o endpoint está acessível publicamente
-
-### Build Falha
-
-- Limpe cache: `rm -rf node_modules .next dist && pnpm install`
-- Verifique logs: `pnpm build --verbose`
-- TypeScript: `pnpm tsc --noEmit`
-
-## Suporte
-
-- Documentação Manus: https://docs.manus.im
-- Documentação Stripe: https://stripe.com/docs
-- Issues GitHub: https://github.com/vml-arquivos/site-zelare/issues
+Verifique, no ambiente autorizado, o carregamento de `/`, `/unidades`, `/compliance` e `/contato`. Confirme os links `mailto:` e `tel:` dos canais públicos, a ausência de `example.invalid` no HTML/bundle e o estado de nova tentativa quando a consulta de unidades falhar.

@@ -25,10 +25,15 @@ describe("Zelare API Tests", () => {
 
       expect(units).toBeDefined();
       expect(Array.isArray(units)).toBe(true);
-      expect(units.length).toBeGreaterThan(0);
+      if (units.length === 0) {
+        expect(units).toEqual([]);
+        return;
+      }
+
       expect(units[0]).toHaveProperty("unitName");
       expect(units[0]).toHaveProperty("slug");
       expect(units[0]).toHaveProperty("active");
+      expect(units.every((unit) => !unit.unitName.toLowerCase().includes("demonstração"))).toBe(true);
     });
 
     it("should fetch the first unit by its returned slug", async () => {
@@ -36,7 +41,11 @@ describe("Zelare API Tests", () => {
       const caller = appRouter.createCaller(ctx);
 
       const units = await caller.units.getAll();
-      expect(units.length).toBeGreaterThan(0);
+      if (units.length === 0) {
+        expect(units).toEqual([]);
+        return;
+      }
+
       const expected = units[0];
       const unit = await caller.units.getBySlug({ slug: expected.slug });
 

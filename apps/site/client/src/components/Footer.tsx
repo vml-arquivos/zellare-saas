@@ -1,5 +1,6 @@
-import { Mail, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { Link } from 'wouter';
+import { PUBLIC_CHANNELS, publicChannelMailto, publicChannelTel } from '@/config/public-channels';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -83,9 +84,19 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex gap-2 items-start">
                 <Mail className="w-4 h-4 text-zelare-mint mt-0.5 flex-shrink-0" />
-                <a href="mailto:contato@example.invalid" className="text-white/60 hover:text-zelare-mint transition-colors">
-                  contato@example.invalid
+                <a href={publicChannelMailto(PUBLIC_CHANNELS.contactEmail)} className="text-white/60 hover:text-zelare-mint transition-colors">
+                  {PUBLIC_CHANNELS.contactEmail}
                 </a>
+              </li>
+              <li className="flex gap-2 items-start">
+                <Phone className="w-4 h-4 text-zelare-mint mt-0.5 flex-shrink-0" />
+                <a href={publicChannelTel(PUBLIC_CHANNELS.phone)} className="text-white/60 hover:text-zelare-mint transition-colors">
+                  {PUBLIC_CHANNELS.phone}
+                </a>
+              </li>
+              <li className="flex gap-2 items-start">
+                <MapPin className="w-4 h-4 text-zelare-mint mt-0.5 flex-shrink-0" />
+                <span className="text-white/60">{PUBLIC_CHANNELS.address}</span>
               </li>
             </ul>
           </div>

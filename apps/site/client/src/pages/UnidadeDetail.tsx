@@ -6,7 +6,7 @@ import { trpc } from '@/lib/trpc';
 
 export default function UnidadeDetail() {
   const params = useParams<{ slug: string }>();
-  const { data: unit, isLoading, error } = trpc.units.getBySlug.useQuery({ slug: params.slug || '' });
+  const { data: unit, isLoading, error, refetch } = trpc.units.getBySlug.useQuery({ slug: params.slug || '' });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -20,14 +20,19 @@ export default function UnidadeDetail() {
         )}
 
         {error && (
-          <div className="container py-32 text-center">
-            <p className="text-destructive text-lg mb-6">Erro ao carregar informações da unidade.</p>
-            <Link href="/unidades">
-              <button className="btn-primary inline-flex items-center gap-2">
-                <ArrowLeft className="w-5 h-5" />
-                Voltar para Unidades
+          <div role="alert" className="container py-32 text-center">
+            <p className="text-destructive text-lg mb-6">As informações da unidade estão indisponíveis no momento.</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button type="button" className="btn-outline" onClick={() => void refetch()}>
+                Tentar novamente
               </button>
-            </Link>
+              <Link href="/unidades">
+                <button className="btn-primary inline-flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5" />
+                  Voltar para Unidades
+                </button>
+              </Link>
+            </div>
           </div>
         )}
 

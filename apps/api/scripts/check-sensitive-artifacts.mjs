@@ -22,6 +22,9 @@ const policyFiles = new Set([
   'docs/security/GATE02_PII_ARTIFACTS.md',
 ]);
 const syntheticEmail = /@(example\.(com|org|net|invalid)|example\.test|test\.local|localhost)$/i;
+const publicInstitutionalEmails = new Set(['contato@zelare.com.br', 'denuncia@zelare.com.br']);
+const publicInstitutionalPhones = new Set(['556121234567', '6121234567']);
+const phonePattern = /(?:\+?55[\s-]?)?\(\d{2}\)\s?9?\d{4}[\s-]\d{4}/g;
 const skipContent = (file) => policyFiles.has(file) || file.includes('/prisma/migrations/') || file.includes('/drizzle/meta/') || file.endsWith('.lock') || file.endsWith('package-lock.json') || file.endsWith('pnpm-lock.yaml') || file.endsWith('package.json') || publicAllowlist.has(file);
 const rules = [
   ['credential-literal', /\b(?:Admin@123|Teste@123|Demo@2026|Carol270412|dev123)\b/g],
@@ -30,7 +33,6 @@ const rules = [
   ['private-key', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g],
   ['cpf', /\b(?:\d{3}\.\d{3}\.\d{3}-\d{2}|\d{3}\s\d{3}\s\d{3}-\d{2})\b/g],
   ['cpf-labeled', /\b(?:cpf|documento)\s*[:=]\s*['"`]?\d{11}['"`]?/gi],
-  ['phone', /(?:\+?55[\s-]?)?\(\d{2}\)\s?9?\d{4}[\s-]\d{4}/g],
   ['real-data-marker', /\b(?:ALUNOS2026|arara[- ]?canind[eé]|flamboyant|pelicano|s[aá]bia|alunos reais|funcion[aá]rios reais|smoke-prod|LOGINS_(?:TESTE|ATUALIZADOS)|funcionarios-reais|turmas_alunos|update-names|seed-units)\b/gi],
   ['person-name-marker', /\b(?:Bruna Vaz|Carla Psic[oó]loga|Daniel(?: Pereira da Cruz)?|Ana Carolina(?: de Araujo)?|Adriel|Dorli(?: Souza Viana)?|Raquel|Elisangela|Luciene|JESSICA|EDILVANA|ANGELICA|Evellyn|Nonata|Paula Costa|Fernanda Lima|Maria Silva|Ana Santos|Joana Oliveira|Carla Souza|Vanderlon Tavares)\b/gi],
 ];
@@ -48,7 +50,19 @@ for (const file of files) {
   const lines = data.split(/\r?\n/);
   lines.forEach((line, index) => {
     const emails = line.match(/[A-Z0-9._%+-]+@[A-Z][A-Z0-9-]*(?:\.[A-Z0-9-]+)*\.[A-Z]{2,}/gi) ?? [];
-    for (const value of emails) if (!syntheticEmail.test(value)) findings.push({ file, line: index + 1, kind: 'email', snippet: redact(line) });
+    for (const value of emails) {
+      const normalized = value.toLowerCase();
+      if (!syntheticEmail.test(value) && !publicInstitutionalEmails.has(normalized)) {
+        findings.push({ file, line: index + 1, kind: 'email', snippet: redact(line) });
+      }
+    }
+    const phones = line.match(phonePattern) ?? [];
+    for (const value of phones) {
+      const normalized = value.replace(/\D/g, '');
+      if (!publicInstitutionalPhones.has(normalized)) {
+        findings.push({ file, line: index + 1, kind: 'phone', snippet: redact(line) });
+      }
+    }
     for (const [kind, regex] of rules) {
       regex.lastIndex = 0;
       if (regex.test(line)) findings.push({ file, line: index + 1, kind, snippet: redact(line) });
