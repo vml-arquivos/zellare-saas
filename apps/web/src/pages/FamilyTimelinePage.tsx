@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CheckCheck, HeartHandshake, LockKeyhole, MessageCircle, RefreshCw, Send } from 'lucide-react';
 import { PageShell } from '../components/ui/PageShell';
 import {
@@ -44,7 +44,7 @@ export default function FamilyTimelinePage() {
     setMessages(nextMessages);
   }
 
-  async function loadChildren() {
+  const loadChildren = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -62,9 +62,9 @@ export default function FamilyTimelinePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedChildId]);
 
-  useEffect(() => { void loadChildren(); }, []);
+  useEffect(() => { void loadChildren(); }, [loadChildren]);
 
   async function selectChild(childId: string) {
     setSelectedChildId(childId);
