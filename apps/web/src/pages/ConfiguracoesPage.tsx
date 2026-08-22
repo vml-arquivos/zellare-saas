@@ -409,7 +409,7 @@ export default function ConfiguracoesPage() {
                   </div>
                   <div>
                     <Label>Telefone</Label>
-                    <Input placeholder="(00) 0000-0000" value={unidade.telefone || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, telefone: e.target.value }))} />
+                    <Input placeholder="Telefone da unidade" value={unidade.telefone || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, telefone: e.target.value }))} />
                   </div>
                   <div>
                     <Label>E-mail da Unidade</Label>

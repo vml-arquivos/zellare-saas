@@ -33,7 +33,7 @@ Todos os três apps foram buildados com sucesso:
 
 **Arquivos gerados**:
 - `dist/src/main.js` - Entry point da aplicação
-- `dist/data/` - Datasets (ALUNOS2026.xlsx, matriz-curricular-2026-sample.json)
+- `dist/data/` - Datasets (synthetic-fixture.json, matriz-curricular-2026-sample.json)
 - `dist/scripts/` - Scripts de seed e importação
 - `dist/src/**/*.js` - Todos os módulos compilados
 

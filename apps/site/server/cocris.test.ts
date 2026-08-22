@@ -31,18 +31,20 @@ describe("Zelare API Tests", () => {
       expect(units[0]).toHaveProperty("active");
     });
 
-    it("should fetch unit by slug", async () => {
+    it("should fetch the first unit by its returned slug", async () => {
       const ctx = createMockContext();
       const caller = appRouter.createCaller(ctx);
 
-      const unit = await caller.units.getBySlug({ slug: "cepi-arara-caninde" });
+      const units = await caller.units.getAll();
+      expect(units.length).toBeGreaterThan(0);
+      const expected = units[0];
+      const unit = await caller.units.getBySlug({ slug: expected.slug });
 
-      expect(unit).toBeDefined();
-      if (unit) {
-        expect(unit.unitName).toBe("CEPI Arara Canindé");
-        expect(unit.slug).toBe("cepi-arara-caninde");
-        expect(unit.city).toBe("Recanto das Emas");
-      }
+      expect(unit).toMatchObject({
+        unitName: expected.unitName,
+        slug: expected.slug,
+        city: expected.city,
+      });
     });
 
     it("should return undefined for non-existent unit slug", async () => {
@@ -154,7 +156,7 @@ describe("Zelare API Tests", () => {
       const result = await caller.contact.submit({
         name: "Test User",
         email: "test@example.com",
-        phone: "(61) 99999-9999",
+        phone: "contato-sintetico",
         subject: "Test Subject",
         message: "This is a test message with phone and unit.",
         unitId: 1,

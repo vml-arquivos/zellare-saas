@@ -67,16 +67,15 @@ export default function Contato() {
                     <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Telefone</h3>
-                      <p className="text-foreground/70">(61) 3575-4125</p>
-                      <p className="text-foreground/70">(61) 3575-4119</p>
+                      <p className="text-foreground/70">Canal informado pelo ambiente autorizado</p>
                     </div>
                   </div>
                   <div className="flex gap-4">
                     <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Email</h3>
-                      <a href="mailto:contato@zelare.com.br" className="text-primary hover:text-secondary transition-colors">
-                        contato@zelare.com.br
+                      <a href="mailto:contato@example.invalid" className="text-primary hover:text-secondary transition-colors">
+                        contato@example.invalid
                       </a>
                     </div>
                   </div>
@@ -85,9 +84,8 @@ export default function Contato() {
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">Endereço</h3>
                       <p className="text-foreground/70">
-                        Avenida Recanto das Emas<br />
-                        Quadra 301, Lote 26<br />
-                        Brasília-DF
+                        Endereço institucional<br />
+                        disponível no ambiente autorizado
                       </p>
                     </div>
                   </div>
@@ -147,7 +145,7 @@ export default function Contato() {
                         onChange={handleChange}
                         required
                         className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                        placeholder="seu@email.com"
+                        placeholder="seu@example.invalid"
                       />
                     </div>
 

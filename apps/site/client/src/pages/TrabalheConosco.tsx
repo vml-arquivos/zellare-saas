@@ -238,7 +238,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="joao@email.com"
+                        placeholder="candidato@example.invalid"
                       />
                     </div>
                   </div>
@@ -251,7 +251,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', maskPhone(e.target.value))}
-                        placeholder="(61) 99999-9999"
+                        placeholder="telefone do candidato"
                         maxLength={15}
                       />
                     </div>
@@ -262,7 +262,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.cpf}
                         onChange={(e) => handleInputChange('cpf', maskCPF(e.target.value))}
-                        placeholder="000.000.000-00"
+                        placeholder="CPF do candidato"
                         maxLength={14}
                       />
                     </div>

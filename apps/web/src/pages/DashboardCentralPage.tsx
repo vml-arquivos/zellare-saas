@@ -1,6 +1,6 @@
 /**
  * Dashboard Central — Análises
- * Acesso: Coordenadora Geral (Bruna Vaz) e Psicóloga Central (Carla)
+ * Acesso: Coordenação geral e Psicologia central
  * Funcionalidades: Indicadores, gráficos, filtros, exportação CSV
  * Somente leitura — sem edição de cadastros operacionais
  */
@@ -297,7 +297,7 @@ export function DashboardCentralPage() {
       {/* Erro */}
       {erro && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-          <strong>Não foi possível carregar os dados reais:</strong> {erro}. Tente novamente.
+          <strong>Não foi possível carregar os dados do escopo autorizado:</strong> {erro}. Tente novamente.
         </div>
       )}
 

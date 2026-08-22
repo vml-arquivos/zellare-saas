@@ -1,7 +1,7 @@
 # 🚀 DEPLOY AGORA - Zelare
 
-**Status**: ✅ LIBERADO PARA DEPLOY  
-**Tempo estimado**: 30-45 minutos  
+**Status**: ✅ LIBERADO PARA DEPLOY
+**Tempo estimado**: 30-45 minutos
 **Dificuldade**: Fácil
 
 ---
@@ -31,7 +31,7 @@ Antes de começar, tenha em mãos:
      - Name: `zelare-saas-db`
      - Database: `conexa`
      - Username: `zelare_user`
-     - Password: `[gere uma senha forte]`
+      - Password: fornecida pelo gerenciador de segredos, sem valor padrão versionado
    - Clique em **"Create"**
 
 3. **Aguarde o deploy**
@@ -40,7 +40,7 @@ Antes de começar, tenha em mãos:
 4. **Copie a Connection String**
    - Clique no banco criado
    - Copie a **"Connection String"**
-   - Exemplo: `postgresql://zelare_user:senha@zelare-saas-db:5432/conexa`
+   - Exemplo: `postgresql://db_user:contact@example.invalid:5432/database`
    - **ANOTE!** Você vai usar várias vezes
 
 ✅ **Banco criado!**
@@ -63,11 +63,11 @@ Antes de começar, tenha em mãos:
    - Working Directory: `/`
 
 3. **Configure Variáveis de Ambiente**
-   
+
    Clique em **"Environment Variables"** e adicione:
 
    ```bash
-   DATABASE_URL=postgresql://zelare_user:SUA_SENHA@zelare-saas-db:5432/conexa
+   DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
    JWT_SECRET=[gere com: openssl rand -base64 32]
    JWT_EXPIRES_IN=7d
    NODE_ENV=production
@@ -103,24 +103,17 @@ Antes de começar, tenha em mãos:
    ```
    - Aguarde: `✅ Migrations applied`
 
-6. **Crie Usuário Admin**
-   - No console, execute:
-   ```bash
-   cd apps/api
-   node scripts/create-admin.js
-   ```
-   - Anote: Email `admin@zelare.com.br` / Senha `Admin@123`
+6. **Configure o acesso administrativo**
+   - Use `ZELARE_ADMIN_EMAIL` e `ZELARE_ADMIN_PASSWORD` no gerenciador de segredos do ambiente.
+   - Execute `node scripts/create-admin.js` somente em ambiente autorizado.
+   - O script não imprime a senha e não há credencial padrão no repositório.
 
-7. **Crie Usuários de Teste**
-   - No console, execute:
-   ```bash
-   cd apps/api
-   node scripts/seed-test-users.js
-   ```
-   - Aguarde: `✅ Seed concluído! Criados: 13`
+7. **Dados de desenvolvimento**
+   - `db:seed` não cria dados.
+   - Use somente banco descartável e fixtures sintéticas controladas pelo CI; não execute população de dados reais em produção.
 
 8. **Teste Health Check**
-   - Acesse: `https://api.conexa.seu-dominio.com/health`
+   - Acesse: `https://api.example.invalid/health`
    - Deve retornar: `{"status":"ok"}`
 
 ✅ **Backend funcionando!**
@@ -143,7 +136,7 @@ Antes de começar, tenha em mãos:
    - Working Directory: `/`
 
 3. **Configure Variáveis de Ambiente**
-   
+
    ```bash
    VITE_API_URL=https://api.conexa.seu-dominio.com
    VITE_APP_NAME=Zelare
@@ -182,9 +175,9 @@ Antes de começar, tenha em mãos:
    - Working Directory: `/`
 
 3. **Configure Variáveis de Ambiente**
-   
+
    ```bash
-   DATABASE_URL=postgresql://zelare_user:SUA_SENHA@zelare-saas-db:5432/conexa
+   DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
    API_URL=https://api.conexa.seu-dominio.com
    NODE_ENV=production
    PORT=5174
@@ -247,8 +240,8 @@ Antes de começar, tenha em mãos:
 
 2. **Teste Login**
    - Acesse: `https://app.conexa.seu-dominio.com`
-   - Login: `admin@zelare.com.br`
-   - Senha: `Admin@123`
+   - Login: `contact@example.invalid`
+   - Senha: `<SECRET_FROM_SECRET_MANAGER>`
    - Deve entrar no dashboard
 
 3. **Teste IA Assistiva**
@@ -259,11 +252,11 @@ Antes de começar, tenha em mãos:
 4. **Teste Usuários de Teste**
    - Logout
    - Teste cada nível:
-     - `developer@zelare.com.br` / `Teste@123`
-     - `admin@mantenedora.com` / `Teste@123`
-     - `coordenacao@central.com` / `Teste@123`
-     - `diretor@unidade1.com` / `Teste@123`
-     - `professor1@unidade1.com` / `Teste@123`
+     - `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
+     - `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
+     - `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
+     - `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
+     - `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
 
 5. **Verifique Logs**
    - No Coolify, veja os logs de cada serviço
@@ -292,7 +285,7 @@ Parabéns! O Zelare está no ar! 🚀
   - Diagnósticos
   - Sugestões pedagógicas
 
-- ✅ **13 usuários de teste**:
+- ✅ **registros sintéticos de teste**:
   - 1 Developer
   - 2 Mantenedora
   - 2 Staff Central
@@ -317,17 +310,17 @@ Parabéns! O Zelare está no ar! 🚀
 ### Imediato (Hoje)
 
 1. **Altere senhas**
-   - Admin: `admin@zelare.com.br`
+   - Admin: `contact@example.invalid`
    - Usuários de teste
 
 2. **Crie mantenedora real**
-   - Login como `developer@zelare.com.br`
+   - Login como `contact@example.invalid`
    - Crie sua instituição
 
 3. **Crie unidades reais**
    - Adicione suas escolas/creches
 
-4. **Crie funcionários reais**
+4. **Crie dados não sintéticos**
    - Diretores, coordenadores, professores
 
 5. **Importe dados**
@@ -414,7 +407,7 @@ Consulte para mais detalhes:
 
 - **Guia Completo**: `GUIA_DEPLOY_COOLIFY_PASSO_A_PASSO.md`
 - **Variáveis de Ambiente**: `VARIAVEIS_AMBIENTE_DEPLOY.md`
-- **Logins de Teste**: `LOGINS_TESTE.md`
+- **Acessos temporários**: fornecidos pelo gerenciador de segredos; nenhum login é versionado
 - **PostgreSQL**: `POSTGRESQL_COOLIFY.md`
 - **Checklist Completo**: `CHECKLIST_DEPLOY.md`
 
@@ -442,25 +435,25 @@ Consulte para mais detalhes:
 
 Após seguir este guia:
 
-✅ **Sistema 100% funcional**  
-✅ **IA Assistiva ativa**  
-✅ **13 usuários de teste**  
-✅ **Pronto para uso**  
+✅ **Sistema 100% funcional**
+✅ **IA Assistiva ativa**
+✅ **registros sintéticos de teste**
+✅ **Pronto para uso**
 
-**Tempo total**: 30-45 minutos  
-**Dificuldade**: Fácil  
+**Tempo total**: 30-45 minutos
+**Dificuldade**: Fácil
 **Sucesso**: Garantido! 🎉
 
 ---
 
-**Desenvolvido por**: Manus AI Agent  
-**Última atualização**: 19 de Fevereiro de 2026  
+**Desenvolvido por**: Manus AI Agent
+**Última atualização**: 19 de Fevereiro de 2026
 **Versão**: 1.0.0
 
 ---
 
 ## 🚀 COMECE AGORA!
 
-**Tudo pronto para deploy!**  
-**Siga este guia passo a passo e em 30-45 minutos estará no ar!**  
+**Tudo pronto para deploy!**
+**Siga este guia passo a passo e em 30-45 minutos estará no ar!**
 **Boa sorte! 🍀**

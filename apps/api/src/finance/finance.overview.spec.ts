@@ -11,7 +11,7 @@ import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 const user: JwtPayload = {
   sub: 'finance-user',
-  email: 'finance@example.com',
+  email: 'finance-user@example.invalid',
   mantenedoraId: 'mantenedora-1',
   unitId: 'unit-1',
   roles: [{
@@ -23,7 +23,7 @@ const user: JwtPayload = {
 };
 
 describe('FinanceService — overview operacional', () => {
-  it('consolida folha, contas, estoque, compras e ponto com dados reais do escopo', async () => {
+  it('consolida folha, contas, estoque, compras e ponto com dados sintéticos do escopo', async () => {
     const prisma = {
       unit: { findFirst: jest.fn().mockResolvedValue({ id: 'unit-1' }) },
       financialPeriod: {

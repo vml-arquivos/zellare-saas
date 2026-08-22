@@ -1,15 +1,15 @@
 # 🔐 Variáveis de Ambiente - Configuração Final
 
 **Seus subdomínios**:
-- Backend API: `api.conexa.casadf.com.br`
-- Frontend Web: `app.zelare.seu-dominio.com.br`
-- Site: `conexa3.casadf.com.br`
+- Backend API: `api.example.invalid`
+- Frontend Web: `app.example.invalid`
+- Site: `site.example.invalid`
 
 ---
 
 ## 🚀 BACKEND API
 
-**Domínio no Coolify**: `api.conexa.casadf.com.br`
+**Domínio no Coolify**: `api.example.invalid`
 
 **Variáveis de Ambiente** (14 variáveis):
 
@@ -18,10 +18,10 @@
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
 # Copie do PostgreSQL no Coolify
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # DIRECT_URL (OPCIONAL - deixe igual ao DATABASE_URL se não usar pooling)
-DIRECT_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # ============================================================================
 # REDIS (OPCIONAL)
@@ -41,13 +41,13 @@ JWT_EXPIRES_IN=7d
 # ============================================================================
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.conexa.casadf.com.br
+API_URL=https://api.example.invalid
 
 # ============================================================================
 # CORS (OBRIGATÓRIO)
 # ============================================================================
 # IMPORTANTE: Adicione os 2 subdomínios do frontend e site
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid
 
 # ============================================================================
 # GEMINI AI (OBRIGATÓRIO)
@@ -74,7 +74,7 @@ LOG_FORMAT=json
 
 ## 🎨 FRONTEND WEB
 
-**Domínio no Coolify**: `app.zelare.seu-dominio.com.br`
+**Domínio no Coolify**: `app.example.invalid`
 
 **Variáveis de Ambiente** (3 variáveis):
 
@@ -82,7 +82,7 @@ LOG_FORMAT=json
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_API_URL=https://api.conexa.casadf.com.br
+VITE_API_URL=https://api.example.invalid
 
 # ============================================================================
 # APP CONFIGURATION (OBRIGATÓRIO)
@@ -95,7 +95,7 @@ VITE_APP_VERSION=3.0.0
 
 ## 🌐 SITE INSTITUCIONAL
 
-**Domínio no Coolify**: `conexa3.casadf.com.br`
+**Domínio no Coolify**: `site.example.invalid`
 
 **Variáveis de Ambiente** (4 variáveis):
 
@@ -104,12 +104,12 @@ VITE_APP_VERSION=3.0.0
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
 # Mesma do backend!
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-API_URL=https://api.conexa.casadf.com.br
+API_URL=https://api.example.invalid
 NODE_ENV=production
 PORT=5174
 ```
@@ -118,35 +118,35 @@ PORT=5174
 
 ## 📋 CHECKLIST DE CONFIGURAÇÃO
 
-### 1. Backend API (`api.conexa.casadf.com.br`)
+### 1. Backend API (`api.example.invalid`)
 
-- [ ] Domínio configurado no Coolify: `api.conexa.casadf.com.br`
+- [ ] Domínio configurado no Coolify: `api.example.invalid`
 - [ ] `DATABASE_URL` copiada do PostgreSQL
 - [ ] `DIRECT_URL` configurada (mesma do DATABASE_URL)
 - [ ] `REDIS_URL` copiada do Redis
 - [ ] `JWT_SECRET` gerada com `openssl rand -base64 32`
-- [ ] `API_URL=https://api.conexa.casadf.com.br`
-- [ ] `CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br`
+- [ ] `API_URL=https://api.example.invalid`
+- [ ] `CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid`
 - [ ] `GEMINI_API_KEY` obtida em https://makersuite.google.com/app/apikey
 - [ ] Todas as 14 variáveis configuradas
 - [ ] Redeploy realizado
 
-### 2. Frontend Web (`app.zelare.seu-dominio.com.br`)
+### 2. Frontend Web (`app.example.invalid`)
 
 - [ ] DNS configurado: `app` → IP da VPS
-- [ ] Domínio configurado no Coolify: `app.zelare.seu-dominio.com.br`
-- [ ] `VITE_API_URL=https://api.conexa.casadf.com.br`
+- [ ] Domínio configurado no Coolify: `app.example.invalid`
+- [ ] `VITE_API_URL=https://api.example.invalid`
 - [ ] `VITE_APP_NAME=Zelare`
 - [ ] `VITE_APP_VERSION=3.0.0`
 - [ ] Todas as 3 variáveis configuradas
 - [ ] Deploy realizado
 
-### 3. Site (`conexa3.casadf.com.br`)
+### 3. Site (`site.example.invalid`)
 
 - [ ] DNS configurado: `conexa3` → IP da VPS (ou `@` se for raiz)
-- [ ] Domínio configurado no Coolify: `conexa3.casadf.com.br`
+- [ ] Domínio configurado no Coolify: `site.example.invalid`
 - [ ] `DATABASE_URL` (mesma do backend)
-- [ ] `API_URL=https://api.conexa.casadf.com.br`
+- [ ] `API_URL=https://api.example.invalid`
 - [ ] `NODE_ENV=production`
 - [ ] `PORT=5174`
 - [ ] Todas as 4 variáveis configuradas
@@ -174,7 +174,7 @@ postgresql://[USUARIO]:[SENHA]@[CONTAINER]:5432/[BANCO]
 
 Exemplo:
 ```
-postgresql://postgres:minha_senha@postgres-conexa:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 **Onde encontrar**:
@@ -234,7 +234,7 @@ Kx9mN2vR5tY8wA1bC4dE6fG7hJ9kL0mN3pQ5rS8tU1vW4xY7zA0bC3dE6fG9hJ2k
 
 Formato:
 ```
-AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+<SECRET_FROM_SECRET_MANAGER>
 ```
 
 ---
@@ -246,18 +246,18 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 **MUITO IMPORTANTE**: Adicione os 2 subdomínios separados por vírgula **SEM ESPAÇOS**:
 
 ```bash
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid
 ```
 
 **❌ ERRADO**:
 ```bash
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br, https://conexa3.casadf.com.br
+CORS_ORIGIN=https://app.example.invalid, https://site.example.invalid
 ```
 (Tem espaço após a vírgula)
 
 **❌ ERRADO**:
 ```bash
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br
+CORS_ORIGIN=https://app.example.invalid
 ```
 (Falta o site)
 
@@ -267,19 +267,19 @@ CORS_ORIGIN=https://app.zelare.seu-dominio.com.br
 
 **Backend (`API_URL`)**:
 ```bash
-API_URL=https://api.conexa.casadf.com.br
+API_URL=https://api.example.invalid
 ```
 (URL do próprio backend)
 
 **Frontend (`VITE_API_URL`)**:
 ```bash
-VITE_API_URL=https://api.conexa.casadf.com.br
+VITE_API_URL=https://api.example.invalid
 ```
 (URL do backend que o frontend vai chamar)
 
 **Site (`API_URL`)**:
 ```bash
-API_URL=https://api.conexa.casadf.com.br
+API_URL=https://api.example.invalid
 ```
 (URL do backend que o site vai chamar)
 
@@ -335,35 +335,31 @@ cd /app
 node scripts/create-admin.js
 ```
 
-Login: `admin@zelare.com.br` / `Admin@123`
+Login: use credenciais temporárias fornecidas pelo gerenciador de segredos do ambiente autorizado; não registre valores neste arquivo.
 
-### 4. Crie Usuários de Teste (1 min)
+### 4. Dados de desenvolvimento
 
-No terminal do backend:
-```bash
-cd /app
-node scripts/seed-test-users.js
-```
+`db:seed` não cria dados. Para testes, use banco descartável e fixtures sintéticas controladas pelo CI; não há logins de teste versionados.
 
 ### 5. Configure Frontend (5 min)
 
 1. Crie aplicação no Coolify
-2. Domínio: `app.zelare.seu-dominio.com.br`
+2. Domínio: `app.example.invalid`
 3. Adicione as 3 variáveis
 4. Deploy
 
 ### 6. Configure Site (5 min)
 
 1. Crie aplicação no Coolify
-2. Domínio: `conexa3.casadf.com.br`
+2. Domínio: `site.example.invalid`
 3. Adicione as 4 variáveis
 4. Deploy
 
 ### 7. Teste Sistema (5 min)
 
-1. Health check: `curl https://api.conexa.casadf.com.br/health`
-2. Login: `https://app.zelare.seu-dominio.com.br` → `admin@zelare.com.br`
-3. Site: `https://conexa3.casadf.com.br`
+1. Health check: `curl https://api.example.invalid/health`
+2. Login: `https://app.example.invalid` → credenciais temporárias do ambiente autorizado
+3. Site: `https://site.example.invalid`
 
 ---
 
@@ -373,15 +369,15 @@ Após configurar tudo:
 
 ```bash
 # 1. Teste Backend
-curl https://api.conexa.casadf.com.br/health
+curl https://api.example.invalid/health
 # Deve retornar: {"status":"ok"}
 
 # 2. Teste Frontend
-curl https://app.zelare.seu-dominio.com.br
+curl https://app.example.invalid
 # Deve retornar HTML da página de login
 
 # 3. Teste Site
-curl https://conexa3.casadf.com.br
+curl https://site.example.invalid
 # Deve retornar HTML do site institucional
 ```
 
@@ -390,23 +386,23 @@ curl https://conexa3.casadf.com.br
 ## 🎯 RESUMO RÁPIDO
 
 ### Subdomínios:
-- Backend: `api.conexa.casadf.com.br`
-- Frontend: `app.zelare.seu-dominio.com.br`
-- Site: `conexa3.casadf.com.br`
+- Backend: `api.example.invalid`
+- Frontend: `app.example.invalid`
+- Site: `site.example.invalid`
 
 ### Variáveis Críticas:
 
 **Backend**:
 - `DATABASE_URL` (copie do PostgreSQL)
-- `CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://conexa3.casadf.com.br`
+- `CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid`
 - `GEMINI_API_KEY` (obtenha no Google)
 
 **Frontend**:
-- `VITE_API_URL=https://api.conexa.casadf.com.br`
+- `VITE_API_URL=https://api.example.invalid`
 
 **Site**:
 - `DATABASE_URL` (mesma do backend)
-- `API_URL=https://api.conexa.casadf.com.br`
+- `API_URL=https://api.example.invalid`
 
 ---
 

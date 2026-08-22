@@ -34,7 +34,7 @@ const makeReq = (overrides: Record<string, unknown> = {}) => ({
   unitId: 'unit-001',
   unit: { id: 'unit-001', name: 'Escola Teste' },
   createdBy: 'prof-001',
-  createdByUser: { id: 'prof-001', firstName: 'Ana', lastName: 'Silva', email: 'ana@escola.com' },
+  createdByUser: { id: 'prof-001', firstName: 'Pessoa', lastName: 'Sintética A', email: 'material-user@example.invalid' },
   items: [],
   ...overrides,
 });
@@ -58,7 +58,7 @@ describe('MaterialRequestService — relatorioConsumo() — FIX P0', () => {
 
   const userUnidade = {
     sub: 'coord-001',
-    email: 'coord@escola.com',
+    email: 'coordinator-b@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ level: RoleLevel.UNIDADE, type: 'UNIDADE_COORDENADOR_PEDAGOGICO', unitScopes: [] }],
@@ -66,7 +66,7 @@ describe('MaterialRequestService — relatorioConsumo() — FIX P0', () => {
 
   const userCentral = {
     sub: 'staff-001',
-    email: 'staff@central.com',
+    email: 'staff@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: undefined,
     roles: [{ level: RoleLevel.MANTENEDORA, type: 'MANTENEDORA', unitScopes: [] }],

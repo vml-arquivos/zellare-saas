@@ -82,7 +82,7 @@ Shared Buffers: 256MB
 Após criado, copie a **Connection String**:
 
 ```
-postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 **⚠️ ANOTE**: Você vai usar essa string nas variáveis de ambiente!
@@ -123,7 +123,7 @@ Clique em **"Environment Variables"** e adicione:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://zelare_user:[SUA_SENHA]@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # JWT
 JWT_SECRET=sua-chave-secreta-super-segura-aqui-min-32-caracteres
@@ -293,7 +293,7 @@ Clique em **"Environment Variables"** e adicione:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://zelare_user:[SUA_SENHA]@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # API
 API_URL=https://api.conexa.seu-dominio.com
@@ -409,10 +409,10 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function createAdmin() {
-  const hashedPassword = await bcrypt.hash('Admin@123', 10);
+  const hashedPassword = await bcrypt.hash('<SECRET_FROM_SECRET_MANAGER>', 10);
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@zelare.com.br',
+      email: 'contact@example.invalid',
       password: hashedPassword,
       firstName: 'Admin',
       lastName: 'Sistema',
@@ -429,8 +429,8 @@ createAdmin().catch(console.error).finally(() => prisma.\$disconnect());
 
 2. **Testar Login**:
    - Acesse: `https://app.conexa.seu-dominio.com`
-   - Email: `admin@zelare.com.br`
-   - Senha: `Admin@123`
+   - Email: `contact@example.invalid`
+   - Senha: `<SECRET_FROM_SECRET_MANAGER>`
    - Deve fazer login com sucesso
 
 3. **Testar Dashboard**:

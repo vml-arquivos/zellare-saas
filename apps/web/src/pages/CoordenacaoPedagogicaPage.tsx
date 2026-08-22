@@ -137,7 +137,7 @@ export default function CoordenacaoPedagogicaPage() {
   const [filtroSegCurriculo, setFiltroSegCurriculo] = useState<SegmentoKey>('EI01');
   const [filtroCampo, setFiltroCampo] = useState('TODOS');
   const [filtroBimestre, setFiltroBimestre] = useState('TODOS');
-  // Matriz via API (dados reais com exemploAtividade)
+  // Matriz via API (dados do escopo autorizado com exemploAtividade)
   const [matrizApiData, setMatrizApiData] = useState<any[]>([]);
   const [matrizApiLoading, setMatrizApiLoading] = useState(false);
   const [matrizStartDate, setMatrizStartDate] = useState(() => {

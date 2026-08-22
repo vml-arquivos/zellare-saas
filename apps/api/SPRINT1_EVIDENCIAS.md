@@ -233,8 +233,8 @@ Path: /app/dist/main.js
 **Comando:**
 ```bash
 docker run --rm \
-  -e DATABASE_URL="postgresql://postgres.{ref}:{pwd}@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require" \
-  -e DIRECT_URL="postgresql://postgres.{ref}:{pwd}@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require" \
+  -e DATABASE_URL="postgresql://db_user:contact@example.invalid:5432/database" \
+  -e DIRECT_URL="postgresql://db_user:contact@example.invalid:5432/database" \
   -p 3000:3000 \
   conexa-v2:local
 ```
@@ -316,12 +316,12 @@ $ curl -f http://localhost:3000/health/ready
 
 1. **Configurar variáveis de ambiente:**
    ```
-   DATABASE_URL=postgresql://postgres.{ref}:{pwd}@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-   DIRECT_URL=postgresql://postgres.{ref}:{pwd}@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+   DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+   DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
    JWT_SECRET=[gerar com: openssl rand -base64 32]
    JWT_REFRESH_SECRET=[gerar com: openssl rand -base64 32]
    SUPABASE_URL=https://ockzuvbnzfoqsiwmpixr.supabase.co
-   SUPABASE_ANON_KEY=sb_publishable_HvSlvhTCWY2j9dgKqiSGuQ_3t03hIvF
+   SUPABASE_ANON_KEY=<SECRET_FROM_SECRET_MANAGER>
    SUPABASE_SERVICE_ROLE_KEY=[obter no Dashboard]
    ```
 

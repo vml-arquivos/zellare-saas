@@ -25,7 +25,7 @@ O Zelare implementa um sistema de autenticação e autorização robusto baseado
 **Body:**
 ```json
 {
-  "email": "usuario@exemplo.com",
+  "email": "contact@example.invalid",
   "password": "senha123"
 }
 ```
@@ -37,7 +37,7 @@ O Zelare implementa um sistema de autenticação e autorização robusto baseado
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "clx1234567890",
-    "email": "usuario@exemplo.com",
+    "email": "contact@example.invalid",
     "firstName": "João",
     "lastName": "Silva",
     "mantenedoraId": "clx0987654321",
@@ -232,7 +232,7 @@ getAllData(@CurrentUser() user: JwtPayload) {
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "professor@escola.com",
+    "email": "contact@example.invalid",
     "password": "senha123"
   }'
 ```
@@ -241,14 +241,14 @@ curl -X POST http://localhost:3000/auth/login \
 
 ```bash
 curl -X GET http://localhost:3000/example/protected \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  -H "Authorization: Bearer <ACCESS_TOKEN_FROM_SECRET_MANAGER>"
 ```
 
 ### 6.3. Acessar Rota com Escopo
 
 ```bash
 curl -X GET http://localhost:3000/unidade/clx1111111111/data \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  -H "Authorization: Bearer <ACCESS_TOKEN_FROM_SECRET_MANAGER>"
 ```
 
 ---

@@ -25,8 +25,8 @@
 **Variáveis** (14):
 
 ```bash
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-DIRECT_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 REDIS_URL=redis://redis-conexa:6379
 JWT_SECRET=[gere com: openssl rand -base64 32]
 JWT_EXPIRES_IN=7d
@@ -66,7 +66,7 @@ VITE_APP_VERSION=3.0.0
 **Variáveis** (4):
 
 ```bash
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
@@ -115,22 +115,13 @@ cd /app
 node scripts/create-admin.js
 ```
 
-**Credenciais**:
-- Email: `admin@zelare.com.br`
-- Senha: `Admin@123`
+**Credenciais**: forneça o e-mail e a senha por variáveis protegidas do ambiente. Nunca registre valores reais neste documento ou no histórico do shell.
 
 ---
 
-### 4. Crie Usuários de Teste (1 min)
+### 4. Dados de desenvolvimento
 
-No terminal do backend:
-
-```bash
-cd /app
-node scripts/seed-test-users.js
-```
-
-**Resultado**: 13 usuários criados (5 níveis de acesso)
+`db:seed` não cria dados. Para testes, use exclusivamente banco descartável e fixtures sintéticas controladas pelo CI. Não existe comando de criação de usuários de teste distribuído neste repositório.
 
 ---
 
@@ -187,7 +178,7 @@ curl https://conexa3.casadf.com.br
 
 **Formato**:
 ```
-postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ---
@@ -234,7 +225,7 @@ Copie e cole nas variáveis.
 
 **Formato**:
 ```
-AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+<SECRET_FROM_SECRET_MANAGER>
 ```
 
 ---
@@ -254,8 +245,8 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 - [ ] Redeploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] Migrations executadas
-- [ ] Admin criado (`admin@zelare.com.br`)
-- [ ] Usuários de teste criados (13 usuários)
+- [ ] Admin criado (`contact@example.invalid`)
+- [ ] Usuários de teste criados (registros sintéticos)
 - [ ] Health check funciona: `curl https://api.zelare.seu-dominio.com.br/health`
 
 ### Frontend Web (`app.zelare.seu-dominio.com.br`)
@@ -283,7 +274,7 @@ AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ### Testes Finais
 
-- [ ] Login funciona: `https://app.zelare.seu-dominio.com.br` → `admin@zelare.com.br` / `Admin@123`
+- [ ] Login funciona: `https://app.zelare.seu-dominio.com.br` → `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
 - [ ] Dashboard carrega após login
 - [ ] IA funciona: Teste "Gerar com IA" em Planejamentos
 - [ ] Site institucional carrega: `https://conexa3.casadf.com.br`
@@ -310,8 +301,8 @@ CORS_ORIGIN=https://app.zelare.seu-dominio.com.br, https://conexa3.casadf.com.br
 
 ### 2. Todos os Subdomínios Usam ZELARE3
 
-✅ `api.zelare.seu-dominio.com.br`  
-✅ `app.zelare.seu-dominio.com.br`  
+✅ `api.zelare.seu-dominio.com.br`
+✅ `app.zelare.seu-dominio.com.br`
 ✅ `conexa3.casadf.com.br`
 
 ❌ ~~`api.conexa.casadf.com.br`~~ (ERRADO)
@@ -393,20 +384,20 @@ CORS_ORIGIN=https://app.zelare.seu-dominio.com.br, https://conexa3.casadf.com.br
 
 Após seguir este guia:
 
-✅ **3 aplicações rodando**  
-✅ **SSL ativo em todas** (cadeado verde)  
-✅ **Login funcionando**  
-✅ **Dashboards carregando**  
-✅ **IA Assistiva ativa** (Gemini)  
-✅ **13 usuários de teste** prontos  
-✅ **Sistema 100% funcional**  
+✅ **3 aplicações rodando**
+✅ **SSL ativo em todas** (cadeado verde)
+✅ **Login funcionando**
+✅ **Dashboards carregando**
+✅ **IA Assistiva ativa** (Gemini)
+✅ **registros sintéticos de teste** prontos
+✅ **Sistema 100% funcional**
 
-**Tempo**: 25 minutos  
-**Dificuldade**: Fácil  
+**Tempo**: 25 minutos
+**Dificuldade**: Fácil
 **Sucesso**: Garantido! 🎉
 
 ---
 
-**Desenvolvido por**: Manus AI Agent  
-**Última atualização**: 19 de Fevereiro de 2026  
+**Desenvolvido por**: Manus AI Agent
+**Última atualização**: 19 de Fevereiro de 2026
 **Versão**: 1.0.0

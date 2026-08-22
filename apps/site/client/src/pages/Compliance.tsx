@@ -87,8 +87,8 @@ export default function Compliance() {
                       </p>
                       <div className="bg-white p-6 rounded-lg border border-amber-200 space-y-3">
                         <p className="font-semibold text-foreground">Como denunciar:</p>
-                        <p>📧 Email: <a href="mailto:denuncia@zelare.com.br" className="text-primary hover:underline">denuncia@zelare.com.br</a></p>
-                        <p>📞 Telefone: <a href="tel:+556121234567" className="text-primary hover:underline">(61) 2123-4567</a></p>
+                        <p>📧 Email: <a href="mailto:denuncia@example.invalid" className="text-primary hover:underline">denuncia@example.invalid</a></p>
+                        <p>📞 Telefone: <a href="tel:+5500000000000" className="text-primary hover:underline">Canal informado pelo ambiente autorizado</a></p>
                         <p className="text-sm text-foreground/60 mt-4">
                           * Todas as denúncias são tratadas com sigilo e investigadas por comissão independente.
                         </p>

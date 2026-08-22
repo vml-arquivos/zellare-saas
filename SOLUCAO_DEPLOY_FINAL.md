@@ -1,6 +1,6 @@
 # ✅ SOLUÇÃO COMPLETA - Deploy Pronto!
 
-**Data**: 19 de Fevereiro de 2026  
+**Data**: 19 de Fevereiro de 2026
 **Status**: ✅ ERRO CORRIGIDO - PRONTO PARA REDEPLOY
 
 ---
@@ -9,20 +9,20 @@
 
 ### ❌ Problema Encontrado
 
-**Erro**: Build falhou no Coolify  
-**Causa**: Módulo `Fornecedores` referenciava model que não existe no schema Prisma  
+**Erro**: Build falhou no Coolify
+**Causa**: Módulo `Fornecedores` referenciava model que não existe no schema Prisma
 **Impacto**: Deploy não completou
 
 ### ✅ Solução Aplicada
 
-**Ação**: Removido módulo `Fornecedores` temporariamente  
-**Resultado**: Build passa 100% localmente  
+**Ação**: Removido módulo `Fornecedores` temporariamente
+**Resultado**: Build passa 100% localmente
 **Status**: Commitado e pushed para GitHub
 
 ### 📊 Validação
 
-**Build local**: ✅ PASSOU  
-**Commit**: `d7ee0f7` - Pushed para `main`  
+**Build local**: ✅ PASSOU
+**Commit**: `d7ee0f7` - Pushed para `main`
 **Pronto para redeploy**: ✅ SIM
 
 ---
@@ -35,7 +35,7 @@
 
 **Erros encontrados** (6 erros TypeScript):
 ```
-src/fornecedores/fornecedores.service.ts:14:42 - error TS2339: 
+src/fornecedores/fornecedores.service.ts:14:42 - error TS2339:
 Property 'fornecedor' does not exist on type 'PrismaService'.
 ```
 
@@ -76,9 +76,9 @@ pnpm --filter @zelare/api build
 
 ### 4. Commit e Push ✅
 
-**Commit**: `d7ee0f7`  
-**Mensagem**: `fix: remover módulo Fornecedores para corrigir build`  
-**Branch**: `main`  
+**Commit**: `d7ee0f7`
+**Mensagem**: `fix: remover módulo Fornecedores para corrigir build`
+**Branch**: `main`
 **Status**: ✅ Pushed para GitHub
 
 ---
@@ -157,24 +157,13 @@ cd /app
 node scripts/create-admin.js
 ```
 
-**Credenciais**:
-- Email: `admin@zelare.com.br`
-- Senha: `Admin@123`
+**Credenciais**: forneça os valores apenas por variáveis protegidas do ambiente autorizado. Não os registre neste documento.
 
 ---
 
-### Passo 5: Criar Usuários de Teste
+### Passo 5: Dados de desenvolvimento
 
-No console da aplicação:
-
-```bash
-cd /app
-node scripts/seed-test-users.js
-```
-
-**Resultado**: 13 usuários criados (5 níveis de acesso)
-
-**Logins**: Ver `LOGINS_TESTE.md`
+`db:seed` não cria dados. Para testes, use banco descartável e fixtures sintéticas controladas pelo CI. Não há arquivo de logins de teste versionado.
 
 ---
 
@@ -182,14 +171,13 @@ node scripts/seed-test-users.js
 
 1. **Health check da API**:
    ```bash
-   curl https://api.zelare.com.br/health
+   curl https://api.example.invalid/health
    # Deve retornar: {"status":"ok"}
    ```
 
 2. **Acesse o frontend**:
-   - URL: `https://app.zelare.com.br`
-   - Login: `admin@zelare.com.br`
-   - Senha: `Admin@123`
+   - URL: fornecida pelo ambiente autorizado
+   - Acesso: credenciais temporárias injetadas pelo gerenciador de segredos
 
 3. **Teste dashboards**:
    - Deve carregar o dashboard do admin
@@ -210,10 +198,10 @@ node scripts/seed-test-users.js
 | `GUIA_DEPLOY_COOLIFY_PASSO_A_PASSO.md` | Guia completo e detalhado |
 | `VARIAVEIS_AMBIENTE_DEPLOY.md` | Todas as variáveis necessárias |
 | `DOMINIOS_SUBDOMINIOS.md` | Configuração DNS e SSL |
-| `LOGINS_TESTE.md` | Credenciais dos 13 usuários de teste |
+| Acessos temporários | Credenciais fornecidas pelo gerenciador de segredos, nunca versionadas |
 | `POSTGRESQL_COOLIFY.md` | Como criar banco PostgreSQL |
 | `CHECKLIST_DEPLOY.md` | Checklist completo (150+ itens) |
-| `PROVAS_FUNCIONAMENTO.md` | Provas reais de funcionamento |
+| Evidências de validação | Logs do CI e do ambiente descartável, anexados à revisão |
 
 ---
 
@@ -252,13 +240,13 @@ node scripts/seed-test-users.js
 
 Após seguir os próximos passos:
 
-✅ **Backend rodando** sem erros  
-✅ **Frontend carregando** tela de login  
-✅ **Site institucional** funcionando  
-✅ **Login funcionando** com admin  
-✅ **Dashboards carregando** corretamente  
-✅ **IA Assistiva ativa** (Gemini)  
-✅ **13 usuários de teste** criados  
+✅ **Backend rodando** sem erros
+✅ **Frontend carregando** tela de login
+✅ **Site institucional** funcionando
+✅ **Login funcionando** com admin
+✅ **Dashboards carregando** corretamente
+✅ **IA Assistiva ativa** (Gemini)
+✅ **registros sintéticos de teste** criados
 
 **Tempo total**: 15-20 minutos
 
@@ -344,12 +332,12 @@ Você precisa de **3 subdomínios**: `api`, `app`, e raiz. Guia completo de conf
 
 ## 🚀 PODE FAZER REDEPLOY AGORA!
 
-**O sistema está 100% pronto para deploy!**  
-**Siga os próximos passos e em 15-20 minutos estará no ar!**  
+**O sistema está 100% pronto para deploy!**
+**Siga os próximos passos e em 15-20 minutos estará no ar!**
 **Boa sorte! 🍀**
 
 ---
 
-**Desenvolvido por**: Manus AI Agent  
-**Última atualização**: 19 de Fevereiro de 2026  
+**Desenvolvido por**: Manus AI Agent
+**Última atualização**: 19 de Fevereiro de 2026
 **Versão**: 1.0.0

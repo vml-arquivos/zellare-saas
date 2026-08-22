@@ -107,7 +107,7 @@ if [ -z "$TOKEN_MANTENEDORA_A" ] || [ -z "$TOKEN_MANTENEDORA_B" ] || \
   echo "  # 1. Fazer login como Mantenedora A"
   echo "  curl -X POST $API_BASE_URL/auth/login \\"
   echo "    -H 'Content-Type: application/json' \\"
-  echo "    -d '{\"email\":\"admin@mantenedoraa.com\",\"password\":\"senha\"}' \\"
+  echo "    -d '{\"email\":\"contact@example.invalid\",\"password\":\"senha\"}' \\"
   echo "    | jq -r '.accessToken'"
   echo ""
   echo "  # 2. Criar um planejamento como Mantenedora A"

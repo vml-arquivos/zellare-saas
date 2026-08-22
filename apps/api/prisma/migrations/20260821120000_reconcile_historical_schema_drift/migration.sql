@@ -555,3 +555,4 @@ DO $$ BEGIN IF to_regclass('public."ia_log"') IS NOT NULL AND NOT EXISTS (SELECT
 
 -- AddForeignKey
 DO $$ BEGIN IF to_regclass('public."ia_feedback"') IS NOT NULL AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = to_regclass('public."ia_feedback"') AND conname = 'ia_feedback_responseId_fkey') THEN ALTER TABLE "ia_feedback" ADD CONSTRAINT "ia_feedback_responseId_fkey" FOREIGN KEY ("responseId") REFERENCES "ia_response"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+

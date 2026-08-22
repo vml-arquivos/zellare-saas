@@ -52,7 +52,7 @@ const mockCacheInvalidation = {
 
 const mockUser: JwtPayload = {
   sub: 'user-001',
-  email: 'admin@conexa.com',
+  email: 'admin@example.invalid',
   mantenedoraId: 'mant-001',
   roles: [{
     roleId: 'role-001',

@@ -47,9 +47,9 @@ STRIPE_WEBHOOK_SECRET=whsec_... (opcional)
 ```
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=seu-email@gmail.com
+SMTP_USER=contact@example.invalid
 SMTP_PASSWORD=sua-senha-de-app
-SMTP_FROM=noreply@zelare.org
+SMTP_FROM=contact@example.invalid
 ```
 
 **Gmail:**
@@ -134,14 +134,9 @@ docker exec -it [container-id] pnpm db:push
 
 ### Testes de Pagamento (Stripe)
 
-Use cartões de teste:
-- **Sucesso:** 4242 4242 4242 4242
-- **Falha:** 4000 0000 0000 0002
-- **3D Secure:** 4000 0025 0000 3155
+Use os cartões de teste documentados oficialmente pelo provedor no ambiente de teste. Não armazene números de cartão no repositório.
 
-Data: qualquer data futura
-CVC: qualquer 3 dígitos
-CEP: qualquer
+Data, CVC e CEP: use valores fictícios aceitos pelo ambiente de teste.
 
 ## Troubleshooting
 

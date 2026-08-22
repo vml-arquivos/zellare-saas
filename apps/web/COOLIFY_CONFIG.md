@@ -107,10 +107,10 @@ Após deploy bem-sucedido:
 
 | Email | Senha | Nível |
 |-------|-------|-------|
-| developer@zelare.com.br | Teste@123 | Developer |
-| admin@zelare.org.br | Teste@123 | Admin Mantenedora |
-| coordenador@cepi.com.br | Teste@123 | Coordenador |
-| nonata@cepi.com.br | Teste@123 | Professora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Developer |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Admin Mantenedora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Coordenador |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Professora |
 
 ---
 

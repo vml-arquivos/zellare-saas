@@ -83,8 +83,8 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex gap-2 items-start">
                 <Mail className="w-4 h-4 text-zelare-mint mt-0.5 flex-shrink-0" />
-                <a href="mailto:contato@zelare.com.br" className="text-white/60 hover:text-zelare-mint transition-colors">
-                  contato@zelare.com.br
+                <a href="mailto:contato@example.invalid" className="text-white/60 hover:text-zelare-mint transition-colors">
+                  contato@example.invalid
                 </a>
               </li>
             </ul>

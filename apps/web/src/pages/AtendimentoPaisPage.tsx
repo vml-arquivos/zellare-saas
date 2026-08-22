@@ -360,7 +360,7 @@ export function AtendimentoPaisPage() {
                   value={form.responsavelNome}
                   onChange={e => setForm(f => ({ ...f, responsavelNome: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Ex: Maria Silva"
+                  placeholder="Nome do responsável"
                   required
                 />
               </div>

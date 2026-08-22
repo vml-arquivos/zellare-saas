@@ -15,7 +15,7 @@
 
 ### Commits Recentes (Backend)
 ```
-a14503e - feat(seed): seed completo CEPI Arara-Canindé 2026 — 9 turmas, 9 professoras, 169 alunos
+a14503e - feat(seed): seed completo CEPI Arara-Canindé 2026 — registros sintéticos, 9 professoras, 169 alunos
 52be1d9 - fix(ia-assistiva): migrar para Gemini como provedor padrão de IA
 65b67df - fix(ia-assistiva): inicialização lazy do OpenAI
 6365fc7 - fix(migration): adiciona migration faltante para PedidoCompra
@@ -187,7 +187,7 @@ bd08ac6 - feat(frontend): UX por perfil + pedidos-compra + sidebar atualizado (P
 4. **Planejamentos com IA** - Integração com Gemini, templates por faixa etária
 5. **Requisição de Materiais** - Workflow completo professor → aprovação
 6. **Pedido de Compra** - Consolidação mensal por unidade
-7. **Seed 2026** - CEPI Arara-Canindé com 9 turmas, 9 professoras, 169 alunos
+7. **Seed 2026** - CEPI Arara-Canindé com registros sintéticos, 9 professoras, 169 alunos
 8. **Auditoria** - AuditLog automático em todas operações
 
 ### ⚠️ O que está parcialmente implementado:

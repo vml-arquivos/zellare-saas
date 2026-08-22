@@ -29,6 +29,11 @@ export class Onda2CoverageService {
   async createRatioPolicy(dto: CreateRatioPolicyDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.ratioEngineV1, ONDA2_CAPABILITIES.ratioPolicyManage);
     await this.access.assertUnitAccess(user, dto.unitId);
+    const effectiveFrom = new Date(dto.effectiveFrom);
+    const effectiveTo = dto.effectiveTo ? new Date(dto.effectiveTo) : null;
+    if (Number.isNaN(effectiveFrom.getTime()) || (effectiveTo && Number.isNaN(effectiveTo.getTime())) || (effectiveTo && effectiveTo <= effectiveFrom)) {
+      throw new BadRequestException('A vigência da política é inválida');
+    }
     const latest = await this.prisma.ratioPolicy.findFirst({
       where: { mantenedoraId: user.mantenedoraId, unitId: dto.unitId, name: dto.name },
       orderBy: { version: 'desc' },
@@ -42,8 +47,8 @@ export class Onda2CoverageService {
         name: dto.name,
         jurisdiction: dto.jurisdiction,
         sourceUrl: dto.sourceUrl,
-        effectiveFrom: new Date(dto.effectiveFrom),
-        effectiveTo: dto.effectiveTo ? new Date(dto.effectiveTo) : undefined,
+        effectiveFrom,
+        effectiveTo: effectiveTo ?? undefined,
         version,
         status: Onda2ApprovalStatus.DRAFT,
         definition: dto.definition as Prisma.InputJsonValue,
@@ -70,6 +75,7 @@ export class Onda2CoverageService {
     const policy = await this.prisma.ratioPolicy.findFirst({ where: { id, mantenedoraId: user.mantenedoraId } });
     if (!policy) throw new NotFoundException('Política de proporção não encontrada');
     await this.access.assertUnitAccess(user, policy.unitId);
+    if (policy.status !== Onda2ApprovalStatus.DRAFT) throw new BadRequestException('Somente políticas em rascunho podem ser revisadas');
     if (policy.createdBy === user.sub) throw new BadRequestException('O autor não pode revisar a própria política');
     return this.prisma.ratioPolicy.update({
       where: { id },
@@ -84,6 +90,10 @@ export class Onda2CoverageService {
     await this.access.assertUnitAccess(user, policy.unitId);
     if (policy.status !== Onda2ApprovalStatus.APPROVED || !policy.reviewedBy || policy.reviewedBy === policy.createdBy) {
       throw new BadRequestException('A política precisa de aprovação por um revisor diferente do autor');
+    }
+    if (policy.publishedBy && policy.publishedBy === user.sub) throw new BadRequestException('O publicador já utilizado não pode repetir a publicação');
+    if (policy.createdBy === user.sub || policy.reviewedBy === user.sub) {
+      throw new BadRequestException('O publicador deve ser diferente do autor e do revisor');
     }
     return this.prisma.ratioPolicy.update({
       where: { id },
@@ -267,6 +277,7 @@ export class Onda2CoverageService {
     const assignment = await this.prisma.staffingAssignment.findFirst({ where: { id, mantenedoraId: user.mantenedoraId } });
     if (!assignment) throw new NotFoundException('Alocação de equipe não encontrada');
     await this.access.assertUnitAccess(user, assignment.unitId);
+    if (assignment.createdBy === user.sub) throw new BadRequestException('O autor não pode publicar a própria alocação');
     return this.prisma.staffingAssignment.update({ where: { id }, data: { status: 'PUBLISHED', publishedBy: user.sub, publishedAt: new Date() } });
   }
 

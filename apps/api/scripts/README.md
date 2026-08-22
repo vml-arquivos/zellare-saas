@@ -1,107 +1,53 @@
-# Scripts de Seed - Zelare
+# Scripts da API Zelare
 
-## 📋 Visão Geral
+## Política de dados
 
-Scripts para popular o banco de dados com dados de teste e dados reais.
+Este diretório não distribui cadastros de pessoas, logins, senhas, planilhas, imports ou seeds de produção. Dados de desenvolvimento devem ser criados somente em banco descartável, com fixtures sintéticas e procedimento explícito.
 
----
+> **Regra:** nunca coloque e-mail, senha, CPF, telefone, nome de criança, nome de funcionário, token, chave de API ou arquivo de cadastro neste repositório.
 
-## 🌱 Seeds Disponíveis
+## Seed padrão
 
-### 1. `seed-all-users.js` (Teste)
-Seed básico com dados fictícios para desenvolvimento.
-
-**Estrutura**:
-- 1 Mantenedora: Associação Zelare
-- 1 Unidade: Unidade Piloto
-- 3 Turmas: A, B, C
-- 13 Usuários (developer, mantenedora, staff, coordenadores, professores)
-
-**Uso**:
-```bash
-node scripts/seed-all-users.js
-```
-
----
-
-### 2. `seed-real-data.js` (Produção) ⭐
-Seed com dados REAIS da planilha ALUNOS2026.xlsx do CEPI Arara Canindé.
-
-**Estrutura**:
-- 1 Mantenedora: Associação Zelare
-- 1 Unidade: CEPI Arara Canindé
-- **9 Turmas reais**:
-  - Berçário I (8 alunos) - Prof. Nonata
-  - Berçário II A (16 alunos) - Prof. Elisangela
-  - Berçário II B (15 alunos) - Prof. Jessica
-  - Maternal I A (23 alunos) - Prof. Luciene
-  - Maternal I B (22 alunos) - Prof. Ana
-  - Maternal I C (14 alunos) - Prof. Edilvana
-  - Maternal II A (24 alunos) - Prof. Raquel
-  - Maternal II B (24 alunos) - Prof. Angelica
-  - Maternal II C (24 alunos) - Prof. Evellyn
-- **170 Alunos reais** com dados completos (nome, nascimento, gênero)
-- **13 Usuários**:
-  - 1 Developer
-  - 1 Admin Mantenedora
-  - 1 Staff Central (Pedagógico)
-  - 1 Coordenador Unidade
-  - 9 Professoras (uma por turma)
-
-**Uso**:
-```bash
-node scripts/seed-real-data.js
-```
-
-**Logins Disponíveis** (senha: `Teste@123`):
-- `developer@zelare.com.br` - Acesso total
-- `admin@zelare.org.br` - Admin Mantenedora
-- `pedagogico@zelare.org.br` - Staff Central
-- `coordenador@cepi.com.br` - Coordenador Unidade
-- `nonata@cepi.com.br` - Professora Berçário I
-- `elisangela@cepi.com.br` - Professora Berçário II A
-- `jessica@cepi.com.br` - Professora Berçário II B
-- `luciene@cepi.com.br` - Professora Maternal I A
-- `ana@cepi.com.br` - Professora Maternal I B
-- `edilvana@cepi.com.br` - Professora Maternal I C
-- `raquel@cepi.com.br` - Professora Maternal II A
-- `angelica@cepi.com.br` - Professora Maternal II B
-- `evellyn@cepi.com.br` - Professora Maternal II C
-
----
-
-## 🐳 Uso no Docker/Coolify
-
-Após deploy, executar seed no container:
+O comando abaixo é seguro por padrão e **não cria dados**:
 
 ```bash
-# Entrar no container
-docker exec -it [CONTAINER_ID] /bin/sh
-
-# Executar seed real
-cd /app && node scripts/seed-real-data.js
+pnpm --filter @zelare/api db:seed
 ```
 
----
+Ele apenas informa que o seed está desabilitado. Para executar o caminho sintético explicitamente:
 
-## 📊 Fonte de Dados
+```bash
+ALLOW_SYNTHETIC_SEED=true pnpm --filter @zelare/api seed:synthetic
+```
 
-Os dados reais são extraídos de:
-- **Arquivo**: `datasets/turmas_alunos.json`
-- **Origem**: Planilha ALUNOS2026.xlsx (CEPI Arara Canindé)
-- **Processamento**: Script Python `extract_data.py`
+A fixture sintética atual não insere registros: o harness do CI cria e destrói o banco descartável quando precisa validar schema, migrations e contratos. Nenhum comando de seed deve apontar para produção.
 
----
+## Catálogos públicos
 
-## ✅ Validação
+Os scripts de catálogo e matriz curricular podem consumir somente os arquivos públicos e não pessoais mantidos em `apps/api/data/` e `apps/api/datasets/`, conforme a allowlist do scanner. Esses arquivos não representam alunos, responsáveis, funcionários ou contas de acesso.
 
-Todos os campos seguem o schema Prisma:
-- `Mantenedora`: name, cnpj, email, phone, address, city, state
-- `Unit`: name, code, address, city, state, email, phone
-- `Classroom`: name, code, ageGroupMin, ageGroupMax, capacity
-- `Child`: firstName, lastName, dateOfBirth, gender
-- `User`: email, password, firstName, lastName, role
+## Criação administrativa
 
----
+A criação de uma conta administrativa é uma operação controlada e exige valores fornecidos no momento da execução ou pelo gerenciador de segredos. Não há credencial padrão no código:
 
-**Última atualização**: 2026-02-20
+```bash
+ZELARE_ADMIN_EMAIL='admin@example.invalid' \
+ZELARE_ADMIN_PASSWORD="$ADMIN_PASSWORD_FROM_SECRET_MANAGER" \
+ZELARE_ADMIN_FIRST_NAME='Admin' \
+ZELARE_ADMIN_LAST_NAME='Sistema' \
+node scripts/create-admin.js
+```
+
+O valor da senha não deve ser passado em documentação, histórico do shell ou saída de logs. A conta criada deve ser de um ambiente autorizado e a senha deve ser trocada imediatamente conforme a política da instituição.
+
+## Segurança e validação
+
+Antes de abrir uma PR, execute:
+
+```bash
+pnpm --filter @zelare/api security:artifacts
+pnpm --filter @zelare/api typecheck
+pnpm --filter @zelare/api test -- --runInBand
+```
+
+O scanner verifica nomes de caminhos e conteúdo textual, incluindo credenciais literais, tokens, chaves, e-mails não sintéticos, CPF, telefone, referências a planilhas/cadastros reais e nomes de pessoas conhecidos nos artefatos de risco. O histórico Git não é reescrito pelo scanner.

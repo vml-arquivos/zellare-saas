@@ -142,7 +142,7 @@ export function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
+              placeholder="usuario@example.invalid"
               autoCapitalize="none"
               autoCorrect="off"
               style={{
@@ -329,7 +329,7 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="seu@email.com"
+                  placeholder="usuario@example.invalid"
                   className="w-full px-4 py-3 border-2 border-[var(--border-default)] bg-[var(--surface-subtle)] rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-[var(--surface-brand)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                 />
               </div>

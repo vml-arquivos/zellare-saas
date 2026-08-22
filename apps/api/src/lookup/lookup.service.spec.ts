@@ -54,7 +54,7 @@ describe('LookupService — RBAC de turmas e crianças', () => {
   // ─── Usuários mock ────────────────────────────────────────────────────────
   const professorUser: JwtPayload = {
     sub: 'prof-001',
-    email: 'professora@escola.com',
+    email: 'teacher-a@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r1', level: 'PROFESSOR' as any, type: 'PROFESSOR' as any, unitScopes: [] }],
@@ -63,7 +63,7 @@ describe('LookupService — RBAC de turmas e crianças', () => {
   // PROFESSOR_AUXILIAR tem level=PROFESSOR (conforme admin.service.ts:28)
   const professorAuxiliarUser: JwtPayload = {
     sub: 'aux-001',
-    email: 'auxiliar@escola.com',
+    email: 'assistant-a@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r2', level: 'PROFESSOR' as any, type: 'PROFESSOR_AUXILIAR' as any, unitScopes: [] }],
@@ -71,7 +71,7 @@ describe('LookupService — RBAC de turmas e crianças', () => {
 
   const coordenadoraUser: JwtPayload = {
     sub: 'coord-001',
-    email: 'coordenadora@escola.com',
+    email: 'coordinator-a@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r3', level: 'UNIDADE' as any, type: 'UNIDADE_COORDENADOR_PEDAGOGICO' as any, unitScopes: [] }],

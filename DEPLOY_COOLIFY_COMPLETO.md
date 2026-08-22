@@ -61,12 +61,12 @@ No painel do Supabase, vá em **Settings** → **Database** e copie:
 
 **Para runtime (Transaction Mode - Porta 6543)**:
 ```
-postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 **Para migrations (Session Mode - Porta 5432)**:
 ```
-postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ---
@@ -109,8 +109,8 @@ PORT=3000
 APP_TIMEZONE=America/Sao_Paulo
 
 # Banco de Dados (OBRIGATÓRIAS)
-DATABASE_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-DIRECT_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # JWT (OBRIGATÓRIAS - Gere com: openssl rand -base64 32)
 JWT_SECRET=SEU_SECRET_AQUI
@@ -282,7 +282,7 @@ cd apps/site && NODE_ENV=production node dist/index.js
 NODE_ENV=production
 
 # Banco de Dados (mesmo do backend)
-DATABASE_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # AWS S3 (OPCIONAL)
 # AWS_REGION=us-east-1
@@ -327,7 +327,7 @@ curl https://api.zelare.com.br/health
 # Login
 curl -X POST https://api.zelare.com.br/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "dev@zelare.org", "password": "dev123"}'
+  -d '{"email": "contact@example.invalid", "password": "<SECRET_FROM_SECRET_MANAGER>"}'
 
 # Listar unidades (com token)
 curl https://api.zelare.com.br/lookup/units \
@@ -498,15 +498,15 @@ Parabéns! O Zelare está deployado e rodando no Coolify! 🚀
 - Site Institucional: `https://www.zelare.com.br`
 
 **Credenciais de Teste** (se fez seed):
-- Email: `dev@zelare.org`
-- Senha: `dev123`
+- Email: `contact@example.invalid`
+- Senha: `<SECRET_FROM_SECRET_MANAGER>`
 
 ---
 
 ## 📞 Suporte
 
 Para problemas de deploy:
-- 📧 Email: contato@zelare.org
+- 📧 Email: contact@example.invalid
 - 💻 GitHub Issues: [vml-arquivos/zelare-saas](https://github.com/vml-arquivos/zelare-saas/issues)
 
 ---

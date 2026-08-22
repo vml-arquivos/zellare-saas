@@ -25,8 +25,8 @@ cd /home/ubuntu/zelare-saas/apps/api && pnpm build
 ```
 ✅ Build concluído com sucesso
 📦 Copying datasets to dist...
-  ✓ ALUNOS2026.xlsx
-  ✓ arara-2026-alunos.json
+  ✓ synthetic-fixture.json
+  ✓ synthetic-fixture.json
   ✓ matriz-curricular-2026-sample.json
 ✅ Datasets copied: /home/ubuntu/zelare-saas/apps/api/data -> /home/ubuntu/zelare-saas/apps/api/dist/data
 ```

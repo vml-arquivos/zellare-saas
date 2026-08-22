@@ -976,7 +976,7 @@ function EtapaCrianca({ form, atualizar, modoEdicao, enviandoFoto, onEnviarFoto 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Campo label="COD. ALUNO"><Input value={form.codigoAluno} onChange={(v) => atualizar('codigoAluno', v)} /></Campo>
         <Campo label="Inscrição"><Input value={form.inscricao} onChange={(v) => atualizar('inscricao', v)} /></Campo>
-        <Campo label="CPF da criança"><Input value={form.cpf} onChange={(v) => atualizar('cpf', v)} placeholder="000.000.000-00" /></Campo>
+        <Campo label="CPF da criança"><Input value={form.cpf} onChange={(v) => atualizar('cpf', v)} placeholder="CPF da criança" /></Campo>
         <Campo label="Nome *"><Input value={form.firstName} onChange={(v) => atualizar('firstName', v)} /></Campo>
         <Campo label="Sobrenome *"><Input value={form.lastName} onChange={(v) => atualizar('lastName', v)} /></Campo>
         <Campo label="Nascimento *"><Input type="date" value={form.dateOfBirth} onChange={(v) => atualizar('dateOfBirth', v)} /></Campo>

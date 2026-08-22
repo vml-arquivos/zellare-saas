@@ -49,8 +49,8 @@ cp apps/api/.env.example apps/api/.env
 Edite `apps/api/.env` e configure:
 
 ```env
-DATABASE_URL=postgresql://seu_usuario:sua_senha@localhost:5432/conexa_v3
-DIRECT_URL=postgresql://seu_usuario:sua_senha@localhost:5432/conexa_v3
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ### Opção B: Supabase (Recomendado)
@@ -60,8 +60,8 @@ DIRECT_URL=postgresql://seu_usuario:sua_senha@localhost:5432/conexa_v3
 3. Configure no `.env`:
 
 ```env
-DATABASE_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-DIRECT_URL=postgresql://postgres.SEU_PROJECT_REF:SENHA@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ---
@@ -102,15 +102,7 @@ pnpm db:migrate:dev
 pnpm db:seed
 ```
 
-Isso vai criar:
-- 1 Mantenedora (Zelare)
-- 2 Unidades (Arara Canindé, Arara Azul)
-- Usuários de teste
-- Matriz Curricular 2026
-
-**Credenciais de teste**:
-- Email: `dev@zelare.org`
-- Senha: `dev123`
+O seed padrão não cria dados. Para testar, use um banco descartável e uma fixture sintética autorizada; nenhum login ou senha é distribuído pelo repositório.
 
 ---
 
@@ -164,9 +156,7 @@ Abra seu navegador em:
 - **Backend API**: http://localhost:3000
 - **Site Institucional**: http://localhost:5174
 
-Faça login com:
-- **Email**: `dev@zelare.org`
-- **Senha**: `dev123`
+Faça login somente com credenciais fornecidas pelo ambiente local autorizado. Não copie credenciais para este documento, para commits ou para o histórico do shell.
 
 ---
 
@@ -215,8 +205,11 @@ pnpm db:migrate:deploy
 # Abrir Prisma Studio
 pnpm db:studio
 
-# Seed do banco
+# Seed seguro (não cria dados por padrão)
 pnpm db:seed
+
+# Harness sintético opcional, somente em banco descartável
+ALLOW_SYNTHETIC_SEED=true pnpm --filter @zelare/api seed:synthetic
 ```
 
 ### Linting e Formatação
@@ -300,7 +293,7 @@ Agora que você tem o Zelare rodando, explore:
 
 ## Precisa de Ajuda?
 
-- 📧 Email: contato@zelare.org
+- 📧 Email: contact@example.invalid
 - 🐛 [Reportar Bug](https://github.com/vml-arquivos/zelare-saas/issues)
 - 💬 [Discussões](https://github.com/vml-arquivos/zelare-saas/discussions)
 

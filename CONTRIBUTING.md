@@ -384,7 +384,7 @@ Outras formas de resolver o problema
 ## Dúvidas?
 
 - Abra uma [Discussion](https://github.com/vml-arquivos/zelare-saas/discussions)
-- Entre em contato: contato@zelare.org
+- Entre em contato: contact@example.invalid
 
 ---
 

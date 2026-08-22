@@ -33,7 +33,7 @@ O packet `V3-OPS-PRP-001` foi executado com sucesso, abordando três missões cr
 ### Missão 03: UX 2 Segundos — Performance no Lançamento de Micro-Gestos
 - **Objetivo:** Garantir que o professor possa registrar micro-gestos em menos de 2 segundos, mesmo em condições de rede ruins ou offline.
 - **Implementação:**
-  - **`TeacherDashboardPremium.tsx`:** O dashboard foi completamente refatorado para buscar dados reais da API (`/classrooms/:id/children`, `/attendance`), substituindo todos os dados mockados. Inclui agora um indicador de status online/offline.
+  - **`TeacherDashboardPremium.tsx`:** O dashboard foi completamente refatorado para buscar dados não sintéticos da API (`/classrooms/:id/children`, `/attendance`), substituindo todos os dados mockados. Inclui agora um indicador de status online/offline.
   - **`diary.api.ts`:** Criado um service de API no frontend com uma **fila de requisições offline baseada em IndexedDB** (`idb-keyval`).
   - **`MicroGesturePanel.tsx`:** Ao registrar um micro-gesto, a UI é atualizada **imediatamente** (Optimistic UI). A requisição é enviada para a API. Se o usuário estiver offline, a requisição é serializada e salva na fila do IndexedDB. Ao ficar online novamente, a fila é processada automaticamente em segundo plano.
 - **Resultado:** A experiência do usuário para o registro de micro-gestos é agora instantânea e resiliente a falhas de rede, cumprindo o requisito de < 2 segundos.

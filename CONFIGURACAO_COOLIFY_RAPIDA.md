@@ -22,8 +22,8 @@
 
 ### 4. Environment Variables (14)
 ```
-DATABASE_URL=postgres://postgres:G8pDA7CYCRRyYPDJMU82peXreI6gYJbKGf47X75q3fvmCMHTuJDomaBVBQSNc1kw@vswwog0sss0c48ggwsgsg4ow:5432/postgres
-DIRECT_URL=postgres://postgres:G8pDA7CYCRRyYPDJMU82peXreI6gYJbKGf47X75q3fvmCMHTuJDomaBVBQSNc1kw@vswwog0sss0c48ggwsgsg4ow:5432/postgres
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 REDIS_URL=redis://default:EWCBWCNg0uX92uoCNTRLcL7zwjSpIMkEzXtqxIqi9QL6xCK1ieJbyTrzgkx8Vjzr@y0oso44kkssw40skk048ksgs:6379/0
 JWT_SECRET=0MsE4rEpC7FPosGYzlsXw9GNfD+YZmIDylHzDp2v9YIRRQMHIlbf2IF3fPMGz7tdXAhPVKf/bfJrNXRyL+LAGw==
 JWT_EXPIRATION=7d
@@ -80,7 +80,7 @@ VITE_APP_VERSION=3.0.0
 
 ### 3. Environment Variables (4)
 ```
-DATABASE_URL=postgres://postgres:G8pDA7CYCRRyYPDJMU82peXreI6gYJbKGf47X75q3fvmCMHTuJDomaBVBQSNc1kw@vswwog0sss0c48ggwsgsg4ow:5432/postgres
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 API_URL=https://api.zelare.seu-dominio.com.br
 NODE_ENV=production
 PORT=5174
@@ -104,7 +104,7 @@ curl https://api.zelare.seu-dominio.com.br/health
 # Login
 curl -X POST https://api.zelare.seu-dominio.com.br/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@zelare.com.br","password":"Admin@123"}'
+  -d '{"email":"contact@example.invalid","password":"<SECRET_FROM_SECRET_MANAGER>"}'
 
 # Frontend
 curl https://app.zelare.seu-dominio.com.br

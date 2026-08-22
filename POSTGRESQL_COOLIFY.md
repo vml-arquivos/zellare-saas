@@ -39,9 +39,9 @@ No painel do Coolify:
 3. Selecione **"PostgreSQL"**
 4. Preencha os campos:
    - Name: `zelare-saas-db`
-   - Database: `conexa`
-   - Username: `zelare_user`
-   - Password: `[senha forte]`
+   - Database: `zelare`
+   - Username: fornecido pelo ambiente autorizado
+   - Password: fornecida pelo gerenciador de segredos, sem valor padrão versionado
 5. Clique em **"Create"**
 
 ### Passo 2: Coolify Faz o Deploy
@@ -60,14 +60,14 @@ O Coolify automaticamente:
 
 Após criado, o Coolify fornece:
 ```
-postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ### Passo 4: Você Usa no Backend
 
 Configure a variável de ambiente no backend:
 ```bash
-DATABASE_URL=postgresql://zelare_user:[SENHA]@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ### Passo 5: Execute as Migrations

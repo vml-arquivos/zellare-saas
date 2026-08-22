@@ -5,7 +5,7 @@ import type { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 function makeProfessor(): JwtPayload {
   return {
     sub: 'professor-1',
-    email: 'prof@test.com',
+    email: 'professor@example.invalid',
     mantenedoraId: 'mant-1',
     roles: [{ roleId: 'r1', level: RoleLevel.PROFESSOR, type: RoleType.PROFESSOR, unitScopes: [] }],
   };
@@ -14,7 +14,7 @@ function makeProfessor(): JwtPayload {
 function makeCoordenador(): JwtPayload {
   return {
     sub: 'coord-1',
-    email: 'coord@test.com',
+    email: 'coordinator@example.invalid',
     mantenedoraId: 'mant-1',
     unitId: 'unit-1',
     roles: [{ roleId: 'r2', level: RoleLevel.UNIDADE, type: RoleType.UNIDADE_COORDENADOR_PEDAGOGICO, unitScopes: [] }],

@@ -78,12 +78,12 @@ No painel do Coolify:
    VITE_ANALYTICS_WEBSITE_ID=your-website-id
    
    # Stripe (obter em https://dashboard.stripe.com)
-   STRIPE_SECRET_KEY=sk_live_your_secret_key
+   STRIPE_SECRET_KEY=<SECRET_FROM_SECRET_MANAGER>
    VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your_publishable_key
    STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
    
    # Site Config
-   VITE_SITE_URL=https://zelare.casadef.com.br
+   VITE_SITE_URL=https://site.example.invalid
    NODE_ENV=production
    ```
 
@@ -118,12 +118,12 @@ No painel do Coolify:
    # Executar migrações
    pnpm db:push
    
-   # Popular dados iniciais
-   node seed-units.mjs
+   # O site não executa seed nominal. Configure o banco autorizado;
+   # sem banco, o fallback estático é exclusivamente sintético.
    ```
 
 3. **Verificar site:**
-   - Acesse https://zelare.casadef.com.br
+   - Acesse https://site.example.invalid
    - Teste navegação entre páginas
    - Verifique imagens e assets
 
@@ -147,7 +147,7 @@ No painel do Coolify:
 2. Clique em "Add endpoint"
 3. Configure:
    ```
-   Endpoint URL: https://zelare.casadef.com.br/api/webhooks/stripe
+   Endpoint URL: https://site.example.invalid/api/webhooks/stripe
    Description: Zelare Payment Webhook
    Events to send:
      - checkout.session.completed
@@ -167,10 +167,9 @@ No painel do Coolify:
 ### 4. Testar Pagamentos
 
 **Modo Teste (sk_test_):**
-- Cartão sucesso: 4242 4242 4242 4242
-- Cartão falha: 4000 0000 0000 0002
-- Data: qualquer futura
-- CVC: qualquer 3 dígitos
+- Cartão de sucesso: consulte a documentação oficial do provedor em modo teste
+- Cartão de falha: consulte a documentação oficial do provedor em modo teste
+- Data/CVC: use valores fictícios aceitos pelo ambiente de teste
 
 **Modo Produção:**
 - Use cartões reais
@@ -188,9 +187,9 @@ No painel do Coolify:
    ```env
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
-   SMTP_USER=seu-email@gmail.com
+   SMTP_USER=contact@example.invalid
    SMTP_PASSWORD=senha-de-app-gerada
-   SMTP_FROM=noreply@zelare.org
+   SMTP_FROM=contact@example.invalid
    ```
 
 ### Opção 2: SendGrid
@@ -203,7 +202,7 @@ No painel do Coolify:
    SMTP_PORT=587
    SMTP_USER=apikey
    SMTP_PASSWORD=SG.sua-api-key
-   SMTP_FROM=noreply@zelare.org
+   SMTP_FROM=contact@example.invalid
    ```
 
 ---
@@ -215,7 +214,7 @@ No painel do Coolify:
 1. Acesse https://search.google.com/search-console
 2. Adicione propriedade: `zelare.casadef.com.br`
 3. Verifique propriedade (DNS ou HTML)
-4. Envie sitemap: `https://zelare.casadef.com.br/sitemap.xml`
+4. Envie sitemap: `https://site.example.invalid/sitemap.xml`
 
 ### 2. Google Analytics (Opcional)
 
@@ -313,7 +312,7 @@ docker ps | grep mysql
 1. Verificar logs: `docker logs -f [container-id]`
 2. Verificar DNS: `nslookup zelare.casadef.com.br`
 3. Verificar porta: `curl http://localhost:3000`
-4. Verificar SSL: `curl https://zelare.casadef.com.br`
+4. Verificar SSL: `curl https://site.example.invalid`
 
 ### Pagamentos Não Funcionam
 
@@ -329,7 +328,7 @@ docker ps | grep mysql
 - **Documentação Coolify:** https://coolify.io/docs
 - **Documentação Stripe:** https://stripe.com/docs
 - **Issues GitHub:** https://github.com/vml-arquivos/site-zelare/issues
-- **Email:** suporte@zelare.org
+- **Email:** contact@example.invalid
 
 ---
 

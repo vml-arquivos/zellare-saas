@@ -59,7 +59,7 @@
 │   │   ├── nixpacks.json
 │   │   ├── package.json
 │   │   ├── pnpm-lock.yaml
-│   │   ├── seed-units.mjs
+│   │   ├── fallback sintético de unidades
 │   │   ├── todo.md
 │   │   ├── tsconfig.json
 │   │   ├── vite.config.ts
