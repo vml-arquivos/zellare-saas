@@ -8,11 +8,18 @@ export type JourneyFeatureFlagKey =
 export const JOURNEY_CAPABILITIES = {
   read: "journey.read",
   manage: "journey.manage",
-  reviewMerge: "journey.merge.review",
+  prospectRead: "journey.prospect.read",
+  prospectManage: "journey.prospect.manage",
+  visitRead: "journey.visit.read",
+  visitManage: "journey.visit.manage",
+  waitlistRead: "journey.waitlist.read",
   manageWaitlist: "journey.waitlist.manage",
+  offerRead: "journey.offer.read",
   offerSeat: "journey.offer.create",
   acceptOffer: "journey.offer.accept",
   overrideCapacity: "journey.offer.override",
+  reviewMerge: "journey.merge.review",
+  privacyManage: "journey.privacy.manage",
 } as const;
 
 export type JourneyCapability =
@@ -21,6 +28,10 @@ export type JourneyCapability =
 export const JOURNEY_GOVERNANCE = {
   diagnosticInference: false as const,
   humanReviewRequired: true as const,
+  contactHashVersion: "hmac-sha256-v1" as const,
+  contactCipherVersion: "aes-256-gcm-v1" as const,
+  prospectPrivacyPolicyVersion: "journey-privacy-v1" as const,
+  defaultRetentionDays: 180,
 };
 
 export const JOURNEY_ALLOWED_PROSPECT_FIELDS = [
@@ -38,6 +49,10 @@ export const JOURNEY_ALLOWED_PROSPECT_FIELDS = [
   "desiredDate",
   "consentCapture",
   "consentContact",
+  "captureLegalBasis",
+  "contactLegalBasis",
+  "consentPolicyVersion",
+  "retentionUntil",
 ] as const;
 
 export const JOURNEY_FORBIDDEN_TERMS = [
@@ -76,3 +91,40 @@ export const JOURNEY_STAGE_LABELS = {
   PERDIDO: "Perdido",
   ARQUIVADO: "Arquivado",
 } as const;
+
+export const JOURNEY_ALLOWED_STAGE_TRANSITIONS = {
+  NOVO: [
+    "CONTATADO",
+    "VISITA_AGENDADA",
+    "LISTA_ESPERA",
+    "VAGA_OFERECIDA",
+    "PERDIDO",
+    "ARQUIVADO",
+  ],
+  CONTATADO: [
+    "VISITA_AGENDADA",
+    "VISITA_REALIZADA",
+    "LISTA_ESPERA",
+    "VAGA_OFERECIDA",
+    "PERDIDO",
+    "ARQUIVADO",
+  ],
+  VISITA_AGENDADA: [
+    "VISITA_REALIZADA",
+    "LISTA_ESPERA",
+    "VAGA_OFERECIDA",
+    "PERDIDO",
+    "ARQUIVADO",
+  ],
+  VISITA_REALIZADA: ["LISTA_ESPERA", "VAGA_OFERECIDA", "PERDIDO", "ARQUIVADO"],
+  LISTA_ESPERA: ["VAGA_OFERECIDA", "PERDIDO", "ARQUIVADO"],
+  VAGA_OFERECIDA: ["ACEITO", "LISTA_ESPERA", "PERDIDO", "ARQUIVADO"],
+  ACEITO: ["ARQUIVADO"],
+  PERDIDO: ["ARQUIVADO"],
+  ARQUIVADO: [],
+} as const;
+
+export type JourneyStageTransition = {
+  from: keyof typeof JOURNEY_ALLOWED_STAGE_TRANSITIONS;
+  to: string;
+};

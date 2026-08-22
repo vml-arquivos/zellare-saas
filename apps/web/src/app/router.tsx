@@ -1,116 +1,238 @@
-import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-const LoginPage = lazy(() => import('../pages/LoginPage').then(({ LoginPage }) => ({ default: LoginPage })));
-const DashboardPage = lazy(() => import('../pages/DashboardPage').then(({ DashboardPage }) => ({ default: DashboardPage })));
-const PlanningsPage = lazy(() => import('../pages/PlanningsPage').then(({ PlanningsPage }) => ({ default: PlanningsPage })));
-const DiaryPage = lazy(() => import('../pages/DiaryPage').then(({ DiaryPage }) => ({ default: DiaryPage })));
-const MatricesPage = lazy(() => import('../pages/MatricesPage').then(({ MatricesPage }) => ({ default: MatricesPage })));
-const ReportsPage = lazy(() => import('../pages/ReportsPage').then(({ ReportsPage }) => ({ default: ReportsPage })));
-const TeacherDashboardPage = lazy(() => import('../pages/TeacherDashboardPage'));
-const MaterialRequestPage = lazy(() => import('../pages/MaterialRequestPage').then(({ MaterialRequestPage }) => ({ default: MaterialRequestPage })));
-const PedidosCompraPage = lazy(() => import('../pages/PedidosCompraPage').then(({ PedidosCompraPage }) => ({ default: PedidosCompraPage })));
-const CatalogImportPage = lazy(() => import('../pages/CatalogImportPage').then(({ CatalogImportPage }) => ({ default: CatalogImportPage })));
-const DashboardCentralPage = lazy(() => import('../pages/DashboardCentralPage').then(({ DashboardCentralPage }) => ({ default: DashboardCentralPage })));
-const DashboardUnidadePage = lazy(() => import('../pages/DashboardUnidadePage').then(({ DashboardUnidadePage }) => ({ default: DashboardUnidadePage })));
-const AtendimentoPaisPage = lazy(() => import('../pages/AtendimentoPaisPage').then(({ AtendimentoPaisPage }) => ({ default: AtendimentoPaisPage })));
-const DashboardCoordenacaoPedagogicaPage = lazy(() => import('../pages/DashboardCoordenacaoPedagogicaPage'));
-const DashboardCoordenacaoGeralPage = lazy(() => import('../pages/DashboardCoordenacaoGeralPage'));
-const ControleFaltasPage = lazy(() => import('../pages/ControleFaltasPage'));
-const RdxPage = lazy(() => import('../pages/RdxPage'));
+import { lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+const LoginPage = lazy(() =>
+  import("../pages/LoginPage").then(({ LoginPage }) => ({
+    default: LoginPage,
+  })),
+);
+const DashboardPage = lazy(() =>
+  import("../pages/DashboardPage").then(({ DashboardPage }) => ({
+    default: DashboardPage,
+  })),
+);
+const PlanningsPage = lazy(() =>
+  import("../pages/PlanningsPage").then(({ PlanningsPage }) => ({
+    default: PlanningsPage,
+  })),
+);
+const DiaryPage = lazy(() =>
+  import("../pages/DiaryPage").then(({ DiaryPage }) => ({
+    default: DiaryPage,
+  })),
+);
+const MatricesPage = lazy(() =>
+  import("../pages/MatricesPage").then(({ MatricesPage }) => ({
+    default: MatricesPage,
+  })),
+);
+const ReportsPage = lazy(() =>
+  import("../pages/ReportsPage").then(({ ReportsPage }) => ({
+    default: ReportsPage,
+  })),
+);
+const TeacherDashboardPage = lazy(
+  () => import("../pages/TeacherDashboardPage"),
+);
+const MaterialRequestPage = lazy(() =>
+  import("../pages/MaterialRequestPage").then(({ MaterialRequestPage }) => ({
+    default: MaterialRequestPage,
+  })),
+);
+const PedidosCompraPage = lazy(() =>
+  import("../pages/PedidosCompraPage").then(({ PedidosCompraPage }) => ({
+    default: PedidosCompraPage,
+  })),
+);
+const CatalogImportPage = lazy(() =>
+  import("../pages/CatalogImportPage").then(({ CatalogImportPage }) => ({
+    default: CatalogImportPage,
+  })),
+);
+const DashboardCentralPage = lazy(() =>
+  import("../pages/DashboardCentralPage").then(({ DashboardCentralPage }) => ({
+    default: DashboardCentralPage,
+  })),
+);
+const DashboardUnidadePage = lazy(() =>
+  import("../pages/DashboardUnidadePage").then(({ DashboardUnidadePage }) => ({
+    default: DashboardUnidadePage,
+  })),
+);
+const AtendimentoPaisPage = lazy(() =>
+  import("../pages/AtendimentoPaisPage").then(({ AtendimentoPaisPage }) => ({
+    default: AtendimentoPaisPage,
+  })),
+);
+const DashboardCoordenacaoPedagogicaPage = lazy(
+  () => import("../pages/DashboardCoordenacaoPedagogicaPage"),
+);
+const DashboardCoordenacaoGeralPage = lazy(
+  () => import("../pages/DashboardCoordenacaoGeralPage"),
+);
+const ControleFaltasPage = lazy(() => import("../pages/ControleFaltasPage"));
+const RdxPage = lazy(() => import("../pages/RdxPage"));
 
 // ─── Módulo Mobile PWA ────────────────────────────────────────────────────────
-const MobileShell = lazy(() => import('../components/mobile/MobileShell'));
-const MobileChamadaPage = lazy(() => import('../pages/mobile/MobileChamadaPage'));
-const MobileDiarioPage = lazy(() => import('../pages/mobile/MobileDiarioPage'));
-const MobileObservacaoPage = lazy(() => import('../pages/mobile/MobileObservacaoPage'));
-const MobileOcorrenciaPage = lazy(() => import('../pages/mobile/MobileOcorrenciaPage'));
-const MobileMaterialPage = lazy(() => import('../pages/mobile/MobileMaterialPage'));
-const MobileAlunosPage = lazy(() => import('../pages/mobile/MobileAlunosPage'));
-const MobileFichaAlunoPage = lazy(() => import('../pages/mobile/MobileFichaAlunoPage'));
+const MobileShell = lazy(() => import("../components/mobile/MobileShell"));
+const MobileChamadaPage = lazy(
+  () => import("../pages/mobile/MobileChamadaPage"),
+);
+const MobileDiarioPage = lazy(() => import("../pages/mobile/MobileDiarioPage"));
+const MobileObservacaoPage = lazy(
+  () => import("../pages/mobile/MobileObservacaoPage"),
+);
+const MobileOcorrenciaPage = lazy(
+  () => import("../pages/mobile/MobileOcorrenciaPage"),
+);
+const MobileMaterialPage = lazy(
+  () => import("../pages/mobile/MobileMaterialPage"),
+);
+const MobileAlunosPage = lazy(() => import("../pages/mobile/MobileAlunosPage"));
+const MobileFichaAlunoPage = lazy(
+  () => import("../pages/mobile/MobileFichaAlunoPage"),
+);
 // ─── Novas páginas implementadas ─────────────────────────────────────────────
-const PlanejamentosPage = lazy(() => import('../pages/PlanejamentosPage'));
-const RdicRiaPage = lazy(() => import('../pages/RdicRiaPage'));
-const DiarioBordoPage = lazy(() => import('../pages/DiarioBordoPage'));
-const DiarioCalendarioPage = lazy(() => import('../pages/DiarioCalendarioPage'));
-const MatrizPedagogicaPage = lazy(() => import('../pages/MatrizPedagogicaPage'));
-const ConfiguracoesPage = lazy(() => import('../pages/ConfiguracoesPage'));
-const AdminUsuariosPage = lazy(() => import('../pages/AdminUsuariosPage'));
-const AdminUnidadesPage = lazy(() => import('../pages/AdminUnidadesPage'));
-const AdminTurmasPage = lazy(() => import('../pages/AdminTurmasPage'));
-const MeuPerfilPage = lazy(() => import('../pages/MeuPerfilPage'));
-const PlanejamentoDiarioPage = lazy(() => import('../pages/PlanejamentoDiarioPage'));
-const PlanoDeAulaPage = lazy(() => import('../pages/PlanoDeAulaPage'));
-const CoordenacaoPedagogicaPage = lazy(() => import('../pages/CoordenacaoPedagogicaPage'));
-const RelatorioConsumoMateriaisPage = lazy(() => import('../pages/RelatorioConsumoMateriaisPage'));
-const PainelAlergiasPage = lazy(() => import('../pages/PainelAlergiasPage'));
-const DashboardConsumoMateriaisPage = lazy(() => import('../pages/DashboardConsumoMateriaisPage'));
-const RdicCriancaPage = lazy(() => import('../pages/RdicCriancaPage'));
-const SalaDeAulaVirtualPage = lazy(() => import('../pages/SalaDeAulaVirtualPage'));
-const RdicCoordPage = lazy(() => import('../pages/RdicCoordPage'));
-const RdicGeralPage = lazy(() => import('../pages/RdicGeralPage'));
-const RdicProfilesPage = lazy(() => import('../pages/RdicProfilesPage'));
+const PlanejamentosPage = lazy(() => import("../pages/PlanejamentosPage"));
+const RdicRiaPage = lazy(() => import("../pages/RdicRiaPage"));
+const DiarioBordoPage = lazy(() => import("../pages/DiarioBordoPage"));
+const DiarioCalendarioPage = lazy(
+  () => import("../pages/DiarioCalendarioPage"),
+);
+const MatrizPedagogicaPage = lazy(
+  () => import("../pages/MatrizPedagogicaPage"),
+);
+const ConfiguracoesPage = lazy(() => import("../pages/ConfiguracoesPage"));
+const AdminUsuariosPage = lazy(() => import("../pages/AdminUsuariosPage"));
+const AdminUnidadesPage = lazy(() => import("../pages/AdminUnidadesPage"));
+const AdminTurmasPage = lazy(() => import("../pages/AdminTurmasPage"));
+const MeuPerfilPage = lazy(() => import("../pages/MeuPerfilPage"));
+const PlanejamentoDiarioPage = lazy(
+  () => import("../pages/PlanejamentoDiarioPage"),
+);
+const PlanoDeAulaPage = lazy(() => import("../pages/PlanoDeAulaPage"));
+const CoordenacaoPedagogicaPage = lazy(
+  () => import("../pages/CoordenacaoPedagogicaPage"),
+);
+const RelatorioConsumoMateriaisPage = lazy(
+  () => import("../pages/RelatorioConsumoMateriaisPage"),
+);
+const PainelAlergiasPage = lazy(() => import("../pages/PainelAlergiasPage"));
+const DashboardConsumoMateriaisPage = lazy(
+  () => import("../pages/DashboardConsumoMateriaisPage"),
+);
+const RdicCriancaPage = lazy(() => import("../pages/RdicCriancaPage"));
+const SalaDeAulaVirtualPage = lazy(
+  () => import("../pages/SalaDeAulaVirtualPage"),
+);
+const RdicCoordPage = lazy(() => import("../pages/RdicCoordPage"));
+const RdicGeralPage = lazy(() => import("../pages/RdicGeralPage"));
+const RdicProfilesPage = lazy(() => import("../pages/RdicProfilesPage"));
 // ─── Fases 1, 2 e 3 — Central Desenvolvimento, Painel Analítico e Painel da Turma ────────────────────
-const CentralRdicCriancaPage = lazy(() => import('../pages/CentralRdicCriancaPage'));
-const PainelAnaliticoCriancaPage = lazy(() => import('../pages/PainelAnaliticoCriancaPage'));
-const PainelTurmaPage = lazy(() => import('../pages/PainelTurmaPage'));
-const PainelInteligenciaPage = lazy(() => import('../pages/PainelInteligenciaPage'));
-const ConferenciaPlanejamentoPage = lazy(() => import('../pages/ConferenciaPlanejamentoPage'));
-const DashboardDiretorPage = lazy(() => import('../pages/DashboardDiretorPage').then(({ DashboardDiretorPage }) => ({ default: DashboardDiretorPage })));
-const DashboardNutricionistaPage = lazy(() => import('../pages/DashboardNutricionistaPage').then(({ DashboardNutricionistaPage }) => ({ default: DashboardNutricionistaPage })));
-const DashboardPsicologoPage = lazy(() => import('../pages/DashboardPsicologoPage'));
-const DesenvolvimentoInfantilPage = lazy(() => import('../pages/DesenvolvimentoInfantilPage'));
+const CentralRdicCriancaPage = lazy(
+  () => import("../pages/CentralRdicCriancaPage"),
+);
+const PainelAnaliticoCriancaPage = lazy(
+  () => import("../pages/PainelAnaliticoCriancaPage"),
+);
+const PainelTurmaPage = lazy(() => import("../pages/PainelTurmaPage"));
+const PainelInteligenciaPage = lazy(
+  () => import("../pages/PainelInteligenciaPage"),
+);
+const ConferenciaPlanejamentoPage = lazy(
+  () => import("../pages/ConferenciaPlanejamentoPage"),
+);
+const DashboardDiretorPage = lazy(() =>
+  import("../pages/DashboardDiretorPage").then(({ DashboardDiretorPage }) => ({
+    default: DashboardDiretorPage,
+  })),
+);
+const DashboardNutricionistaPage = lazy(() =>
+  import("../pages/DashboardNutricionistaPage").then(
+    ({ DashboardNutricionistaPage }) => ({
+      default: DashboardNutricionistaPage,
+    }),
+  ),
+);
+const DashboardPsicologoPage = lazy(
+  () => import("../pages/DashboardPsicologoPage"),
+);
+const DesenvolvimentoInfantilPage = lazy(
+  () => import("../pages/DesenvolvimentoInfantilPage"),
+);
 // Timeline e observações da criança
-const TimelineCriancaPage = lazy(() => import('../pages/TimelineCriancaPage'));
-const ObservacaoCriancaPage = lazy(() => import('../pages/ObservacaoCriancaPage'));
+const TimelineCriancaPage = lazy(() => import("../pages/TimelineCriancaPage"));
+const ObservacaoCriancaPage = lazy(
+  () => import("../pages/ObservacaoCriancaPage"),
+);
 // ─── Módulo de Planejamento — Oficina e Painel de Planejamentos ─────────────────────
-const PlanoDeAulaNovoPage = lazy(() => import('../pages/PlanoDeAulaNovoPage'));
-const CurriculumImportPage = lazy(() => import('../pages/CurriculumImportPage').then(({ CurriculumImportPage }) => ({ default: CurriculumImportPage })));
-const PlanoDeAulaListaPage = lazy(() => import('../pages/PlanoDeAulaListaPage'));
+const PlanoDeAulaNovoPage = lazy(() => import("../pages/PlanoDeAulaNovoPage"));
+const CurriculumImportPage = lazy(() =>
+  import("../pages/CurriculumImportPage").then(({ CurriculumImportPage }) => ({
+    default: CurriculumImportPage,
+  })),
+);
+const PlanoDeAulaListaPage = lazy(
+  () => import("../pages/PlanoDeAulaListaPage"),
+);
 // ─── Módulo da Secretaria ────────────────────────────────────────────────────
-const SecretariaPage = lazy(() => import('../pages/SecretariaPage'));
-const MatriculaPage = lazy(() => import('../pages/MatriculaPage'));
-const MatriculasListPage = lazy(() => import('../pages/MatriculasListPage'));
-const FichaAlunoPage = lazy(() => import('../pages/FichaAlunoPage'));
-const MovimentacoesPage = lazy(() => import('../pages/MovimentacoesPage'));
-const FuncionariosPage = lazy(() => import('../pages/FuncionariosPage'));
-const ComunicacaoPage = lazy(() => import('../pages/ComunicacaoPage'));
-const FaltasSecretariaPage = lazy(() => import('../pages/FaltasSecretariaPage'));
-const OcorrenciasSecretariaPage = lazy(() => import('../pages/OcorrenciasSecretariaPage'));
-const PedidosAdministrativosPage = lazy(() => import('../pages/PedidosAdministrativosPage'));
+const SecretariaPage = lazy(() => import("../pages/SecretariaPage"));
+const MatriculaPage = lazy(() => import("../pages/MatriculaPage"));
+const MatriculasListPage = lazy(() => import("../pages/MatriculasListPage"));
+const FichaAlunoPage = lazy(() => import("../pages/FichaAlunoPage"));
+const MovimentacoesPage = lazy(() => import("../pages/MovimentacoesPage"));
+const FuncionariosPage = lazy(() => import("../pages/FuncionariosPage"));
+const ComunicacaoPage = lazy(() => import("../pages/ComunicacaoPage"));
+const FaltasSecretariaPage = lazy(
+  () => import("../pages/FaltasSecretariaPage"),
+);
+const OcorrenciasSecretariaPage = lazy(
+  () => import("../pages/OcorrenciasSecretariaPage"),
+);
+const PedidosAdministrativosPage = lazy(
+  () => import("../pages/PedidosAdministrativosPage"),
+);
 // FIX: páginas de Transporte/Retirada e Atestados/Documentos (antes causavam 404)
-const TransporteRetiradaPage = lazy(() => import('../pages/TransporteRetiradaPage'));
-const AtestadosDocumentosPage = lazy(() => import('../pages/AtestadosDocumentosPage'));
-const FinanceDashboardPage = lazy(() => import('../pages/FinanceDashboardPage'));
-const TeacherRankingPage = lazy(() => import('../pages/TeacherRankingPage'));
-const FamilyTimelinePage = lazy(() => import('../pages/FamilyTimelinePage'));
-const CareOverviewPage = lazy(() => import('../pages/CareOverviewPage'));
-const DailyCollectionPage = lazy(() => import('../pages/DailyCollectionPage'));
-const FamilyGuardiansPage = lazy(() => import('../pages/FamilyGuardiansPage'));
-const MetricsCoveragePage = lazy(() => import('../pages/MetricsCoveragePage'));
-const Onda2CommandCenterPage = lazy(() => import('../pages/Onda2CommandCenterPage'));
-const JourneyPage = lazy(() => import('../pages/JourneyPage'));
+const TransporteRetiradaPage = lazy(
+  () => import("../pages/TransporteRetiradaPage"),
+);
+const AtestadosDocumentosPage = lazy(
+  () => import("../pages/AtestadosDocumentosPage"),
+);
+const FinanceDashboardPage = lazy(
+  () => import("../pages/FinanceDashboardPage"),
+);
+const TeacherRankingPage = lazy(() => import("../pages/TeacherRankingPage"));
+const FamilyTimelinePage = lazy(() => import("../pages/FamilyTimelinePage"));
+const CareOverviewPage = lazy(() => import("../pages/CareOverviewPage"));
+const DailyCollectionPage = lazy(() => import("../pages/DailyCollectionPage"));
+const FamilyGuardiansPage = lazy(() => import("../pages/FamilyGuardiansPage"));
+const MetricsCoveragePage = lazy(() => import("../pages/MetricsCoveragePage"));
+const Onda2CommandCenterPage = lazy(
+  () => import("../pages/Onda2CommandCenterPage"),
+);
+const JourneyPage = lazy(() => import("../pages/JourneyPage"));
 
-const Child360Page = lazy(() => import('../pages/Child360Page'));
-const ReviewHubPage = lazy(() => import('../pages/ReviewHubPage'));
-const FamilyCirclePage = lazy(() => import('../pages/FamilyCirclePage'));
-import { AppLayout } from '../components/layout/AppLayout';
-import { ProtectedRoute } from './ProtectedRoute';
-import { RoleProtectedRoute } from './RoleProtectedRoute';
-import { RouteErrorBoundary } from '../components/ErrorBoundary';
+const Child360Page = lazy(() => import("../pages/Child360Page"));
+const ReviewHubPage = lazy(() => import("../pages/ReviewHubPage"));
+const FamilyCirclePage = lazy(() => import("../pages/FamilyCirclePage"));
+import { AppLayout } from "../components/layout/AppLayout";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { RoleProtectedRoute } from "./RoleProtectedRoute";
+import { RouteErrorBoundary } from "../components/ErrorBoundary";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Navigate to="/app/dashboard" replace />,
     errorElement: <RouteErrorBoundary />,
   },
   {
-    path: '/login',
+    path: "/login",
     element: <LoginPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {
-    path: '/app',
+    path: "/app",
     element: (
       <ProtectedRoute>
         <AppLayout />
@@ -119,48 +241,57 @@ export const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
     children: [
       {
-        path: 'dashboard',
+        path: "dashboard",
         element: <DashboardPage />,
         errorElement: <RouteErrorBoundary />,
       },
       // ─── Rotas legadas (mantidas para compatibilidade, sem exposição no menu) ─
       {
-        path: 'plannings',
+        path: "plannings",
         element: <PlanningsPage />,
         errorElement: <RouteErrorBoundary />,
       },
       {
         // Legada: UI primitiva sem guards de role. Mantida para links externos.
-        path: 'diary',
+        path: "diary",
         element: <DiaryPage />,
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'matrices',
+        path: "matrices",
         element: <MatricesPage />,
         errorElement: <RouteErrorBoundary />,
       },
       {
         // Tarefa 3.3 — Importação de Matriz Curricular via CSV
-        path: 'curriculum-import',
+        path: "curriculum-import",
         element: <CurriculumImportPage />,
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'reports',
+        path: "reports",
         element: <ReportsPage />,
         errorElement: <RouteErrorBoundary />,
       },
       {
         // Legada: redireciona para a rota canônica com suporte a PROFESSOR_AUXILIAR
-        path: 'professor',
+        path: "professor",
         element: <Navigate to="/app/teacher-dashboard" replace />,
       },
       // ─── Painel do Professor ───────────────────────────────────────────────
       {
-        path: 'teacher-dashboard',
+        path: "teacher-dashboard",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <TeacherDashboardPage />
           </RoleProtectedRoute>
         ),
@@ -168,9 +299,18 @@ export const router = createBrowserRouter([
       },
       // ─── Plano de Aula com Matriz Completa 2026 ──────────────────
       {
-        path: 'plano-de-aula',
+        path: "plano-de-aula",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaPage />
           </RoleProtectedRoute>
         ),
@@ -178,9 +318,18 @@ export const router = createBrowserRouter([
       },
       // ─── Planejamento Diário com Calendário Pedagógico 2026 ────────────
       {
-        path: 'planejamento-diario',
+        path: "planejamento-diario",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanejamentoDiarioPage />
           </RoleProtectedRoute>
         ),
@@ -188,9 +337,18 @@ export const router = createBrowserRouter([
       },
       // ─── Planejamentos — Painel de Planejamentos (rota canônica do professor) ─────────
       {
-        path: 'planejamentos',
+        path: "planejamentos",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaListaPage />
           </RoleProtectedRoute>
         ),
@@ -199,9 +357,18 @@ export const router = createBrowserRouter([
       // ─── Planejamento individual (visualização) — rota que gerava 404 ─────────
       // Rota adicionada para suportar links /app/planejamentos/:id
       {
-        path: 'planejamentos/:id',
+        path: "planejamentos/:id",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaListaPage />
           </RoleProtectedRoute>
         ),
@@ -209,9 +376,18 @@ export const router = createBrowserRouter([
       },
       // Legada: PlanejamentosPage (mantida para links internos existentes)
       {
-        path: 'planejamentos-legado',
+        path: "planejamentos-legado",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanejamentosPage />
           </RoleProtectedRoute>
         ),
@@ -219,9 +395,18 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento por Criança (professor) ──────────────────────────────────────
       {
-        path: 'rdic-crianca',
+        path: "rdic-crianca",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <RdicCriancaPage />
           </RoleProtectedRoute>
         ),
@@ -229,9 +414,11 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento Coordenação Pedagógica da Unidade (revisão e aprovação) ────────
       {
-        path: 'rdic-coord',
+        path: "rdic-coord",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["UNIDADE", "MANTENEDORA", "DEVELOPER"]}
+          >
             <RdicCoordPage />
           </RoleProtectedRoute>
         ),
@@ -239,9 +426,11 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento Coordenação Geral (somente leitura, apenas PUBLICADOS) ────────
       {
-        path: 'rdic-geral',
+        path: "rdic-geral",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <RdicGeralPage />
           </RoleProtectedRoute>
         ),
@@ -249,9 +438,9 @@ export const router = createBrowserRouter([
       },
       // ─── Perfis documentais oficiais e institucionais ─────────────────────────────────
       {
-        path: 'rdic-perfis',
+        path: "rdic-perfis",
         element: (
-          <RoleProtectedRoute allowedRoles={['MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute allowedRoles={["MANTENEDORA", "DEVELOPER"]}>
             <RdicProfilesPage />
           </RoleProtectedRoute>
         ),
@@ -259,9 +448,18 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento & RIA ────────────────────────────────────────────────────────
       {
-        path: 'rdic-ria',
+        path: "rdic-ria",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <RdicRiaPage />
           </RoleProtectedRoute>
         ),
@@ -269,9 +467,18 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento alias (/app/rdic → RdicCriancaPage) ─────────────────────────────────
       {
-        path: 'rdic',
+        path: "rdic",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <RdicCriancaPage />
           </RoleProtectedRoute>
         ),
@@ -279,9 +486,16 @@ export const router = createBrowserRouter([
       },
       // ─── Observações Individuais alias (/app/coordenacao/observacoes) ────────────
       {
-        path: 'coordenacao/observacoes',
+        path: "coordenacao/observacoes",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DesenvolvimentoInfantilPage />
           </RoleProtectedRoute>
         ),
@@ -289,9 +503,18 @@ export const router = createBrowserRouter([
       },
       // ─── Diário da Turma — Calendário por Dia Letivo (PR 1: nova entrada principal) ────
       {
-        path: 'diario-calendario',
+        path: "diario-calendario",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DiarioCalendarioPage />
           </RoleProtectedRoute>
         ),
@@ -299,9 +522,18 @@ export const router = createBrowserRouter([
       },
       // ─── Diário de Bordo com Microgestos (preservado — entrada via calendário ou link direto) ──
       {
-        path: 'diario-de-bordo',
+        path: "diario-de-bordo",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DiarioBordoPage />
           </RoleProtectedRoute>
         ),
@@ -309,9 +541,18 @@ export const router = createBrowserRouter([
       },
       // ─── Matriz Pedagógica 2026 ────────────────────────────────────────────
       {
-        path: 'matriz-pedagogica',
+        path: "matriz-pedagogica",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MatrizPedagogicaPage />
           </RoleProtectedRoute>
         ),
@@ -319,7 +560,7 @@ export const router = createBrowserRouter([
       },
       // ─── Configurações ────────────────────────────────────────────────────
       {
-        path: 'configuracoes',
+        path: "configuracoes",
         element: (
           <ProtectedRoute>
             <ConfiguracoesPage />
@@ -329,9 +570,18 @@ export const router = createBrowserRouter([
       },
       // ─── Requisições de Materiais ─────────────────────────────────────────
       {
-        path: 'material-requests',
+        path: "material-requests",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MaterialRequestPage />
           </RoleProtectedRoute>
         ),
@@ -339,9 +589,16 @@ export const router = createBrowserRouter([
       },
       // ─── Pedidos de Compra ────────────────────────────────────────────────
       {
-        path: 'pedidos-compra',
+        path: "pedidos-compra",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PedidosCompraPage />
           </RoleProtectedRoute>
         ),
@@ -349,9 +606,11 @@ export const router = createBrowserRouter([
       },
       // ─── Catálogo de Produtos (importação CSV/XLSX) ─────────────────────
       {
-        path: 'catalog-import',
+        path: "catalog-import",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["UNIDADE", "MANTENEDORA", "DEVELOPER"]}
+          >
             <CatalogImportPage />
           </RoleProtectedRoute>
         ),
@@ -359,9 +618,11 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard Central ────────────────────────────────────────────────
       {
-        path: 'central',
+        path: "central",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardCentralPage />
           </RoleProtectedRoute>
         ),
@@ -369,9 +630,11 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard do Diretor ──────────────────────────────────────────────
       {
-        path: 'diretor',
+        path: "diretor",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["UNIDADE", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardDiretorPage />
           </RoleProtectedRoute>
         ),
@@ -379,12 +642,14 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard da Nutricionista ───────────────────────────────────────────────────────────────────────────────────────
       {
-        path: 'nutricionista',
+        path: "nutricionista",
         element: (
           // FASE 1: restrito a UNIDADE_NUTRICIONISTA (RoleType específico).
           // UNIDADE genérico (diretor, coord, administrativo) não acessa este painel.
           // MANTENEDORA e DEVELOPER mantêm acesso para suporte e auditoria.
-          <RoleProtectedRoute allowedRoles={['UNIDADE_NUTRICIONISTA', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["UNIDADE_NUTRICIONISTA", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardNutricionistaPage />
           </RoleProtectedRoute>
         ),
@@ -392,9 +657,11 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard de Unidade ───────────────────────────────────────────────────────────────────────────────────────
       {
-        path: 'unidade',
+        path: "unidade",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["UNIDADE", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardUnidadePage />
           </RoleProtectedRoute>
         ),
@@ -402,9 +669,18 @@ export const router = createBrowserRouter([
       },
       // ─── Atendimentos aos Pais ────────────────────────────────────────────
       {
-        path: 'atendimentos-pais',
+        path: "atendimentos-pais",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <AtendimentoPaisPage />
           </RoleProtectedRoute>
         ),
@@ -412,9 +688,18 @@ export const router = createBrowserRouter([
       },
       // ─── Chamada Diária ───────────────────────────────────────────────────
       {
-        path: 'chamada',
+        path: "chamada",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <ControleFaltasPage />
           </RoleProtectedRoute>
         ),
@@ -422,9 +707,18 @@ export const router = createBrowserRouter([
       },
       // ─── Relatório de Fotos (RDX) ─────────────────────────────────────────
       {
-        path: 'rdx',
+        path: "rdx",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <RdxPage />
           </RoleProtectedRoute>
         ),
@@ -432,9 +726,16 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard de Coordenação Pedagógica ──────────────────────────────
       {
-        path: 'coordenacao-pedagogica',
+        path: "coordenacao-pedagogica",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DashboardCoordenacaoPedagogicaPage />
           </RoleProtectedRoute>
         ),
@@ -442,9 +743,11 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard de Coordenação Geral ───────────────────────────────────
       {
-        path: 'coordenacao-geral',
+        path: "coordenacao-geral",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardCoordenacaoGeralPage />
           </RoleProtectedRoute>
         ),
@@ -452,9 +755,11 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard da Psicóloga Central ──────────────────────────────────
       {
-        path: 'psicologo',
+        path: "psicologo",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DashboardPsicologoPage />
           </RoleProtectedRoute>
         ),
@@ -462,9 +767,11 @@ export const router = createBrowserRouter([
       },
       // ─── Desenvolvimento Infantil ────────────────────────────────────────
       {
-        path: 'desenvolvimento-infantil',
+        path: "desenvolvimento-infantil",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <DesenvolvimentoInfantilPage />
           </RoleProtectedRoute>
         ),
@@ -472,7 +779,7 @@ export const router = createBrowserRouter([
       },
       // ─── Meu Perfil (todos os usuários) ──────────────────────────────────
       {
-        path: 'meu-perfil',
+        path: "meu-perfil",
         element: (
           <ProtectedRoute>
             <MeuPerfilPage />
@@ -480,13 +787,23 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
-            // ─── Admin: Gestão de Usuários ────────────────────
+      // ─── Admin: Gestão de Usuários ────────────────────
       // RBAC: UNIDADE_NUTRICIONISTA NÃO acessa gestão de usuários.
       // Apenas perfis UNIDADE genéricos (diretor, coord, admin) e superiores.
       {
-        path: 'admin/usuarios',
+        path: "admin/usuarios",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO', 'UNIDADE_ADMINISTRATIVO', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_DIRETOR",
+              "UNIDADE_COORDENADOR_PEDAGOGICO",
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <AdminUsuariosPage />
           </RoleProtectedRoute>
         ),
@@ -494,9 +811,11 @@ export const router = createBrowserRouter([
       },
       // ─── Admin: Gestão de Unidades ────────────────────────────────────────
       {
-        path: 'admin/unidades',
+        path: "admin/unidades",
         element: (
-          <RoleProtectedRoute allowedRoles={['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={["STAFF_CENTRAL", "MANTENEDORA", "DEVELOPER"]}
+          >
             <AdminUnidadesPage />
           </RoleProtectedRoute>
         ),
@@ -504,9 +823,16 @@ export const router = createBrowserRouter([
       },
       // ─── Admin: Gestão de Turmas ──────────────────────────────────────────────────────
       {
-        path: 'admin/turmas',
+        path: "admin/turmas",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <AdminTurmasPage />
           </RoleProtectedRoute>
         ),
@@ -514,9 +840,16 @@ export const router = createBrowserRouter([
       },
       // ─── Coordenação Pedagógica Completa (turmas + currículo + reuniões) ────
       {
-        path: 'coordenacao',
+        path: "coordenacao",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <CoordenacaoPedagogicaPage />
           </RoleProtectedRoute>
         ),
@@ -524,9 +857,16 @@ export const router = createBrowserRouter([
       },
       // ─── Relatório de Consumo de Materiais (Coordenação) ─────────────────
       {
-        path: 'relatorio-consumo-materiais',
+        path: "relatorio-consumo-materiais",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <RelatorioConsumoMateriaisPage />
           </RoleProtectedRoute>
         ),
@@ -534,9 +874,16 @@ export const router = createBrowserRouter([
       },
       // ─── Dashboard de Consumo de Materiais com gráficos ─────────────────────
       {
-        path: 'dashboard-consumo-materiais',
+        path: "dashboard-consumo-materiais",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DashboardConsumoMateriaisPage />
           </RoleProtectedRoute>
         ),
@@ -545,9 +892,18 @@ export const router = createBrowserRouter([
       // ─── Painel de Alergias e Dietas ────────────────────────────────────
       // Visível para professor, coordenação, diretor, nutri e secretaria
       {
-        path: 'painel-alergias',
+        path: "painel-alergias",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PainelAlergiasPage />
           </RoleProtectedRoute>
         ),
@@ -555,27 +911,54 @@ export const router = createBrowserRouter([
       },
       // ─── Módulo de Planejamento — Oficina (criação/edição) ─────────────────
       {
-        path: 'planejamento/novo',
+        path: "planejamento/novo",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaNovoPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'planejamento/:id/editar',
+        path: "planejamento/:id/editar",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaNovoPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'planejamento/:planningId/conferir',
+        path: "planejamento/:planningId/conferir",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <ConferenciaPlanejamentoPage />
           </RoleProtectedRoute>
         ),
@@ -583,9 +966,18 @@ export const router = createBrowserRouter([
       },
       // ─── Módulo de Planejamento — Painel de Planejamentos (lista/calendário) ────────
       {
-        path: 'planejamentos-calendario',
+        path: "planejamentos-calendario",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PlanoDeAulaListaPage />
           </RoleProtectedRoute>
         ),
@@ -593,9 +985,18 @@ export const router = createBrowserRouter([
       },
       // ─── Sala de Aula Virtual (Professor + Coordenação) ─────────────────────────
       {
-        path: 'sala-de-aula-virtual',
+        path: "sala-de-aula-virtual",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <SalaDeAulaVirtualPage />
           </RoleProtectedRoute>
         ),
@@ -603,99 +1004,201 @@ export const router = createBrowserRouter([
       },
       // ─── Módulo da Secretaria ──────────────────────────────────────────────
       {
-        path: 'secretaria',
+        path: "secretaria",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <SecretariaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/matriculas',
+        path: "secretaria/matriculas",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MatriculasListPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/matriculas/nova',
+        path: "secretaria/matriculas/nova",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MatriculaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/matriculas/:id',
+        path: "secretaria/matriculas/:id",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MatriculaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/matriculas/:id/ficha',
+        path: "secretaria/matriculas/:id/ficha",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO', 'UNIDADE_NUTRICIONISTA', 'UNIDADE', 'STAFF_CENTRAL', 'STAFF_CENTRAL_PEDAGOGICO', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE_COORDENADOR_PEDAGOGICO",
+              "UNIDADE_NUTRICIONISTA",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "STAFF_CENTRAL_PEDAGOGICO",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FichaAlunoPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/movimentacoes',
+        path: "secretaria/movimentacoes",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MovimentacoesPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/funcionarios',
+        path: "secretaria/funcionarios",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FuncionariosPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/comunicacao',
+        path: "secretaria/comunicacao",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <ComunicacaoPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/faltas',
+        path: "secretaria/faltas",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FaltasSecretariaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/ocorrencias',
+        path: "secretaria/ocorrencias",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <OcorrenciasSecretariaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/pedidos',
+        path: "secretaria/pedidos",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <PedidosAdministrativosPage />
           </RoleProtectedRoute>
         ),
@@ -703,27 +1206,55 @@ export const router = createBrowserRouter([
       },
       // ─── Financeiro e gestão de pessoas ────────────────────────────────────
       {
-        path: 'financeiro',
+        path: "financeiro",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FinanceDashboardPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'ranking-preenchimento',
+        path: "ranking-preenchimento",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <TeacherRankingPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'timeline-familiar',
+        path: "timeline-familiar",
         element: (
-          <RoleProtectedRoute allowedRoles={['FAMILIA', 'PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "FAMILIA",
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FamilyTimelinePage />
           </RoleProtectedRoute>
         ),
@@ -731,9 +1262,16 @@ export const router = createBrowserRouter([
       },
       // ─── Onda 2 — Command Center Pulse + Facilities ──────────────────────────
       {
-        path: 'onda2',
+        path: "onda2",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <Onda2CommandCenterPage />
           </RoleProtectedRoute>
         ),
@@ -741,9 +1279,16 @@ export const router = createBrowserRouter([
       },
       // ─── Cobertura e observabilidade agregada ────────────────────────────────
       {
-        path: 'metricas-cobertura',
+        path: "metricas-cobertura",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <MetricsCoveragePage />
           </RoleProtectedRoute>
         ),
@@ -751,9 +1296,16 @@ export const router = createBrowserRouter([
       },
       // ─── Gestão de vínculos familiares e consentimentos ─────────────────────
       {
-        path: 'familia/vinculos',
+        path: "familia/vinculos",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <FamilyGuardiansPage />
           </RoleProtectedRoute>
         ),
@@ -761,9 +1313,18 @@ export const router = createBrowserRouter([
       },
       // ─── Coleta diária estruturada — escrita real e escopo da turma ─────────
       {
-        path: 'coleta-diaria',
+        path: "coleta-diaria",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <DailyCollectionPage />
           </RoleProtectedRoute>
         ),
@@ -771,18 +1332,36 @@ export const router = createBrowserRouter([
       },
       // ─── Cuidado integrado por criança — somente leitura e escopo real ─────
       {
-        path: 'cuidado',
+        path: "cuidado",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <CareOverviewPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'cuidado/:childId',
+        path: "cuidado/:childId",
         element: (
-          <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <CareOverviewPage />
           </RoleProtectedRoute>
         ),
@@ -790,56 +1369,352 @@ export const router = createBrowserRouter([
       },
       // FIX: rotas ausentes que causavam 404 ao clicar no menu da Secretaria
       {
-        path: 'secretaria/transporte',
+        path: "secretaria/transporte",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <TransporteRetiradaPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
       {
-        path: 'secretaria/atestados',
+        path: "secretaria/atestados",
         element: (
-          <RoleProtectedRoute allowedRoles={['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}>
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
             <AtestadosDocumentosPage />
           </RoleProtectedRoute>
         ),
         errorElement: <RouteErrorBoundary />,
       },
-      { path:'turma/:classroomId/painel', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><PainelTurmaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'crianca/:childId/rdic-central', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><CentralRdicCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'crianca/:childId/painel-analitico', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><PainelAnaliticoCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      {
+        path: "turma/:classroomId/painel",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <PainelTurmaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "crianca/:childId/rdic-central",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <CentralRdicCriancaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "crianca/:childId/painel-analitico",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <PainelAnaliticoCriancaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
       // Nova rota: linha do tempo consolidada da criança
-      { path:'crianca/:childId/timeline', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><TimelineCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'crianca/:childId/observacoes', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><ObservacaoCriancaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'crianca/:childId/child-360', element:(<RoleProtectedRoute allowedRoles={['PROFESSOR','PROFESSOR_AUXILIAR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><Child360Page/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'review-hub', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><ReviewHubPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'family-circle', element:(<RoleProtectedRoute allowedRoles={['FAMILIA','PROFESSOR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><FamilyCirclePage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'inteligencia', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><PainelInteligenciaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      {
+        path: "crianca/:childId/timeline",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <TimelineCriancaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "crianca/:childId/observacoes",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <ObservacaoCriancaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "crianca/:childId/child-360",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "PROFESSOR",
+              "PROFESSOR_AUXILIAR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <Child360Page />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "review-hub",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <ReviewHubPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "family-circle",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "FAMILIA",
+              "PROFESSOR",
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <FamilyCirclePage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "inteligencia",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE",
+              "STAFF_CENTRAL",
+              "MANTENEDORA",
+              "DEVELOPER",
+            ]}
+          >
+            <PainelInteligenciaPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
       // Onda 3 — Journey; API e manifesto também aplicam flag e capability.
-      { path:'journey', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/interessados', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/funil', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/visitas', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/lista-espera', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/ofertas', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
-      { path:'journey/relatorios', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      {
+        path: "journey",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/interessados",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/funil",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/visitas",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/lista-espera",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/ofertas",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "journey/relatorios",
+        element: (
+          <RoleProtectedRoute
+            allowedRoles={[
+              "UNIDADE_ADMINISTRATIVO",
+              "UNIDADE_DIRETOR",
+              "STAFF_CENTRAL_ADMISSOES",
+              "MANTENEDORA_ADMIN",
+              "DEVELOPER",
+            ]}
+          >
+            <JourneyPage />
+          </RoleProtectedRoute>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
     ],
   },
   // ─── PWA Mobile — layout próprio, sem AppLayout desktop ────────────────────
   {
-    path: '/app/mobile',
-    element: <RoleProtectedRoute allowedRoles={['PROFESSOR', 'PROFESSOR_AUXILIAR', 'UNIDADE', 'UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO', 'UNIDADE_NUTRICIONISTA', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER']}><MobileShell /></RoleProtectedRoute>,
+    path: "/app/mobile",
+    element: (
+      <RoleProtectedRoute
+        allowedRoles={[
+          "PROFESSOR",
+          "PROFESSOR_AUXILIAR",
+          "UNIDADE",
+          "UNIDADE_ADMINISTRATIVO",
+          "UNIDADE_DIRETOR",
+          "UNIDADE_COORDENADOR_PEDAGOGICO",
+          "UNIDADE_NUTRICIONISTA",
+          "STAFF_CENTRAL",
+          "MANTENEDORA",
+          "DEVELOPER",
+        ]}
+      >
+        <MobileShell />
+      </RoleProtectedRoute>
+    ),
     children: [
       { index: true, element: <Navigate to="/app/mobile/chamada" replace /> },
-      { path: 'chamada',    element: <MobileChamadaPage /> },
-      { path: 'diario',     element: <MobileDiarioPage /> },
-      { path: 'observacao', element: <MobileObservacaoPage /> },
-      { path: 'ocorrencia', element: <MobileOcorrenciaPage /> },
-      { path: 'material',   element: <MobileMaterialPage /> },
-      { path: 'alunos',              element: <MobileAlunosPage /> },
-      { path: 'alunos/:childId',     element: <MobileFichaAlunoPage /> },
+      { path: "chamada", element: <MobileChamadaPage /> },
+      { path: "diario", element: <MobileDiarioPage /> },
+      { path: "observacao", element: <MobileObservacaoPage /> },
+      { path: "ocorrencia", element: <MobileOcorrenciaPage /> },
+      { path: "material", element: <MobileMaterialPage /> },
+      { path: "alunos", element: <MobileAlunosPage /> },
+      { path: "alunos/:childId", element: <MobileFichaAlunoPage /> },
     ],
   },
 ]);

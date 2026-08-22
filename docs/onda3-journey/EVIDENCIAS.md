@@ -1,93 +1,120 @@
-# Onda 3 — Zelare Journey: evidências da fatia vertical
+# Onda 3 — Zelare Journey: matriz final de requisitos e evidências
 
-## Escopo e limites
+## Escopo, autorização e limites
 
-Esta PR implementa somente **Zelare Journey — Captação, Visitas, Lista de Espera e Oferta de Vaga**. O fluxo reutiliza `Mantenedora`, `Unit`, `Classroom`, capacidade, matrículas ativas, usuários/roles, auditoria, outbox e manifesto existentes. O aceite de oferta cria apenas `JourneyEnrollmentDraft` incompleto; não cria `Child`, `Enrollment` ativo, `User` familiar, `ChildGuardian`, contrato, cobrança ou pagamento.
+Esta PR permanece limitada à fatia **Zelare Journey — Captação, Visitas, Lista de Espera e Oferta de Vaga**, com as pendências Family/LGPD necessárias ao Gate UX 0.4.1. A implementação reutiliza `Mantenedora`, `Unit`, `Classroom`, capacidade, matrículas ativas, usuários/roles, auditoria, outbox e manifesto existentes. A aceitação de oferta cria somente um `JourneyEnrollmentDraft` incompleto; não cria `Child`, `Enrollment` ativo, usuário familiar, contrato, cobrança, pagamento ou qualquer domínio Family Finance.
 
-A flag persistida `journey_admissions_v1` permanece desligada por padrão. O bloqueio é aplicado no servidor e a navegação é condicionada à flag, capability, nível e tipo de papel. A PR não altera `vml-arquivos/conexa-v3.0`, não reabre a PR #20, não faz merge, deploy, migration ou ativação em produção.
+A flag persistida `journey_admissions_v1` permanece desligada por padrão e foi exercitada desligada/ligada somente em bancos sintéticos descartáveis. Nenhum dado real foi acessado ou alterado. Nenhum arquivo do Conexa/COCRIS foi alterado, e a PR #20 não foi reaberta. A autorização posterior para merge e redeploy será tratada somente depois de os gates do novo SHA estarem verdes; a flag Journey continuará sem ativação explícita em produção.
 
-## Baseline e rastreabilidade
+## Rastreabilidade do estado validado
 
-| Item | Valor | Evidência |
-|---|---|---|
-| Branch | `feat/zelare-onda3-journey-20260822` | `git branch --show-current` |
-| Base da PR #20 | `196e7f2deb37b030051b3088b0c4452fe7eec17f` | ancestral confirmado em `origin/main` |
-| Pacote Onda 3 | `PACOTE_ZELARE_ONDA_3_JOURNEY_FAMILY_FINANCE_2026-08-21(1).zip` | revisão em `/home/ubuntu/research_zelare/onda3_journey_20260822/package-review.md` |
-| SHA-256 do pacote | `7d31bc65e92c8583983172d55426ea9ab71f78776f6ce94a4624a7e925709c34` | checksum validado antes da implementação |
-| Cluster Prisma | PostgreSQL 16 efêmero em `127.0.0.1:55432` | `/tmp/onda3-pgdata`, somente local/CI |
+| Item           | Valor                                                                       | Evidência                                                                                    |
+| -------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Branch         | `feat/zelare-onda3-journey-20260822`                                        | `git branch --show-current`                                                                  |
+| PR             | `#21` aberta, base `main`                                                   | `gh pr view 21`                                                                              |
+| Base conhecida | `196e7f2deb37b030051b3088b0c4452fe7eec17f0`                                 | `origin/main` é ancestral do branch                                                          |
+| Feature flag   | `journey_admissions_v1`, default desligado                                  | `journey-access.service.ts`, E2E de flag                                                     |
+| Banco E2E      | PostgreSQL 16 descartável em `127.0.0.1:55432`                              | `zellare_e2e`, somente fixture sintética                                                     |
+| Fixture        | organizações, unidades, turmas, usuários e prospectos `example.invalid`     | `apps/api/scripts/verification/journey-e2e-fixture.mjs`                                      |
+| Migrations     | `20260822200000_onda3_journey_foundation`, aditiva/forward-only             | migration SQL e replay oficial PG16 anterior                                                 |
+| Pacote Onda 3  | checksum `7d31bc65e92c8583983172d55426ea9ab71f78776f6ce94a4624a7e925709c34` | revisão do pacote em `/home/ubuntu/research_zelare/onda3_journey_20260822/package-review.md` |
 
-## Contratos REST Journey
+## Implementação e contratos
 
-| Método | Rota | Finalidade | Mutável | Proteções principais |
-|---|---|---|---:|---|
-| `GET` | `/journey/units` | unidades autorizadas | não | flag, tenant, escopo |
-| `GET` | `/journey/dashboard` | indicadores e capacidade real | não | tenant/unidade |
-| `GET/POST` | `/journey/prospects` | listar/captar interessado | POST | allowlist, consentimento, hashes privados, idempotência |
-| `GET` | `/journey/prospects/:id` | detalhe administrativo | não | tenant/unidade |
-| `PATCH` | `/journey/prospects/:id/stage` | alterar estágio | sim | capability, escopo, auditoria, idempotência |
-| `POST` | `/journey/prospects/:id/activities` | registrar interação/nota/follow-up | sim | allowlist, escopo, idempotência |
-| `POST` | `/journey/prospects/:id/tasks` | criar tarefa | sim | escopo, idempotência |
-| `PATCH` | `/journey/tasks/:id/complete` | concluir tarefa | sim | escopo, auditoria |
-| `GET/POST` | `/journey/visits` | listar/agendar visita | POST | conflito temporal por interessado, usuário ativo, escopo |
-| `PATCH` | `/journey/visits/:id/reschedule` | reagendar | sim | intervalo, conflito, evento append-only |
-| `PATCH` | `/journey/visits/:id/cancel` | cancelar | sim | evento, idempotência |
-| `PATCH` | `/journey/visits/:id/confirm` | confirmar presença | sim | evento, estágio, idempotência |
-| `PATCH` | `/journey/visits/:id/absence` | registrar ausência | sim | evento, idempotência |
-| `PATCH` | `/journey/visits/:id/follow-up` | follow-up humano | sim | evento, idempotência |
-| `GET/POST` | `/journey/waitlist/policies` | listar/criar versão | POST | vigência, governança, idempotência |
-| `PATCH` | `/journey/waitlist/policies/:id/review` | revisão humana | sim | revisor diferente do criador, `reviewedAt` |
-| `PATCH` | `/journey/waitlist/policies/:id/publish` | publicação | sim | criador/revisor/publicador distintos, vigência |
-| `GET/POST` | `/journey/waitlist` | listar/entrar na espera | POST | política publicada/vigente, explicação, escopo |
-| `GET/POST` | `/journey/offers` | listar/criar oferta | POST | lock de turma, capacidade real, idempotência, override justificado |
-| `PATCH` | `/journey/offers/:id/decision` | aceitar/recusar | sim | expiração, lock, rechecagem, draft incompleto |
-| `GET` | `/journey/duplicates` | fila de revisão | não | hashes não expostos, tenant/unidade |
-| `PATCH` | `/journey/duplicates/:id/review` | confirmar/rejeitar duplicidade | sim | revisão humana e auditoria |
-| `POST` | `/journey/duplicates/:id/undo` | desfazer merge | sim | estado, auditoria, outbox |
+| Requisito                                | Implementação                                                                                                                                                                                                                               | Cobertura/evidência                                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RBAC organizacional por capability       | `JourneyAccessService`, `JourneyCapabilityGuard` e `RequireJourneyCapability`; `STAFF_CENTRAL_ADMISSOES` recebeu capacidades operacionais de admissões; gestão pedagógica, psicologia, nutrição, professor, família e financeiro ficam fora | `journey-access.service.spec.ts`, `journey-capability.guard.spec.ts`, E2E RBAC por endpoint                                                               |
+| Separação Journey na navegação           | rotas e manifesto limitados a administrativo de unidade, direção, admissões central, mantenedora admin e developer                                                                                                                          | `navigationManifest.test.ts`, `journeyNavigation.test.ts`, browser E2E autenticado como admissions                                                        |
+| Isolamento por organização/unidade/turma | toda consulta aplica `mantenedoraId`; unidades e turmas são validadas no backend; respostas fora do escopo são 404                                                                                                                          | E2E com prospecto de tenant estrangeiro, prospecto de unidade isolada, turma incompatível e turma estrangeira; testes unitários de `JourneyAccessService` |
+| LGPD server-side                         | consentimentos, bases legais, versão de política e retenção são validados no serviço; payload adulterado não contorna a validação                                                                                                           | E2E de consentimento adulterado, persistência de privacidade e testes de `FamilyService`                                                                  |
+| HMAC versionado                          | contatos usam `hmac-sha256-v1` com segredo dedicado; SHA-256 simples não é usado como fronteira de identificação                                                                                                                            | fixture sintética cifrada, assertions de versão, scanner de artefatos                                                                                     |
+| Criptografia e mascaramento              | contatos persistidos novos ficam sem plaintext, com AES-256-GCM versionado; respostas administrativas mascaram e não devolvem hash/ciphertext                                                                                               | E2E verifica `a***@example.invalid`, `***01` e ausência de campos privados                                                                                |
+| Retenção, revogação e eliminação         | retenção limitada a dois anos; revogação idempotente; eliminação lógica anonimiza contatos e preserva ledger/auditoria                                                                                                                      | E2E após reload, contagem de `JourneyProspectPrivacyEvent`, unitários de Journey/Family                                                                   |
+| Retenção e expiração em consultas        | listagens, dashboard, visitas, ofertas e duplicidades excluem eliminados e expirados                                                                                                                                                        | specs de serviço e E2E de privacidade                                                                                                                     |
+| Máquina de estados explícita             | `JOURNEY_ALLOWED_STAGE_TRANSITIONS` e `transitionIfNeeded`; update otimista por `id + stage + version`                                                                                                                                      | `journey.constants.ts`, `journey.service.spec.ts`, E2E de fluxo, harness de concorrência                                                                  |
+| Concorrência e idempotência              | locks de turma, chaves idempotentes, replay determinístico, draft sem matrícula definitiva                                                                                                                                                  | `journey-concurrency.mjs`, E2E activity/offer/replay, teste de concorrência                                                                               |
+| Governança de política                   | criação, revisão e publicação exigem atores distintos; vigência e intervalos são validados                                                                                                                                                  | E2E `exige revisão e publicação por atores diferentes` e specs de política                                                                                |
+| Family/LGPD Gate UX 0.4.1                | policy compartilhada e `FamilyPrivacyGuard`; vínculo exige CONSENT/policy/retention; revogação exige motivo, remove permissões e registra `ConsentGrant REVOGADO`                                                                           | `family.service.spec.ts`, controller/policy/guard, Vitest web e lint focado                                                                               |
 
-O contrato OpenAPI local foi gerado no build da API e contém 24 paths Journey.
+## Rotas REST Journey principais
 
-## Matriz de autorização
+| Método           | Rota                                                                              | Proteções principais                                              |
+| ---------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `GET`            | `/journey/units`, `/journey/dashboard`                                            | flag, tenant, capability e escopo de unidade                      |
+| `GET/POST`       | `/journey/prospects`                                                              | capability, consentimento, base legal, HMAC/cifra, idempotência   |
+| `GET/PATCH`      | `/journey/prospects/:id` e `/stage`                                               | tenant/unidade, estado permitido, versão e auditoria              |
+| `POST`           | `/journey/prospects/:id/activities` e `/tasks`                                    | allowlist, escopo e idempotência                                  |
+| `PATCH`          | `/journey/tasks/:id/complete`                                                     | escopo e auditoria                                                |
+| `GET/POST`       | `/journey/visits`                                                                 | unidade/prospect alinhados, intervalo, conflito e usuário ativo   |
+| `PATCH`          | `/journey/visits/:id/reschedule`, `/confirm`, `/cancel`, `/absence`, `/follow-up` | evento append-only, escopo e idempotência                         |
+| `GET/POST`       | `/journey/waitlist/policies`, `/journey/waitlist`                                 | intervalo, vigência, governança, política publicada e escopo      |
+| `PATCH`          | `/journey/waitlist/policies/:id/review`, `/publish`                               | revisão/publicação por atores distintos                           |
+| `GET/POST`       | `/journey/offers`                                                                 | turma real, capacidade, lock, override justificado e idempotência |
+| `PATCH`          | `/journey/offers/:id/decision`                                                    | expiração, lock, rechecagem e draft incompleto                    |
+| `GET/PATCH/POST` | duplicidades, revisão e undo                                                      | escopo, revisão humana, estado `ARQUIVADO`, auditoria e outbox    |
+| `PATCH`          | `/journey/prospects/:id/privacy/retention`, `/contact/revoke`, `/erase`           | capability de privacidade, motivo, idempotência e ledger          |
 
-| Perfil/tipo | Flag desligada | Flag ligada | Escopo de leitura | Escrita de Journey | Override de capacidade |
-|---|---:|---:|---|---|---:|
-| `UNIDADE_ADMINISTRATIVO` | negado | permitido | unidade autorizada | ações Journey autorizadas pelo serviço | negado |
-| `UNIDADE_DIRETOR` | negado | permitido | unidade autorizada | ações Journey autorizadas pelo serviço | negado |
-| `UNIDADE_COORDENADOR_PEDAGOGICO` | negado | permitido | unidade autorizada | ações Journey autorizadas pelo serviço | negado |
-| `STAFF_CENTRAL_PEDAGOGICO` | negado | permitido | rede/unidades autorizadas | ações Journey autorizadas pelo serviço | permitido |
-| `MANTENEDORA_ADMIN` | negado | permitido | rede/unidades autorizadas | ações Journey autorizadas pelo serviço | permitido |
-| `DEVELOPER` | negado | permitido | rede autorizada | ações Journey autorizadas pelo serviço | permitido |
-| Psicologia/Nutrição/Professor/Família | negado | negado | sem manifesto e sem capability | negado | negado |
+O contrato OpenAPI local foi gerado durante o build da API e permanece compatível com os contratos consumidos pela web. A checagem frontend percorreu 228 arquivos-fonte e 412 chamadas HTTP.
 
-Toda consulta filtra `mantenedoraId` e valida unidade/turma no backend; o filtro da UI não é a fronteira de segurança.
+## Matriz requisito → teste → evidência
 
-## Evidências de teste e gate
+| Requisito de aceite                                               | Teste executado                                 | Resultado/evidência                                                                                            |
+| ----------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Administrativo/admissões operam; coordenação pedagógica não opera | API E2E `aplica RBAC granular por endpoint...`  | passou; 403 para coordenação pedagógica e acesso permitido para administrativo/admissões                       |
+| Tenant, unidade e turma sem IDOR                                  | API E2E `mantém escopo tenant/unidade/turma...` | passou; 404 para tenant estrangeiro, unidade isolada, turma incompatível e turma estrangeira                   |
+| Payload adulterado não cria contato sem consentimento             | API E2E `rejeita payload adulterado...`         | passou; 400 server-side                                                                                        |
+| Flag desligada bloqueia e religação sintética retorna             | API E2E `respeita flag desligada...`            | passou; 403 desligada, 200 após reativação no tenant sintético                                                 |
+| Revisão/publicação com SoD                                        | API E2E `exige revisão e publicação...`         | passou; `createdBy`, `reviewedBy` e `publishedBy` distintos conforme assertions                                |
+| Atividade com replay                                              | API E2E de mutações                             | passou; mesma atividade no replay idempotente                                                                  |
+| Tarefa e conclusão                                                | API E2E de mutações                             | passou; criação 201 e conclusão 200                                                                            |
+| Visita, reagendamento, confirmação e follow-up                    | API E2E de mutações                             | passou; fluxo completo com eventos                                                                             |
+| Lista de espera por política vigente                              | API E2E de mutações                             | passou; entrada `AGUARDANDO` usando política publicada/compatível                                              |
+| Oferta e aceitação sem matrícula definitiva                       | API E2E de mutações                             | passou; oferta aceita e draft, sem `Child`/`Enrollment` ativo                                                  |
+| Duplicidade, revisão e undo                                       | API E2E de mutações                             | passou; undo 201 e prospecto retorna à etapa esperada                                                          |
+| Retenção, revogação e eliminação após reload                      | API E2E `persiste retenção...`                  | passou; contato removido, status `ERASED`, ledger preservado e GET 410                                         |
+| Capacidade e concorrência                                         | `journey-concurrency.mjs`                       | passou anteriormente; 1 sucesso/1 `ConflictException`, uma oferta, zero matrícula/draft indevido, replay igual |
+| Responsividade em 320/360/390/412/768                             | Playwright browser E2E                          | passou 1/1; 7 abas, cadastro, reload, overflow horizontal ausente                                              |
+| Console sem erros e HAR redigido                                  | Playwright + scanner local                      | `journey-console.log` contém `CLEAN`; HAR final sanitizado, 238 entradas, sem valores de token/cookie/contato  |
 
-Os gates locais de aplicação abaixo foram executados novamente no commit verificável `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7`, após o corretivo de privacidade. O commit `e8fabccb08ff57be0bb1c825ef729fbc194960de` sincronizou somente `apps/api/package-lock.json` para o Dockerfile; no novo HEAD `e8fabcc` os 14 checks do GitHub Actions também terminaram com sucesso. O log local integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt` e o workflow é `32562760690`.
+## Gates locais executados no estado atual
 
-| Gate | Comando | Resultado final | Log/evidência |
-|---|---|---|---|
-| Instalação reprodutível | `pnpm install --frozen-lockfile` | passou; lockfile atualizado e instalação concluída | terminal final, linhas iniciais |
-| Lint API Journey | `pnpm --filter @zelare/api exec eslint src/journey src/journey/dto/journey.dto.ts` | passou no HEAD final | terminal final |
-| Lint web Journey | `pnpm --filter @zelare/web exec eslint src/pages/JourneyPage.tsx src/pages/JourneyActionPanels.tsx src/pages/JourneyActionPanels.test.tsx src/api/journey.ts` | passou no HEAD final | terminal final |
-| Typecheck API | `pnpm --filter @zelare/api typecheck` | passou no HEAD final | terminal final |
-| Typecheck web | `pnpm --filter @zelare/web exec tsc --noEmit` | passou no HEAD final | terminal final |
-| Unit API | `pnpm --filter @zelare/api test -- --runInBand` | 47 suítes / 347 testes passaram | log final, resumo Jest |
-| Unit Journey | incluído em `pnpm --filter @zelare/api test -- --runInBand` | specs Journey passaram dentro das 47 suítes / 347 testes | log final, `src/journey/*spec.ts` |
-| Unit web | `pnpm --filter @zelare/web test` | 5 arquivos / 18 testes passaram | log final, resumo Vitest |
-| API E2E | `DATABASE_URL=... JWT_SECRET=... JWT_REFRESH_SECRET=... pnpm exec jest --config test/jest-e2e.json --runInBand` | 2 testes passaram com banco local descartável | log final, resumo Jest E2E |
-| API build/OpenAPI | `pnpm --filter @zelare/api build` | passou; 329 rotas totais / 24 Journey | `apps/api/dist/openapi.json` gerado localmente |
-| Web build/budget | `NODE_ENV=production VITE_API_URL=... pnpm --filter @zelare/web build && ... budget:check` | passou; JS inicial 77.750 bytes, gzip 20.611 bytes, precache 4.474.774 bytes | log final, budget |
-| Site build | build com canais `.test` | passou; canais públicos sintéticos validados | log final |
-| Privacidade | `pnpm --filter @zelare/api security:artifacts` | passou; 1.061 arquivos versionados verificados e 0 conteúdo sensível | log final |
-| Prisma clean cluster | `prisma-clean-cluster-gate.sh` | `CLEAN_CLUSTER_PRISMA_DRIFT=0`; 48 migrations aplicadas e schema atualizado | log final e script em `evidence/` |
-| Concorrência | `node apps/api/scripts/verification/journey-concurrency.mjs` | 1 sucesso / 1 `ConflictException`; 1 oferta; 0 Child/Enrollment/Draft; replay igual | terminal do gate |
-| E2E autenticado | `JOURNEY_E2E_PASSWORD=... node evidence/capture-journey-e2e.cjs` | passou; 4 screenshots, desktop/mobile, confirmação real de visita e releitura | `evidence/screenshots/` e log final |
-| CI da PR | workflow `Zelare Gate 0.2 PR` no run `32562760690` | 14/14 checks concluídos com `SUCCESS`; PR permanece aberta | GitHub Actions / PR #21 |
+Os logs abaixo são integrais e ficam fora do repositório em `/home/ubuntu/research_zelare/onda3_journey_20260822/evidence/gates/`. O lint global da web mantém baseline legado de 797 erros/35 avisos dentro do limite CI de 800/35; não é declarado como zero. O lint global da API possui baseline legado elevado e também não é declarado como verde; o lint focado dos arquivos alterados passou.
 
-## Rollback e canário
+| Gate                           | Comando/escopo                                                        | Resultado atual                                                              | Evidência                                       |
+| ------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------- |
+| API typecheck                  | `pnpm --filter @zelare/api typecheck`                                 | passou                                                                       | `api-typecheck-final.log`                       |
+| API unitários                  | `pnpm --filter @zelare/api test -- --runInBand`                       | 48 suítes / 358 testes passaram                                              | `api-units-final.log`                           |
+| API E2E autenticado            | fixture sintética + Jest `test/journey.e2e-spec.ts`                   | 7 testes passaram                                                            | `api-authenticated-e2e-all-mutations-final.log` |
+| Web contracts/typecheck/Vitest | `contracts:check`, `tsc -b`, `test -- --run`                          | 228 arquivos; typecheck passou; 5 arquivos / 19 testes passaram              | `web-contracts-typecheck-vitest-final.log`      |
+| Lint focado                    | API `src` e web `src` alterados                                       | passou com `--max-warnings=0`                                                | `focused-lint-final.log`                        |
+| Privacidade/artefatos          | `pnpm --filter @zelare/api security:artifacts`                        | 1.061 arquivos, 0 conteúdo sensível                                          | `privacy-artifacts-final.log`                   |
+| Build/OpenAPI/budget           | build API, build web e `budget:check`                                 | passou; JS inicial 78.336 bytes, gzip 20.688 bytes, precache 4.483.803 bytes | `build-openapi-budget-final.log`                |
+| Diff/migration/secret          | `git diff --check`, scanner destrutivo e scanner de conteúdo alterado | passou; migration sem `DROP/DELETE/TRUNCATE`; scan de segredos passou        | `diff-migration-secret-final.log`               |
+| PostgreSQL 16 zero-to-drift    | replay oficial histórico em banco descartável                         | anteriormente passou: 48 migrations, status atualizado, drift zero           | `prisma-postgresql-official-pg16-rerun.log`     |
+| Browser autenticado            | admissions sintético, abas e viewports                                | passou 1/1; console `CLEAN`                                                  | `browser-final/playwright.log`                  |
+| CI do novo SHA                 | ainda não executado neste novo commit                                 | pendente até push/CI                                                         | atualizar somente após `gh pr checks 21`        |
 
-A migration `20260822200000_onda3_journey_foundation` é forward-only e aditiva; a coluna `overrideReason` é nullable. Não há `DROP`, `DELETE` ou alteração de tabelas canônicas no SQL Journey. O rollback de aplicação é feito por desativação server-side da flag `journey_admissions_v1`, sem apagar dados. O canário recomendado é um tenant descartável/piloto com a flag ligada, monitorando erros 4xx/5xx, conflitos de capacidade, duplicidades, latência e outbox antes de qualquer expansão. Produção não foi migrada ou ativada nesta tarefa.
+## Evidências browser
 
-## Evidência visual
+As capturas finais estão em `/home/ubuntu/research_zelare/onda3_journey_20260822/evidence/`: `journey-overview-320.png`, `journey-overview-360.png`, `journey-overview-390.png`, `journey-overview-412.png`, `journey-overview-768.png`, `journey-reports-768.png`, `journey-responsive.webm`, `journey-responsive.har` e `journey-console.log`. O vídeo foi copiado da última execução aprovada; o HAR bruto foi removido após redação determinística dos valores sensíveis. O diretório `browser-final/results/` preserva o resultado bruto Playwright necessário para auditoria local, fora do Git.
 
-As imagens em `/home/ubuntu/research_zelare/onda3_journey_20260822/evidence/screenshots/` são capturas reais do navegador autenticado com fixture sintético. A visão desktop mostra indicadores, funil, menu e abas Journey. A visão mobile mostra cabeçalho compacto, seletor, abas com rolagem horizontal e cards responsivos. O capturador executa confirmação de presença e espera o estado `REALIZADA` após a releitura.
+## Migrations, rollback e operação
+
+A migration `20260822200000_onda3_journey_foundation` é aditiva e forward-only. A preparação de pré-requisitos históricos usada para reproduzir o CI só foi executada no banco PostgreSQL 16 descartável; nunca deve ser executada contra produção. Não há rollback destrutivo: o rollback funcional é a desativação server-side da flag `journey_admissions_v1`, sem apagar dados. Merge, redeploy, migration de produção e ativação da flag são operações separadas; a flag não será ativada automaticamente por esta PR.
+
+## Estado de entrega
+
+Antes do push, a PR permanece aberta e sem merge; a validação local acima está verde nos escopos declarados. O SHA final, o resultado do CI do novo SHA, o merge e o redeploy só podem ser registrados depois que forem realmente executados e verificados. Nenhum status remoto anterior será reutilizado como evidência do commit corretivo.
+
+## Referências internas
+
+| Referência            | Local                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| Implementação Journey | `apps/api/src/journey/journey.service.ts` e `journey-access.service.ts`                        |
+| Guard de capability   | `apps/api/src/journey/journey-capability.guard.ts`                                             |
+| Privacy Family        | `apps/api/src/family/family-privacy-access.ts`, `family-privacy.guard.ts`, `family.service.ts` |
+| Migration             | `apps/api/prisma/migrations/20260822200000_onda3_journey_foundation/migration.sql`             |
+| E2E API               | `apps/api/test/journey.e2e-spec.ts`                                                            |
+| Fixture sintética     | `apps/api/scripts/verification/journey-e2e-fixture.mjs`                                        |
+| E2E browser           | `apps/web/e2e/journey-responsive.spec.ts`                                                      |
+| Workflow              | `.github/workflows/pr-gate.yml`                                                                |

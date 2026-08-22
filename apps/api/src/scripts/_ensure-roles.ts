@@ -1,45 +1,47 @@
-import { PrismaClient, RoleType, RoleLevel } from '@prisma/client';
+import { PrismaClient, RoleType, RoleLevel } from "@prisma/client";
 
 /**
  * Mapeamento de RoleType para RoleLevel
  */
 const ROLE_TYPE_TO_LEVEL: Record<RoleType, RoleLevel> = {
-  DEVELOPER: 'DEVELOPER',
-  MANTENEDORA_ADMIN: 'MANTENEDORA',
-  MANTENEDORA_FINANCEIRO: 'MANTENEDORA',
-  STAFF_CENTRAL_PEDAGOGICO: 'STAFF_CENTRAL',
-  STAFF_CENTRAL_PSICOLOGIA: 'STAFF_CENTRAL',
-  UNIDADE_DIRETOR: 'UNIDADE',
-  UNIDADE_COORDENADOR_PEDAGOGICO: 'UNIDADE',
-  UNIDADE_ADMINISTRATIVO: 'UNIDADE',
-  UNIDADE_NUTRICIONISTA: 'UNIDADE',
-  PROFESSOR: 'PROFESSOR',
-  PROFESSOR_AUXILIAR: 'PROFESSOR',
-  FAMILIA_RESPONSAVEL: 'FAMILIA',
+  DEVELOPER: "DEVELOPER",
+  MANTENEDORA_ADMIN: "MANTENEDORA",
+  MANTENEDORA_FINANCEIRO: "MANTENEDORA",
+  STAFF_CENTRAL_PEDAGOGICO: "STAFF_CENTRAL",
+  STAFF_CENTRAL_ADMISSOES: "STAFF_CENTRAL",
+  STAFF_CENTRAL_PSICOLOGIA: "STAFF_CENTRAL",
+  UNIDADE_DIRETOR: "UNIDADE",
+  UNIDADE_COORDENADOR_PEDAGOGICO: "UNIDADE",
+  UNIDADE_ADMINISTRATIVO: "UNIDADE",
+  UNIDADE_NUTRICIONISTA: "UNIDADE",
+  PROFESSOR: "PROFESSOR",
+  PROFESSOR_AUXILIAR: "PROFESSOR",
+  FAMILIA_RESPONSAVEL: "FAMILIA",
 };
 
 /**
  * Nomes amigáveis para cada RoleType
  */
 const ROLE_TYPE_NAMES: Record<RoleType, string> = {
-  DEVELOPER: 'Desenvolvedor',
-  MANTENEDORA_ADMIN: 'Administrador da Mantenedora',
-  MANTENEDORA_FINANCEIRO: 'Financeiro da Mantenedora',
-  STAFF_CENTRAL_PEDAGOGICO: 'Coordenação Pedagógica Central',
-  STAFF_CENTRAL_PSICOLOGIA: 'Psicologia Central',
-  UNIDADE_DIRETOR: 'Diretor de Unidade',
-  UNIDADE_COORDENADOR_PEDAGOGICO: 'Coordenador Pedagógico de Unidade',
-  UNIDADE_ADMINISTRATIVO: 'Administrativo de Unidade',
-  UNIDADE_NUTRICIONISTA: 'Nutricionista de Unidade',
-  PROFESSOR: 'Professor',
-  PROFESSOR_AUXILIAR: 'Professor Auxiliar',
-  FAMILIA_RESPONSAVEL: 'Responsável Familiar',
+  DEVELOPER: "Desenvolvedor",
+  MANTENEDORA_ADMIN: "Administrador da Mantenedora",
+  MANTENEDORA_FINANCEIRO: "Financeiro da Mantenedora",
+  STAFF_CENTRAL_PEDAGOGICO: "Coordenação Pedagógica Central",
+  STAFF_CENTRAL_ADMISSOES: "Admissões Central",
+  STAFF_CENTRAL_PSICOLOGIA: "Psicologia Central",
+  UNIDADE_DIRETOR: "Diretor de Unidade",
+  UNIDADE_COORDENADOR_PEDAGOGICO: "Coordenador Pedagógico de Unidade",
+  UNIDADE_ADMINISTRATIVO: "Administrativo de Unidade",
+  UNIDADE_NUTRICIONISTA: "Nutricionista de Unidade",
+  PROFESSOR: "Professor",
+  PROFESSOR_AUXILIAR: "Professor Auxiliar",
+  FAMILIA_RESPONSAVEL: "Responsável Familiar",
 };
 
 /**
  * Garante que todos os Roles existem para a mantenedora
  * Idempotente: pode rodar múltiplas vezes sem duplicar
- * 
+ *
  * @param prisma - Cliente Prisma
  * @param mantenedoraId - ID da mantenedora
  * @returns Map de RoleType para Role.id

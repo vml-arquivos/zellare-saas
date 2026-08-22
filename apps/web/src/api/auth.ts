@@ -32,6 +32,7 @@ export interface User {
   roles?: UserRole[] | string[];
   featureFlags?: string[];
   flags?: string[];
+  capabilities?: string[];
   [key: string]: unknown;
 }
 

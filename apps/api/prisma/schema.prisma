@@ -57,6 +57,7 @@ enum RoleType {
   MANTENEDORA_ADMIN
   MANTENEDORA_FINANCEIRO
   STAFF_CENTRAL_PEDAGOGICO
+  STAFF_CENTRAL_ADMISSOES
   STAFF_CENTRAL_PSICOLOGIA
   UNIDADE_DIRETOR
   UNIDADE_COORDENADOR_PEDAGOGICO
@@ -356,6 +357,7 @@ model Mantenedora {
   JourneyTask                 JourneyTask[]
   JourneyDuplicateReview      JourneyDuplicateReview[]
   JourneyVisitEvent           JourneyVisitEvent[]
+  journeyProspectPrivacyEvents JourneyProspectPrivacyEvent[]
   operationalPresenceSessions OperationalPresenceSession[]
   operationalPresenceEvents   OperationalPresenceEvent[]
   staffingAssignments         StaffingAssignment[]
@@ -714,6 +716,7 @@ model Unit {
   JourneyActivity             JourneyActivity[]
   JourneyTask                 JourneyTask[]
   JourneyVisitEvent           JourneyVisitEvent[]
+  journeyProspectPrivacyEvents JourneyProspectPrivacyEvent[]
 
   @@unique([mantenedoraId, code])
   @@index([mantenedoraId])
@@ -1007,6 +1010,10 @@ model ChildGuardian {
   canViewHealth      Boolean   @default(false)
   consentAt          DateTime?
   revokedAt          DateTime?
+  legalBasis         Onda1LegalBasis @default(CONSENT)
+  consentPolicyVersion String          @default("family-link-v1") @db.VarChar(80)
+  retentionUntil     DateTime?
+  revocationReason   String?           @db.VarChar(500)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   child              Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
@@ -3992,6 +3999,7 @@ model ConsentGrant {
   responsibleUserId String               @db.VarChar(255)
   purpose           Onda1ConsentPurpose
   decision          Onda1ConsentDecision
+  legalBasis        Onda1LegalBasis      @default(CONSENT)
   policyVersion     String               @db.VarChar(80)
   textPresented     String               @db.Text
   origin            String               @db.VarChar(80)
@@ -5119,6 +5127,30 @@ enum JourneyEnrollmentDraftStatus {
   CONCLUIDA
 }
 
+enum JourneyPrivacyEventType {
+  CONSENT_CAPTURED
+  CONSENT_CONTACT_GRANTED
+  CONSENT_CONTACT_REVOKED
+  RETENTION_EXTENDED
+  ERASURE_REQUESTED
+  ERASURE_COMPLETED
+}
+
+enum JourneyProspectPrivacyStatus {
+  ACTIVE
+  RETAINED
+  ERASURE_REQUESTED
+  ERASED
+}
+
+enum Onda1LegalBasis {
+  CONSENT
+  LEGAL_OBLIGATION
+  PRE_CONTRACTUAL_STEPS
+  VITAL_INTEREST
+  PUBLIC_TASK
+}
+
 model JourneyProspect {
   id                   String       @id @default(cuid())
   mantenedoraId        String
@@ -5131,6 +5163,19 @@ model JourneyProspect {
   phoneHash            String?      @db.VarChar(128)
   declaredIdentityType String?      @db.VarChar(40)
   declaredIdentityHash String?      @db.VarChar(128)
+  emailCiphertext      String?      @db.Text
+  phoneCiphertext      String?      @db.Text
+  declaredIdentityCiphertext String? @db.Text
+  contactHashVersion   String?      @db.VarChar(40)
+  privacyStatus        JourneyProspectPrivacyStatus @default(ACTIVE)
+  captureLegalBasis    Onda1LegalBasis @default(CONSENT)
+  contactLegalBasis    Onda1LegalBasis?
+  consentPolicyVersion String       @default("journey-privacy-v1") @db.VarChar(80)
+  consentCapturedAt    DateTime?
+  contactConsentAt     DateTime?
+  retentionUntil       DateTime?
+  erasedAt             DateTime?
+  erasedBy             String?      @db.VarChar(255)
   source               String       @db.VarChar(80)
   ageGroupMinMonths    Int
   ageGroupMaxMonths    Int
@@ -5159,14 +5204,41 @@ model JourneyProspect {
   waitlistEntries      JourneyWaitlistEntry[]
   offers               JourneySeatOffer[]
   enrollmentDrafts     JourneyEnrollmentDraft[]
+  privacyEvents         JourneyProspectPrivacyEvent[]
 
   @@unique([mantenedoraId, idempotencyKey])
   @@index([mantenedoraId, unitId, stage])
   @@index([mantenedoraId, emailHash])
   @@index([mantenedoraId, phoneHash])
   @@index([mantenedoraId, declaredIdentityHash])
+  @@index([mantenedoraId, contactHashVersion])
+  @@index([mantenedoraId, privacyStatus, retentionUntil])
   @@index([unitId, desiredDate])
   @@map("journey_prospect")
+}
+
+model JourneyProspectPrivacyEvent {
+  id             String                @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  type           JourneyPrivacyEventType
+  purpose        String                @db.VarChar(80)
+  legalBasis     Onda1LegalBasis?
+  policyVersion  String                @db.VarChar(80)
+  reason         String?               @db.VarChar(500)
+  actorUserId    String                @db.VarChar(255)
+  idempotencyKey String                @db.VarChar(255)
+  createdAt      DateTime              @default(now())
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, prospectId, createdAt])
+  @@index([prospectId, type, createdAt])
+  @@map("journey_prospect_privacy_event")
 }
 
 model JourneyProspectStageEvent {

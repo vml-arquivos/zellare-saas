@@ -1,11 +1,13 @@
-import { ConflictException, GoneException } from "@nestjs/common";
 /* O mock Prisma é deliberadamente parcial nesta suíte unitária; integração real é coberta pelo harness descartável. */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
+import { ConflictException, GoneException } from "@nestjs/common";
+import { createHmac } from "node:crypto";
 import {
   JourneyOfferStatus,
   JourneyStage,
   JourneyWaitlistPolicyStatus,
+  Onda1LegalBasis,
   RoleLevel,
   RoleType,
   UserStatus,
@@ -15,6 +17,11 @@ import { JourneyAccessService } from "./journey-access.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { AuditService } from "../common/services/audit.service";
 import type { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
+
+process.env.JWT_SECRET ??= "journey-unit-test-secret-2026";
+process.env.JOURNEY_CONTACT_HMAC_SECRET ??= "journey-unit-test-hmac-2026";
+process.env.JOURNEY_CONTACT_ENCRYPTION_SECRET ??=
+  "journey-unit-test-encryption-2026";
 
 const operator: JwtPayload = {
   sub: "operator-1",
@@ -40,6 +47,10 @@ const prospect = {
   emailHash: "email-hash",
   phoneHash: null,
   declaredIdentityHash: null,
+  emailCiphertext: null,
+  phoneCiphertext: null,
+  privacyStatus: "ACTIVE",
+  retentionUntil: null,
   stage: JourneyStage.NOVO,
   version: 1,
 };
@@ -64,9 +75,11 @@ function build() {
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       count: jest.fn(),
     },
     journeyProspectStageEvent: { findUnique: jest.fn(), create: jest.fn() },
+    journeyProspectPrivacyEvent: { findUnique: jest.fn(), create: jest.fn() },
     journeyDuplicateReview: {
       findFirst: jest.fn(),
       upsert: jest.fn(),
@@ -110,7 +123,11 @@ function build() {
       update: jest.fn(),
       count: jest.fn(),
     },
-    journeyEnrollmentDraft: { findUnique: jest.fn(), create: jest.fn() },
+    journeyEnrollmentDraft: {
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+    },
     classroom: {
       findFirst: jest.fn().mockResolvedValue({
         id: "class-a",
@@ -176,6 +193,8 @@ function createDto(overrides: Record<string, unknown> = {}) {
     period: "Integral",
     consentCapture: true,
     consentContact: true,
+    captureLegalBasis: Onda1LegalBasis.CONSENT,
+    contactLegalBasis: Onda1LegalBasis.CONSENT,
     idempotencyKey: "prospect-command-001",
     ...overrides,
   };
@@ -184,12 +203,17 @@ function createDto(overrides: Record<string, unknown> = {}) {
 describe("JourneyService", () => {
   it("detecta duplicidade por organização, cria revisão humana e não retorna hashes", async () => {
     const { service, prisma } = build();
+    const emailHash = `hmac-sha256-v1:${createHmac(
+      "sha256",
+      process.env.JOURNEY_CONTACT_HMAC_SECRET as string,
+    )
+      .update("family@example.invalid")
+      .digest("hex")}`;
     prisma.journeyProspect.findUnique.mockResolvedValueOnce(null);
     prisma.journeyProspect.findMany.mockResolvedValueOnce([
       {
         ...prospect,
-        emailHash:
-          "d52ee3c4d681c35f93a47ca5f6344759a34c129ecac814ee9d9c88abc512c7a2",
+        emailHash,
       },
     ]);
     prisma.journeyProspect.create.mockResolvedValueOnce({
@@ -224,6 +248,16 @@ describe("JourneyService", () => {
         }),
       }),
     );
+    expect(prisma.journeyProspect.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          email: null,
+          phone: null,
+          emailHash: expect.stringMatching(/^hmac-sha256-v1:/),
+          emailCiphertext: expect.stringMatching(/^aes-256-gcm-v1:/),
+        }),
+      }),
+    );
   });
 
   it("retorna o mesmo prospecto no retry idempotente sem criar um segundo registro", async () => {
@@ -242,6 +276,15 @@ describe("JourneyService", () => {
     expect(prisma.journeyProspect.create).not.toHaveBeenCalled();
   });
 
+  it("rejeita contato sem base legal de consentimento", async () => {
+    await expect(
+      build().service.createProspect(
+        createDto({ contactLegalBasis: undefined }),
+        operator,
+      ),
+    ).rejects.toThrow("Contato exige consentimento explícito");
+  });
+
   it("rejeita intervalos inválidos e conteúdo fora da allowlist", async () => {
     const invalidRange = createDto({
       ageGroupMinMonths: 49,
@@ -255,6 +298,73 @@ describe("JourneyService", () => {
     await expect(
       build().service.createProspect(sensitive, operator),
     ).rejects.toThrow("somente dados de captação permitidos");
+  });
+
+  it("bloqueia mutações sobre prospecto expirado", async () => {
+    const { service, access } = build();
+    access.assertProspectAccess.mockResolvedValueOnce({
+      ...prospect,
+      retentionUntil: new Date(Date.now() - 1_000),
+    });
+    await expect(
+      service.createActivity(
+        "prospect-1",
+        { type: "NOTA", title: "Retorno", idempotencyKey: "activity-expired" },
+        operator,
+      ),
+    ).rejects.toBeInstanceOf(GoneException);
+  });
+
+  it("rejeita transição que não consta da máquina de estados", async () => {
+    const { service } = build();
+    await expect(
+      service.changeStage(
+        "prospect-1",
+        {
+          toStage: JourneyStage.ACEITO,
+          idempotencyKey: "stage-invalid",
+        },
+        operator,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it("elimina prospecto logicamente, preservando o evento de privacidade", async () => {
+    const { service, prisma } = build();
+    prisma.journeyProspectPrivacyEvent.findUnique.mockResolvedValue(null);
+    prisma.journeyProspect.findUnique.mockResolvedValue(prospect);
+    prisma.journeyProspect.update.mockResolvedValue({
+      ...prospect,
+      privacyStatus: "ERASED",
+      erasedAt: new Date(),
+    });
+    prisma.journeyProspectPrivacyEvent.create.mockResolvedValue({
+      id: "privacy-1",
+    });
+    prisma.domainOutboxEvent.create.mockResolvedValue({
+      id: "outbox-privacy-1",
+    });
+
+    const result = await service.eraseProspect(
+      "prospect-1",
+      { reason: "Solicitação de teste", idempotencyKey: "erase-001" },
+      operator,
+    );
+
+    expect(result.status).toBe("ERASED");
+    expect(prisma.journeyProspect.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          responsibleName: "[REMOVIDO]",
+          email: null,
+          phone: null,
+          emailHash: null,
+          phoneHash: null,
+          privacyStatus: "ERASED",
+        }),
+      }),
+    );
+    expect(prisma.journeyProspectPrivacyEvent.create).toHaveBeenCalledTimes(1);
   });
 
   it("não permite que o criador publique sua própria política", async () => {
@@ -300,6 +410,7 @@ describe("JourneyService", () => {
       classroomId: "class-a",
       status: JourneyOfferStatus.OFERTADA,
       reservationExpiresAt: new Date(Date.now() - 1000),
+      prospect: { privacyStatus: "ACTIVE", retentionUntil: null },
     };
     prisma.journeyEnrollmentDraft.findUnique.mockResolvedValue(null);
     prisma.journeySeatOffer.findFirst.mockResolvedValue(expiredOffer);
@@ -358,6 +469,7 @@ describe("JourneyService", () => {
       status: JourneyOfferStatus.OFERTADA,
       reservationExpiresAt: new Date(Date.now() + 60_000),
       overrideReason: null,
+      prospect: { privacyStatus: "ACTIVE", retentionUntil: null },
     };
     prisma.journeyEnrollmentDraft.findUnique.mockResolvedValue(null);
     prisma.journeySeatOffer.findFirst.mockResolvedValue(offer);

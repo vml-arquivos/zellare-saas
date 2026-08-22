@@ -2,10 +2,19 @@ import { describe, expect, it } from "vitest";
 import type { User } from "../../api/auth";
 import { getNavigationGroups } from "./navigationManifest";
 
+const journeyCapabilities = [
+  "journey.read",
+  "journey.prospect.read",
+  "journey.visit.read",
+  "journey.waitlist.read",
+  "journey.offer.read",
+];
+
 function profile(
   level: string,
   type: string,
   featureFlags: string[] = [],
+  capabilities?: string[],
 ): User {
   return {
     id: `${level}-${type}`,
@@ -13,22 +22,26 @@ function profile(
     mantenedoraId: "synthetic-org",
     roles: [{ roleId: "role-1", level, type, unitScopes: ["unit-a"] }],
     featureFlags,
+    capabilities,
   };
 }
 
 describe("Journey navigation gate", () => {
-  it("keeps Journey hidden when the tenant flag is absent", () => {
+  it("mantém Journey oculta quando a flag do tenant está ausente", () => {
     const groups = getNavigationGroups(
-      profile("UNIDADE", "UNIDADE_COORDENADOR_PEDAGOGICO"),
+      profile("UNIDADE", "UNIDADE_ADMINISTRATIVO", [], journeyCapabilities),
     );
     expect(groups.some((group) => group.id === "journey")).toBe(false);
   });
 
-  it("shows Journey only for an allowed role when the persisted flag is active", () => {
+  it("exibe Journey para administrativo de unidade quando flag e capabilities estão ativas", () => {
     const groups = getNavigationGroups(
-      profile("UNIDADE", "UNIDADE_COORDENADOR_PEDAGOGICO", [
-        "journey_admissions_v1",
-      ]),
+      profile(
+        "UNIDADE",
+        "UNIDADE_ADMINISTRATIVO",
+        ["journey_admissions_v1"],
+        journeyCapabilities,
+      ),
     );
     expect(
       groups
@@ -45,18 +58,46 @@ describe("Journey navigation gate", () => {
     ]);
   });
 
-  it("does not expose Journey to psychology or nutrition even when their level passes the broad route guard", () => {
+  it("exibe Journey para admissões central e não para capability ausente", () => {
     expect(
       getNavigationGroups(
-        profile("STAFF_CENTRAL", "STAFF_CENTRAL_PSICOLOGIA", [
-          "journey_admissions_v1",
-        ]),
+        profile(
+          "STAFF_CENTRAL",
+          "STAFF_CENTRAL_ADMISSOES",
+          ["journey_admissions_v1"],
+          journeyCapabilities,
+        ),
       ).some((group) => group.id === "journey"),
-    ).toBe(false);
+    ).toBe(true);
+
     expect(
       getNavigationGroups(
-        profile("UNIDADE", "UNIDADE_NUTRICIONISTA", ["journey_admissions_v1"]),
-      ).some((group) => group.id === "journey"),
-    ).toBe(false);
+        profile(
+          "STAFF_CENTRAL",
+          "STAFF_CENTRAL_ADMISSOES",
+          ["journey_admissions_v1"],
+          ["journey.read"],
+        ),
+      )
+        .filter((group) => group.id === "journey")
+        .flatMap((group) => group.items)
+        .map((item) => item.id),
+    ).toEqual(["journey-overview", "journey-reports"]);
+  });
+
+  it("não expõe Journey a pedagogia, psicologia ou nutrição", () => {
+    const denied = [
+      ["UNIDADE", "UNIDADE_COORDENADOR_PEDAGOGICO"],
+      ["STAFF_CENTRAL", "STAFF_CENTRAL_PEDAGOGICO"],
+      ["STAFF_CENTRAL", "STAFF_CENTRAL_PSICOLOGIA"],
+      ["UNIDADE", "UNIDADE_NUTRICIONISTA"],
+    ];
+    for (const [level, type] of denied) {
+      expect(
+        getNavigationGroups(
+          profile(level, type, ["journey_admissions_v1"], journeyCapabilities),
+        ).some((group) => group.id === "journey"),
+      ).toBe(false);
+    }
   });
 });

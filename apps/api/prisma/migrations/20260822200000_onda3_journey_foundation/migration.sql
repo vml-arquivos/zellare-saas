@@ -12,6 +12,10 @@ CREATE TYPE "JourneyWaitlistPolicyStatus" AS ENUM ('RASCUNHO', 'PUBLICADA', 'ARQ
 CREATE TYPE "JourneyWaitlistEntryStatus" AS ENUM ('AGUARDANDO', 'OFERTADA', 'REMOVIDA');
 CREATE TYPE "JourneyOfferStatus" AS ENUM ('OFERTADA', 'ACEITA', 'RECUSADA', 'EXPIRADA', 'CANCELADA');
 CREATE TYPE "JourneyEnrollmentDraftStatus" AS ENUM ('INCOMPLETA', 'CANCELADA', 'CONCLUIDA');
+CREATE TYPE "JourneyPrivacyEventType" AS ENUM ('CONSENT_CAPTURED', 'CONSENT_CONTACT_GRANTED', 'CONSENT_CONTACT_REVOKED', 'RETENTION_EXTENDED', 'ERASURE_REQUESTED', 'ERASURE_COMPLETED');
+CREATE TYPE "JourneyProspectPrivacyStatus" AS ENUM ('ACTIVE', 'RETAINED', 'ERASURE_REQUESTED', 'ERASED');
+CREATE TYPE "Onda1LegalBasis" AS ENUM ('CONSENT', 'LEGAL_OBLIGATION', 'PRE_CONTRACTUAL_STEPS', 'VITAL_INTEREST', 'PUBLIC_TASK');
+ALTER TYPE "RoleType" ADD VALUE IF NOT EXISTS 'STAFF_CENTRAL_ADMISSOES';
 
 ALTER TYPE "AuditLogEntity" ADD VALUE 'JOURNEY_PROSPECT';
 ALTER TYPE "AuditLogEntity" ADD VALUE 'JOURNEY_VISIT';
@@ -32,6 +36,19 @@ CREATE TABLE "journey_prospect" (
   "phoneHash" VARCHAR(128),
   "declaredIdentityType" VARCHAR(40),
   "declaredIdentityHash" VARCHAR(128),
+  "emailCiphertext" TEXT,
+  "phoneCiphertext" TEXT,
+  "declaredIdentityCiphertext" TEXT,
+  "contactHashVersion" VARCHAR(40),
+  "privacyStatus" "JourneyProspectPrivacyStatus" NOT NULL DEFAULT 'ACTIVE',
+  "captureLegalBasis" "Onda1LegalBasis" NOT NULL DEFAULT 'CONSENT',
+  "contactLegalBasis" "Onda1LegalBasis",
+  "consentPolicyVersion" VARCHAR(80) NOT NULL DEFAULT 'journey-privacy-v1',
+  "consentCapturedAt" TIMESTAMP(3),
+  "contactConsentAt" TIMESTAMP(3),
+  "retentionUntil" TIMESTAMP(3),
+  "erasedAt" TIMESTAMP(3),
+  "erasedBy" VARCHAR(255),
   "source" VARCHAR(80) NOT NULL,
   "ageGroupMinMonths" INTEGER NOT NULL,
   "ageGroupMaxMonths" INTEGER NOT NULL,
@@ -47,6 +64,22 @@ CREATE TABLE "journey_prospect" (
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "journey_prospect_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "journey_prospect_privacy_event" (
+  "id" TEXT NOT NULL,
+  "mantenedoraId" TEXT NOT NULL,
+  "unitId" TEXT NOT NULL,
+  "prospectId" TEXT NOT NULL,
+  "type" "JourneyPrivacyEventType" NOT NULL,
+  "purpose" VARCHAR(80) NOT NULL,
+  "legalBasis" "Onda1LegalBasis",
+  "policyVersion" VARCHAR(80) NOT NULL,
+  "reason" VARCHAR(500),
+  "actorUserId" VARCHAR(255) NOT NULL,
+  "idempotencyKey" VARCHAR(255) NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "journey_prospect_privacy_event_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "journey_prospect_stage_event" (
@@ -233,6 +266,7 @@ CREATE TABLE "journey_enrollment_draft" (
 );
 
 CREATE UNIQUE INDEX "journey_prospect_mantenedoraId_idempotencyKey_key" ON "journey_prospect"("mantenedoraId", "idempotencyKey");
+CREATE UNIQUE INDEX "journey_prospect_privacy_event_mantenedoraId_idempotencyKey_key" ON "journey_prospect_privacy_event"("mantenedoraId", "idempotencyKey");
 CREATE UNIQUE INDEX "journey_prospect_stage_event_mantenedoraId_idempotencyKey_key" ON "journey_prospect_stage_event"("mantenedoraId", "idempotencyKey");
 CREATE UNIQUE INDEX "journey_activity_mantenedoraId_idempotencyKey_key" ON "journey_activity"("mantenedoraId", "idempotencyKey");
 CREATE UNIQUE INDEX "journey_task_mantenedoraId_idempotencyKey_key" ON "journey_task"("mantenedoraId", "idempotencyKey");
@@ -251,6 +285,10 @@ CREATE INDEX "journey_prospect_mantenedoraId_unitId_stage_idx" ON "journey_prosp
 CREATE INDEX "journey_prospect_mantenedoraId_emailHash_idx" ON "journey_prospect"("mantenedoraId", "emailHash");
 CREATE INDEX "journey_prospect_mantenedoraId_phoneHash_idx" ON "journey_prospect"("mantenedoraId", "phoneHash");
 CREATE INDEX "journey_prospect_mantenedoraId_declaredIdentityHash_idx" ON "journey_prospect"("mantenedoraId", "declaredIdentityHash");
+CREATE INDEX "journey_prospect_mantenedoraId_contactHashVersion_idx" ON "journey_prospect"("mantenedoraId", "contactHashVersion");
+CREATE INDEX "journey_prospect_mantenedoraId_privacyStatus_retentionUntil_idx" ON "journey_prospect"("mantenedoraId", "privacyStatus", "retentionUntil");
+CREATE INDEX "journey_prospect_privacy_event_mantenedoraId_unitId_prospec_idx" ON "journey_prospect_privacy_event"("mantenedoraId", "unitId", "prospectId", "createdAt");
+CREATE INDEX "journey_prospect_privacy_event_prospectId_type_createdAt_idx" ON "journey_prospect_privacy_event"("prospectId", "type", "createdAt");
 CREATE INDEX "journey_prospect_unitId_desiredDate_idx" ON "journey_prospect"("unitId", "desiredDate");
 CREATE INDEX "journey_prospect_stage_event_mantenedoraId_unitId_createdAt_idx" ON "journey_prospect_stage_event"("mantenedoraId", "unitId", "createdAt");
 CREATE INDEX "journey_prospect_stage_event_prospectId_createdAt_idx" ON "journey_prospect_stage_event"("prospectId", "createdAt");
@@ -277,6 +315,9 @@ CREATE INDEX "journey_enrollment_draft_prospectId_status_idx" ON "journey_enroll
 ALTER TABLE "journey_prospect" ADD CONSTRAINT "journey_prospect_mantenedoraId_fkey" FOREIGN KEY ("mantenedoraId") REFERENCES "Mantenedora"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_prospect" ADD CONSTRAINT "journey_prospect_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_prospect" ADD CONSTRAINT "journey_prospect_mergedIntoId_fkey" FOREIGN KEY ("mergedIntoId") REFERENCES "journey_prospect"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "journey_prospect_privacy_event" ADD CONSTRAINT "journey_prospect_privacy_event_mantenedoraId_fkey" FOREIGN KEY ("mantenedoraId") REFERENCES "Mantenedora"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "journey_prospect_privacy_event" ADD CONSTRAINT "journey_prospect_privacy_event_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "journey_prospect_privacy_event" ADD CONSTRAINT "journey_prospect_privacy_event_prospectId_fkey" FOREIGN KEY ("prospectId") REFERENCES "journey_prospect"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_prospect_stage_event" ADD CONSTRAINT "journey_prospect_stage_event_mantenedoraId_fkey" FOREIGN KEY ("mantenedoraId") REFERENCES "Mantenedora"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_prospect_stage_event" ADD CONSTRAINT "journey_prospect_stage_event_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_prospect_stage_event" ADD CONSTRAINT "journey_prospect_stage_event_prospectId_fkey" FOREIGN KEY ("prospectId") REFERENCES "journey_prospect"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -310,3 +351,9 @@ ALTER TABLE "journey_enrollment_draft" ADD CONSTRAINT "journey_enrollment_draft_
 ALTER TABLE "journey_enrollment_draft" ADD CONSTRAINT "journey_enrollment_draft_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_enrollment_draft" ADD CONSTRAINT "journey_enrollment_draft_prospectId_fkey" FOREIGN KEY ("prospectId") REFERENCES "journey_prospect"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "journey_enrollment_draft" ADD CONSTRAINT "journey_enrollment_draft_offerId_fkey" FOREIGN KEY ("offerId") REFERENCES "journey_seat_offer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "child_guardian" ADD COLUMN "legalBasis" "Onda1LegalBasis" NOT NULL DEFAULT 'CONSENT';
+ALTER TABLE "child_guardian" ADD COLUMN "consentPolicyVersion" VARCHAR(80) NOT NULL DEFAULT 'family-link-v1';
+ALTER TABLE "child_guardian" ADD COLUMN "retentionUntil" TIMESTAMP(3);
+ALTER TABLE "child_guardian" ADD COLUMN "revocationReason" VARCHAR(500);
+ALTER TABLE "consent_grant" ADD COLUMN "legalBasis" "Onda1LegalBasis" NOT NULL DEFAULT 'CONSENT';

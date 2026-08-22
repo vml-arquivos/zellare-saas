@@ -22,6 +22,7 @@ import {
 import {
   changeJourneyStage,
   createJourneyProspect,
+  eraseJourneyProspect,
   getJourneyDashboard,
   getJourneyDuplicateReviews,
   getJourneyOffers,
@@ -31,6 +32,8 @@ import {
   getJourneyVisits,
   getJourneyWaitlist,
   journeyIdempotencyKey,
+  revokeJourneyProspectContact,
+  setJourneyProspectRetention,
 } from "../api/journey";
 import type {
   JourneyDashboard,
@@ -135,6 +138,79 @@ function Empty({ text }: { text: string }) {
   );
 }
 
+function PrivacyActions({
+  prospect,
+  reason,
+  retention,
+  busy,
+  onReason,
+  onRetention,
+  onAction,
+}: {
+  prospect: JourneyProspect;
+  reason: string;
+  retention: string;
+  busy: boolean;
+  onReason: (value: string) => void;
+  onRetention: (value: string) => void;
+  onAction: (action: "retention" | "revoke" | "erase") => void;
+}) {
+  return (
+    <details className="rounded-lg bg-[var(--surface-inset)] p-2">
+      <summary className="cursor-pointer text-xs font-medium text-[var(--text-primary)]">
+        Privacidade
+      </summary>
+      <div className="mt-2 space-y-2">
+        <label className="block text-xs text-[var(--text-secondary)]">
+          Justificativa
+          <input
+            aria-label={`Justificativa de privacidade de ${prospect.childName}`}
+            className="ds-input mt-1 w-full"
+            value={reason}
+            onChange={(event) => onReason(event.target.value)}
+          />
+        </label>
+        <label className="block text-xs text-[var(--text-secondary)]">
+          Reter até
+          <input
+            aria-label={`Retenção de ${prospect.childName}`}
+            type="date"
+            className="ds-input mt-1 w-full"
+            value={retention}
+            onChange={(event) => onRetention(event.target.value)}
+          />
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="ds-btn ds-btn-secondary mobile-touch-target"
+            disabled={busy}
+            onClick={() => onAction("retention")}
+          >
+            Reter
+          </button>
+          <button
+            type="button"
+            className="ds-btn ds-btn-secondary mobile-touch-target"
+            disabled={busy || !prospect.consentContact}
+            onClick={() => onAction("revoke")}
+          >
+            Revogar contato
+          </button>
+          <button
+            type="button"
+            className="ds-btn ds-btn-secondary mobile-touch-target text-[var(--danger-600)]"
+            disabled={busy}
+            onClick={() => onAction("erase")}
+          >
+            Eliminar dados
+          </button>
+        </div>
+      </div>
+    </details>
+  );
+}
+
 export default function JourneyPage() {
   const { user } = useAuth();
   const location = useLocation();
@@ -163,6 +239,10 @@ export default function JourneyPage() {
     desiredDate: "",
     consentCapture: false,
     consentContact: false,
+    captureLegalBasis: "CONSENT" as const,
+    contactLegalBasis: "CONSENT" as const,
+    consentPolicyVersion: "journey-privacy-v1",
+    retentionUntil: "",
   });
 
   const mode = useMemo(() => {
@@ -239,6 +319,12 @@ export default function JourneyPage() {
     try {
       const result = await createJourneyProspect({
         ...form,
+        contactLegalBasis: form.consentContact
+          ? form.contactLegalBasis
+          : undefined,
+        retentionUntil: form.retentionUntil
+          ? `${form.retentionUntil}T23:59:59.999Z`
+          : undefined,
         unitId,
         ageGroupMinMonths: Number(form.ageGroupMinMonths),
         ageGroupMaxMonths: Number(form.ageGroupMaxMonths),
@@ -259,6 +345,7 @@ export default function JourneyPage() {
         email: "",
         phone: "",
         desiredDate: "",
+        retentionUntil: "",
       }));
       await load(true);
     } catch (cause) {
@@ -274,7 +361,7 @@ export default function JourneyPage() {
     (mode === "overview" ? "Visão geral" : "Jornada");
 
   return (
-    <main className="mx-auto w-full max-w-[var(--content-max-w)] px-4 py-5 sm:px-6 lg:px-8">
+    <main className="mx-auto min-w-0 w-full max-w-[var(--content-max-w)] px-4 py-5 sm:px-6 lg:px-8">
       <header className="zelare-page-header mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-1 text-xs uppercase tracking-[0.18em] text-[var(--text-tertiary)]">
@@ -287,13 +374,13 @@ export default function JourneyPage() {
             {selectedUnitLabel}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
           <label htmlFor="journey-unit" className="sr-only">
             Unidade
           </label>
           <select
             id="journey-unit"
-            className="ds-input min-w-[13rem]"
+            className="ds-input w-full min-w-0 sm:w-auto sm:min-w-[13rem]"
             value={unitId}
             onChange={(event) => setUnitId(event.target.value)}
           >
@@ -394,11 +481,43 @@ export default function JourneyPage() {
           {mode === "pipeline" && (
             <Pipeline dashboard={dashboard} prospects={prospects} />
           )}
-          {mode === "visits" && <JourneyVisitsPanel visits={visits} prospects={prospects} unitId={unitId} units={units} onChanged={() => load(true)} />}
-          {mode === "waitlist" && <JourneyWaitlistPanel entries={waitlist} policies={policies} prospects={prospects} units={units} unitId={unitId} onChanged={() => load(true)} />}
-          {mode === "offers" && <JourneyOffersPanel offers={offers} prospects={prospects} capacity={dashboard?.capacity ?? []} waitlist={waitlist} units={units} unitId={unitId} onChanged={() => load(true)} />}
+          {mode === "visits" && (
+            <JourneyVisitsPanel
+              visits={visits}
+              prospects={prospects}
+              unitId={unitId}
+              units={units}
+              onChanged={() => load(true)}
+            />
+          )}
+          {mode === "waitlist" && (
+            <JourneyWaitlistPanel
+              entries={waitlist}
+              policies={policies}
+              prospects={prospects}
+              units={units}
+              unitId={unitId}
+              onChanged={() => load(true)}
+            />
+          )}
+          {mode === "offers" && (
+            <JourneyOffersPanel
+              offers={offers}
+              prospects={prospects}
+              capacity={dashboard?.capacity ?? []}
+              waitlist={waitlist}
+              units={units}
+              unitId={unitId}
+              onChanged={() => load(true)}
+            />
+          )}
           {mode === "reports" && <Reports dashboard={dashboard} />}
-          {mode === "prospects" && <JourneyDuplicatesPanel reviews={duplicates} onChanged={() => load(true)} />}
+          {mode === "prospects" && (
+            <JourneyDuplicatesPanel
+              reviews={duplicates}
+              onChanged={() => load(true)}
+            />
+          )}
         </>
       )}
 
@@ -511,30 +630,100 @@ function Prospects({
     desiredDate: string;
     consentCapture: boolean;
     consentContact: boolean;
+    captureLegalBasis: "CONSENT";
+    contactLegalBasis: "CONSENT";
+    consentPolicyVersion: string;
+    retentionUntil: string;
   };
   setForm: React.Dispatch<React.SetStateAction<typeof form>>;
   submit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
   onChanged: () => Promise<void>;
 }) {
-  const [selectedStages, setSelectedStages] = useState<Record<string, JourneyStage>>({});
+  const [selectedStages, setSelectedStages] = useState<
+    Record<string, JourneyStage>
+  >({});
   const [stageBusy, setStageBusy] = useState<string | null>(null);
   const [stageMessage, setStageMessage] = useState<string | null>(null);
   const [stageError, setStageError] = useState<string | null>(null);
+  const [privacyReasons, setPrivacyReasons] = useState<Record<string, string>>(
+    {},
+  );
+  const [privacyRetention, setPrivacyRetention] = useState<
+    Record<string, string>
+  >({});
+  const [privacyBusy, setPrivacyBusy] = useState<string | null>(null);
+  const [privacyMessage, setPrivacyMessage] = useState<string | null>(null);
+  const [privacyError, setPrivacyError] = useState<string | null>(null);
   const update = (field: keyof typeof form, value: string | boolean) =>
     setForm((current) => ({ ...current, [field]: value }));
   const saveStage = async (prospect: JourneyProspect) => {
     const toStage = selectedStages[prospect.id] ?? prospect.stage;
-    setStageBusy(prospect.id); setStageMessage(null); setStageError(null);
+    setStageBusy(prospect.id);
+    setStageMessage(null);
+    setStageError(null);
     try {
-      await changeJourneyStage(prospect.id, { toStage, idempotencyKey: journeyIdempotencyKey("prospect-stage") });
-      await onChanged(); setStageMessage("Estágio atualizado.");
+      await changeJourneyStage(prospect.id, {
+        toStage,
+        idempotencyKey: journeyIdempotencyKey("prospect-stage"),
+      });
+      await onChanged();
+      setStageMessage("Estágio atualizado.");
     } catch {
       setStageError("Não foi possível atualizar o estágio.");
-    } finally { setStageBusy(null); }
+    } finally {
+      setStageBusy(null);
+    }
+  };
+  const savePrivacy = async (
+    prospect: JourneyProspect,
+    action: "retention" | "revoke" | "erase",
+  ) => {
+    const reason = privacyReasons[prospect.id]?.trim() ?? "";
+    if (reason.length < 3) {
+      setPrivacyError("Informe uma justificativa de privacidade.");
+      return;
+    }
+    if (action === "retention" && !privacyRetention[prospect.id]) {
+      setPrivacyError("Informe a nova data de retenção.");
+      return;
+    }
+    setPrivacyBusy(`${action}-${prospect.id}`);
+    setPrivacyMessage(null);
+    setPrivacyError(null);
+    try {
+      if (action === "retention")
+        await setJourneyProspectRetention(prospect.id, {
+          retentionUntil: `${privacyRetention[prospect.id]}T23:59:59.999Z`,
+          reason,
+          idempotencyKey: journeyIdempotencyKey("prospect-retention"),
+        });
+      if (action === "revoke")
+        await revokeJourneyProspectContact(prospect.id, {
+          reason,
+          idempotencyKey: journeyIdempotencyKey("prospect-contact-revoke"),
+        });
+      if (action === "erase")
+        await eraseJourneyProspect(prospect.id, {
+          reason,
+          idempotencyKey: journeyIdempotencyKey("prospect-erase"),
+        });
+      await onChanged();
+      setPrivacyMessage(
+        action === "erase"
+          ? "Dados eliminados e histórico preservado."
+          : action === "revoke"
+            ? "Contato revogado."
+            : "Retenção atualizada.",
+      );
+    } catch {
+      setPrivacyError("Não foi possível concluir a ação de privacidade.");
+    } finally {
+      setPrivacyBusy(null);
+    }
   };
   return (
-    <section className="grid gap-6 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.6fr)]">
-      <Card>
+    <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.6fr)]">
+      <Card className="min-w-0">
         <div className="mb-4">
           <h2 className="text-base font-normal text-[var(--text-primary)]">
             Novo interessado
@@ -566,7 +755,7 @@ function Prospects({
               onChange={(event) => update("childName", event.target.value)}
             />
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="block text-xs text-[var(--text-secondary)]">
               E-mail
               <input
@@ -585,7 +774,7 @@ function Prospects({
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="block text-xs text-[var(--text-secondary)]">
               Faixa inicial
               <input
@@ -615,7 +804,7 @@ function Prospects({
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label className="block text-xs text-[var(--text-secondary)]">
               Período
               <input
@@ -644,6 +833,40 @@ function Prospects({
               onChange={(event) => update("source", event.target.value)}
             />
           </label>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label className="block text-xs text-[var(--text-secondary)]">
+              Base legal da captação
+              <select
+                className="ds-input mt-1 w-full"
+                value={form.captureLegalBasis}
+                onChange={(event) =>
+                  update("captureLegalBasis", event.target.value as "CONSENT")
+                }
+              >
+                <option value="CONSENT">Consentimento explícito</option>
+              </select>
+            </label>
+            <label className="block text-xs text-[var(--text-secondary)]">
+              Política de privacidade
+              <input
+                className="ds-input mt-1 w-full"
+                value={form.consentPolicyVersion}
+                readOnly
+                aria-readonly="true"
+              />
+            </label>
+            <label className="block text-xs text-[var(--text-secondary)] sm:col-span-2">
+              Reter até (opcional)
+              <input
+                type="date"
+                className="ds-input mt-1 w-full"
+                value={form.retentionUntil}
+                onChange={(event) =>
+                  update("retentionUntil", event.target.value)
+                }
+              />
+            </label>
+          </div>
           <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
             <input
               required
@@ -663,7 +886,9 @@ function Prospects({
                 update("consentContact", event.target.checked)
               }
             />
-            Consentimento para contato.
+            <span>
+              Consentimento para contato. Base legal: consentimento explícito.
+            </span>
           </label>
           <button className="ds-btn ds-btn-primary w-full" type="submit">
             <UserPlus className="h-4 w-4" aria-hidden="true" />
@@ -671,7 +896,7 @@ function Prospects({
           </button>
         </form>
       </Card>
-      <Card>
+      <Card className="min-w-0">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-normal text-[var(--text-primary)]">
@@ -685,8 +910,8 @@ function Prospects({
             {metric(prospects.length)} registros
           </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[44rem] text-left text-sm">
+        <div className="hidden overflow-x-auto lg:block">
+          <table className="w-full text-left text-sm">
             <thead className="border-b border-[var(--border-default)] text-[10px] uppercase tracking-[0.12em] text-[var(--text-tertiary)]">
               <tr>
                 <th className="px-2 py-3 font-medium">Responsável</th>
@@ -695,6 +920,7 @@ function Prospects({
                 <th className="px-2 py-3 font-medium">Estágio</th>
                 <th className="px-2 py-3 font-medium">Atualizado</th>
                 <th className="px-2 py-3 font-medium">Ação</th>
+                <th className="px-2 py-3 font-medium">Privacidade</th>
               </tr>
             </thead>
             <tbody>
@@ -723,18 +949,67 @@ function Prospects({
                     </td>
                     <td className="px-2 py-3">
                       <div className="flex min-w-[14rem] gap-2">
-                        <label className="sr-only" htmlFor={`stage-${prospect.id}`}>Novo estágio</label>
-                        <select id={`stage-${prospect.id}`} className="ds-input" value={selectedStages[prospect.id] ?? prospect.stage} onChange={(event) => setSelectedStages((current) => ({ ...current, [prospect.id]: event.target.value as JourneyStage }))}>
-                          {STAGES.map((stage) => <option key={stage} value={stage}>{STAGE_LABELS[stage]}</option>)}
+                        <label
+                          className="sr-only"
+                          htmlFor={`stage-${prospect.id}`}
+                        >
+                          Novo estágio
+                        </label>
+                        <select
+                          id={`stage-${prospect.id}`}
+                          className="ds-input"
+                          value={selectedStages[prospect.id] ?? prospect.stage}
+                          onChange={(event) =>
+                            setSelectedStages((current) => ({
+                              ...current,
+                              [prospect.id]: event.target.value as JourneyStage,
+                            }))
+                          }
+                        >
+                          {STAGES.map((stage) => (
+                            <option key={stage} value={stage}>
+                              {STAGE_LABELS[stage]}
+                            </option>
+                          ))}
                         </select>
-                        <button type="button" className="ds-btn ds-btn-secondary mobile-touch-target" disabled={stageBusy !== null} onClick={() => void saveStage(prospect)}>Salvar</button>
+                        <button
+                          type="button"
+                          className="ds-btn ds-btn-secondary mobile-touch-target"
+                          disabled={stageBusy !== null}
+                          onClick={() => void saveStage(prospect)}
+                        >
+                          Salvar
+                        </button>
                       </div>
+                    </td>
+                    <td className="px-2 py-3 align-top">
+                      <PrivacyActions
+                        prospect={prospect}
+                        reason={privacyReasons[prospect.id] ?? ""}
+                        retention={privacyRetention[prospect.id] ?? ""}
+                        busy={privacyBusy !== null}
+                        onReason={(value) =>
+                          setPrivacyReasons((current) => ({
+                            ...current,
+                            [prospect.id]: value,
+                          }))
+                        }
+                        onRetention={(value) =>
+                          setPrivacyRetention((current) => ({
+                            ...current,
+                            [prospect.id]: value,
+                          }))
+                        }
+                        onAction={(action) =>
+                          void savePrivacy(prospect, action)
+                        }
+                      />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <Empty text="Nenhum interessado no escopo selecionado." />
                   </td>
                 </tr>
@@ -742,8 +1017,105 @@ function Prospects({
             </tbody>
           </table>
         </div>
-        {stageMessage && <p className="mt-3 text-xs text-[var(--text-brand)]" role="status">{stageMessage}</p>}
-        {stageError && <p className="mt-3 text-xs text-[var(--danger-600)]" role="alert">{stageError}</p>}
+        <div className="space-y-3 lg:hidden">
+          {prospects.length ? (
+            prospects.map((prospect) => (
+              <article
+                key={prospect.id}
+                className="rounded-[var(--r-lg)] border border-[var(--border-subtle)] p-3"
+              >
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-[var(--text-primary)]">
+                      {prospect.responsibleName}
+                    </p>
+                    <p className="truncate text-xs text-[var(--text-secondary)]">
+                      {prospect.childName}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+                      {prospect.email ?? "Sem e-mail"} ·{" "}
+                      {prospect.phone ?? "Sem telefone"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 ds-badge ds-badge-blue">
+                    {STAGE_LABELS[prospect.stage]}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <label className="text-xs text-[var(--text-secondary)]">
+                    Novo estágio
+                    <select
+                      aria-label={`Novo estágio de ${prospect.childName}`}
+                      className="ds-input mt-1 w-full"
+                      value={selectedStages[prospect.id] ?? prospect.stage}
+                      onChange={(event) =>
+                        setSelectedStages((current) => ({
+                          ...current,
+                          [prospect.id]: event.target.value as JourneyStage,
+                        }))
+                      }
+                    >
+                      {STAGES.map((stage) => (
+                        <option key={stage} value={stage}>
+                          {STAGE_LABELS[stage]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    className="ds-btn ds-btn-secondary mobile-touch-target self-end"
+                    disabled={stageBusy !== null}
+                    onClick={() => void saveStage(prospect)}
+                  >
+                    Salvar estágio
+                  </button>
+                </div>
+                <PrivacyActions
+                  prospect={prospect}
+                  reason={privacyReasons[prospect.id] ?? ""}
+                  retention={privacyRetention[prospect.id] ?? ""}
+                  busy={privacyBusy !== null}
+                  onReason={(value) =>
+                    setPrivacyReasons((current) => ({
+                      ...current,
+                      [prospect.id]: value,
+                    }))
+                  }
+                  onRetention={(value) =>
+                    setPrivacyRetention((current) => ({
+                      ...current,
+                      [prospect.id]: value,
+                    }))
+                  }
+                  onAction={(action) => void savePrivacy(prospect, action)}
+                />
+              </article>
+            ))
+          ) : (
+            <Empty text="Nenhum interessado no escopo selecionado." />
+          )}
+        </div>
+        {privacyMessage && (
+          <p className="mt-3 text-xs text-[var(--text-brand)]" role="status">
+            {privacyMessage}
+          </p>
+        )}
+        {privacyError && (
+          <p className="mt-3 text-xs text-[var(--danger-600)]" role="alert">
+            {privacyError}
+          </p>
+        )}
+        {stageMessage && (
+          <p className="mt-3 text-xs text-[var(--text-brand)]" role="status">
+            {stageMessage}
+          </p>
+        )}
+        {stageError && (
+          <p className="mt-3 text-xs text-[var(--danger-600)]" role="alert">
+            {stageError}
+          </p>
+        )}
       </Card>
     </section>
   );

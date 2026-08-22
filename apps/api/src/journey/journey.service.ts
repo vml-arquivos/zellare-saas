@@ -10,20 +10,30 @@ import {
   EnrollmentStatus,
   JourneyDuplicateReviewStatus,
   JourneyOfferStatus,
+  JourneyPrivacyEventType,
+  JourneyProspectPrivacyStatus,
   JourneyStage,
   JourneyTaskStatus,
   JourneyVisitEventType,
   JourneyVisitStatus,
   JourneyWaitlistEntryStatus,
   JourneyWaitlistPolicyStatus,
+  Onda1LegalBasis,
   Prisma,
   UserStatus,
 } from "@prisma/client";
-import { createHash } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHmac,
+  randomBytes,
+  scryptSync,
+} from "node:crypto";
 import { AuditService } from "../common/services/audit.service";
 import type { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  JOURNEY_ALLOWED_STAGE_TRANSITIONS,
   JOURNEY_FORBIDDEN_TERMS,
   JOURNEY_GOVERNANCE,
 } from "./journey.constants";
@@ -40,6 +50,8 @@ import {
   JourneyDashboardQueryDto,
   JourneyDuplicateReviewDto,
   JourneyListQueryDto,
+  JourneyPrivacyActionDto,
+  JourneyRetentionDto,
   JourneyVisitActionDto,
   JoinJourneyWaitlistDto,
   PublishJourneyPolicyDto,
@@ -61,11 +73,83 @@ export class JourneyService {
     return normalized ? normalized : undefined;
   }
 
+  private secret(name: string): string {
+    const dedicated = process.env[name];
+    if (process.env.NODE_ENV === "production" && !dedicated) {
+      throw new Error(`${name} precisa estar configurado em produção`);
+    }
+    const value = dedicated ?? process.env.JWT_SECRET;
+    if (!value || value.length < 16) {
+      throw new Error(`${name} ou JWT_SECRET precisa estar configurado`);
+    }
+    return value;
+  }
+
   private hash(value?: string): string | undefined {
     const normalized = this.normalize(value);
     return normalized
-      ? createHash("sha256").update(normalized).digest("hex")
+      ? `${JOURNEY_GOVERNANCE.contactHashVersion}:${createHmac("sha256", this.secret("JOURNEY_CONTACT_HMAC_SECRET")).update(normalized).digest("hex")}`
       : undefined;
+  }
+
+  private encryptionKey(): Buffer {
+    return scryptSync(
+      this.secret("JOURNEY_CONTACT_ENCRYPTION_SECRET"),
+      "zelare-journey-contact-v1",
+      32,
+    );
+  }
+
+  private encrypt(value?: string): string | undefined {
+    const normalized = value?.trim();
+    if (!normalized) return undefined;
+    const iv = randomBytes(12);
+    const cipher = createCipheriv("aes-256-gcm", this.encryptionKey(), iv);
+    const ciphertext = Buffer.concat([
+      cipher.update(normalized, "utf8"),
+      cipher.final(),
+    ]);
+    const tag = cipher.getAuthTag();
+    return `${JOURNEY_GOVERNANCE.contactCipherVersion}:${iv.toString("hex")}:${tag.toString("hex")}:${ciphertext.toString("hex")}`;
+  }
+
+  private decrypt(value?: string | null): string | undefined {
+    if (!value) return undefined;
+    const [version, ivHex, tagHex, ciphertextHex] = value.split(":");
+    if (
+      version !== JOURNEY_GOVERNANCE.contactCipherVersion ||
+      !ivHex ||
+      !tagHex ||
+      !ciphertextHex
+    )
+      return undefined;
+    try {
+      const decipher = createDecipheriv(
+        "aes-256-gcm",
+        this.encryptionKey(),
+        Buffer.from(ivHex, "hex"),
+      );
+      decipher.setAuthTag(Buffer.from(tagHex, "hex"));
+      return Buffer.concat([
+        decipher.update(Buffer.from(ciphertextHex, "hex")),
+        decipher.final(),
+      ]).toString("utf8");
+    } catch {
+      return undefined;
+    }
+  }
+
+  private maskEmail(value?: string): string | undefined {
+    if (!value) return undefined;
+    const [local, domain] = value.split("@");
+    if (!local || !domain) return "•••";
+    return `${local.slice(0, 1)}***@${domain}`;
+  }
+
+  private maskPhone(value?: string): string | undefined {
+    if (!value) return undefined;
+    const digits = value.replace(/\D/g, "");
+    return digits.length > 2 ? `***${digits.slice(-2)}` : "***";
   }
 
   private date(value: string | undefined, field: string): Date | undefined {
@@ -99,6 +183,28 @@ export class JourneyService {
       throw new BadRequestException("O fim deve ser posterior ao início");
   }
 
+  private assertStageTransition(
+    from: JourneyStage,
+    to: JourneyStage,
+    allowArchivedUndo = false,
+  ): void {
+    if (from === to) return;
+    if (
+      allowArchivedUndo &&
+      from === JourneyStage.ARQUIVADO &&
+      to !== JourneyStage.ARQUIVADO
+    )
+      return;
+    const allowed = JOURNEY_ALLOWED_STAGE_TRANSITIONS[
+      from
+    ] as readonly string[];
+    if (!allowed.includes(to)) {
+      throw new ConflictException(
+        `Transição de estágio não permitida: ${from} → ${to}`,
+      );
+    }
+  }
+
   private rejectSensitiveContent(values: Array<string | undefined>): void {
     const content = values
       .filter(Boolean)
@@ -114,6 +220,88 @@ export class JourneyService {
         "O Journey aceita somente dados de captação permitidos",
       );
     }
+  }
+
+  private validateProspectPrivacy(dto: CreateJourneyProspectDto): {
+    captureLegalBasis: Onda1LegalBasis;
+    contactLegalBasis: Onda1LegalBasis | undefined;
+    consentPolicyVersion: string;
+    retentionUntil: Date;
+  } {
+    if (!dto.consentCapture) {
+      throw new BadRequestException(
+        "O consentimento para registrar a captação é obrigatório",
+      );
+    }
+    const captureLegalBasis = dto.captureLegalBasis ?? Onda1LegalBasis.CONSENT;
+    if (captureLegalBasis !== Onda1LegalBasis.CONSENT) {
+      throw new BadRequestException(
+        "A captação Journey exige base legal de consentimento explícito",
+      );
+    }
+    const contactLegalBasis = dto.contactLegalBasis;
+    if (dto.consentContact && contactLegalBasis !== Onda1LegalBasis.CONSENT) {
+      throw new BadRequestException(
+        "Contato exige consentimento explícito e base legal compatível",
+      );
+    }
+    if (!dto.consentContact && contactLegalBasis) {
+      throw new BadRequestException(
+        "Não informe base legal de contato sem consentimento de contato",
+      );
+    }
+    const retentionUntil = dto.retentionUntil
+      ? this.dateRequired(dto.retentionUntil, "Retenção")
+      : new Date(
+          Date.now() + JOURNEY_GOVERNANCE.defaultRetentionDays * 86_400_000,
+        );
+    if (retentionUntil <= new Date()) {
+      throw new BadRequestException("O prazo de retenção deve estar no futuro");
+    }
+    if (retentionUntil.getTime() - Date.now() > 730 * 86_400_000) {
+      throw new BadRequestException(
+        "O prazo de retenção não pode exceder 2 anos",
+      );
+    }
+    const consentPolicyVersion =
+      dto.consentPolicyVersion?.trim() ||
+      JOURNEY_GOVERNANCE.prospectPrivacyPolicyVersion;
+    return {
+      captureLegalBasis,
+      contactLegalBasis,
+      consentPolicyVersion,
+      retentionUntil,
+    };
+  }
+
+  private async appendPrivacyEvent(
+    tx: JourneyTx,
+    params: {
+      mantenedoraId: string;
+      unitId: string;
+      prospectId: string;
+      type: JourneyPrivacyEventType;
+      purpose: string;
+      legalBasis?: Onda1LegalBasis;
+      reason?: string;
+      actorUserId: string;
+      idempotencyKey: string;
+    },
+  ): Promise<void> {
+    await tx.journeyProspectPrivacyEvent.create({
+      data: {
+        mantenedoraId: params.mantenedoraId,
+        unitId: params.unitId,
+        prospectId: params.prospectId,
+        type: params.type,
+        purpose: params.purpose,
+        legalBasis: params.legalBasis,
+        policyVersion: JOURNEY_GOVERNANCE.prospectPrivacyPolicyVersion,
+        reason: params.reason,
+        actorUserId: params.actorUserId,
+        idempotencyKey: params.idempotencyKey,
+      },
+    });
   }
 
   private assertPriorityDefinition(definition: Record<string, unknown>): void {
@@ -150,6 +338,15 @@ export class JourneyService {
     childName: string;
     email: string | null;
     phone: string | null;
+    emailCiphertext?: string | null;
+    phoneCiphertext?: string | null;
+    privacyStatus?: JourneyProspectPrivacyStatus;
+    retentionUntil?: Date | null;
+    captureLegalBasis?: Onda1LegalBasis;
+    contactLegalBasis?: Onda1LegalBasis | null;
+    consentPolicyVersion?: string;
+    consentCapturedAt?: Date | null;
+    contactConsentAt?: Date | null;
     source: string;
     ageGroupMinMonths: number;
     ageGroupMaxMonths: number;
@@ -167,8 +364,12 @@ export class JourneyService {
       unitId: prospect.unitId,
       responsibleName: prospect.responsibleName,
       childName: prospect.childName,
-      email: prospect.email,
-      phone: prospect.phone,
+      email: this.maskEmail(
+        this.decrypt(prospect.emailCiphertext) ?? prospect.email ?? undefined,
+      ),
+      phone: this.maskPhone(
+        this.decrypt(prospect.phoneCiphertext) ?? prospect.phone ?? undefined,
+      ),
       source: prospect.source,
       ageGroupMinMonths: prospect.ageGroupMinMonths,
       ageGroupMaxMonths: prospect.ageGroupMaxMonths,
@@ -180,6 +381,15 @@ export class JourneyService {
       version: prospect.version,
       createdAt: prospect.createdAt,
       updatedAt: prospect.updatedAt,
+      privacy: {
+        status: prospect.privacyStatus ?? JourneyProspectPrivacyStatus.ACTIVE,
+        retentionUntil: prospect.retentionUntil ?? null,
+        captureLegalBasis: prospect.captureLegalBasis ?? null,
+        contactLegalBasis: prospect.contactLegalBasis ?? null,
+        consentPolicyVersion: prospect.consentPolicyVersion ?? null,
+        consentCapturedAt: prospect.consentCapturedAt ?? null,
+        contactConsentAt: prospect.contactConsentAt ?? null,
+      },
     };
   }
 
@@ -200,6 +410,20 @@ export class JourneyService {
       throw new BadRequestException(
         "Responsável interno não encontrado ou inativo",
       );
+  }
+
+  private assertActiveProspect(prospect: {
+    privacyStatus: JourneyProspectPrivacyStatus;
+    retentionUntil: Date | null;
+  }): void {
+    if (
+      prospect.privacyStatus === JourneyProspectPrivacyStatus.ERASED ||
+      (prospect.retentionUntil && prospect.retentionUntil <= new Date())
+    ) {
+      throw new GoneException(
+        "Os dados deste prospecto não estão mais disponíveis para esta operação",
+      );
+    }
   }
 
   private async outbox(
@@ -260,17 +484,33 @@ export class JourneyService {
       actorUserId: string;
       idempotencyKey: string;
       reason?: string;
+      allowArchivedUndo?: boolean;
     },
   ) {
     const prospect = await tx.journeyProspect.findUnique({
       where: { id: params.prospectId },
     });
     if (!prospect) throw new NotFoundException("Interessado não encontrado");
+    if (!params.allowArchivedUndo) this.assertActiveProspect(prospect);
+    this.assertStageTransition(
+      prospect.stage,
+      params.toStage,
+      params.allowArchivedUndo,
+    );
     if (prospect.stage === params.toStage) return prospect;
-    await tx.journeyProspect.update({
-      where: { id: prospect.id },
+    const changed = await tx.journeyProspect.updateMany({
+      where: {
+        id: prospect.id,
+        stage: prospect.stage,
+        version: prospect.version,
+      },
       data: { stage: params.toStage, version: { increment: 1 } },
     });
+    if (changed.count !== 1) {
+      throw new ConflictException(
+        "O prospecto foi alterado por outra operação; recarregue e tente novamente",
+      );
+    }
     await this.appendStageEvent(tx, {
       mantenedoraId: prospect.mantenedoraId,
       unitId: prospect.unitId,
@@ -326,9 +566,13 @@ export class JourneyService {
       dto.period,
     ]);
 
+    const privacy = this.validateProspectPrivacy(dto);
     const emailHash = this.hash(dto.email);
     const phoneHash = this.hash(dto.phone);
     const declaredIdentityHash = this.hash(dto.declaredIdentity);
+    const emailCiphertext = this.encrypt(dto.email);
+    const phoneCiphertext = this.encrypt(dto.phone);
+    const declaredIdentityCiphertext = this.encrypt(dto.declaredIdentity);
     const desiredDate = this.date(dto.desiredDate, "Data desejada");
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -362,6 +606,7 @@ export class JourneyService {
               emailHash: true,
               phoneHash: true,
               declaredIdentityHash: true,
+              contactHashVersion: true,
             },
             take: 20,
           })
@@ -373,12 +618,26 @@ export class JourneyService {
           unitId: dto.unitId,
           responsibleName: dto.responsibleName.trim(),
           childName: dto.childName.trim(),
-          email: dto.email?.trim() || null,
-          phone: dto.phone?.trim() || null,
+          email: null,
+          phone: null,
           emailHash: emailHash ?? null,
           phoneHash: phoneHash ?? null,
           declaredIdentityType: dto.declaredIdentityType?.trim() || null,
           declaredIdentityHash: declaredIdentityHash ?? null,
+          emailCiphertext: emailCiphertext ?? null,
+          phoneCiphertext: phoneCiphertext ?? null,
+          declaredIdentityCiphertext: declaredIdentityCiphertext ?? null,
+          contactHashVersion:
+            emailHash || phoneHash || declaredIdentityHash
+              ? JOURNEY_GOVERNANCE.contactHashVersion
+              : null,
+          captureLegalBasis: privacy.captureLegalBasis,
+          contactLegalBasis: privacy.contactLegalBasis ?? null,
+          consentPolicyVersion: privacy.consentPolicyVersion,
+          consentCapturedAt: new Date(),
+          contactConsentAt: dto.consentContact ? new Date() : null,
+          retentionUntil: privacy.retentionUntil,
+          privacyStatus: JourneyProspectPrivacyStatus.ACTIVE,
           source: dto.source.trim(),
           ageGroupMinMonths: dto.ageGroupMinMonths,
           ageGroupMaxMonths: dto.ageGroupMaxMonths,
@@ -398,6 +657,40 @@ export class JourneyService {
         toStage: JourneyStage.NOVO,
         actorUserId: user.sub,
         idempotencyKey: `${dto.idempotencyKey}:stage`,
+      });
+      await this.appendPrivacyEvent(tx, {
+        mantenedoraId: user.mantenedoraId,
+        unitId: dto.unitId,
+        prospectId: prospect.id,
+        type: JourneyPrivacyEventType.CONSENT_CAPTURED,
+        purpose: "JOURNEY_CAPTURE",
+        legalBasis: privacy.captureLegalBasis,
+        actorUserId: user.sub,
+        idempotencyKey: `${dto.idempotencyKey}:privacy:capture`,
+      });
+      if (dto.consentContact) {
+        await this.appendPrivacyEvent(tx, {
+          mantenedoraId: user.mantenedoraId,
+          unitId: dto.unitId,
+          prospectId: prospect.id,
+          type: JourneyPrivacyEventType.CONSENT_CONTACT_GRANTED,
+          purpose: "JOURNEY_CONTACT",
+          legalBasis: privacy.contactLegalBasis,
+          actorUserId: user.sub,
+          idempotencyKey: `${dto.idempotencyKey}:privacy:contact`,
+        });
+      }
+      await this.outbox(tx, {
+        mantenedoraId: user.mantenedoraId,
+        eventType: "journey.privacy.consent.captured",
+        aggregateType: "JourneyProspect",
+        aggregateId: prospect.id,
+        idempotencyKey: `${user.mantenedoraId}:journey.privacy.captured:${dto.idempotencyKey}`,
+        payload: {
+          prospectId: prospect.id,
+          consentContact: dto.consentContact,
+          policyVersion: privacy.consentPolicyVersion,
+        },
       });
       for (const candidate of candidates) {
         const matchReasons = [
@@ -469,14 +762,16 @@ export class JourneyService {
   }
 
   async listProspects(query: JourneyListQueryDto, user: JwtPayload) {
-    await this.access.assertAccess(user, "journey.read");
+    await this.access.assertAccess(user, "journey.prospect.read");
     const unitIds = await this.access.accessibleUnitIds(user, query.unitId);
-    return this.prisma.journeyProspect.findMany({
+    const prospects = await this.prisma.journeyProspect.findMany({
       where: {
         mantenedoraId: user.mantenedoraId,
         unitId: { in: unitIds },
         mergedIntoId: null,
         stage: query.stage,
+        privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+        OR: [{ retentionUntil: null }, { retentionUntil: { gt: new Date() } }],
       },
       select: {
         id: true,
@@ -485,6 +780,15 @@ export class JourneyService {
         childName: true,
         email: true,
         phone: true,
+        emailCiphertext: true,
+        phoneCiphertext: true,
+        privacyStatus: true,
+        retentionUntil: true,
+        captureLegalBasis: true,
+        contactLegalBasis: true,
+        consentPolicyVersion: true,
+        consentCapturedAt: true,
+        contactConsentAt: true,
         source: true,
         ageGroupMinMonths: true,
         ageGroupMaxMonths: true,
@@ -504,12 +808,14 @@ export class JourneyService {
       take: query.limit,
       skip: query.offset,
     });
+    return prospects.map((prospect) => this.publicProspect(prospect));
   }
 
   async getProspect(id: string, user: JwtPayload) {
     await this.access.assertAccess(user, "journey.read");
     const prospect = await this.access.assertProspectAccess(user, id);
-    return this.prisma.journeyProspect.findUnique({
+    this.assertActiveProspect(prospect);
+    const detailed = await this.prisma.journeyProspect.findUnique({
       where: { id: prospect.id },
       select: {
         id: true,
@@ -519,6 +825,15 @@ export class JourneyService {
         childName: true,
         email: true,
         phone: true,
+        emailCiphertext: true,
+        phoneCiphertext: true,
+        privacyStatus: true,
+        retentionUntil: true,
+        captureLegalBasis: true,
+        contactLegalBasis: true,
+        consentPolicyVersion: true,
+        consentCapturedAt: true,
+        contactConsentAt: true,
         declaredIdentityType: true,
         source: true,
         ageGroupMinMonths: true,
@@ -548,6 +863,248 @@ export class JourneyService {
         },
       },
     });
+    if (!detailed) throw new NotFoundException("Interessado não encontrado");
+    return {
+      ...detailed,
+      ...this.publicProspect(detailed),
+      emailCiphertext: undefined,
+      phoneCiphertext: undefined,
+    };
+  }
+
+  async setProspectRetention(
+    id: string,
+    dto: JourneyRetentionDto,
+    user: JwtPayload,
+  ) {
+    await this.access.assertAccess(user, "journey.privacy.manage");
+    const current = await this.access.assertProspectAccess(user, id);
+    this.rejectSensitiveContent([dto.reason]);
+    const retentionUntil = this.dateRequired(dto.retentionUntil, "Retenção");
+    if (retentionUntil <= new Date()) {
+      throw new BadRequestException("O prazo de retenção deve estar no futuro");
+    }
+    if (retentionUntil.getTime() - Date.now() > 730 * 86_400_000) {
+      throw new BadRequestException(
+        "O prazo de retenção não pode exceder 2 anos",
+      );
+    }
+    const existing = await this.prisma.journeyProspectPrivacyEvent.findUnique({
+      where: {
+        mantenedoraId_idempotencyKey: {
+          mantenedoraId: user.mantenedoraId,
+          idempotencyKey: dto.idempotencyKey,
+        },
+      },
+    });
+    if (existing) return this.getProspect(id, user);
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const prospect = await tx.journeyProspect.findUnique({ where: { id } });
+      if (!prospect) throw new NotFoundException("Interessado não encontrado");
+      if (prospect.privacyStatus === JourneyProspectPrivacyStatus.ERASED) {
+        throw new ConflictException(
+          "Dados eliminados não podem ser retidos novamente",
+        );
+      }
+      const saved = await tx.journeyProspect.update({
+        where: { id },
+        data: {
+          retentionUntil,
+          privacyStatus: JourneyProspectPrivacyStatus.RETAINED,
+          version: { increment: 1 },
+        },
+      });
+      await this.appendPrivacyEvent(tx, {
+        mantenedoraId: user.mantenedoraId,
+        unitId: prospect.unitId,
+        prospectId: id,
+        type: JourneyPrivacyEventType.RETENTION_EXTENDED,
+        purpose: "JOURNEY_CAPTURE",
+        reason: dto.reason,
+        actorUserId: user.sub,
+        idempotencyKey: dto.idempotencyKey,
+      });
+      await this.outbox(tx, {
+        mantenedoraId: user.mantenedoraId,
+        eventType: "journey.privacy.retention.extended",
+        aggregateType: "JourneyProspect",
+        aggregateId: id,
+        idempotencyKey: `${user.mantenedoraId}:journey.privacy.retention:${dto.idempotencyKey}`,
+        payload: {
+          prospectId: id,
+          retentionUntil: retentionUntil.toISOString(),
+        },
+      });
+      return saved;
+    });
+    await this.audit.logUpdate(
+      AuditLogEntity.JOURNEY_PROSPECT,
+      id,
+      user.sub,
+      user.mantenedoraId,
+      updated.unitId,
+      { retentionUntil: current.retentionUntil },
+      { retentionUntil: updated.retentionUntil, reason: dto.reason },
+    );
+    return this.getProspect(id, user);
+  }
+
+  async revokeProspectContact(
+    id: string,
+    dto: JourneyPrivacyActionDto,
+    user: JwtPayload,
+  ) {
+    await this.access.assertAccess(user, "journey.privacy.manage");
+    const current = await this.access.assertProspectAccess(user, id);
+    this.rejectSensitiveContent([dto.reason]);
+    const existing = await this.prisma.journeyProspectPrivacyEvent.findUnique({
+      where: {
+        mantenedoraId_idempotencyKey: {
+          mantenedoraId: user.mantenedoraId,
+          idempotencyKey: dto.idempotencyKey,
+        },
+      },
+    });
+    if (existing) return this.getProspect(id, user);
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const prospect = await tx.journeyProspect.findUnique({ where: { id } });
+      if (!prospect) throw new NotFoundException("Interessado não encontrado");
+      if (prospect.privacyStatus === JourneyProspectPrivacyStatus.ERASED) {
+        throw new ConflictException("Dados já eliminados");
+      }
+      const saved = await tx.journeyProspect.update({
+        where: { id },
+        data: {
+          consentContact: false,
+          contactLegalBasis: null,
+          contactConsentAt: null,
+          emailCiphertext: null,
+          phoneCiphertext: null,
+          emailHash: null,
+          phoneHash: null,
+          version: { increment: 1 },
+        },
+      });
+      await this.appendPrivacyEvent(tx, {
+        mantenedoraId: user.mantenedoraId,
+        unitId: prospect.unitId,
+        prospectId: id,
+        type: JourneyPrivacyEventType.CONSENT_CONTACT_REVOKED,
+        purpose: "JOURNEY_CONTACT",
+        reason: dto.reason,
+        actorUserId: user.sub,
+        idempotencyKey: dto.idempotencyKey,
+      });
+      await this.outbox(tx, {
+        mantenedoraId: user.mantenedoraId,
+        eventType: "journey.privacy.contact.revoked",
+        aggregateType: "JourneyProspect",
+        aggregateId: id,
+        idempotencyKey: `${user.mantenedoraId}:journey.privacy.contact-revoked:${dto.idempotencyKey}`,
+        payload: { prospectId: id },
+      });
+      return saved;
+    });
+    await this.audit.logUpdate(
+      AuditLogEntity.JOURNEY_PROSPECT,
+      id,
+      user.sub,
+      user.mantenedoraId,
+      updated.unitId,
+      { consentContact: current.consentContact },
+      { consentContact: false, reason: dto.reason },
+    );
+    return this.getProspect(id, user);
+  }
+
+  async eraseProspect(
+    id: string,
+    dto: JourneyPrivacyActionDto,
+    user: JwtPayload,
+  ) {
+    await this.access.assertAccess(user, "journey.privacy.manage");
+    const current = await this.access.assertProspectAccess(user, id);
+    this.rejectSensitiveContent([dto.reason]);
+    const existing = await this.prisma.journeyProspectPrivacyEvent.findUnique({
+      where: {
+        mantenedoraId_idempotencyKey: {
+          mantenedoraId: user.mantenedoraId,
+          idempotencyKey: dto.idempotencyKey,
+        },
+      },
+    });
+    if (existing) return { id, status: JourneyProspectPrivacyStatus.ERASED };
+    const erasedAt = new Date();
+    const erased = await this.prisma.$transaction(async (tx) => {
+      const prospect = await tx.journeyProspect.findUnique({ where: { id } });
+      if (!prospect) throw new NotFoundException("Interessado não encontrado");
+      if (prospect.privacyStatus === JourneyProspectPrivacyStatus.ERASED) {
+        return prospect;
+      }
+      const saved = await tx.journeyProspect.update({
+        where: { id },
+        data: {
+          responsibleName: "[REMOVIDO]",
+          childName: "[REMOVIDO]",
+          email: null,
+          phone: null,
+          emailHash: null,
+          phoneHash: null,
+          declaredIdentityType: null,
+          declaredIdentityHash: null,
+          emailCiphertext: null,
+          phoneCiphertext: null,
+          declaredIdentityCiphertext: null,
+          consentCapture: false,
+          consentContact: false,
+          contactLegalBasis: null,
+          privacyStatus: JourneyProspectPrivacyStatus.ERASED,
+          retentionUntil: erasedAt,
+          erasedAt,
+          erasedBy: user.sub,
+          version: { increment: 1 },
+        },
+      });
+      await this.appendPrivacyEvent(tx, {
+        mantenedoraId: user.mantenedoraId,
+        unitId: prospect.unitId,
+        prospectId: id,
+        type: JourneyPrivacyEventType.ERASURE_COMPLETED,
+        purpose: "JOURNEY_CAPTURE",
+        reason: dto.reason,
+        actorUserId: user.sub,
+        idempotencyKey: dto.idempotencyKey,
+      });
+      await this.outbox(tx, {
+        mantenedoraId: user.mantenedoraId,
+        eventType: "journey.privacy.erasure.completed",
+        aggregateType: "JourneyProspect",
+        aggregateId: id,
+        idempotencyKey: `${user.mantenedoraId}:journey.privacy.erasure:${dto.idempotencyKey}`,
+        payload: {
+          prospectId: id,
+          status: JourneyProspectPrivacyStatus.ERASED,
+        },
+      });
+      return saved;
+    });
+    await this.audit.logUpdate(
+      AuditLogEntity.JOURNEY_PROSPECT,
+      id,
+      user.sub,
+      user.mantenedoraId,
+      erased.unitId,
+      { privacyStatus: current.privacyStatus },
+      {
+        privacyStatus: JourneyProspectPrivacyStatus.ERASED,
+        reason: dto.reason,
+      },
+    );
+    return {
+      id: erased.id,
+      status: erased.privacyStatus,
+      erasedAt: erased.erasedAt,
+    };
   }
 
   async changeStage(id: string, dto: ChangeJourneyStageDto, user: JwtPayload) {
@@ -564,27 +1121,10 @@ export class JourneyService {
         },
       });
     if (existingEvent) return this.getProspect(id, user);
-    if (
-      current.stage === JourneyStage.ARQUIVADO &&
-      dto.toStage !== JourneyStage.ARQUIVADO
-    ) {
-      throw new ConflictException(
-        "Interessado arquivado não pode ser reaberto nesta fatia",
-      );
-    }
+    this.assertStageTransition(current.stage, dto.toStage);
     const updated = await this.prisma.$transaction(async (tx) => {
-      const prospect = await tx.journeyProspect.findUnique({ where: { id } });
-      if (!prospect) throw new NotFoundException("Interessado não encontrado");
-      if (prospect.stage === dto.toStage) return prospect;
-      const changed = await tx.journeyProspect.update({
-        where: { id },
-        data: { stage: dto.toStage, version: { increment: 1 } },
-      });
-      await this.appendStageEvent(tx, {
-        mantenedoraId: user.mantenedoraId,
-        unitId: prospect.unitId,
+      const changed = await this.transitionIfNeeded(tx, {
         prospectId: id,
-        fromStage: prospect.stage,
         toStage: dto.toStage,
         reason: dto.reason,
         actorUserId: user.sub,
@@ -598,7 +1138,6 @@ export class JourneyService {
         idempotencyKey: `${user.mantenedoraId}:journey.stage:${dto.idempotencyKey}`,
         payload: {
           prospectId: id,
-          fromStage: prospect.stage,
           toStage: dto.toStage,
         },
       });
@@ -623,6 +1162,7 @@ export class JourneyService {
   ) {
     await this.access.assertAccess(user, "journey.manage");
     const prospect = await this.access.assertProspectAccess(user, id);
+    this.assertActiveProspect(prospect);
     this.rejectSensitiveContent([dto.title, dto.note, dto.nextAction]);
     const existing = await this.prisma.journeyActivity.findUnique({
       where: {
@@ -662,6 +1202,7 @@ export class JourneyService {
   async createTask(id: string, dto: CreateJourneyTaskDto, user: JwtPayload) {
     await this.access.assertAccess(user, "journey.manage");
     const prospect = await this.access.assertProspectAccess(user, id);
+    this.assertActiveProspect(prospect);
     await this.assertActiveUser(user, dto.assignedTo);
     this.rejectSensitiveContent([dto.title]);
     const existing = await this.prisma.journeyTask.findUnique({
@@ -695,6 +1236,11 @@ export class JourneyService {
     if (!task)
       throw new NotFoundException("Tarefa não encontrada no escopo autorizado");
     await this.access.assertUnitAccess(user, task.unitId);
+    const prospect = await this.access.assertProspectAccess(
+      user,
+      task.prospectId,
+    );
+    this.assertActiveProspect(prospect);
     if (task.status === JourneyTaskStatus.CONCLUIDA) return task;
     return this.prisma.journeyTask.update({
       where: { id },
@@ -714,6 +1260,7 @@ export class JourneyService {
       user,
       dto.prospectId,
     );
+    this.assertActiveProspect(prospect);
     if (prospect.unitId !== dto.unitId)
       throw new NotFoundException(
         "Interessado não pertence à unidade informada",
@@ -822,6 +1369,8 @@ export class JourneyService {
             responsibleName: true,
             childName: true,
             stage: true,
+            privacyStatus: true,
+            retentionUntil: true,
           },
         },
       },
@@ -829,6 +1378,7 @@ export class JourneyService {
     if (!visit)
       throw new NotFoundException("Visita não encontrada no escopo autorizado");
     await this.access.assertUnitAccess(user, visit.unitId);
+    this.assertActiveProspect(visit.prospect);
     return visit;
   }
 
@@ -836,7 +1386,17 @@ export class JourneyService {
     await this.access.assertAccess(user, "journey.read");
     const unitIds = await this.access.accessibleUnitIds(user, query.unitId);
     return this.prisma.journeyVisit.findMany({
-      where: { mantenedoraId: user.mantenedoraId, unitId: { in: unitIds } },
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        unitId: { in: unitIds },
+        prospect: {
+          privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+          OR: [
+            { retentionUntil: null },
+            { retentionUntil: { gt: new Date() } },
+          ],
+        },
+      },
       include: {
         prospect: {
           select: {
@@ -867,6 +1427,11 @@ export class JourneyService {
     if (!current)
       throw new NotFoundException("Visita não encontrada no escopo autorizado");
     await this.access.assertUnitAccess(user, current.unitId);
+    const prospect = await this.access.assertProspectAccess(
+      user,
+      current.prospectId,
+    );
+    this.assertActiveProspect(prospect);
     this.rejectSensitiveContent([dto.note]);
     const existing = await this.prisma.journeyVisitEvent.findUnique({
       where: {
@@ -919,6 +1484,11 @@ export class JourneyService {
     if (!current)
       throw new NotFoundException("Visita não encontrada no escopo autorizado");
     await this.access.assertUnitAccess(user, current.unitId);
+    const prospect = await this.access.assertProspectAccess(
+      user,
+      current.prospectId,
+    );
+    this.assertActiveProspect(prospect);
     const startsAt = this.dateRequired(dto.startsAt, "Início da visita");
     const endsAt = this.dateRequired(dto.endsAt, "Fim da visita");
     this.ensureTimeRange(startsAt, endsAt);
@@ -1289,6 +1859,7 @@ export class JourneyService {
       user,
       dto.prospectId,
     );
+    this.assertActiveProspect(prospect);
     if (prospect.unitId !== dto.unitId)
       throw new NotFoundException(
         "Interessado não pertence à unidade informada",
@@ -1388,6 +1959,13 @@ export class JourneyService {
         mantenedoraId: user.mantenedoraId,
         unitId: { in: ids },
         status: JourneyWaitlistEntryStatus.AGUARDANDO,
+        prospect: {
+          privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+          OR: [
+            { retentionUntil: null },
+            { retentionUntil: { gt: new Date() } },
+          ],
+        },
       },
       include: {
         prospect: {
@@ -1425,6 +2003,7 @@ export class JourneyService {
       user,
       dto.prospectId,
     );
+    this.assertActiveProspect(prospect);
     if (prospect.unitId !== dto.unitId)
       throw new NotFoundException(
         "Interessado não pertence à unidade informada",
@@ -1586,7 +2165,17 @@ export class JourneyService {
     await this.access.assertAccess(user, "journey.read");
     const ids = await this.access.accessibleUnitIds(user, query.unitId);
     return this.prisma.journeySeatOffer.findMany({
-      where: { mantenedoraId: user.mantenedoraId, unitId: { in: ids } },
+      where: {
+        mantenedoraId: user.mantenedoraId,
+        unitId: { in: ids },
+        prospect: {
+          privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+          OR: [
+            { retentionUntil: null },
+            { retentionUntil: { gt: new Date() } },
+          ],
+        },
+      },
       include: {
         classroom: {
           select: { id: true, name: true, code: true, capacity: true },
@@ -1608,12 +2197,11 @@ export class JourneyService {
 
   async decideOffer(id: string, dto: DecideJourneyOfferDto, user: JwtPayload) {
     await this.access.assertAccess(user, "journey.offer.accept");
-    const existingDraft = await this.prisma.journeyEnrollmentDraft.findUnique({
+    const existingDraft = await this.prisma.journeyEnrollmentDraft.findFirst({
       where: {
-        mantenedoraId_idempotencyKey: {
-          mantenedoraId: user.mantenedoraId,
-          idempotencyKey: dto.idempotencyKey,
-        },
+        mantenedoraId: user.mantenedoraId,
+        idempotencyKey: dto.idempotencyKey,
+        offerId: id,
       },
     });
     if (existingDraft)
@@ -1624,12 +2212,18 @@ export class JourneyService {
     const result = await this.prisma.$transaction(async (tx) => {
       const offer = await tx.journeySeatOffer.findFirst({
         where: { id, mantenedoraId: user.mantenedoraId },
+        include: {
+          prospect: {
+            select: { privacyStatus: true, retentionUntil: true },
+          },
+        },
       });
       if (!offer)
         throw new NotFoundException(
           "Oferta não encontrada no escopo autorizado",
         );
       await this.access.assertUnitAccess(user, offer.unitId);
+      this.assertActiveProspect(offer.prospect);
       await tx.$executeRaw(
         Prisma.sql`SELECT "id" FROM "Classroom" WHERE "id" = ${offer.classroomId} FOR UPDATE`,
       );
@@ -1794,6 +2388,8 @@ export class JourneyService {
             mantenedoraId: user.mantenedoraId,
             unitId: { in: unitIds },
             mergedIntoId: null,
+            privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+            OR: [{ retentionUntil: null }, { retentionUntil: { gt: now } }],
           },
           _count: { _all: true },
         }),
@@ -1805,6 +2401,10 @@ export class JourneyService {
               in: [JourneyVisitStatus.AGENDADA, JourneyVisitStatus.REAGENDADA],
             },
             startsAt: { gte: now },
+            prospect: {
+              privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+              OR: [{ retentionUntil: null }, { retentionUntil: { gt: now } }],
+            },
           },
         }),
         this.prisma.journeyWaitlistEntry.count({
@@ -1812,6 +2412,10 @@ export class JourneyService {
             mantenedoraId: user.mantenedoraId,
             unitId: { in: unitIds },
             status: JourneyWaitlistEntryStatus.AGUARDANDO,
+            prospect: {
+              privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+              OR: [{ retentionUntil: null }, { retentionUntil: { gt: now } }],
+            },
           },
         }),
         this.prisma.journeySeatOffer.count({
@@ -1820,6 +2424,10 @@ export class JourneyService {
             unitId: { in: unitIds },
             status: JourneyOfferStatus.OFERTADA,
             reservationExpiresAt: { gt: now },
+            prospect: {
+              privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+              OR: [{ retentionUntil: null }, { retentionUntil: { gt: now } }],
+            },
           },
         }),
         this.prisma.classroom.findMany({
@@ -1884,8 +2492,22 @@ export class JourneyService {
     return this.prisma.journeyDuplicateReview.findMany({
       where: {
         mantenedoraId: user.mantenedoraId,
-        primary: { unitId: { in: unitIds } },
-        duplicate: { unitId: { in: unitIds } },
+        primary: {
+          unitId: { in: unitIds },
+          privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+          OR: [
+            { retentionUntil: null },
+            { retentionUntil: { gt: new Date() } },
+          ],
+        },
+        duplicate: {
+          unitId: { in: unitIds },
+          privacyStatus: { not: JourneyProspectPrivacyStatus.ERASED },
+          OR: [
+            { retentionUntil: null },
+            { retentionUntil: { gt: new Date() } },
+          ],
+        },
       },
       select: {
         id: true,
@@ -1938,6 +2560,8 @@ export class JourneyService {
       );
     await this.access.assertUnitAccess(user, review.primary.unitId);
     await this.access.assertUnitAccess(user, review.duplicate.unitId);
+    this.assertActiveProspect(review.primary);
+    this.assertActiveProspect(review.duplicate);
     if (review.status !== JourneyDuplicateReviewStatus.PENDENTE) return review;
     if (dto.decision === "reject")
       return this.prisma.journeyDuplicateReview.update({
@@ -1952,6 +2576,8 @@ export class JourneyService {
       throw new BadRequestException(
         "Um interessado não pode ser duplicado de si mesmo",
       );
+    if (review.duplicate.stage === JourneyStage.ARQUIVADO)
+      throw new ConflictException("O duplicado já está arquivado");
     const merged = await this.prisma.$transaction(async (tx) => {
       const updatedReview = await tx.journeyDuplicateReview.update({
         where: { id },
@@ -1962,19 +2588,24 @@ export class JourneyService {
           previousStage: review.duplicate.stage,
         },
       });
-      await tx.journeyProspect.update({
-        where: { id: review.duplicate.id },
+      const markedMerged = await tx.journeyProspect.updateMany({
+        where: {
+          id: review.duplicate.id,
+          stage: review.duplicate.stage,
+          version: review.duplicate.version,
+          mergedIntoId: null,
+        },
         data: {
           mergedIntoId: review.primary.id,
-          stage: JourneyStage.ARQUIVADO,
           version: { increment: 1 },
         },
       });
-      await this.appendStageEvent(tx, {
-        mantenedoraId: user.mantenedoraId,
-        unitId: review.duplicate.unitId,
+      if (markedMerged.count !== 1)
+        throw new ConflictException(
+          "O duplicado foi alterado por outra operação",
+        );
+      await this.transitionIfNeeded(tx, {
         prospectId: review.duplicate.id,
-        fromStage: review.duplicate.stage,
         toStage: JourneyStage.ARQUIVADO,
         actorUserId: user.sub,
         idempotencyKey: `${dto.idempotencyKey}:stage`,
@@ -2022,6 +2653,8 @@ export class JourneyService {
       );
     await this.access.assertUnitAccess(user, review.primary.unitId);
     await this.access.assertUnitAccess(user, review.duplicate.unitId);
+    this.assertActiveProspect(review.primary);
+    this.assertActiveProspect(review.duplicate);
     if (review.status === JourneyDuplicateReviewStatus.DESFEITA) return review;
     if (review.status !== JourneyDuplicateReviewStatus.CONFIRMADA)
       throw new ConflictException("Somente merge confirmado pode ser desfeito");
@@ -2034,20 +2667,21 @@ export class JourneyService {
           undoAt: new Date(),
         },
       });
-      await tx.journeyProspect.update({
-        where: { id: review.duplicate.id },
-        data: {
-          mergedIntoId: null,
-          stage: review.previousStage ?? JourneyStage.NOVO,
-          version: { increment: 1 },
+      const unmerged = await tx.journeyProspect.updateMany({
+        where: {
+          id: review.duplicate.id,
+          stage: JourneyStage.ARQUIVADO,
+          version: review.duplicate.version,
+          mergedIntoId: review.primary.id,
         },
+        data: { mergedIntoId: null, version: { increment: 1 } },
       });
-      await this.appendStageEvent(tx, {
-        mantenedoraId: user.mantenedoraId,
-        unitId: review.duplicate.unitId,
+      if (unmerged.count !== 1)
+        throw new ConflictException("O merge foi alterado por outra operação");
+      await this.transitionIfNeeded(tx, {
         prospectId: review.duplicate.id,
-        fromStage: JourneyStage.ARQUIVADO,
         toStage: review.previousStage ?? JourneyStage.NOVO,
+        allowArchivedUndo: true,
         actorUserId: user.sub,
         idempotencyKey: `${idempotencyKey}:stage`,
         reason: "Desfazer merge revisado por humano",

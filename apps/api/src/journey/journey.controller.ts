@@ -13,6 +13,10 @@ import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RequireRoles } from "../common/decorators/roles.decorator";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
+import {
+  JourneyCapabilityGuard,
+  RequireJourneyCapability,
+} from "./journey-capability.guard";
 import type { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
 import { JourneyService } from "./journey.service";
 import {
@@ -27,6 +31,8 @@ import {
   JourneyDashboardQueryDto,
   JourneyDuplicateReviewDto,
   JourneyListQueryDto,
+  JourneyPrivacyActionDto,
+  JourneyRetentionDto,
   JourneyVisitActionDto,
   JoinJourneyWaitlistDto,
   PublishJourneyPolicyDto,
@@ -41,18 +47,20 @@ const JOURNEY_ROLES = [
 ] as const;
 
 @Controller("journey")
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, JourneyCapabilityGuard)
 export class JourneyController {
   constructor(private readonly journey: JourneyService) {}
 
   @Get("units")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.read")
   listUnits(@CurrentUser() user: JwtPayload) {
     return this.journey.listUnits(user);
   }
 
   @Get("dashboard")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.read")
   dashboard(
     @Query() query: JourneyDashboardQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -62,6 +70,7 @@ export class JourneyController {
 
   @Get("prospects")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.read")
   listProspects(
     @Query() query: JourneyListQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -71,6 +80,7 @@ export class JourneyController {
 
   @Post("prospects")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.manage")
   createProspect(
     @Body() dto: CreateJourneyProspectDto,
     @CurrentUser() user: JwtPayload,
@@ -80,12 +90,47 @@ export class JourneyController {
 
   @Get("prospects/:id")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.read")
   getProspect(@Param("id") id: string, @CurrentUser() user: JwtPayload) {
     return this.journey.getProspect(id, user);
   }
 
+  @Patch("prospects/:id/privacy/retention")
+  @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.privacy.manage")
+  setProspectRetention(
+    @Param("id") id: string,
+    @Body() dto: JourneyRetentionDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.journey.setProspectRetention(id, dto, user);
+  }
+
+  @Patch("prospects/:id/privacy/contact/revoke")
+  @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.privacy.manage")
+  revokeProspectContact(
+    @Param("id") id: string,
+    @Body() dto: JourneyPrivacyActionDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.journey.revokeProspectContact(id, dto, user);
+  }
+
+  @Patch("prospects/:id/privacy/erase")
+  @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.privacy.manage")
+  eraseProspect(
+    @Param("id") id: string,
+    @Body() dto: JourneyPrivacyActionDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.journey.eraseProspect(id, dto, user);
+  }
+
   @Patch("prospects/:id/stage")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.manage")
   changeStage(
     @Param("id") id: string,
     @Body() dto: ChangeJourneyStageDto,
@@ -96,6 +141,7 @@ export class JourneyController {
 
   @Post("prospects/:id/activities")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.manage")
   createActivity(
     @Param("id") id: string,
     @Body() dto: CreateJourneyActivityDto,
@@ -106,6 +152,7 @@ export class JourneyController {
 
   @Post("prospects/:id/tasks")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.manage")
   createTask(
     @Param("id") id: string,
     @Body() dto: CreateJourneyTaskDto,
@@ -116,12 +163,14 @@ export class JourneyController {
 
   @Patch("tasks/:id/complete")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.prospect.manage")
   completeTask(@Param("id") id: string, @CurrentUser() user: JwtPayload) {
     return this.journey.completeTask(id, user);
   }
 
   @Get("visits")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.read")
   listVisits(
     @Query() query: JourneyListQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -131,6 +180,7 @@ export class JourneyController {
 
   @Post("visits")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   createVisit(
     @Body() dto: CreateJourneyVisitDto,
     @CurrentUser() user: JwtPayload,
@@ -140,12 +190,14 @@ export class JourneyController {
 
   @Get("visits/:id")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.read")
   getVisit(@Param("id") id: string, @CurrentUser() user: JwtPayload) {
     return this.journey.getVisit(id, user);
   }
 
   @Patch("visits/:id/reschedule")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   rescheduleVisit(
     @Param("id") id: string,
     @Body() dto: RescheduleJourneyVisitDto,
@@ -156,6 +208,7 @@ export class JourneyController {
 
   @Patch("visits/:id/cancel")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   cancelVisit(
     @Param("id") id: string,
     @Body() dto: JourneyVisitActionDto,
@@ -166,6 +219,7 @@ export class JourneyController {
 
   @Patch("visits/:id/confirm")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   confirmVisit(
     @Param("id") id: string,
     @Body() dto: JourneyVisitActionDto,
@@ -176,6 +230,7 @@ export class JourneyController {
 
   @Patch("visits/:id/absence")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   markVisitAbsence(
     @Param("id") id: string,
     @Body() dto: JourneyVisitActionDto,
@@ -186,6 +241,7 @@ export class JourneyController {
 
   @Patch("visits/:id/follow-up")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.visit.manage")
   registerVisitFollowUp(
     @Param("id") id: string,
     @Body() dto: JourneyVisitActionDto,
@@ -196,6 +252,7 @@ export class JourneyController {
 
   @Get("waitlist/policies")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.read")
   listPolicies(
     @Query() query: JourneyListQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -205,6 +262,7 @@ export class JourneyController {
 
   @Post("waitlist/policies")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.waitlist.manage")
   createPolicy(
     @Body() dto: CreateJourneyPolicyDto,
     @CurrentUser() user: JwtPayload,
@@ -214,12 +272,14 @@ export class JourneyController {
 
   @Patch("waitlist/policies/:id/review")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.waitlist.manage")
   reviewPolicy(@Param("id") id: string, @CurrentUser() user: JwtPayload) {
     return this.journey.reviewPolicy(id, user);
   }
 
   @Patch("waitlist/policies/:id/publish")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.waitlist.manage")
   publishPolicy(
     @Param("id") id: string,
     @Body() dto: PublishJourneyPolicyDto,
@@ -230,6 +290,7 @@ export class JourneyController {
 
   @Get("waitlist")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.waitlist.read")
   listWaitlist(
     @Query() query: JourneyListQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -239,6 +300,7 @@ export class JourneyController {
 
   @Post("waitlist")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.waitlist.manage")
   joinWaitlist(
     @Body() dto: JoinJourneyWaitlistDto,
     @CurrentUser() user: JwtPayload,
@@ -248,6 +310,7 @@ export class JourneyController {
 
   @Get("offers")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.offer.read")
   listOffers(
     @Query() query: JourneyListQueryDto,
     @CurrentUser() user: JwtPayload,
@@ -257,6 +320,7 @@ export class JourneyController {
 
   @Post("offers")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.offer.create")
   createOffer(
     @Body() dto: CreateJourneyOfferDto,
     @CurrentUser() user: JwtPayload,
@@ -266,6 +330,7 @@ export class JourneyController {
 
   @Patch("offers/:id/decision")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.offer.accept")
   decideOffer(
     @Param("id") id: string,
     @Body() dto: DecideJourneyOfferDto,
@@ -276,12 +341,14 @@ export class JourneyController {
 
   @Get("duplicates")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.read")
   listDuplicateReviews(@CurrentUser() user: JwtPayload) {
     return this.journey.listDuplicateReviews(user);
   }
 
   @Patch("duplicates/:id/review")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.merge.review")
   reviewDuplicate(
     @Param("id") id: string,
     @Body() dto: JourneyDuplicateReviewDto,
@@ -292,6 +359,7 @@ export class JourneyController {
 
   @Post("duplicates/:id/undo")
   @RequireRoles(...JOURNEY_ROLES)
+  @RequireJourneyCapability("journey.merge.review")
   undoDuplicate(
     @Param("id") id: string,
     @Body() dto: PublishJourneyPolicyDto,

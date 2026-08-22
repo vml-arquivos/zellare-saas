@@ -36,6 +36,15 @@ export interface JourneyProspect {
   version: number;
   createdAt: string;
   updatedAt: string;
+  privacy?: {
+    status: "ACTIVE" | "RETAINED" | "ERASURE_REQUESTED" | "ERASED";
+    retentionUntil: string | null;
+    captureLegalBasis?: string | null;
+    contactLegalBasis?: string | null;
+    consentPolicyVersion?: string | null;
+    consentCapturedAt?: string | null;
+    contactConsentAt?: string | null;
+  };
   _count?: {
     visits: number;
     activities: number;
@@ -131,6 +140,10 @@ export interface CreateProspectInput {
   desiredDate?: string;
   consentCapture: boolean;
   consentContact: boolean;
+  captureLegalBasis?: "CONSENT";
+  contactLegalBasis?: "CONSENT";
+  consentPolicyVersion?: string;
+  retentionUntil?: string;
   idempotencyKey: string;
 }
 
@@ -323,5 +336,20 @@ export async function createJourneyTask(id: string, input: { title: string; dueA
 
 export async function completeJourneyTask(id: string) {
   const response = await http.patch(`/journey/tasks/${id}/complete`);
+  return response.data;
+}
+
+export async function setJourneyProspectRetention(id: string, input: { retentionUntil: string; reason: string; idempotencyKey: string }) {
+  const response = await http.patch<JourneyProspect>(`/journey/prospects/${id}/privacy/retention`, input);
+  return response.data;
+}
+
+export async function revokeJourneyProspectContact(id: string, input: { reason: string; idempotencyKey: string }) {
+  const response = await http.patch<JourneyProspect>(`/journey/prospects/${id}/privacy/contact/revoke`, input);
+  return response.data;
+}
+
+export async function eraseJourneyProspect(id: string, input: { reason: string; idempotencyKey: string }) {
+  const response = await http.patch<{ id: string; status: string; erasedAt?: string }>(`/journey/prospects/${id}/privacy/erase`, input);
   return response.data;
 }

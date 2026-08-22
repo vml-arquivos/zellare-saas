@@ -15,67 +15,93 @@ import {
 const NETWORK_LEVELS = new Set<RoleLevel>([
   RoleLevel.DEVELOPER,
   RoleLevel.MANTENEDORA,
-  RoleLevel.STAFF_CENTRAL,
 ]);
 
-const CENTRAL_ALLOWED_TYPES = new Set<RoleType>([
+const JOURNEY_ALLOWED_TYPES = new Set<RoleType>([
   RoleType.DEVELOPER,
   RoleType.MANTENEDORA_ADMIN,
-  RoleType.STAFF_CENTRAL_PEDAGOGICO,
+  RoleType.STAFF_CENTRAL_ADMISSOES,
+  RoleType.UNIDADE_DIRETOR,
+  RoleType.UNIDADE_ADMINISTRATIVO,
 ]);
 
-const UNIT_ALLOWED_TYPES = new Set<RoleType>([
-  RoleType.UNIDADE_DIRETOR,
-  RoleType.UNIDADE_COORDENADOR_PEDAGOGICO,
-  RoleType.UNIDADE_ADMINISTRATIVO,
+const READ_CAPABILITIES = new Set<JourneyCapability>([
+  JOURNEY_CAPABILITIES.read,
+  JOURNEY_CAPABILITIES.prospectRead,
+  JOURNEY_CAPABILITIES.visitRead,
+  JOURNEY_CAPABILITIES.waitlistRead,
+  JOURNEY_CAPABILITIES.offerRead,
+]);
+
+const WRITE_CAPABILITIES = new Set<JourneyCapability>([
+  JOURNEY_CAPABILITIES.manage,
+  JOURNEY_CAPABILITIES.prospectManage,
+  JOURNEY_CAPABILITIES.visitManage,
+  JOURNEY_CAPABILITIES.manageWaitlist,
+  JOURNEY_CAPABILITIES.offerSeat,
+  JOURNEY_CAPABILITIES.acceptOffer,
+  JOURNEY_CAPABILITIES.reviewMerge,
+  JOURNEY_CAPABILITIES.privacyManage,
 ]);
 
 @Injectable()
 export class JourneyAccessService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private roles(user: JwtPayload) {
+    return (user.roles ?? []).filter((role) =>
+      JOURNEY_ALLOWED_TYPES.has(role.type),
+    );
+  }
+
   private levels(user: JwtPayload): Set<RoleLevel> {
-    return new Set((user.roles ?? []).map((role) => role.level));
+    return new Set(this.roles(user).map((role) => role.level));
   }
 
   private types(user: JwtPayload): Set<RoleType> {
-    return new Set((user.roles ?? []).map((role) => role.type));
+    return new Set(this.roles(user).map((role) => role.type));
   }
 
   isNetworkScoped(user: JwtPayload): boolean {
-    return Array.from(NETWORK_LEVELS).some((level) =>
-      this.levels(user).has(level),
+    return this.roles(user).some(
+      (role) =>
+        NETWORK_LEVELS.has(role.level) ||
+        (role.level === RoleLevel.STAFF_CENTRAL &&
+          role.type === RoleType.STAFF_CENTRAL_ADMISSOES),
     );
   }
 
   can(user: JwtPayload, capability: JourneyCapability): boolean {
-    const levels = this.levels(user);
     const types = this.types(user);
-    const developer =
-      levels.has(RoleLevel.DEVELOPER) || types.has(RoleType.DEVELOPER);
-    const central =
-      (levels.has(RoleLevel.MANTENEDORA) &&
-        Array.from(types).some((type) => CENTRAL_ALLOWED_TYPES.has(type))) ||
-      (levels.has(RoleLevel.STAFF_CENTRAL) &&
-        Array.from(types).some((type) => CENTRAL_ALLOWED_TYPES.has(type)));
-    const unit =
-      levels.has(RoleLevel.UNIDADE) &&
-      Array.from(types).some((type) => UNIT_ALLOWED_TYPES.has(type));
+    const developer = types.has(RoleType.DEVELOPER);
+    const mantenedoraAdmin = types.has(RoleType.MANTENEDORA_ADMIN);
+    const director = types.has(RoleType.UNIDADE_DIRETOR);
+    const centralAdmissions = types.has(RoleType.STAFF_CENTRAL_ADMISSOES);
+    const administrative = types.has(RoleType.UNIDADE_ADMINISTRATIVO);
+    const unitAdmissions = administrative || director || centralAdmissions;
+    const readable =
+      developer || mantenedoraAdmin || centralAdmissions || unitAdmissions;
+    const writable =
+      developer || mantenedoraAdmin || centralAdmissions || unitAdmissions;
 
-    if (capability === JOURNEY_CAPABILITIES.read)
-      return developer || central || unit;
-    if (capability === JOURNEY_CAPABILITIES.manage)
-      return developer || central || unit;
-    if (capability === JOURNEY_CAPABILITIES.reviewMerge)
-      return developer || central || unit;
-    if (capability === JOURNEY_CAPABILITIES.manageWaitlist)
-      return developer || central || unit;
-    if (capability === JOURNEY_CAPABILITIES.offerSeat)
-      return developer || central || unit;
-    if (capability === JOURNEY_CAPABILITIES.acceptOffer)
-      return developer || central || unit;
     if (capability === JOURNEY_CAPABILITIES.overrideCapacity)
-      return developer || central;
+      return developer || director;
+    if (capability === JOURNEY_CAPABILITIES.reviewMerge)
+      return developer || mantenedoraAdmin || director;
+    if (capability === JOURNEY_CAPABILITIES.acceptOffer)
+      return developer || mantenedoraAdmin || director;
+    if (capability === JOURNEY_CAPABILITIES.offerSeat)
+      return developer || mantenedoraAdmin || unitAdmissions;
+    if (capability === JOURNEY_CAPABILITIES.manageWaitlist)
+      return developer || mantenedoraAdmin || unitAdmissions;
+    if (capability === JOURNEY_CAPABILITIES.visitManage)
+      return developer || mantenedoraAdmin || unitAdmissions;
+    if (capability === JOURNEY_CAPABILITIES.prospectManage)
+      return developer || mantenedoraAdmin || unitAdmissions;
+    if (capability === JOURNEY_CAPABILITIES.privacyManage)
+      return developer || mantenedoraAdmin || director;
+    if (WRITE_CAPABILITIES.has(capability)) return writable;
+    if (READ_CAPABILITIES.has(capability)) return readable;
     return false;
   }
 
@@ -119,7 +145,7 @@ export class JourneyAccessService {
     if (this.isNetworkScoped(user)) return true;
     return (
       user.unitId === unitId ||
-      (user.roles ?? []).some((role) => role.unitScopes.includes(unitId))
+      this.roles(user).some((role) => role.unitScopes.includes(unitId))
     );
   }
 
@@ -149,7 +175,7 @@ export class JourneyAccessService {
     }
     const ids = new Set<string>();
     if (user.unitId) ids.add(user.unitId);
-    for (const role of user.roles ?? []) {
+    for (const role of this.roles(user)) {
       for (const unitId of role.unitScopes) ids.add(unitId);
     }
     const units = await this.prisma.unit.findMany({
@@ -176,6 +202,9 @@ export class JourneyAccessService {
         ageGroupMinMonths: true,
         ageGroupMaxMonths: true,
         desiredDate: true,
+        consentContact: true,
+        privacyStatus: true,
+        retentionUntil: true,
       },
     });
     if (!prospect)

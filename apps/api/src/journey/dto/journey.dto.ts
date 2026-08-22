@@ -12,7 +12,11 @@ import {
   Min,
   MinLength,
 } from "class-validator";
-import { JourneyActivityType, JourneyStage } from "@prisma/client";
+import {
+  JourneyActivityType,
+  JourneyStage,
+  Onda1LegalBasis,
+} from "@prisma/client";
 
 export class CreateJourneyProspectDto {
   @IsString()
@@ -79,6 +83,24 @@ export class CreateJourneyProspectDto {
 
   @IsBoolean()
   consentContact!: boolean;
+
+  @IsOptional()
+  @IsEnum(Onda1LegalBasis)
+  captureLegalBasis?: Onda1LegalBasis;
+
+  @IsOptional()
+  @IsEnum(Onda1LegalBasis)
+  contactLegalBasis?: Onda1LegalBasis;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(80)
+  consentPolicyVersion?: string;
+
+  @IsOptional()
+  @IsDateString()
+  retentionUntil?: string;
 
   @IsString()
   @MinLength(8)
@@ -359,4 +381,21 @@ export class JourneyDashboardQueryDto {
   @IsOptional()
   @IsString()
   unitId?: string;
+}
+
+export class JourneyPrivacyActionDto {
+  @IsString()
+  @MinLength(8)
+  @MaxLength(255)
+  idempotencyKey!: string;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(500)
+  reason!: string;
+}
+
+export class JourneyRetentionDto extends JourneyPrivacyActionDto {
+  @IsDateString()
+  retentionUntil!: string;
 }

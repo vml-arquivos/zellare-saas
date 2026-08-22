@@ -145,6 +145,10 @@ Variáveis **obrigatórias**:
 - `DIRECT_URL` - Connection string para migrations
 - `JWT_SECRET` - Secret para JWT tokens
 - `JWT_REFRESH_SECRET` - Secret para refresh tokens
+- `JOURNEY_CONTACT_HMAC_SECRET` - Chave dedicada para HMAC versionado dos contatos Journey; obrigatória quando `NODE_ENV=production`
+- `JOURNEY_CONTACT_ENCRYPTION_SECRET` - Chave dedicada para cifragem dos contatos Journey; obrigatória quando `NODE_ENV=production`
+
+As chaves de HMAC e cifragem devem ser fornecidas pelo gerenciador de segredos, não devem ser iguais às chaves JWT e não devem ser gravadas no repositório. Fora de produção, o código aceita fallback controlado para fixtures sintéticas; esse fallback não é permitido em produção.
 
 Variáveis **opcionais**:
 - `REDIS_URL` - Connection string do Redis

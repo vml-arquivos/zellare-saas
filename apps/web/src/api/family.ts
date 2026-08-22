@@ -136,6 +136,10 @@ export interface FamilyGuardian {
   canViewHealth: boolean;
   consentAt?: string | null;
   revokedAt?: string | null;
+  legalBasis?: string;
+  consentPolicyVersion?: string;
+  retentionUntil?: string | null;
+  revocationReason?: string | null;
   createdAt: string;
   updatedAt?: string;
   user: {
@@ -162,6 +166,9 @@ export interface LinkFamilyGuardianPayload {
   canViewTimeline?: boolean;
   canViewDevelopment?: boolean;
   canViewHealth?: boolean;
+  legalBasis?: 'CONSENT';
+  consentPolicyVersion?: string;
+  retentionUntil?: string;
 }
 
 export async function listFamilyGuardians(childId: string) {
@@ -174,7 +181,7 @@ export async function linkFamilyGuardian(childId: string, payload: LinkFamilyGua
   return response.data;
 }
 
-export async function revokeFamilyGuardian(childId: string, guardianUserId: string) {
-  const response = await http.delete<{ count: number }>(`/family/children/${childId}/guardians/${guardianUserId}`);
+export async function revokeFamilyGuardian(childId: string, guardianUserId: string, payload: { reason: string }) {
+  const response = await http.delete<{ count: number }>(`/family/children/${childId}/guardians/${guardianUserId}`, { data: payload });
   return response.data;
 }

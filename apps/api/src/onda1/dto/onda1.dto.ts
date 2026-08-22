@@ -1,9 +1,20 @@
-import { Type } from 'class-transformer';
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { Type } from "class-transformer";
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from "class-validator";
 import {
   EvidenceSensitivity,
   Onda1ConsentDecision,
   Onda1ConsentPurpose,
+  Onda1LegalBasis,
   Onda1ContributionType,
   Onda1ConversationStatus,
   Onda1GoalStatus,
@@ -12,7 +23,7 @@ import {
   Onda1ReviewPriority,
   Onda1ReviewTaskStatus,
   Onda1SupportStatus,
-} from '@prisma/client';
+} from "@prisma/client";
 
 export class EvidenceLoopQueryDto {
   @IsOptional()
@@ -294,6 +305,10 @@ export class CreateConsentGrantDto {
 
   @IsEnum(Onda1ConsentDecision)
   decision!: Onda1ConsentDecision;
+
+  @IsOptional()
+  @IsEnum(Onda1LegalBasis)
+  legalBasis?: Onda1LegalBasis;
 
   @IsString()
   @MaxLength(80)
