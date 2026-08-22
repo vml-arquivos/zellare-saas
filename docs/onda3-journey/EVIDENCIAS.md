@@ -62,26 +62,26 @@ Toda consulta filtra `mantenedoraId` e valida unidade/turma no backend; o filtro
 
 ## Evidências de teste e gate
 
-Os comandos devem ser executados novamente no SHA final após o commit corretivo. A tabela abaixo é o registro operacional a ser atualizado com os resultados finais, sem tratar verificações anteriores como suficientes.
+Todos os comandos abaixo foram executados novamente no SHA final `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7` após o commit corretivo de privacidade. O log integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt`.
 
 | Gate | Comando | Resultado final | Log/evidência |
 |---|---|---|---|
-| Instalação reprodutível | `pnpm install --frozen-lockfile` | pendente no HEAD final | terminal do gate |
-| Lint API Journey | `pnpm --filter @zelare/api exec eslint src/journey src/journey/dto/journey.dto.ts` | passou no HEAD de trabalho | terminal do gate |
-| Lint web Journey | `pnpm --filter @zelare/web exec eslint src/pages/JourneyPage.tsx src/pages/JourneyActionPanels.tsx src/pages/JourneyActionPanels.test.tsx src/api/journey.ts` | passou no HEAD de trabalho | terminal do gate |
-| Typecheck API | `pnpm --filter @zelare/api typecheck` | passou no HEAD de trabalho | terminal do gate |
-| Typecheck web | `pnpm --filter @zelare/web exec tsc --noEmit` | passou no HEAD de trabalho | terminal do gate |
-| Unit API | `pnpm --filter @zelare/api test -- --runInBand` | 47 suítes / 345 testes antes do último teste adicional; repetir | `/home/ubuntu/terminal_full_output/2026-08-22_07-44-29_428796_10669.txt` |
-| Unit Journey | `pnpm exec jest src/journey/journey.service.spec.ts --runInBand` | 8 testes passaram no HEAD de trabalho | terminal do gate |
-| Unit web | `pnpm --filter @zelare/web test` | 5 arquivos / 18 testes passaram antes da última pequena correção; repetir | terminal do gate |
-| API E2E | `DATABASE_URL=... JWT_SECRET=... JWT_REFRESH_SECRET=... pnpm exec jest --config test/jest-e2e.json --runInBand` | 2 testes passaram com banco local descartável | terminal do gate |
+| Instalação reprodutível | `pnpm install --frozen-lockfile` | passou; lockfile atualizado e instalação concluída | terminal final, linhas iniciais |
+| Lint API Journey | `pnpm --filter @zelare/api exec eslint src/journey src/journey/dto/journey.dto.ts` | passou no HEAD final | terminal final |
+| Lint web Journey | `pnpm --filter @zelare/web exec eslint src/pages/JourneyPage.tsx src/pages/JourneyActionPanels.tsx src/pages/JourneyActionPanels.test.tsx src/api/journey.ts` | passou no HEAD final | terminal final |
+| Typecheck API | `pnpm --filter @zelare/api typecheck` | passou no HEAD final | terminal final |
+| Typecheck web | `pnpm --filter @zelare/web exec tsc --noEmit` | passou no HEAD final | terminal final |
+| Unit API | `pnpm --filter @zelare/api test -- --runInBand` | 47 suítes / 347 testes passaram | log final, resumo Jest |
+| Unit Journey | incluído em `pnpm --filter @zelare/api test -- --runInBand` | specs Journey passaram dentro das 47 suítes / 347 testes | log final, `src/journey/*spec.ts` |
+| Unit web | `pnpm --filter @zelare/web test` | 5 arquivos / 18 testes passaram | log final, resumo Vitest |
+| API E2E | `DATABASE_URL=... JWT_SECRET=... JWT_REFRESH_SECRET=... pnpm exec jest --config test/jest-e2e.json --runInBand` | 2 testes passaram com banco local descartável | log final, resumo Jest E2E |
 | API build/OpenAPI | `pnpm --filter @zelare/api build` | passou; 329 rotas totais / 24 Journey | `apps/api/dist/openapi.json` gerado localmente |
-| Web build/budget | `NODE_ENV=production VITE_API_URL=... pnpm --filter @zelare/web build && ... budget:check` | passou; PWA 4.339,92 KiB / limites respeitados | terminal do gate |
-| Site build | build com canais `.test` | passou | terminal do gate |
+| Web build/budget | `NODE_ENV=production VITE_API_URL=... pnpm --filter @zelare/web build && ... budget:check` | passou; JS inicial 77.750 bytes, gzip 20.611 bytes, precache 4.474.774 bytes | log final, budget |
+| Site build | build com canais `.test` | passou; canais públicos sintéticos validados | log final |
 | Privacidade | `pnpm --filter @zelare/api security:artifacts` | passou; 0 conteúdo sensível | terminal do gate |
-| Prisma clean cluster | `prisma-clean-cluster-gate.sh` | `CLEAN_CLUSTER_PRISMA_DRIFT=0` | script em `evidence/` |
+| Prisma clean cluster | `prisma-clean-cluster-gate.sh` | `CLEAN_CLUSTER_PRISMA_DRIFT=0`; 48 migrations aplicadas e schema atualizado | log final e script em `evidence/` |
 | Concorrência | `node apps/api/scripts/verification/journey-concurrency.mjs` | 1 sucesso / 1 `ConflictException`; 1 oferta; 0 Child/Enrollment/Draft; replay igual | terminal do gate |
-| E2E autenticado | `node evidence/capture-journey-e2e.cjs` | passou; 4 screenshots, desktop/mobile, confirmação real de visita e releitura | `evidence/screenshots/` |
+| E2E autenticado | `JOURNEY_E2E_PASSWORD=... node evidence/capture-journey-e2e.cjs` | passou; 4 screenshots, desktop/mobile, confirmação real de visita e releitura | `evidence/screenshots/` e log final |
 
 ## Rollback e canário
 
