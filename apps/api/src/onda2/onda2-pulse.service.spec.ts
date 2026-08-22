@@ -13,7 +13,7 @@ const actor: JwtPayload = {
 describe('Onda2PulseService', () => {
   const prisma = {
     operationalPresenceSession: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn(), count: jest.fn() },
-    operationalPresenceEvent: { findUnique: jest.fn(), create: jest.fn(), findMany: jest.fn(), count: jest.fn() },
+    operationalPresenceEvent: { findFirst: jest.fn(), create: jest.fn(), findMany: jest.fn(), count: jest.fn() },
     unit: { findMany: jest.fn() },
     ratioBreach: { count: jest.fn() },
     maintenanceRequest: { count: jest.fn() },
@@ -34,7 +34,7 @@ describe('Onda2PulseService', () => {
   });
 
   it('registra evento idempotente e persiste a origem do dispositivo', async () => {
-    prisma.operationalPresenceEvent.findUnique.mockResolvedValue(null);
+    prisma.operationalPresenceEvent.findFirst.mockResolvedValue(null);
     prisma.operationalPresenceEvent.create.mockResolvedValue({ id: 'event-1', status: 'ACCEPTED' });
 
     await expect(
@@ -53,14 +53,17 @@ describe('Onda2PulseService', () => {
       ),
     ).resolves.toEqual({ id: 'event-1', status: 'ACCEPTED' });
 
+    expect(prisma.operationalPresenceEvent.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ mantenedoraId: 'tenant-1', source: 'MOBILE', idempotencyKey: 'mobile-1' }) }),
+    );
     expect(prisma.operationalPresenceEvent.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ idempotencyKey: 'mobile-1', createdBy: 'user-1' }) }),
+      expect.objectContaining({ data: expect.objectContaining({ idempotencyKey: 'mobile-1', source: 'MOBILE', createdBy: 'user-1' }) }),
     );
   });
 
   it('retorna o mesmo evento quando a chave idempotente já existe', async () => {
-    const existing = { id: 'event-existing', idempotencyKey: 'same-key' };
-    prisma.operationalPresenceEvent.findUnique.mockResolvedValue(existing);
+    const existing = { id: 'event-existing', unitId: 'unit-1', idempotencyKey: 'same-key' };
+    prisma.operationalPresenceEvent.findFirst.mockResolvedValue(existing);
     await expect(
       service.recordEvent(
         { unitId: 'unit-1', subjectType: 'CHILD', subjectId: 'child-1', eventType: Onda2PresenceEventType.CHECK_OUT, occurredAt: '2026-08-21T12:00:00.000Z', idempotencyKey: 'same-key' },

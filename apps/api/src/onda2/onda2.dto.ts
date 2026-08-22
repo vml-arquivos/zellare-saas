@@ -85,6 +85,11 @@ export class RecordPresenceEventDto {
   payload?: Record<string, unknown>;
 }
 
+export class ReviewRatioPolicyDto {
+  @IsEnum(Onda2ApprovalStatus)
+  status!: Onda2ApprovalStatus;
+}
+
 export class CreateRatioPolicyDto {
   @IsString()
   unitId!: string;
@@ -125,17 +130,20 @@ export class CreateRatioSnapshotDto {
   @Min(0)
   capacity?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
-  childCount!: number;
+  childCount?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
-  requiredAdults!: number;
+  requiredAdults?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
-  validAdults!: number;
+  validAdults?: number;
 
   @IsOptional()
   @IsString()
@@ -176,6 +184,10 @@ export class CreateStaffingAssignmentDto {
   @IsOptional()
   @IsString()
   idempotencyKey?: string;
+
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class CreateFacilitySpaceDto {
@@ -298,6 +310,10 @@ export class CreateMaintenanceRequestDto {
 
   @IsString()
   idempotencyKey!: string;
+
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class TriageMaintenanceRequestDto {
@@ -358,6 +374,10 @@ export class ChangeWorkOrderStatusDto {
 
   @IsString()
   idempotencyKey!: string;
+
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
 
 export class AssignWorkOrderDto {
@@ -467,6 +487,10 @@ export class CreateInspectionDto {
 }
 
 export class CompleteInspectionDto {
+  @IsOptional()
+  @IsString()
+  executionId?: string;
+
   @IsEnum(Onda2InspectionResult)
   result!: Onda2InspectionResult;
 

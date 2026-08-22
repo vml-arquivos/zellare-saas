@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Onda2PresenceEventStatus, Onda2PresenceSessionStatus, Prisma } from '@prisma/client';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,6 +17,10 @@ export class Onda2PulseService {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.pulseCommandCenterV1, ONDA2_CAPABILITIES.presenceRecord);
     await this.access.assertUnitAccess(user, dto.unitId);
     const sessionDate = new Date(dto.sessionDate);
+    if (dto.spaceId) {
+      const space = await this.prisma.facilitySpace.findFirst({ where: { id: dto.spaceId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!space) throw new NotFoundException('Espaço da sessão não encontrado no escopo autorizado');
+    }
     const existing = await this.prisma.operationalPresenceSession.findFirst({
       where: { mantenedoraId: user.mantenedoraId, unitId: dto.unitId, spaceId: dto.spaceId ?? null, sessionDate },
     });
@@ -38,8 +42,19 @@ export class Onda2PulseService {
   async recordEvent(dto: RecordPresenceEventDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.pulseCommandCenterV1, ONDA2_CAPABILITIES.presenceRecord);
     await this.access.assertUnitAccess(user, dto.unitId);
-    const existing = await this.prisma.operationalPresenceEvent.findUnique({ where: { idempotencyKey: dto.idempotencyKey } });
-    if (existing) return existing;
+    const source = dto.source ?? 'MOBILE';
+    const existing = await this.prisma.operationalPresenceEvent.findFirst({
+      where: { mantenedoraId: user.mantenedoraId, source, idempotencyKey: dto.idempotencyKey },
+    });
+    if (existing) {
+      if (existing.unitId !== dto.unitId) throw new ConflictException('Chave de idempotência já utilizada em outra unidade');
+      return existing;
+    }
+
+    if (dto.spaceId) {
+      const space = await this.prisma.facilitySpace.findFirst({ where: { id: dto.spaceId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!space) throw new NotFoundException('Espaço do evento não encontrado no escopo autorizado');
+    }
 
     if (dto.sessionId) {
       const session = await this.prisma.operationalPresenceSession.findFirst({
@@ -49,24 +64,31 @@ export class Onda2PulseService {
       if (!session) throw new NotFoundException('Sessão operacional não encontrada no escopo autorizado');
     }
 
-    return this.prisma.operationalPresenceEvent.create({
-      data: {
-        mantenedoraId: user.mantenedoraId,
-        unitId: dto.unitId,
-        sessionId: dto.sessionId,
-        spaceId: dto.spaceId,
-        subjectType: dto.subjectType,
-        subjectId: dto.subjectId,
-        eventType: dto.eventType,
-        status: Onda2PresenceEventStatus.ACCEPTED,
-        occurredAt: new Date(dto.occurredAt),
-        source: dto.source ?? 'MOBILE',
-        idempotencyKey: dto.idempotencyKey,
-        correlationId: dto.correlationId,
-        payload: dto.payload as Prisma.InputJsonValue | undefined,
-        createdBy: user.sub,
-      },
-    });
+    try {
+      return await this.prisma.operationalPresenceEvent.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId: dto.unitId,
+          sessionId: dto.sessionId,
+          spaceId: dto.spaceId,
+          subjectType: dto.subjectType,
+          subjectId: dto.subjectId,
+          eventType: dto.eventType,
+          status: Onda2PresenceEventStatus.ACCEPTED,
+          occurredAt: new Date(dto.occurredAt),
+          source,
+          idempotencyKey: dto.idempotencyKey,
+          correlationId: dto.correlationId,
+          payload: dto.payload as Prisma.InputJsonValue | undefined,
+          createdBy: user.sub,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Chave de idempotência já utilizada');
+      }
+      throw error;
+    }
   }
 
   async closeSession(id: string, user: JwtPayload) {

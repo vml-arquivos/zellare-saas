@@ -54,35 +54,49 @@ END $$;
 
 -- ─── 2. DevelopmentObservation — tabela JÁ EXISTE, adicionar apenas colunas faltantes ──
 
-ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "classroom_id"           TEXT;
-ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "diary_event_id"          TEXT;
-ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "planning_participation" TEXT;
-ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "psychological_notes"    TEXT;
-ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "development_alerts"     TEXT;
+DO $$
+BEGIN
+  IF to_regclass('public.development_observation') IS NOT NULL THEN
+    ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "classroom_id" TEXT;
+    ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "diary_event_id" TEXT;
+    ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "planning_participation" TEXT;
+    ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "psychological_notes" TEXT;
+    ALTER TABLE "development_observation" ADD COLUMN IF NOT EXISTS "development_alerts" TEXT;
 
-CREATE INDEX IF NOT EXISTS "DevelopmentObservation_childId_idx"     ON "development_observation"("child_id");
-CREATE INDEX IF NOT EXISTS "DevelopmentObservation_classroomId_idx" ON "development_observation"("classroom_id");
-CREATE INDEX IF NOT EXISTS "DevelopmentObservation_date_idx"        ON "development_observation"("date");
-CREATE INDEX IF NOT EXISTS "DevelopmentObservation_category_idx"    ON "development_observation"("category");
-CREATE INDEX IF NOT EXISTS "DevelopmentObservation_createdBy_idx"   ON "development_observation"("created_by");
+    CREATE INDEX IF NOT EXISTS "DevelopmentObservation_childId_idx" ON "development_observation"("child_id");
+    CREATE INDEX IF NOT EXISTS "DevelopmentObservation_classroomId_idx" ON "development_observation"("classroom_id");
+    CREATE INDEX IF NOT EXISTS "DevelopmentObservation_date_idx" ON "development_observation"("date");
+    CREATE INDEX IF NOT EXISTS "DevelopmentObservation_category_idx" ON "development_observation"("category");
+    CREATE INDEX IF NOT EXISTS "DevelopmentObservation_createdBy_idx" ON "development_observation"("created_by");
 
-DO $$ BEGIN
-  ALTER TABLE "development_observation"
-    ADD CONSTRAINT "DevelopmentObservation_childId_fkey"
-    FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
+    IF to_regclass('public.child') IS NOT NULL THEN
+      BEGIN
+        ALTER TABLE "development_observation"
+          ADD CONSTRAINT "DevelopmentObservation_childId_fkey"
+          FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END;
+    END IF;
+  END IF;
 END $$;
 
 -- ─── 3. DevelopmentReport — tabela JÁ EXISTE completa, apenas índices/FK ─────
 
-CREATE INDEX IF NOT EXISTS "DevelopmentReport_childId_idx"           ON "development_report"("child_id");
-CREATE INDEX IF NOT EXISTS "DevelopmentReport_startDate_endDate_idx" ON "development_report"("start_date", "end_date");
+DO $$
+BEGIN
+  IF to_regclass('public.development_report') IS NOT NULL THEN
+    CREATE INDEX IF NOT EXISTS "DevelopmentReport_childId_idx" ON "development_report"("child_id");
+    CREATE INDEX IF NOT EXISTS "DevelopmentReport_startDate_endDate_idx" ON "development_report"("start_date", "end_date");
 
-DO $$ BEGIN
-  ALTER TABLE "development_report"
-    ADD CONSTRAINT "DevelopmentReport_childId_fkey"
-    FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
+    IF to_regclass('public.child') IS NOT NULL THEN
+      BEGIN
+        ALTER TABLE "development_report"
+          ADD CONSTRAINT "DevelopmentReport_childId_fkey"
+          FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END;
+    END IF;
+  END IF;
 END $$;
 
 -- ─── 4. MaterialRequestItem — tabela JÁ EXISTE com schema diferente ──────────
@@ -91,11 +105,15 @@ END $$;
 -- Adicionar apenas colunas novas que o sistema precisa (item, quantidade, unidade)
 -- NÃO recriar a tabela, NÃO criar índice em colunas que não existem
 
-ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "item"       VARCHAR(255);
-ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "quantidade" INTEGER;
-ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "unidade"    VARCHAR(50);
-
-CREATE INDEX IF NOT EXISTS "MaterialRequestItem_requestId_idx" ON "material_request_item"("request_id");
+DO $$
+BEGIN
+  IF to_regclass('public.material_request_item') IS NOT NULL THEN
+    ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "item" VARCHAR(255);
+    ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "quantidade" INTEGER;
+    ALTER TABLE "material_request_item" ADD COLUMN IF NOT EXISTS "unidade" VARCHAR(50);
+    CREATE INDEX IF NOT EXISTS "MaterialRequestItem_requestId_idx" ON "material_request_item"("request_id");
+  END IF;
+END $$;
 
 -- ─── 5. ClassroomPost — NÃO EXISTE → criar ───────────────────────────────────
 
@@ -120,11 +138,16 @@ CREATE INDEX IF NOT EXISTS "ClassroomPost_classroomId_idx"   ON "classroom_post"
 CREATE INDEX IF NOT EXISTS "ClassroomPost_mantenedoraId_idx" ON "classroom_post"("mantenedora_id");
 CREATE INDEX IF NOT EXISTS "ClassroomPost_createdAt_idx"     ON "classroom_post"("created_at");
 
-DO $$ BEGIN
-  ALTER TABLE "classroom_post"
-    ADD CONSTRAINT "ClassroomPost_classroomId_fkey"
-    FOREIGN KEY ("classroom_id") REFERENCES "classroom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
+DO $$
+BEGIN
+  IF to_regclass('public.classroom') IS NOT NULL THEN
+    BEGIN
+      ALTER TABLE "classroom_post"
+        ADD CONSTRAINT "ClassroomPost_classroomId_fkey"
+        FOREIGN KEY ("classroom_id") REFERENCES "classroom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+  END IF;
 END $$;
 
 -- ─── 6. ClassroomPostFile — NÃO EXISTE → criar ───────────────────────────────
@@ -174,11 +197,16 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-DO $$ BEGIN
-  ALTER TABLE "student_post_performance"
-    ADD CONSTRAINT "StudentPostPerformance_childId_fkey"
-    FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
+DO $$
+BEGIN
+  IF to_regclass('public.child') IS NOT NULL THEN
+    BEGIN
+      ALTER TABLE "student_post_performance"
+        ADD CONSTRAINT "StudentPostPerformance_childId_fkey"
+        FOREIGN KEY ("child_id") REFERENCES "child"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+  END IF;
 END $$;
 
 -- ─── 8. RecadoTurma — NÃO EXISTE → criar ────────────────────────────────────
@@ -203,11 +231,16 @@ CREATE INDEX IF NOT EXISTS "RecadoTurma_unitId_idx"      ON "recado_turma"("unit
 CREATE INDEX IF NOT EXISTS "RecadoTurma_classroomId_idx" ON "recado_turma"("classroom_id");
 CREATE INDEX IF NOT EXISTS "RecadoTurma_criadoEm_idx"    ON "recado_turma"("criado_em");
 
-DO $$ BEGIN
-  ALTER TABLE "recado_turma"
-    ADD CONSTRAINT "RecadoTurma_unitId_fkey"
-    FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL;
+DO $$
+BEGIN
+  IF to_regclass('public.unit') IS NOT NULL THEN
+    BEGIN
+      ALTER TABLE "recado_turma"
+        ADD CONSTRAINT "RecadoTurma_unitId_fkey"
+        FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END;
+  END IF;
 END $$;
 
 -- ─── 9. RecadoLeitura — NÃO EXISTE → criar ───────────────────────────────────

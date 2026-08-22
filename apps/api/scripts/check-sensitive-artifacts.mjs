@@ -1,13 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Gate de privacidade para artifacts versionados do Zelare.
- *
- * Este gate é deliberadamente baseado em caminho/nome de arquivo. Ele não tenta
- * inferir conteúdo de planilhas ou JSON e não apaga histórico Git. Qualquer
- * remoção histórica exige aprovação humana explícita (P0-2).
- */
-
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -42,80 +32,52 @@ const publicAllowlist = new Set([
   'apps/api/datasets/materiais_seed.json',
 ]);
 
-const knownLegacySensitivePaths = new Set([
-  'apps/api/data/ALUNOS2026.xlsx',
-  'apps/api/data/arara-2026-alunos.json',
-  'apps/api/data/dados-arara.xlsx',
-  'apps/api/data/dados-flamboyant.xlsx',
-  'apps/api/data/dados-pelicano.xlsx',
-  'apps/api/data/dados-sabia.xlsx',
-  'apps/api/datasets/turmas_alunos.json',
-  'apps/api/docs/funcionarios-reais-completo.json',
-  'apps/api/imports/alunos.xlsx',
-  'apps/api/imports/profissionais.xlsx',
-  'apps/api/prisma/seed-arara-caninde.ts',
-  'apps/api/prisma/seed-cocris-units.ts',
-  'apps/api/prisma/seed-units-from-json.js',
-  'apps/api/prisma/seed-units-from-json.ts',
-  'apps/api/prisma/seed-units.ts',
-  'apps/api/prisma/seed.ts',
-  'apps/api/prisma/seeds/flamboyant/01_seed_flamboyant_completo.sql',
-  'apps/api/prisma/seeds/flamboyant/02_conferir_flamboyant.sql',
-  'apps/api/prisma/seeds/flamboyant/03_conferencia_qualidade_pelicano_flamboyant.sql',
-  'apps/api/prisma/seeds/pelicano/01_seed_pelicano_completo.sql',
-  'apps/api/prisma/seeds/pelicano/02_conferir_pelicano.sql',
-]);
-
 const blockedPathRules = [
   {
-    name: 'planilhas de dados pessoais',
+    name: 'planilha potencialmente pessoal',
     test: (file) => file.startsWith(apiPrefix) && /\.(xlsx|xls)$/i.test(file),
   },
   {
-    name: 'imports locais',
+    name: 'import local potencialmente pessoal',
     test: (file) => file.startsWith(`${apiPrefix}imports/`),
   },
   {
-    name: 'documentação com cadastro de funcionários',
-    test: (file) => /(^|\/)funcionarios-reais/i.test(file),
+    name: 'dataset fora da allowlist pública',
+    test: (file) => file.startsWith(`${apiPrefix}data/`) || file.startsWith(`${apiPrefix}datasets/`),
   },
   {
-    name: 'datasets com alunos/turmas identificáveis',
-    test: (file) => /(^|\/)(arara-2026-alunos|turmas_alunos)\.(json|csv)$/i.test(file),
+    name: 'documento de login ou cadastro pessoal',
+    test: (file) => /(^|\/)(LOGINS_TESTE|LOGINS_ATUALIZADOS|funcionarios-reais|dados-(arara|flamboyant|pelicano|sabia)|turmas_alunos|arara-2026-alunos)/i.test(file),
   },
   {
-    name: 'seeds SQL com cadastros pessoais',
+    name: 'evidência de produção com dados autenticados',
+    test: (file) => file.startsWith(`${apiPrefix}ops/evidencias/smoke-prod/`),
+  },
+  {
+    name: 'seed SQL com cadastro ou conferência',
     test: (file) => /^apps\/api\/prisma\/seeds\//i.test(file),
   },
   {
-    name: 'seeds de dados reais no runtime',
+    name: 'seed Prisma legado',
     test: (file) => /^apps\/api\/prisma\/seed[^/]*\.(ts|js)$/i.test(file),
+  },
+  {
+    name: 'seed/import de dados pessoais',
+    test: (file) => /(^|\/)(seed-(admin|all-users|cirurgico|fresh|real-data|test-users)|seed-completar-maio-hoje-unidades|import-(arara-2026|dados-responsaveis)|importar-unidade)(\.|\/|$)/i.test(file),
+  },
+  {
+    name: 'seed/import de dados pessoais em src',
+    test: (file) => /^apps\/api\/src\/scripts\/(seed-arara|seed-sabia|import-arara|import-dados-responsaveis|importar-unidade)/i.test(file),
   },
 ];
 
 const findings = [];
-const legacyWarnings = new Set();
-
 for (const file of files) {
+  if (publicAllowlist.has(file)) continue;
   for (const rule of blockedPathRules) {
-    if (rule.test(file) && !publicAllowlist.has(file)) {
-      if (knownLegacySensitivePaths.has(file)) {
-        legacyWarnings.add(file);
-      } else {
-        findings.push(`${rule.name}: ${file}`);
-      }
+    if (rule.test(file)) {
+      findings.push(`${rule.name}: ${file}`);
       break;
-    }
-  }
-
-  if (
-    (file.startsWith(`${apiPrefix}data/`) || file.startsWith(`${apiPrefix}datasets/`)) &&
-    !publicAllowlist.has(file)
-  ) {
-    if (knownLegacySensitivePaths.has(file)) {
-      legacyWarnings.add(file);
-    } else {
-      findings.push(`arquivo fora da allowlist pública: ${file}`);
     }
   }
 }
@@ -130,7 +92,6 @@ const requiredDockerignoreRules = [
   'prisma/seed*.ts',
   'prisma/seeds/',
 ];
-
 for (const rule of requiredDockerignoreRules) {
   if (!dockerignore.split(/\r?\n/).some((line) => line.trim() === rule)) {
     findings.push(`regra ausente em apps/api/.dockerignore: ${rule}`);
@@ -139,20 +100,13 @@ for (const rule of requiredDockerignoreRules) {
 
 if (findings.length > 0) {
   console.error('Sensitive-artifacts gate: FAIL');
-  for (const finding of [...new Set(findings)]) console.error(`- ${finding}`);
-  console.error(
-    'A remoção do histórico Git não é automática; P0-2 exige aprovação humana explícita.',
-  );
+  for (const finding of [...new Set(findings)].sort()) console.error(`- ${finding}`);
+  console.error('Remova o artifact do commit corrente ou substitua-o por fixture pública/sintética. O histórico Git não é reescrito por este gate.');
   process.exit(1);
 }
 
 console.log('Sensitive-artifacts gate: PASS');
 console.log(`Arquivos versionados verificados: ${files.length}`);
 console.log(`Allowlist pública: ${publicAllowlist.size} arquivos`);
-console.log(`Baseline legado sensível documentado: ${legacyWarnings.size} arquivos`);
-if (legacyWarnings.size > 0) {
-  console.warn('Risco residual documentado — não removido sem aprovação humana (P0-2):');
-  for (const warning of [...legacyWarnings].sort()) console.warn(`- ${warning}`);
-}
-console.log('Nenhum novo artifact de PII foi permitido na imagem da API.');
-console.log('Nenhuma remoção ou reescrita de histórico Git foi executada.');
+console.log('Nenhum caminho sensível identificado no HEAD corrente.');
+console.log('Nenhum artifact não público é copiado para dist pela rotina de build.');

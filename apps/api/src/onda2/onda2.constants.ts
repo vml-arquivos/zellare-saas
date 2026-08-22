@@ -20,6 +20,7 @@ export const ONDA2_CAPABILITIES = {
   staffingPublish: 'staffing.publish',
   ratioPolicyRead: 'ratio.policy.read',
   ratioPolicyManage: 'ratio.policy.manage',
+  ratioPolicyReview: 'ratio.policy.review',
   ratioPolicyPublish: 'ratio.policy.publish',
   ratioBreachAcknowledge: 'ratio.breach.acknowledge',
   ratioBreachResolve: 'ratio.breach.resolve',

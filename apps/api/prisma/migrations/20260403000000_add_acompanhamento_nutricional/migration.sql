@@ -62,8 +62,9 @@ CREATE INDEX IF NOT EXISTS "acompanhamento_nutricional_proxima_reavaliacao_idx"
   ON "acompanhamento_nutricional"("proxima_reavaliacao");
 
 -- AddForeignKey: child_id → child.id
-DO $$ BEGIN
-  IF NOT EXISTS (
+DO $$
+BEGIN
+  IF to_regclass('public.child') IS NOT NULL AND NOT EXISTS (
     SELECT 1 FROM information_schema.table_constraints
     WHERE constraint_name = 'acompanhamento_nutricional_child_id_fkey'
   ) THEN
@@ -74,8 +75,9 @@ DO $$ BEGIN
 END $$;
 
 -- AddForeignKey: mantenedora_id → mantenedora.id
-DO $$ BEGIN
-  IF NOT EXISTS (
+DO $$
+BEGIN
+  IF to_regclass('public.mantenedora') IS NOT NULL AND NOT EXISTS (
     SELECT 1 FROM information_schema.table_constraints
     WHERE constraint_name = 'acompanhamento_nutricional_mantenedora_id_fkey'
   ) THEN

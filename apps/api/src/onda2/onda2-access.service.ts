@@ -71,6 +71,7 @@ export class Onda2AccessService {
       case ONDA2_CAPABILITIES.staffingManage:
       case ONDA2_CAPABILITIES.staffingPublish:
       case ONDA2_CAPABILITIES.ratioPolicyManage:
+      case ONDA2_CAPABILITIES.ratioPolicyReview:
       case ONDA2_CAPABILITIES.ratioPolicyPublish:
       case ONDA2_CAPABILITIES.facilityRequestTriage:
       case ONDA2_CAPABILITIES.assetManage:

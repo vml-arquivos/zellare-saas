@@ -12,12 +12,19 @@ const actor: JwtPayload = {
 
 describe('Onda2ComplianceService', () => {
   const prisma = {
-    preventiveMaintenancePlan: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn() },
-    preventivePlanTask: { findUnique: jest.fn(), create: jest.fn() },
+    preventiveMaintenancePlan: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
+    preventivePlanTask: { findFirst: jest.fn(), create: jest.fn() },
+    workOrder: { create: jest.fn() },
+    checklistTemplate: { findFirst: jest.fn() },
+    checklistTemplateVersion: { findFirst: jest.fn() },
+    checklistExecution: { findFirst: jest.fn() },
+    checklistItemResult: { count: jest.fn() },
     inspection: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
     nonconformity: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn(), update: jest.fn() },
     complianceRequirement: { findFirst: jest.fn(), create: jest.fn(), findMany: jest.fn() },
-    complianceEvidence: { create: jest.fn(), findMany: jest.fn() },
+    complianceEvidence: { create: jest.fn(), findMany: jest.fn(), findFirst: jest.fn() },
+    correctiveAction: { findFirst: jest.fn() },
+    $transaction: jest.fn((operation: any) => Array.isArray(operation) ? Promise.all(operation) : operation(prisma)),
   } as any;
   const access = { assertFlagAndCapability: jest.fn(), assertUnitAccess: jest.fn() } as any;
   let service: Onda2ComplianceService;
@@ -31,10 +38,12 @@ describe('Onda2ComplianceService', () => {
 
   it('conclui inspeção e cria não conformidade revisável', async () => {
     prisma.inspection.findFirst.mockResolvedValue({ id: 'inspection-1', unitId: 'unit-1', mantenedoraId: 'tenant-1' });
+    prisma.checklistExecution.findFirst.mockResolvedValue({ id: 'exec-1' });
+    prisma.checklistItemResult.count.mockResolvedValue(3);
     prisma.inspection.update.mockResolvedValue({ id: 'inspection-1', status: 'COMPLETED' });
     prisma.nonconformity.create.mockResolvedValue({ id: 'nc-1' });
 
-    const result = await service.completeInspection('inspection-1', { result: Onda2InspectionResult.NON_COMPLIANT, note: 'Revisar fechamento da janela' }, actor);
+    const result = await service.completeInspection('inspection-1', { executionId: 'exec-1', result: Onda2InspectionResult.NON_COMPLIANT, note: 'Revisar fechamento da janela' }, actor);
     expect(result.governance).toEqual({ diagnosticInference: false, humanReviewRequired: true });
     expect(prisma.nonconformity.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ inspectionId: 'inspection-1', description: 'Revisar fechamento da janela' }) }));
   });
