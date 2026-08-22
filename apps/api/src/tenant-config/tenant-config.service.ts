@@ -28,6 +28,7 @@ export const KNOWN_TENANT_FLAG_KEYS = [
   'preventive_maintenance_v1',
   'compliance_inspections_v1',
   'operational_ai_v1',
+  'journey_admissions_v1',
 ] as const;
 
 @Injectable()

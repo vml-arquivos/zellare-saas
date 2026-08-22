@@ -88,6 +88,8 @@ const DailyCollectionPage = lazy(() => import('../pages/DailyCollectionPage'));
 const FamilyGuardiansPage = lazy(() => import('../pages/FamilyGuardiansPage'));
 const MetricsCoveragePage = lazy(() => import('../pages/MetricsCoveragePage'));
 const Onda2CommandCenterPage = lazy(() => import('../pages/Onda2CommandCenterPage'));
+const JourneyPage = lazy(() => import('../pages/JourneyPage'));
+
 const Child360Page = lazy(() => import('../pages/Child360Page'));
 const ReviewHubPage = lazy(() => import('../pages/ReviewHubPage'));
 const FamilyCirclePage = lazy(() => import('../pages/FamilyCirclePage'));
@@ -815,6 +817,14 @@ export const router = createBrowserRouter([
       { path:'review-hub', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><ReviewHubPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
       { path:'family-circle', element:(<RoleProtectedRoute allowedRoles={['FAMILIA','PROFESSOR','UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><FamilyCirclePage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
       { path:'inteligencia', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><PainelInteligenciaPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      // Onda 3 — Journey; API e manifesto também aplicam flag e capability.
+      { path:'journey', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/interessados', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/funil', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/visitas', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/lista-espera', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/ofertas', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
+      { path:'journey/relatorios', element:(<RoleProtectedRoute allowedRoles={['UNIDADE','STAFF_CENTRAL','MANTENEDORA','DEVELOPER']}><JourneyPage/></RoleProtectedRoute>), errorElement:<RouteErrorBoundary/> },
     ],
   },
   // ─── PWA Mobile — layout próprio, sem AppLayout desktop ────────────────────

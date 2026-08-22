@@ -87,6 +87,8 @@ const MANAGEMENT_LEVELS = ['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER
 const NETWORK_LEVELS = ['STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER'];
 const TEACHER_LEVELS = ['PROFESSOR', 'PROFESSOR_AUXILIAR', 'DEVELOPER'];
 const UNIT_ADMIN_TYPES = ['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO'];
+const JOURNEY_LEVELS = ['UNIDADE', 'STAFF_CENTRAL', 'MANTENEDORA', 'DEVELOPER'];
+const JOURNEY_TYPES = ['UNIDADE_ADMINISTRATIVO', 'UNIDADE_DIRETOR', 'UNIDADE_COORDENADOR_PEDAGOGICO', 'STAFF_CENTRAL_PEDAGOGICO', 'MANTENEDORA_ADMIN', 'DEVELOPER'];
 
 const item = (
   id: string,
@@ -141,6 +143,20 @@ export const NAVIGATION_MANIFEST: NavigationGroup[] = [
       item('virtual-classroom', '/app/sala-de-aula-virtual', 'Sala de aula virtual', Sparkles, { levels: TEAM_LEVELS, capability: 'pedagogy.read' }),
       item('teacher-ranking', '/app/ranking-preenchimento', 'Ranking', Trophy, { levels: TEAM_LEVELS, capability: 'pedagogy.read' }),
       item('official-profiles', '/app/rdic-perfis', 'Perfis documentais', FileText, { levels: ['MANTENEDORA', 'DEVELOPER'], capability: 'pedagogy.read', badge: 'Oficial' }),
+    ],
+  },
+  {
+    id: 'journey',
+    title: 'Jornada e Admissões',
+    featureFlag: 'journey_admissions_v1',
+    items: [
+      item('journey-overview', '/app/journey', 'Visão geral', LayoutDashboard, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'overview.read' }),
+      item('journey-prospects', '/app/journey/interessados', 'Interessados', Users, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'admin.read' }),
+      item('journey-pipeline', '/app/journey/funil', 'Funil', BarChart3, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'admin.read' }),
+      item('journey-visits', '/app/journey/visitas', 'Visitas', ClipboardList, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'admin.read' }),
+      item('journey-waitlist', '/app/journey/lista-espera', 'Lista de espera', Users, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'admin.read' }),
+      item('journey-offers', '/app/journey/ofertas', 'Ofertas de vaga', UserCheck, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'admin.read' }),
+      item('journey-reports', '/app/journey/relatorios', 'Relatórios', BarChart3, { levels: JOURNEY_LEVELS, types: JOURNEY_TYPES, capability: 'overview.read' }),
     ],
   },
   {

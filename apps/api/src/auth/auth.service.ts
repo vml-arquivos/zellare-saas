@@ -255,6 +255,11 @@ export class AuthService {
       unitScopes: r.unitScopes.map((s) => s.unitId),
     }));
 
+    const enabledFeatureFlags = await this.prisma.tenantFeatureFlag.findMany({
+      where: { mantenedoraId: user.mantenedoraId, enabled: true },
+      select: { flagKey: true },
+    });
+
     return {
       user: {
         id: user.id,
@@ -272,6 +277,7 @@ export class AuthService {
         unitId: user.unitId,
         unit: user.unit ? { id: user.unit.id, name: user.unit.name, unitCode: user.unit.code } : null,
         roles: rolesRich,
+        featureFlags: enabledFeatureFlags.map((flag) => flag.flagKey),
       },
     };
   }
