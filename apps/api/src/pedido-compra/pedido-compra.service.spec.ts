@@ -36,7 +36,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
 
   const userUnidadeComUnitId: JwtPayload = {
     sub: 'coord-001',
-    email: 'coordenadora@escola.com',
+    email: 'coordinator-a@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r1', level: RoleLevel.UNIDADE, type: 'UNIDADE_COORDENADOR_PEDAGOGICO' as any, unitScopes: [] }],
@@ -45,7 +45,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
   // FIX P0 Bug 1: UNIDADE sem unitId
   const userUnidadeSemUnitId: JwtPayload = {
     sub: 'coord-sem-unidade',
-    email: 'sem-unidade@escola.com',
+    email: 'without-unit@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: undefined as any,
     roles: [{ roleId: 'r2', level: RoleLevel.UNIDADE, type: 'UNIDADE_COORDENADOR_PEDAGOGICO' as any, unitScopes: [] }],
@@ -54,7 +54,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
   // FIX P0 Bug 2: STAFF_CENTRAL com unitScopes=[]
   const userStaffCentralSemScopes: JwtPayload = {
     sub: 'staff-001',
-    email: 'staff@central.com',
+    email: 'staff@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: undefined as any,
     roles: [{ roleId: 'r3', level: RoleLevel.STAFF_CENTRAL, type: 'STAFF_CENTRAL' as any, unitScopes: [] }],
@@ -63,7 +63,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
   // STAFF_CENTRAL com unitScopes preenchidos
   const userStaffCentralComScopes: JwtPayload = {
     sub: 'staff-002',
-    email: 'staff2@central.com',
+    email: 'staff-2@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: undefined as any,
     roles: [{ roleId: 'r4', level: RoleLevel.STAFF_CENTRAL, type: 'STAFF_CENTRAL' as any, unitScopes: ['unit-001', 'unit-002'] }],
@@ -71,7 +71,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
 
   const userMantenedora: JwtPayload = {
     sub: 'mant-001',
-    email: 'mantenedora@rede.com',
+    email: 'owner@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: undefined as any,
     roles: [{ roleId: 'r5', level: RoleLevel.MANTENEDORA, type: 'MANTENEDORA' as any, unitScopes: [] }],
@@ -79,7 +79,7 @@ describe('PedidoCompraService — listar() — FIX P0 (500 → erro controlado)'
 
   const userProfessor: JwtPayload = {
     sub: 'prof-001',
-    email: 'professor@escola.com',
+    email: 'teacher-b@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r6', level: RoleLevel.PROFESSOR, type: 'PROFESSOR' as any, unitScopes: [] }],

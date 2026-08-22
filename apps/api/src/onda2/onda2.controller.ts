@@ -27,6 +27,7 @@ import {
   CreateRatioSnapshotDto,
   CreateStaffingAssignmentDto,
   CreateWorkOrderDto,
+  ReviewRatioPolicyDto,
   VerifyNonconformityDto,
   Onda2ListQueryDto,
   PulseQueryDto,
@@ -84,6 +85,12 @@ export class Onda2Controller {
   @RequireRoles(RoleLevel.UNIDADE, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
   createRatioPolicy(@Body() dto: CreateRatioPolicyDto, @CurrentUser() user: JwtPayload) {
     return this.coverage.createRatioPolicy(dto, user);
+  }
+
+  @Post('coverage/policies/:id/review')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  reviewRatioPolicy(@Param('id') id: string, @Body() dto: ReviewRatioPolicyDto, @CurrentUser() user: JwtPayload) {
+    return this.coverage.reviewRatioPolicy(id, dto, user);
   }
 
   @Post('coverage/policies/:id/publish')

@@ -27,12 +27,12 @@ Port: 3000
 
 **Variáveis de Ambiente:**
 ```env
-DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 JWT_SECRET=[mesmo da produção]
 JWT_REFRESH_SECRET=[mesmo da produção]
 SUPABASE_URL=https://ockzuvbnzfoqsiwmpixr.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_HvSlvhTCWY2j9dgKqiSGuQ_3t03hIvF
+SUPABASE_ANON_KEY=<SECRET_FROM_SECRET_MANAGER>
 SUPABASE_SERVICE_ROLE_KEY=[obter no Dashboard]
 NODE_ENV=staging
 ```
@@ -80,7 +80,7 @@ export DIARY_EVENT_ID_B="..."
 ```bash
 curl -X POST https://staging-apiconexa.casadf.com.br/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"admin@mantenedora.com","password":"senha"}'
+  -d '{"email":"contact@example.invalid","password":"senha"}'
 ```
 
 **Teste 2: Listagens**

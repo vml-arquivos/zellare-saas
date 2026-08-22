@@ -219,7 +219,7 @@ site-zelare/
 │   ├── _core/
 │   ├── const.ts
 │   └── types.ts
-└── seed-units.mjs
+└── fallback sintético de unidades (sem seed nominal)
 ```
 
 ### Funcionalidades Identificadas

@@ -15,9 +15,9 @@
 ### Database (Supabase)
 
 ```env
-DATABASE_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
-DIRECT_URL=postgresql://postgres.ockzuvbnzfoqsiwmpixr:Zelareapiv1db@aws-1-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
+DIRECT_URL=postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 ⚠️ **IMPORTANTE:**
@@ -43,7 +43,7 @@ openssl rand -base64 32
 
 ```env
 SUPABASE_URL=https://ockzuvbnzfoqsiwmpixr.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_HvSlvhTCWY2j9dgKqiSGuQ_3t03hIvF
+SUPABASE_ANON_KEY=<SECRET_FROM_SECRET_MANAGER>
 SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key_aqui
 ```
 
@@ -180,8 +180,8 @@ No Coolify, verificar logs para:
 ```bash
 curl -X GET \
   'https://ockzuvbnzfoqsiwmpixr.supabase.co/rest/v1/_prisma_migrations?select=*' \
-  -H "apikey: sb_publishable_HvSlvhTCWY2j9dgKqiSGuQ_3t03hIvF" \
-  -H "Authorization: Bearer sb_publishable_HvSlvhTCWY2j9dgKqiSGuQ_3t03hIvF"
+  -H "apikey: <SECRET_FROM_SECRET_MANAGER>" \
+  -H "Authorization: Bearer <ACCESS_TOKEN_FROM_SECRET_MANAGER>"
 ```
 
 ---

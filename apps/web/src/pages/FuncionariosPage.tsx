@@ -411,7 +411,7 @@ export default function FuncionariosPage() {
                   className={inputCls}
                   value={form.email}
                   onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="email@exemplo.com"
+                  placeholder="funcionario@example.invalid"
                   disabled={!!editando}
                 />
               </FormField>
@@ -440,7 +440,7 @@ export default function FuncionariosPage() {
                   className={inputCls}
                   value={form.phone}
                   onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))}
-                  placeholder="(00) 00000-0000"
+                  placeholder="Telefone do funcionário"
                 />
               </FormField>
               <FormField label="CPF">
@@ -448,7 +448,7 @@ export default function FuncionariosPage() {
                   className={inputCls}
                   value={form.cpf}
                   onChange={(e) => setForm(f => ({ ...f, cpf: e.target.value }))}
-                  placeholder="000.000.000-00"
+                  placeholder="CPF do funcionário"
                 />
               </FormField>
               <FormField label="Cargo / Papel">

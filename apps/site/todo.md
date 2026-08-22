@@ -43,16 +43,16 @@
 
 ## FINALIZAÇÃO COMPLETA DO SITE - DEPLOY READY
 
-### 1. Imagens Reais das Unidades
-- [x] Buscar e adicionar fotos reais das 7 unidades educacionais
-- [x] Otimizar imagens para web (compressão, tamanho adequado)
+### 1. Imagens e fallback de demonstração
+- [x] Manter componentes visuais sem dados institucionais nominados
+- [x] Otimizar imagens públicas para web quando existirem
 - [x] Adicionar alt text descritivo em todas as imagens
 
-### 2. Integração de Dados Reais
-- [x] Criar script seed-units.mjs com dados do units.json
-- [x] Popular banco de dados com informações completas das 7 unidades
-- [x] Adicionar coordenadas GPS para mapa interativo
-- [x] Atualizar estatísticas reais (anos de história, crianças atendidas)
+### 2. Integração de dados
+- [x] Usar banco real somente quando configurado pelo ambiente autorizado
+- [x] Manter fallback estático exclusivamente sintético
+- [x] Não distribuir coordenadas, contatos ou estatísticas pessoais
+- [x] Validar escopo e privacidade antes de publicar
 
 ### 3. Sistema de Pagamentos Real
 - [x] Integrar Stripe com chaves de teste (estrutura base criada)

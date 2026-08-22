@@ -1,11 +1,13 @@
 import { MapPin, Phone, Mail, ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from 'wouter';
 import Header from '@/components/Header';
+import { getPublicUnitsLoadState } from '@/lib/public-units';
 import Footer from '@/components/Footer';
 import { trpc } from '@/lib/trpc';
 
 export default function Unidades() {
-  const { data: units, isLoading, error } = trpc.units.getAll.useQuery();
+  const { data: units, isLoading, error, refetch } = trpc.units.getAll.useQuery();
+  const unitsState = getPublicUnitsLoadState({ isLoading, error, units });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -17,7 +19,7 @@ export default function Unidades() {
           <div className="container text-white text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">Nossas Unidades Educacionais</h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
-              Administramos 7 unidades de educação infantil no Distrito Federal, oferecendo educação de qualidade, alimentação nutritiva e um ambiente acolhedor para centenas de crianças
+              Consulte as unidades de educação infantil cadastradas pela instituição.
             </p>
           </div>
         </section>
@@ -25,15 +27,18 @@ export default function Unidades() {
         {/* Units Grid */}
         <section className="py-20 md:py-32 bg-white">
           <div className="container">
-            {isLoading && (
+            {unitsState.kind === 'loading' && (
               <div className="flex justify-center items-center py-20">
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
               </div>
             )}
 
-            {error && (
-              <div className="text-center py-20">
-                <p className="text-destructive text-lg">Erro ao carregar unidades. Tente novamente mais tarde.</p>
+            {unitsState.kind === 'unavailable' && (
+              <div role="alert" className="text-center py-20">
+                <p className="text-destructive text-lg mb-5">{unitsState.message}</p>
+                <button type="button" className="btn-outline" onClick={() => void refetch()}>
+                  Tentar novamente
+                </button>
               </div>
             )}
 
@@ -102,9 +107,9 @@ export default function Unidades() {
               </div>
             )}
 
-            {units && units.length === 0 && (
+            {unitsState.kind === 'empty' && (
               <div className="text-center py-20">
-                <p className="text-foreground/70 text-lg">Nenhuma unidade encontrada.</p>
+                <p className="text-foreground/70 text-lg">{unitsState.message}</p>
               </div>
             )}
           </div>
@@ -116,7 +121,7 @@ export default function Unidades() {
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">Localização das Unidades</h2>
               <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-                Nossas unidades estão estrategicamente localizadas no Recanto das Emas e Brazlândia para atender comunidades em vulnerabilidade social
+                Consulte os endereços publicados pela instituição em cada unidade cadastrada.
               </p>
             </div>
 

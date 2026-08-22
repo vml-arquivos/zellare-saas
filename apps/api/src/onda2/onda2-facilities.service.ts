@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Onda2AssetStatus,
   Onda2MaintenanceRequestStatus,
@@ -32,6 +32,10 @@ export class Onda2FacilitiesService {
   async createSpace(dto: CreateFacilitySpaceDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.facilitiesServiceDeskV1, ONDA2_CAPABILITIES.assetManage);
     await this.access.assertUnitAccess(user, dto.unitId);
+    if (dto.parentId) {
+      const parent = await this.prisma.facilitySpace.findFirst({ where: { id: dto.parentId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!parent) throw new NotFoundException('Espaço-pai não encontrado no escopo autorizado');
+    }
     return this.prisma.facilitySpace.create({
       data: {
         mantenedoraId: user.mantenedoraId,
@@ -57,6 +61,14 @@ export class Onda2FacilitiesService {
   async createAsset(dto: CreateFacilityAssetDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.facilitiesServiceDeskV1, ONDA2_CAPABILITIES.assetManage);
     await this.access.assertUnitAccess(user, dto.unitId);
+    if (dto.spaceId) {
+      const space = await this.prisma.facilitySpace.findFirst({ where: { id: dto.spaceId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!space) throw new NotFoundException('Espaço do ativo não encontrado no escopo autorizado');
+    }
+    if (dto.supplierId) {
+      const supplier = await this.prisma.fornecedor.findFirst({ where: { id: dto.supplierId, mantenedoraId: user.mantenedoraId, ativo: true }, select: { id: true } });
+      if (!supplier) throw new NotFoundException('Fornecedor não encontrado no escopo autorizado');
+    }
     return this.prisma.facilityAsset.create({
       data: {
         mantenedoraId: user.mantenedoraId,
@@ -93,26 +105,43 @@ export class Onda2FacilitiesService {
   async createMaintenanceRequest(dto: CreateMaintenanceRequestDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.facilitiesServiceDeskV1, ONDA2_CAPABILITIES.facilityRequestCreate);
     await this.access.assertUnitAccess(user, dto.unitId);
-    const existing = await this.prisma.maintenanceRequest.findUnique({ where: { idempotencyKey: dto.idempotencyKey } });
+    const source = dto.source ?? 'WEB';
+    if (dto.spaceId) {
+      const space = await this.prisma.facilitySpace.findFirst({ where: { id: dto.spaceId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!space) throw new NotFoundException('Espaço da solicitação não encontrado no escopo autorizado');
+    }
+    if (dto.assetId) {
+      const asset = await this.prisma.facilityAsset.findFirst({ where: { id: dto.assetId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId }, select: { id: true } });
+      if (!asset) throw new NotFoundException('Ativo da solicitação não encontrado no escopo autorizado');
+    }
+    const existing = await this.prisma.maintenanceRequest.findFirst({ where: { mantenedoraId: user.mantenedoraId, unitId: dto.unitId, source, idempotencyKey: dto.idempotencyKey } });
     if (existing) return existing;
     const code = dto.code ?? `REQ-${Date.now()}`;
-    return this.prisma.maintenanceRequest.create({
-      data: {
-        mantenedoraId: user.mantenedoraId,
-        unitId: dto.unitId,
-        spaceId: dto.spaceId,
-        assetId: dto.assetId,
-        code,
-        category: dto.category,
-        description: dto.description,
-        impact: dto.impact,
-        priority: dto.priority ?? Onda2Priority.NORMAL,
-        safetyRisk: dto.safetyRisk ?? false,
-        status: Onda2MaintenanceRequestStatus.SUBMITTED,
-        requesterId: user.sub,
-        idempotencyKey: dto.idempotencyKey,
-      },
-    });
+    try {
+      return await this.prisma.maintenanceRequest.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId: dto.unitId,
+          spaceId: dto.spaceId,
+          assetId: dto.assetId,
+          code,
+          category: dto.category,
+          description: dto.description,
+          impact: dto.impact,
+          priority: dto.priority ?? Onda2Priority.NORMAL,
+          safetyRisk: dto.safetyRisk ?? false,
+          status: Onda2MaintenanceRequestStatus.SUBMITTED,
+          requesterId: user.sub,
+          idempotencyKey: dto.idempotencyKey,
+          source,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Chave de idempotência já utilizada');
+      }
+      throw error;
+    }
   }
 
   async listMaintenanceRequests(query: Onda2ListQueryDto, user: JwtPayload) {
@@ -132,26 +161,46 @@ export class Onda2FacilitiesService {
   async createWorkOrder(dto: CreateWorkOrderDto, user: JwtPayload) {
     await this.access.assertFlagAndCapability(user, ONDA2_FEATURE_FLAGS.facilitiesServiceDeskV1, ONDA2_CAPABILITIES.facilityRequestTriage);
     await this.access.assertUnitAccess(user, dto.unitId);
+    let request: { id: string; status: Onda2MaintenanceRequestStatus } | null = null;
     if (dto.requestId) {
-      const request = await this.prisma.maintenanceRequest.findFirst({ where: { id: dto.requestId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId } });
+      request = await this.prisma.maintenanceRequest.findFirst({ where: { id: dto.requestId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId }, select: { id: true, status: true } });
       if (!request) throw new NotFoundException('Solicitação de manutenção não encontrada no escopo informado');
+      if (request.status === Onda2MaintenanceRequestStatus.REJECTED || request.status === Onda2MaintenanceRequestStatus.CLOSED) {
+        throw new BadRequestException('A solicitação não pode ser convertida em ordem de serviço');
+      }
     }
-    return this.prisma.workOrder.create({
-      data: {
-        mantenedoraId: user.mantenedoraId,
-        unitId: dto.unitId,
-        requestId: dto.requestId,
-        spaceId: dto.spaceId,
-        assetId: dto.assetId,
-        code: dto.code ?? `OS-${Date.now()}`,
-        category: dto.category,
-        description: dto.description,
-        priority: dto.priority ?? Onda2Priority.NORMAL,
-        status: Onda2WorkOrderStatus.OPEN,
-        supplierId: dto.supplierId,
-        dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined,
-        createdBy: user.sub,
-      },
+    if (dto.spaceId) {
+      const space = await this.prisma.facilitySpace.findFirst({ where: { id: dto.spaceId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId, isActive: true }, select: { id: true } });
+      if (!space) throw new NotFoundException('Espaço da OS não encontrado no escopo autorizado');
+    }
+    if (dto.assetId) {
+      const asset = await this.prisma.facilityAsset.findFirst({ where: { id: dto.assetId, mantenedoraId: user.mantenedoraId, unitId: dto.unitId }, select: { id: true } });
+      if (!asset) throw new NotFoundException('Ativo da OS não encontrado no escopo autorizado');
+    }
+    if (dto.supplierId) {
+      const supplier = await this.prisma.fornecedor.findFirst({ where: { id: dto.supplierId, mantenedoraId: user.mantenedoraId, ativo: true }, select: { id: true } });
+      if (!supplier) throw new NotFoundException('Fornecedor da OS não encontrado no escopo autorizado');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const workOrder = await tx.workOrder.create({
+        data: {
+          mantenedoraId: user.mantenedoraId,
+          unitId: dto.unitId,
+          requestId: dto.requestId,
+          spaceId: dto.spaceId,
+          assetId: dto.assetId,
+          code: dto.code ?? `OS-${Date.now()}`,
+          category: dto.category,
+          description: dto.description,
+          priority: dto.priority ?? Onda2Priority.NORMAL,
+          status: Onda2WorkOrderStatus.OPEN,
+          supplierId: dto.supplierId,
+          dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined,
+          createdBy: user.sub,
+        },
+      });
+      if (request) await tx.maintenanceRequest.update({ where: { id: request.id }, data: { status: Onda2MaintenanceRequestStatus.CONVERTED } });
+      return workOrder;
     });
   }
 
@@ -166,17 +215,29 @@ export class Onda2FacilitiesService {
     const order = await this.prisma.workOrder.findFirst({ where: { id, mantenedoraId: user.mantenedoraId } });
     if (!order) throw new NotFoundException('Ordem de serviço não encontrada');
     await this.access.assertUnitAccess(user, order.unitId);
-    if (!dto.employeeId && !dto.supplierId) throw new BadRequestException('Informe employeeId ou supplierId');
-    await this.prisma.workOrderAssignment.updateMany({ where: { workOrderId: id, unitId: order.unitId, active: true }, data: { active: false, unassignedAt: new Date() } });
-    const assignment = await this.prisma.workOrderAssignment.create({ data: { mantenedoraId: user.mantenedoraId, unitId: order.unitId, workOrderId: id, employeeId: dto.employeeId, supplierId: dto.supplierId, assignedBy: user.sub } });
-    return this.prisma.workOrder.update({ where: { id }, data: { assignedEmployeeId: dto.employeeId, supplierId: dto.supplierId, status: order.status === Onda2WorkOrderStatus.OPEN ? Onda2WorkOrderStatus.IN_PROGRESS : undefined } }).then(() => assignment);
+    if ((!dto.employeeId && !dto.supplierId) || (dto.employeeId && dto.supplierId)) throw new BadRequestException('Informe exatamente employeeId ou supplierId');
+    if (dto.employeeId) {
+      const employee = await this.prisma.user.findFirst({ where: { id: dto.employeeId, mantenedoraId: user.mantenedoraId, status: 'ATIVO', OR: [{ unitId: order.unitId }, { unitId: null }] }, select: { id: true } });
+      if (!employee) throw new NotFoundException('Executor não encontrado no escopo autorizado');
+    }
+    if (dto.supplierId) {
+      const supplier = await this.prisma.fornecedor.findFirst({ where: { id: dto.supplierId, mantenedoraId: user.mantenedoraId, ativo: true }, select: { id: true } });
+      if (!supplier) throw new NotFoundException('Fornecedor não encontrado no escopo autorizado');
+    }
+    return this.prisma.$transaction(async (tx) => {
+      await tx.workOrderAssignment.updateMany({ where: { workOrderId: id, mantenedoraId: user.mantenedoraId, unitId: order.unitId, active: true }, data: { active: false, unassignedAt: new Date() } });
+      const assignment = await tx.workOrderAssignment.create({ data: { mantenedoraId: user.mantenedoraId, unitId: order.unitId, workOrderId: id, employeeId: dto.employeeId, supplierId: dto.supplierId, assignedBy: user.sub } });
+      await tx.workOrder.update({ where: { id }, data: { assignedEmployeeId: dto.employeeId, supplierId: dto.supplierId, status: order.status === Onda2WorkOrderStatus.OPEN ? Onda2WorkOrderStatus.IN_PROGRESS : undefined } });
+      return assignment;
+    });
   }
 
   async changeWorkOrderStatus(id: string, dto: ChangeWorkOrderStatusDto, user: JwtPayload) {
     const order = await this.prisma.workOrder.findFirst({ where: { id, mantenedoraId: user.mantenedoraId } });
     if (!order) throw new NotFoundException('Ordem de serviço não encontrada');
     await this.access.assertUnitAccess(user, order.unitId);
-    const existingEvent = await this.prisma.workOrderStatusEvent.findUnique({ where: { idempotencyKey: dto.idempotencyKey } });
+    const source = dto.source ?? 'WEB';
+    const existingEvent = await this.prisma.workOrderStatusEvent.findFirst({ where: { mantenedoraId: user.mantenedoraId, unitId: order.unitId, source, idempotencyKey: dto.idempotencyKey } });
     if (existingEvent) return order;
     this.assertTransition(order.status, dto.status);
     const capability = dto.status === Onda2WorkOrderStatus.VALIDATED || dto.status === Onda2WorkOrderStatus.CLOSED
@@ -195,7 +256,7 @@ export class Onda2FacilitiesService {
 
     const [updated] = await this.prisma.$transaction([
       this.prisma.workOrder.update({ where: { id }, data }),
-      this.prisma.workOrderStatusEvent.create({ data: { mantenedoraId: user.mantenedoraId, unitId: order.unitId, workOrderId: id, fromStatus: order.status, toStatus: dto.status, reason: dto.reason, actorId: user.sub, idempotencyKey: dto.idempotencyKey } }),
+      this.prisma.workOrderStatusEvent.create({ data: { mantenedoraId: user.mantenedoraId, unitId: order.unitId, workOrderId: id, fromStatus: order.status, toStatus: dto.status, reason: dto.reason, actorId: user.sub, idempotencyKey: dto.idempotencyKey, source } }),
     ]);
     return updated;
   }

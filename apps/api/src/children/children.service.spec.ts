@@ -59,8 +59,8 @@ describe('ChildrenService — getHealthDashboard', () => {
       allergies: 'Amendoim severo',
       medicalConditions: 'TEA — Laudo 2025',
       medicationNeeds: 'Ritalina 10mg às 8h',
-      emergencyContactName: 'Maria Silva',
-      emergencyContactPhone: '(61) 99999-0000',
+      emergencyContactName: 'Responsável Sintético A',
+      emergencyContactPhone: 'contato-sintetico',
       enrollments: [{ classroom: { id: 'class-1', name: 'MATERNAL I B' } }],
       dietaryRestrictions: [
         {

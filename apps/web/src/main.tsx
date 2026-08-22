@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './app/AuthProvider';
@@ -13,7 +13,9 @@ createRoot(document.getElementById('root')!).render(
     <PwaRuntime />
     <ThemeProvider>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <Suspense fallback={<div className="min-h-screen bg-background text-foreground grid place-items-center">Carregando...</div>}>
+          <RouterProvider router={router} />
+        </Suspense>
         <Toaster />
       </AuthProvider>
     </ThemeProvider>

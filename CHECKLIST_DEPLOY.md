@@ -80,7 +80,7 @@
 
 ### Usuário Admin
 - [ ] Script `create-admin.js` executado
-- [ ] Email: `admin@zelare.com.br`
+- [ ] Email: `contact@example.invalid`
 - [ ] Senha anotada
 - [ ] Login testado
 

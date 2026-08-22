@@ -77,15 +77,16 @@ async function main() {
   console.log(`   Version: ${matrizData.metadata.version}`);
   console.log(`   Entries no dataset: ${matrizData.entries.length}\n`);
 
-  // Buscar mantenedora Conexa (criada pelo seed:ensure-cocris-units)
-  let mantenedora = await prisma.mantenedora.findFirst({
-    where: { name: { contains: 'Conexa', mode: 'insensitive' } },
+  const mantenedoraId = process.env.SEED_MANTENEDORA_ID;
+  if (!mantenedoraId) {
+    console.error('❌ Defina SEED_MANTENEDORA_ID fora do repositório antes de executar este seed.');
+    process.exit(1);
+  }
+  const mantenedora = await prisma.mantenedora.findFirst({
+    where: { id: mantenedoraId, isActive: true },
   });
   if (!mantenedora) {
-    mantenedora = await prisma.mantenedora.findFirst({ where: { isActive: true } });
-  }
-  if (!mantenedora) {
-    console.error('❌ Mantenedora não encontrada. Execute seed:ensure-cocris-units primeiro.');
+    console.error('❌ A mantenedora informada não foi encontrada ou não está ativa.');
     process.exit(1);
   }
   console.log(`✅ Mantenedora: ${mantenedora.name} (${mantenedora.id})\n`);

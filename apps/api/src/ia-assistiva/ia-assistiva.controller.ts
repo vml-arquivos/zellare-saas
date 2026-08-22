@@ -82,7 +82,7 @@ export class IaAssistivaController {
   /**
    * POST /ia/relatorio-consolidado-lgpd
    * Gera relatório consolidado com anonimização LGPD.
-   * Busca dados reais do banco e envia apenas dados anonimizados para a IA.
+   * Consulta o escopo autorizado e envia somente dados anonimizados para a IA.
    */
   @Post('relatorio-consolidado-lgpd')
   @HttpCode(HttpStatus.OK)

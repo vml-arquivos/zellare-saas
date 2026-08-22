@@ -26,7 +26,7 @@ Implementado um motor de status e permissões para garantir a integridade dos re
 ### B. Motor de IA Assistiva LGPD
 Localizado em `apps/api/src/ia-assistiva/ia-assistiva.service.ts`:
 - **Função:** `gerarRelatorioConsolidadoLGPD`
-- **Lógica:** Busca dados reais do `DiaryEvent`, anonimiza nomes reais por códigos (ex: `C-XXXXXX`) antes de enviar para o LLM, e retorna um rascunho estruturado para o professor.
+- **Lógica:** Busca dados não sintéticos do `DiaryEvent`, anonimiza nomes reais por códigos (ex: `C-XXXXXX`) antes de enviar para o LLM, e retorna um rascunho estruturado para o professor.
 
 ### C. Gestão de Alergias e Dietas (Nutricionista)
 - **Backend:** `GET /children/dietary-restrictions/unidade` (filtro automático por `unitId` do usuário).

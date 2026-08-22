@@ -19,6 +19,10 @@ env:
   DIRECT_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
   JWT_SECRET: ci-only-not-production
   VITE_RELEASE_ID: ${{ github.sha }}
+  VITE_PUBLIC_CONTACT_EMAIL: contato@zelare.com.br
+  VITE_PUBLIC_COMPLIANCE_EMAIL: denuncia@zelare.com.br
+  VITE_PUBLIC_PHONE: "(61) 2123-4567"
+  VITE_PUBLIC_ADDRESS: Brasília-DF
 
 jobs:
   gate:
@@ -121,7 +125,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm --filter @zelare/api security:artifacts
-          ! git grep -nI -E 'Carol270412|Demo@2026|sk_(live|test)_[A-Za-z0-9]+|AIza[0-9A-Za-z_-]{20,}' -- ':!.github/**' ':!docs/**' ':!*.md'
+          ! git grep -nI -E '<SECRET_FROM_SECRET_MANAGER>|<SECRET_FROM_SECRET_MANAGER>|sk_(live|test)_[A-Za-z0-9]+|AIza[0-9A-Za-z_-]{20,}' -- ':!.github/**' ':!docs/**' ':!*.md'
 
       - name: Prisma + PostgreSQL + drift
         if: matrix.step == 'prisma-postgresql'
@@ -240,7 +244,7 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm --filter @zelare/api security:artifacts
           ! find . -path '*/dist/*' -type f \( -iname '*.xlsx' -o -iname '*.xls' \) -print -quit | grep -q .
-          ! find . -path '*/dist/*' -type f -iname '*.json' -print0 | xargs -0 grep -IlE 'Carol270412|Demo@2026|ALUNOS2026|funcionarios-reais' | grep -q .
+          ! find . -path '*/dist/*' -type f \( -iname '*.json' -o -iname '*.js' -o -iname '*.map' \) -print0 | xargs -0 grep -IlE 'Admin@123|Teste@123|Demo@2026|Carol270412|dev123|AIza[0-9A-Za-z_-]{20,}|sk_(live|test)_[A-Za-z0-9_-]+|sb_(publishable|secret)_[A-Za-z0-9_-]+|Bearer [A-Za-z0-9._~+/=-]{24,}|[A-Za-z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|cocris|cepi)\.' | grep -q .
           find apps/api/dist apps/web/dist -type f -printf '%p %s bytes\n' 2>/dev/null | sort > artifacts-inventory.txt
 
       - name: Upload de evidências redigidas

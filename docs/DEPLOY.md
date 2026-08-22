@@ -345,4 +345,4 @@ Recursos mínimos recomendados:
 Para problemas de deploy, consulte:
 - [Documentação Coolify](https://coolify.io/docs)
 - [Issues no GitHub](https://github.com/vml-arquivos/zelare-saas/issues)
-- Email: contato@zelare.org
+- Email: contact@example.invalid

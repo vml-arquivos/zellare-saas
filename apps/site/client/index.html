@@ -20,16 +20,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Só carrega analytics se o endpoint estiver configurado — evita 404 desnecessário
-      if (window.__ANALYTICS_ENDPOINT__ || '%VITE_ANALYTICS_ENDPOINT%'.trim()) {
-        const s = document.createElement('script');
-        s.defer = true;
-        s.src = '%VITE_ANALYTICS_ENDPOINT%/umami';
-        s.setAttribute('data-website-id', '%VITE_ANALYTICS_WEBSITE_ID%');
-        document.body.appendChild(s);
-      }
-    </script>
   </body>
 
 </html>

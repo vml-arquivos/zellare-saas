@@ -1,18 +1,20 @@
-# Gate 0.2 — PII e artifacts de build
+# Gate 0.2 — Artefatos sensíveis e PII
 
 ## Objetivo
 
-O Zelare possui arquivos de desenvolvimento usados para popular ambientes de demonstração. Alguns carregam nomes, contatos, turmas, funcionários ou planilhas de cadastro. Esses arquivos não devem ser enviados para a imagem da API nem tratados como fonte de dados de produção. O Gate 0.2 protege o contexto de build sem apagar dados do repositório e sem alterar o banco do Zelare ou qualquer artefato do Conexa/COCRIS.
+O Zelare não deve versionar dados de crianças, responsáveis, funcionários, contatos pessoais, credenciais, tokens, chaves, planilhas de cadastro ou exports de banco. O gate protege o clone local, o contexto de build e as imagens publicadas sem alterar bancos, sem apagar dados de produção e sem reescrever o histórico Git.
 
 ## Política de retenção
 
-A proteção implementada nesta etapa é **preventiva e reversível**. O `apps/api/.dockerignore` impede que cargas pessoais, imports locais, documentação operacional e seeds reais sejam incluídos na imagem Docker da API. O script `apps/api/scripts/check-sensitive-artifacts.mjs` verifica os caminhos versionados por nome e aplica uma allowlist explícita aos catálogos públicos.
+A proteção é preventiva e forward-only. O `.dockerignore` impede que imports, documentação operacional, planilhas, seeds pessoais e datasets nominados sejam enviados para a imagem da API. O `apps/api/scripts/check-sensitive-artifacts.mjs` inspeciona também o conteúdo dos arquivos versionados, não apenas seus caminhos.
 
-> **P0-2 — decisão humana obrigatória:** remover arquivos do histórico Git, limpar objetos antigos, reescrever commits ou executar qualquer operação destrutiva não faz parte deste Gate. Essas ações somente poderão ocorrer após aprovação humana explícita e um plano separado de backup, retenção e restauração.
+O scanner bloqueia credenciais literais, tokens Bearer, chaves de API, blocos de chave privada, e-mails não sintéticos, CPF, telefone, marcadores de planilhas/cadastros reais e nomes pessoais conhecidos em artefatos de risco. Placeholders devem usar domínios reservados, como `example.invalid`, e valores devem ser fornecidos por variáveis protegidas fora do repositório.
+
+> **P0-2 — decisão humana obrigatória:** remover objetos antigos, limpar o histórico Git, reescrever commits ou executar qualquer operação destrutiva não faz parte deste gate. Essas ações exigem aprovação explícita e plano separado de backup, retenção e restauração.
 
 ## Allowlist pública mantida
 
-Os seguintes arquivos são considerados catálogos ou amostras públicas e continuam disponíveis para o build e para seeds determinísticos:
+A allowlist é restrita a catálogos e fixtures sem cadastro pessoal:
 
 | Caminho | Uso permitido |
 | --- | --- |
@@ -22,24 +24,22 @@ Os seguintes arquivos são considerados catálogos ou amostras públicas e conti
 | `apps/api/data/catalogo_materiais_higiene_pedagogico.csv` | Catálogo público de materiais |
 | `apps/api/data/catalogo_pedagogico.csv` | Catálogo público pedagógico |
 | `apps/api/data/matriz-curricular-2026-sample.json` | Amostra curricular sem cadastro pessoal |
-| `apps/api/datasets/materiais_seed.json` | Materiais de seed sem cadastro pessoal |
+| `apps/api/datasets/materiais_seed.json` | Materiais sintéticos de desenvolvimento |
 
-## Caminhos bloqueados no build
+## Seed e dados descartáveis
 
-Planilhas (`*.xlsx` e `*.xls`), o diretório `apps/api/imports/`, `apps/api/docs/`, `apps/api/ops/`, datasets nomeados como alunos ou turmas, o cadastro de funcionários e seeds reais não entram na imagem. A exclusão é feita no contexto de build; os arquivos ainda podem existir no clone local até que uma decisão humana determine uma política de remoção histórica.
-
-O `Dockerfile` continua copiando migrations e catálogos públicos necessários ao runtime. Seeds de desenvolvimento, imports e documentação não são necessários para a execução da API ou para o job explícito de migrations e, por isso, ficam fora da imagem.
+`db:seed` não cria dados. O caminho opcional `seed:synthetic` é reservado a banco descartável e não distribui contas, logins ou cadastros. O CI cria fixtures em memória ou no PostgreSQL efêmero quando precisa validar contratos. Nenhum seed deve receber uma URL de produção.
 
 ## Execução local e CI
 
-O gate pode ser executado a partir da raiz com:
+Execute o gate a partir da raiz:
 
 ```bash
 pnpm --filter @zelare/api security:artifacts
 ```
 
-Ele falha quando encontra um caminho sensível versionado, um arquivo em `data/` ou `datasets/` fora da allowlist, ou uma regra mínima ausente em `apps/api/.dockerignore`. O gate não inspeciona nem modifica dados de banco, não faz upload de arquivos e não reescreve o histórico Git.
+Ele falha quando encontra caminho sensível versionado, arquivo fora da allowlist de dados públicos ou conteúdo que corresponda às regras de PII/credenciais. Também valida as regras mínimas do `apps/api/.dockerignore`. O gate não inspeciona nem modifica dados de banco, não faz upload e não reescreve o histórico.
 
-## Evidência deste Gate
+## Evidência
 
-A evidência deve registrar o commit, o resultado do scanner e o `git status --short` após a execução. A presença de arquivos históricos sensíveis no repositório é um risco residual conhecido; a mitigação desta fase é impedir seu empacotamento em imagens novas e impedir a entrada de novos caminhos sem revisão.
+A evidência deve registrar o SHA do novo HEAD, a saída integral do scanner, a lista de arquivos analisados e o `git status --short` após a execução. Qualquer exceção deve ser documentada com justificativa, escopo e revisão humana; não se deve reduzir a regra para fazer o CI passar.

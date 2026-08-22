@@ -1,37 +1,11 @@
-#!/usr/bin/env node
-
-/**
- * Gate de privacidade para artifacts versionados do Zelare.
- *
- * Este gate é deliberadamente baseado em caminho/nome de arquivo. Ele não tenta
- * inferir conteúdo de planilhas ou JSON e não apaga histórico Git. Qualquer
- * remoção histórica exige aprovação humana explícita (P0-2).
- */
-
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 
-function gitRoot() {
-  return execFileSync('git', ['rev-parse', '--show-toplevel'], {
-    cwd: process.cwd(),
-    encoding: 'utf8',
-  }).trim();
-}
-
-function trackedFiles(root) {
-  const output = execFileSync('git', ['-C', root, 'ls-files', '-z'], {
-    encoding: 'buffer',
-  }).toString('utf8');
-  return output.split('\0').filter(Boolean);
-}
-
-const root = gitRoot();
-const apiPrefix = 'apps/api/';
-const files = trackedFiles(root);
-const dockerignorePath = resolve(root, apiPrefix, '.dockerignore');
+const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+const files = execFileSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'buffer' }).toString('utf8').split('\0').filter(Boolean);
+const dockerignorePath = join(root, 'apps/api/.dockerignore');
 const dockerignore = readFileSync(dockerignorePath, 'utf8');
-
 const publicAllowlist = new Set([
   'apps/api/data/catalogo_administrativo.csv',
   'apps/api/data/catalogo_alimentos.csv',
@@ -41,118 +15,85 @@ const publicAllowlist = new Set([
   'apps/api/data/matriz-curricular-2026-sample.json',
   'apps/api/datasets/materiais_seed.json',
 ]);
-
-const knownLegacySensitivePaths = new Set([
-  'apps/api/data/ALUNOS2026.xlsx',
-  'apps/api/data/arara-2026-alunos.json',
-  'apps/api/data/dados-arara.xlsx',
-  'apps/api/data/dados-flamboyant.xlsx',
-  'apps/api/data/dados-pelicano.xlsx',
-  'apps/api/data/dados-sabia.xlsx',
-  'apps/api/datasets/turmas_alunos.json',
-  'apps/api/docs/funcionarios-reais-completo.json',
-  'apps/api/imports/alunos.xlsx',
-  'apps/api/imports/profissionais.xlsx',
-  'apps/api/prisma/seed-arara-caninde.ts',
-  'apps/api/prisma/seed-cocris-units.ts',
-  'apps/api/prisma/seed-units-from-json.js',
-  'apps/api/prisma/seed-units-from-json.ts',
-  'apps/api/prisma/seed-units.ts',
-  'apps/api/prisma/seed.ts',
-  'apps/api/prisma/seeds/flamboyant/01_seed_flamboyant_completo.sql',
-  'apps/api/prisma/seeds/flamboyant/02_conferir_flamboyant.sql',
-  'apps/api/prisma/seeds/flamboyant/03_conferencia_qualidade_pelicano_flamboyant.sql',
-  'apps/api/prisma/seeds/pelicano/01_seed_pelicano_completo.sql',
-  'apps/api/prisma/seeds/pelicano/02_conferir_pelicano.sql',
+const policyFiles = new Set([
+  'apps/api/scripts/check-sensitive-artifacts.mjs',
+  'apps/api/.dockerignore',
+  '.github/workflows/pr-gate.yml',
+  'docs/security/GATE02_PII_ARTIFACTS.md',
 ]);
-
-const blockedPathRules = [
-  {
-    name: 'planilhas de dados pessoais',
-    test: (file) => file.startsWith(apiPrefix) && /\.(xlsx|xls)$/i.test(file),
-  },
-  {
-    name: 'imports locais',
-    test: (file) => file.startsWith(`${apiPrefix}imports/`),
-  },
-  {
-    name: 'documentação com cadastro de funcionários',
-    test: (file) => /(^|\/)funcionarios-reais/i.test(file),
-  },
-  {
-    name: 'datasets com alunos/turmas identificáveis',
-    test: (file) => /(^|\/)(arara-2026-alunos|turmas_alunos)\.(json|csv)$/i.test(file),
-  },
-  {
-    name: 'seeds SQL com cadastros pessoais',
-    test: (file) => /^apps\/api\/prisma\/seeds\//i.test(file),
-  },
-  {
-    name: 'seeds de dados reais no runtime',
-    test: (file) => /^apps\/api\/prisma\/seed[^/]*\.(ts|js)$/i.test(file),
-  },
+const syntheticEmail = /@(example\.(com|org|net|invalid)|example\.test|test\.local|localhost)$/i;
+const publicInstitutionalEmails = new Set(['contato@zelare.com.br', 'denuncia@zelare.com.br']);
+const publicInstitutionalPhones = new Set(['556121234567', '6121234567']);
+const phonePattern = /(?:\+?55[\s-]?)?\(\d{2}\)\s?9?\d{4}[\s-]\d{4}/g;
+const skipContent = (file) => policyFiles.has(file) || file.includes('/prisma/migrations/') || file.includes('/drizzle/meta/') || file.endsWith('.lock') || file.endsWith('package-lock.json') || file.endsWith('pnpm-lock.yaml') || file.endsWith('package.json') || publicAllowlist.has(file);
+const rules = [
+  ['credential-literal', /\b(?:Admin@123|Teste@123|Demo@2026|Carol270412|dev123)\b/g],
+  ['api-key', /\b(?:AIza[0-9A-Za-z_-]{20,}|sk_(?:live|test)_[A-Za-z0-9_-]+|sb_(?:publishable|secret)_[A-Za-z0-9_-]+)\b/g],
+  ['bearer-token', /\bBearer\s+[A-Za-z0-9._~+/=-]{24,}/gi],
+  ['private-key', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g],
+  ['cpf', /\b(?:\d{3}\.\d{3}\.\d{3}-\d{2}|\d{3}\s\d{3}\s\d{3}-\d{2})\b/g],
+  ['cpf-labeled', /\b(?:cpf|documento)\s*[:=]\s*['"`]?\d{11}['"`]?/gi],
+  ['real-data-marker', /\b(?:ALUNOS2026|arara[- ]?canind[eé]|flamboyant|pelicano|s[aá]bia|alunos reais|funcion[aá]rios reais|smoke-prod|LOGINS_(?:TESTE|ATUALIZADOS)|funcionarios-reais|turmas_alunos|update-names|seed-units)\b/gi],
+  ['person-name-marker', /\b(?:Bruna Vaz|Carla Psic[oó]loga|Daniel(?: Pereira da Cruz)?|Ana Carolina(?: de Araujo)?|Adriel|Dorli(?: Souza Viana)?|Raquel|Elisangela|Luciene|JESSICA|EDILVANA|ANGELICA|Evellyn|Nonata|Paula Costa|Fernanda Lima|Maria Silva|Ana Santos|Joana Oliveira|Carla Souza|Vanderlon Tavares)\b/gi],
 ];
-
 const findings = [];
-const legacyWarnings = new Set();
-
 for (const file of files) {
-  for (const rule of blockedPathRules) {
-    if (rule.test(file) && !publicAllowlist.has(file)) {
-      if (knownLegacySensitivePaths.has(file)) {
-        legacyWarnings.add(file);
-      } else {
-        findings.push(`${rule.name}: ${file}`);
+  if (skipContent(file)) continue;
+  const path = join(root, file);
+  let data;
+  try {
+    if (statSync(path).size > 3_000_000) continue;
+    const raw = readFileSync(path);
+    if (raw.includes(0)) continue;
+    data = raw.toString('utf8');
+  } catch { continue; }
+  const lines = data.split(/\r?\n/);
+  lines.forEach((line, index) => {
+    const emails = line.match(/[A-Z0-9._%+-]+@[A-Z][A-Z0-9-]*(?:\.[A-Z0-9-]+)*\.[A-Z]{2,}/gi) ?? [];
+    for (const value of emails) {
+      const normalized = value.toLowerCase();
+      if (!syntheticEmail.test(value) && !publicInstitutionalEmails.has(normalized)) {
+        findings.push({ file, line: index + 1, kind: 'email', snippet: redact(line) });
       }
-      break;
     }
-  }
-
-  if (
-    (file.startsWith(`${apiPrefix}data/`) || file.startsWith(`${apiPrefix}datasets/`)) &&
-    !publicAllowlist.has(file)
-  ) {
-    if (knownLegacySensitivePaths.has(file)) {
-      legacyWarnings.add(file);
-    } else {
-      findings.push(`arquivo fora da allowlist pública: ${file}`);
+    const phones = line.match(phonePattern) ?? [];
+    for (const value of phones) {
+      const normalized = value.replace(/\D/g, '');
+      if (!publicInstitutionalPhones.has(normalized)) {
+        findings.push({ file, line: index + 1, kind: 'phone', snippet: redact(line) });
+      }
     }
-  }
+    for (const [kind, regex] of rules) {
+      regex.lastIndex = 0;
+      if (regex.test(line)) findings.push({ file, line: index + 1, kind, snippet: redact(line) });
+    }
+    const assignment = line.match(/\b(?:password|senha|secret|token|apiKey|api_key)\s*[:=]\s*(['"`])([^'"`\n]+)\1/i);
+    if (assignment && !/process\.env|process\.argv|\$[0-9]+|<[^>]+>|placeholder|example|change[-_ ]?me|your[_-]?|from_secret/i.test(assignment[2])) {
+      findings.push({ file, line: index + 1, kind: 'credential-assignment', snippet: redact(line) });
+    }
+  });
 }
-
-const requiredDockerignoreRules = [
-  'imports/',
-  'docs/',
-  '*.xlsx',
-  '**/*alunos*.json',
-  '**/*turmas_alunos*.json',
-  '**/*funcionarios-reais*.json',
-  'prisma/seed*.ts',
-  'prisma/seeds/',
-];
-
-for (const rule of requiredDockerignoreRules) {
-  if (!dockerignore.split(/\r?\n/).some((line) => line.trim() === rule)) {
-    findings.push(`regra ausente em apps/api/.dockerignore: ${rule}`);
-  }
+function redact(line) {
+  return line
+    .replace(/[A-Z0-9._%+-]+@[A-Z][A-Z0-9-]*(?:\.[A-Z0-9-]+)*\.[A-Z]{2,}/gi, '<EMAIL>')
+    .replace(/\b(?:Admin@123|Teste@123|Demo@2026|Carol270412|dev123)\b/g, '<CREDENTIAL>')
+    .replace(/\b(?:AIza[0-9A-Za-z_-]{20,}|sk_(?:live|test)_[A-Za-z0-9_-]+|sb_(?:publishable|secret)_[A-Za-z0-9_-]+)\b/g, '<SECRET>')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{24,}/gi, 'Bearer <TOKEN>')
+    .replace(/\b(?:\d{3}\.\d{3}\.\d{3}-\d{2}|\d{3}\s\d{3}\s\d{3}-\d{2})\b/g, '<CPF>')
+    .replace(/(?:\+?55[\s-]?)?\(\d{2}\)\s?9?\d{4}[\s-]\d{4}/g, '<PHONE>')
+    .slice(0, 260);
 }
-
-if (findings.length > 0) {
+const unique = [...new Map(findings.map((item) => [`${item.file}:${item.line}:${item.kind}`, item])).values()]
+  .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.kind.localeCompare(b.kind));
+if (unique.length) {
   console.error('Sensitive-artifacts gate: FAIL');
-  for (const finding of [...new Set(findings)]) console.error(`- ${finding}`);
-  console.error(
-    'A remoção do histórico Git não é automática; P0-2 exige aprovação humana explícita.',
-  );
+  for (const item of unique) console.error(`- ${item.kind}: ${item.file}:${item.line} ${item.snippet}`);
+  console.error('Remova o conteúdo sensível ou substitua-o por fixture/placeholder sintético. O histórico Git não é reescrito.');
   process.exit(1);
 }
-
+const requiredDockerignoreRules = ['imports/', 'docs/', '*.xlsx', '**/*alunos*.json', '**/*turmas_alunos*.json', '**/*funcionarios-reais*.json', 'prisma/seed*.ts', 'prisma/seeds/'];
+for (const rule of requiredDockerignoreRules) if (!dockerignore.split(/\r?\n/).some((line) => line.trim() === rule)) { console.error(`Regra ausente em apps/api/.dockerignore: ${rule}`); process.exit(1); }
 console.log('Sensitive-artifacts gate: PASS');
 console.log(`Arquivos versionados verificados: ${files.length}`);
-console.log(`Allowlist pública: ${publicAllowlist.size} arquivos`);
-console.log(`Baseline legado sensível documentado: ${legacyWarnings.size} arquivos`);
-if (legacyWarnings.size > 0) {
-  console.warn('Risco residual documentado — não removido sem aprovação humana (P0-2):');
-  for (const warning of [...legacyWarnings].sort()) console.warn(`- ${warning}`);
-}
-console.log('Nenhum novo artifact de PII foi permitido na imagem da API.');
-console.log('Nenhuma remoção ou reescrita de histórico Git foi executada.');
+console.log('Conteúdo sensível detectado: 0');
+console.log('Allowlist pública restrita a catálogos/fixtures não pessoais.');

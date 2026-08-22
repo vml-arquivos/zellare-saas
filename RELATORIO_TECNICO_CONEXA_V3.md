@@ -107,10 +107,10 @@ Para facilitar o teste e a validação das funcionalidades implementadas, as seg
 
 | Perfil | Email | Senha | Observações |
 |---|---|---|---|
-| **Professor** | `professor@zelare.com.br` | `123456` | Acesso à `RdicCriancaPage`, `TeacherDashboardPage`, `DiarioBordoPage`. |
-| **Coordenadora Unidade** | `coordenadora@zelare.com.br` | `123456` | Acesso à `RdicCoordPage`, `PainelAlergiasPage`, `DashboardConsumoMateriaisPage`. Pode aprovar RDICs. |
-| **Coordenadora Geral** | `geral@zelare.com.br` | `123456` | Acesso à `RdicGeralPage` (somente leitura de RDICs PUBLICADOS). |
-| **Nutricionista** | `nutricionista@zelare.com.br` | `123456` | Acesso ao `PainelAlergiasPage`. |
+| **Professor** | `contact@example.invalid` | `123456` | Acesso à `RdicCriancaPage`, `TeacherDashboardPage`, `DiarioBordoPage`. |
+| **Coordenadora Unidade** | `contact@example.invalid` | `123456` | Acesso à `RdicCoordPage`, `PainelAlergiasPage`, `DashboardConsumoMateriaisPage`. Pode aprovar RDICs. |
+| **Coordenadora Geral** | `contact@example.invalid` | `123456` | Acesso à `RdicGeralPage` (somente leitura de RDICs PUBLICADOS). |
+| **Nutricionista** | `contact@example.invalid` | `123456` | Acesso ao `PainelAlergiasPage`. |
 
 **Nota:** As senhas são genéricas para ambiente de teste. Em produção, senhas seguras e políticas de rotação devem ser aplicadas.
 

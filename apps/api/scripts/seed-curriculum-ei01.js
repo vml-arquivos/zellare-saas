@@ -9,9 +9,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Importando Matriz Curricular EI01 (Bebês)...');
 
-  // Buscar mantenedora e unidade
+  const mantenedoraEmail = process.env.SEED_MANTENEDORA_EMAIL;
+  if (!mantenedoraEmail) throw new Error('Defina SEED_MANTENEDORA_EMAIL fora do repositório antes de executar este seed');
+
+  // Buscar somente a mantenedora explicitamente autorizada pelo operador
   const mantenedora = await prisma.mantenedora.findFirst({
-    where: { email: 'admin@cocris.org.br' },
+    where: { email: mantenedoraEmail },
   });
 
   if (!mantenedora) {

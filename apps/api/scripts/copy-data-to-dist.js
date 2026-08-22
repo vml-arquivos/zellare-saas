@@ -1,28 +1,28 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('node:fs');
+const path = require('node:path');
 
-function copyDir(src, dest) {
-  if (!fs.existsSync(src)) {
-    console.warn(`⚠️  Source directory not found: ${src}`);
-    return;
+const apiRoot = path.resolve(__dirname, '..');
+const publicFiles = [
+  'data/catalogo_administrativo.csv',
+  'data/catalogo_alimentos.csv',
+  'data/catalogo_higiene_pessoal.csv',
+  'data/catalogo_materiais_higiene_pedagogico.csv',
+  'data/catalogo_pedagogico.csv',
+  'data/matriz-curricular-2026-sample.json',
+  'datasets/materiais_seed.json',
+];
+
+const destinationRoot = path.join(apiRoot, 'dist');
+
+for (const relativeFile of publicFiles) {
+  const source = path.join(apiRoot, relativeFile);
+  const destination = path.join(destinationRoot, relativeFile);
+  if (!fs.existsSync(source)) {
+    throw new Error(`Arquivo público permitido não encontrado: ${relativeFile}`);
   }
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src)) {
-    const s = path.join(src, entry);
-    const d = path.join(dest, entry);
-    const stat = fs.statSync(s);
-    if (stat.isDirectory()) {
-      copyDir(s, d);
-    } else {
-      fs.copyFileSync(s, d);
-      console.log(`  ✓ ${entry}`);
-    }
-  }
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.copyFileSync(source, destination);
+  console.log(`Public fixture copied: ${relativeFile}`);
 }
 
-const src = path.resolve(__dirname, "..", "data");
-const dest = path.resolve(__dirname, "..", "dist", "data");
-
-console.log("📦 Copying datasets to dist...");
-copyDir(src, dest);
-console.log(`✅ Datasets copied: ${src} -> ${dest}`);
+console.log(`Public fixtures copied: ${publicFiles.length}`);

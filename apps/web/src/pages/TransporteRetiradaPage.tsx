@@ -309,7 +309,7 @@ export default function TransporteRetiradaPage() {
                       value={a.telefone ?? ''}
                       onChange={e => atualizarAutorizado(idx, 'telefone', e.target.value)}
                       className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      placeholder="(61) 9 0000-0000"
+                      placeholder="Telefone do autorizado"
                     />
                   </div>
                   <div>
@@ -319,7 +319,7 @@ export default function TransporteRetiradaPage() {
                       value={a.cpf ?? ''}
                       onChange={e => atualizarAutorizado(idx, 'cpf', e.target.value)}
                       className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                      placeholder="000.000.000-00"
+                      placeholder="CPF do autorizado"
                     />
                   </div>
                   <div className="col-span-2">

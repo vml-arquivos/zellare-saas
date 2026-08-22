@@ -5,12 +5,12 @@
   "main": "index.ts",
   "private": true,
   "scripts": {
-    "generate": "prisma generate --schema=./prisma/schema.prisma",
-    "migrate:dev": "prisma migrate dev --schema=./prisma/schema.prisma",
-    "migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
-    "studio": "prisma studio --schema=./prisma/schema.prisma",
-    "seed": "ts-node prisma/seed.ts",
-    "validate": "prisma validate --schema=./prisma/schema.prisma"
+    "generate": "node scripts/legacy-schema-guard.mjs generate",
+    "migrate:dev": "node scripts/legacy-schema-guard.mjs migrate:dev",
+    "migrate:deploy": "node scripts/legacy-schema-guard.mjs migrate:deploy",
+    "studio": "node scripts/legacy-schema-guard.mjs studio",
+    "seed": "node scripts/legacy-schema-guard.mjs seed",
+    "validate": "node scripts/legacy-schema-guard.mjs validate"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0"

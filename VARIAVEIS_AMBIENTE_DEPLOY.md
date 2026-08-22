@@ -27,7 +27,7 @@ Copie e cole no Coolify (aba "Environment Variables"):
 # ============================================================================
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
-DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # ============================================================================
 # JWT (OBRIGATÓRIO)
@@ -86,7 +86,7 @@ postgresql://[USUARIO]:[SENHA]@[CONTAINER]:5432/[BANCO]
 
 **Exemplo**:
 ```
-postgresql://zelare_user:Cx3@Pg$qL9#mN2vR@zelare-saas-db:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 **Passo a passo**:
@@ -203,7 +203,7 @@ https://app.conexa.seu-dominio.com,https://conexa.seu-dominio.com
 
 **Formato**:
 ```
-AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+<SECRET_FROM_SECRET_MANAGER>
 ```
 
 **Funcionalidades que usam Gemini**:
@@ -301,12 +301,12 @@ REDIS_TTL=3600
 EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=seu-email@gmail.com
+SMTP_USER=contact@example.invalid
 SMTP_PASSWORD=sua-senha-app
-EMAIL_FROM=noreply@zelare.com.br
+EMAIL_FROM=contact@example.invalid
 
 # Sentry (Monitoramento de Erros)
-SENTRY_DSN=https://sua-key@sentry.io/projeto
+SENTRY_DSN=https://contact@example.invalid/projeto
 SENTRY_ENVIRONMENT=production
 
 # N8N (Webhooks)
@@ -378,7 +378,7 @@ Copie e cole no Coolify (aba "Environment Variables"):
 # ============================================================================
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
-DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
@@ -417,7 +417,7 @@ PORT=5174
 ### BACKEND API
 
 ```bash
-DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 JWT_SECRET=sua-chave-secreta-super-segura-aqui-minimo-32-caracteres
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
@@ -452,7 +452,7 @@ VITE_APP_VERSION=3.0.0
 ### SITE INSTITUCIONAL
 
 ```bash
-DATABASE_URL=postgresql://zelare_user:SUA_SENHA_AQUI@zelare-saas-db:5432/conexa
+DATABASE_URL=postgresql://db_user:contact@example.invalid:5432/database
 API_URL=https://api.conexa.seu-dominio.com
 NODE_ENV=production
 PORT=5174

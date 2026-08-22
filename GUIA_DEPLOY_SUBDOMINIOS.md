@@ -1,7 +1,7 @@
 # 🚀 Guia de Deploy - Apenas Subdomínios
 
-**Configuração**: Todos os serviços em subdomínios  
-**Domínio base**: `conexa3.casadf.com.br`  
+**Configuração**: Todos os serviços em subdomínios
+**Domínio base**: `site.example.invalid`
 **PostgreSQL e Redis**: ✅ Já instalados
 
 ---
@@ -12,9 +12,9 @@ Você precisa de **3 subdomínios**:
 
 | Serviço | Subdomínio | Porta | Status |
 |---------|------------|-------|--------|
-| **Backend API** | `api.zelare.seu-dominio.com.br` | 3000 | ✅ Já configurado |
-| **Frontend Web** | `app.zelare.seu-dominio.com.br` | 5173 | ⚠️ Precisa configurar |
-| **Site Institucional** | `site.conexa3.casadf.com.br` | 5174 | ⚠️ Precisa configurar |
+| **Backend API** | `api.example.invalid` | 3000 | ✅ Já configurado |
+| **Frontend Web** | `app.example.invalid` | 5173 | ⚠️ Precisa configurar |
+| **Site Institucional** | `site.example.invalid` | 5174 | ⚠️ Precisa configurar |
 
 ---
 
@@ -30,7 +30,7 @@ Você precisa de **3 subdomínios**:
 
 #### 2. Nas Variáveis de Ambiente
 - Apenas para **referenciar** os outros serviços
-- Exemplo: `VITE_API_URL=https://api.zelare.seu-dominio.com.br`
+- Exemplo: `VITE_API_URL=https://api.example.invalid`
 
 ---
 
@@ -42,7 +42,7 @@ Você precisa de **3 subdomínios**:
 
 Na imagem que você enviou, vejo:
 ```
-Domains: https://api.zelare.seu-dominio.com.br
+Domains: https://api.example.invalid
 ```
 
 ✅ **Já está correto!** Não precisa mudar.
@@ -58,21 +58,21 @@ Vá em **"Environment Variables"** e configure:
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
 # Copie do PostgreSQL que você instalou no Coolify
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
 
 # DIRECT_URL (OPCIONAL - use se tiver connection pooling)
 # Se não tiver, deixe igual ao DATABASE_URL
-DIRECT_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DIRECT_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
 
 # ============================================================================
 # REDIS (OPCIONAL - se estiver usando)
 # ============================================================================
-REDIS_URL=redis://redis-conexa:6379
+REDIS_URL=<REDIS_URL_FORNECIDA_PELO_AMBIENTE>
 
 # ============================================================================
 # JWT (OBRIGATÓRIO)
 # ============================================================================
-JWT_SECRET=sua-chave-secreta-super-segura-aqui-minimo-32-caracteres
+JWT_SECRET=<JWT_SECRET_FORNECIDA_PELO_AMBIENTE>
 JWT_EXPIRES_IN=7d
 
 # ============================================================================
@@ -80,13 +80,13 @@ JWT_EXPIRES_IN=7d
 # ============================================================================
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.zelare.seu-dominio.com.br
+API_URL=https://api.example.invalid
 
 # ============================================================================
 # CORS (OBRIGATÓRIO)
 # ============================================================================
 # IMPORTANTE: Adicione os subdomínios do frontend e site
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
+CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid
 
 # ============================================================================
 # GEMINI AI (OBRIGATÓRIO)
@@ -128,20 +128,20 @@ postgresql://[USUARIO]:[SENHA]@[CONTAINER]:5432/[BANCO]
 
 **Exemplo**:
 ```
-postgresql://postgres:minha_senha_forte@postgres-conexa:5432/conexa
+postgresql://db_user:contact@example.invalid:5432/database
 ```
 
 **Opção 2: Construir manualmente**
 
 Se você criou o PostgreSQL com:
 - Usuário: `postgres`
-- Senha: `sua_senha`
-- Container: `postgres-conexa`
-- Banco: `conexa`
+- Senha: fornecida pelo gerenciador de segredos, sem valor versionado
+- Container: `postgres-zelare`
+- Banco: `zelare`
 
 Então:
 ```
-DATABASE_URL=postgresql://postgres:sua_senha@postgres-conexa:5432/conexa
+DATABASE_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
 ```
 
 ---
@@ -177,7 +177,7 @@ redis://[CONTAINER]:6379
 
 **Exemplo**:
 ```
-REDIS_URL=redis://redis-conexa:6379
+REDIS_URL=<REDIS_URL_FORNECIDA_PELO_AMBIENTE>
 ```
 
 **Se NÃO instalou Redis**: Não adicione `REDIS_URL` (o sistema funciona sem).
@@ -220,7 +220,7 @@ Na aba **"Configuration"** → **"General"**:
 
 **OU** se não tiver Dockerfile:
 
-**Build Pack**: `nixpacks`  
+**Build Pack**: `nixpacks`
 **Build Command**:
 ```bash
 cd /apps/web && pnpm install && pnpm build
@@ -240,7 +240,7 @@ cd /apps/web && pnpm preview --host 0.0.0.0 --port 5173
 Na aba **"Configuration"** → **"General"** → **"Domains"**:
 
 1. Clique em **"Generate Domain"** (ou adicione manualmente)
-2. Digite: `app.zelare.seu-dominio.com.br`
+2. Digite: `app.example.invalid`
 3. Clique em **"Save"**
 
 **IMPORTANTE**: Certifique-se de que o DNS está configurado!
@@ -261,7 +261,7 @@ No seu provedor DNS (Cloudflare, GoDaddy, etc.):
 
 **Teste**:
 ```bash
-nslookup app.zelare.seu-dominio.com.br
+nslookup app.example.invalid
 ```
 
 Deve retornar o IP da VPS.
@@ -276,7 +276,7 @@ Na aba **"Environment Variables"**:
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_API_URL=https://api.example.invalid
 
 # ============================================================================
 # APP CONFIGURATION (OBRIGATÓRIO)
@@ -305,7 +305,7 @@ O Coolify vai gerar SSL automaticamente via Let's Encrypt.
 
 **Teste**:
 ```bash
-curl https://app.zelare.seu-dominio.com.br
+curl https://app.example.invalid
 ```
 
 Deve retornar HTML da página de login.
@@ -338,7 +338,7 @@ Na aba **"Configuration"** → **"General"**:
 
 **OU** se não tiver Dockerfile:
 
-**Build Pack**: `nixpacks`  
+**Build Pack**: `nixpacks`
 **Build Command**:
 ```bash
 cd /apps/site && pnpm install && pnpm build
@@ -357,7 +357,7 @@ cd /apps/site && node dist/index.js
 
 Na aba **"Configuration"** → **"General"** → **"Domains"**:
 
-1. Digite: `site.conexa3.casadf.com.br`
+1. Digite: `site.example.invalid`
 2. Clique em **"Save"**
 
 ---
@@ -385,12 +385,12 @@ Na aba **"Environment Variables"**:
 # DATABASE (OBRIGATÓRIO)
 # ============================================================================
 # Mesma do backend!
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
+DATABASE_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
 
 # ============================================================================
 # API CONFIGURATION (OBRIGATÓRIO)
 # ============================================================================
-API_URL=https://api.zelare.seu-dominio.com.br
+API_URL=https://api.example.invalid
 NODE_ENV=production
 PORT=5174
 ```
@@ -438,22 +438,13 @@ cd /app
 node scripts/create-admin.js
 ```
 
-**Credenciais**:
-- Email: `admin@zelare.com.br`
-- Senha: `Admin@123`
+**Credenciais**: forneça os valores somente pelo gerenciador de segredos do ambiente. Não registre e-mail ou senha neste guia.
 
 ---
 
-#### 5.2 Criar Usuários de Teste
+#### 5.2 Dados de desenvolvimento
 
-No terminal do backend:
-
-```bash
-cd /app
-node scripts/seed-test-users.js
-```
-
-**Resultado**: 13 usuários criados
+`db:seed` não cria dados. Para testes, use banco descartável e fixtures sintéticas controladas pelo CI. Não há usuários ou senhas de teste versionados.
 
 ---
 
@@ -462,7 +453,7 @@ node scripts/seed-test-users.js
 #### 6.1 Teste Health Check
 
 ```bash
-curl https://api.zelare.seu-dominio.com.br/health
+curl https://api.example.invalid/health
 ```
 
 **Deve retornar**:
@@ -474,9 +465,9 @@ curl https://api.zelare.seu-dominio.com.br/health
 
 #### 6.2 Teste Login
 
-1. Acesse: `https://app.zelare.seu-dominio.com.br`
-2. Login: `admin@zelare.com.br`
-3. Senha: `Admin@123`
+1. Acesse a URL fornecida pelo ambiente autorizado.
+2. Use credenciais temporárias injetadas pelo gerenciador de segredos.
+3. Nunca registre as credenciais no repositório ou em logs.
 4. Deve entrar no dashboard
 
 ---
@@ -491,7 +482,7 @@ curl https://api.zelare.seu-dominio.com.br/health
 
 #### 6.4 Teste Site
 
-Acesse: `https://site.conexa3.casadf.com.br`
+Acesse: `https://site.example.invalid`
 
 Deve aparecer o site institucional.
 
@@ -501,13 +492,13 @@ Deve aparecer o site institucional.
 
 ### Configuração DNS
 
-- [ ] Registro A para `app.zelare.seu-dominio.com.br` → IP da VPS
-- [ ] Registro A para `site.conexa3.casadf.com.br` → IP da VPS
+- [ ] Registro A para `app.example.invalid` → IP da VPS
+- [ ] Registro A para `site.example.invalid` → IP da VPS
 - [ ] DNS propagado (teste com `nslookup`)
 
 ### Backend API
 
-- [ ] Domínio: `api.zelare.seu-dominio.com.br` (já configurado)
+- [ ] Domínio: `api.example.invalid` (já configurado)
 - [ ] 14 variáveis de ambiente configuradas
 - [ ] `DATABASE_URL` copiada do PostgreSQL
 - [ ] `REDIS_URL` copiada do Redis (opcional)
@@ -522,9 +513,9 @@ Deve aparecer o site institucional.
 ### Frontend Web
 
 - [ ] Aplicação criada no Coolify
-- [ ] Domínio: `app.zelare.seu-dominio.com.br`
+- [ ] Domínio: `app.example.invalid`
 - [ ] 3 variáveis de ambiente configuradas
-- [ ] `VITE_API_URL=https://api.zelare.seu-dominio.com.br`
+- [ ] `VITE_API_URL=https://api.example.invalid`
 - [ ] Deploy realizado
 - [ ] Status: **Running** (verde)
 - [ ] SSL ativo (cadeado verde)
@@ -532,7 +523,7 @@ Deve aparecer o site institucional.
 ### Site Institucional
 
 - [ ] Aplicação criada no Coolify
-- [ ] Domínio: `site.conexa3.casadf.com.br`
+- [ ] Domínio: `site.example.invalid`
 - [ ] 4 variáveis de ambiente configuradas
 - [ ] Deploy realizado
 - [ ] Status: **Running** (verde)
@@ -540,12 +531,12 @@ Deve aparecer o site institucional.
 
 ### Testes
 
-- [ ] Health check: `https://api.zelare.seu-dominio.com.br/health` → `{"status":"ok"}`
-- [ ] Frontend: `https://app.zelare.seu-dominio.com.br` → Tela de login
-- [ ] Login funciona: `admin@zelare.com.br` / `Admin@123`
+- [ ] Health check: `https://api.example.invalid/health` → `{"status":"ok"}`
+- [ ] Frontend: `https://app.example.invalid` → Tela de login
+- [ ] Login funciona: `contact@example.invalid` / `<SECRET_FROM_SECRET_MANAGER>`
 - [ ] Dashboard carrega
 - [ ] IA funciona (teste "Gerar com IA")
-- [ ] Site: `https://site.conexa3.casadf.com.br` → Landing page
+- [ ] Site: `https://site.example.invalid` → Landing page
 
 ---
 
@@ -554,15 +545,15 @@ Deve aparecer o site institucional.
 ### Backend API (14 variáveis)
 
 ```bash
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-DIRECT_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-REDIS_URL=redis://redis-conexa:6379
-JWT_SECRET=sua-chave-secreta-super-segura-aqui-minimo-32-caracteres
+DATABASE_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
+DIRECT_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
+REDIS_URL=<REDIS_URL_FORNECIDA_PELO_AMBIENTE>
+JWT_SECRET=<JWT_SECRET_FORNECIDA_PELO_AMBIENTE>
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.zelare.seu-dominio.com.br
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
+API_URL=https://api.example.invalid
+CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid
 GEMINI_API_KEY=sua-gemini-api-key-aqui
 GEMINI_MODEL=gemini-1.5-flash
 ENABLE_AI_ASSISTANT=true
@@ -575,7 +566,7 @@ LOG_FORMAT=json
 ### Frontend Web (3 variáveis)
 
 ```bash
-VITE_API_URL=https://api.zelare.seu-dominio.com.br
+VITE_API_URL=https://api.example.invalid
 VITE_APP_NAME=Zelare
 VITE_APP_VERSION=3.0.0
 ```
@@ -583,8 +574,8 @@ VITE_APP_VERSION=3.0.0
 ### Site Institucional (4 variáveis)
 
 ```bash
-DATABASE_URL=postgresql://postgres:SUA_SENHA@postgres-conexa:5432/conexa
-API_URL=https://api.zelare.seu-dominio.com.br
+DATABASE_URL=<DATABASE_URL_FORNECIDA_PELO_AMBIENTE>
+API_URL=https://api.example.invalid
 NODE_ENV=production
 PORT=5174
 ```
@@ -624,7 +615,7 @@ O nome do container PostgreSQL no Coolify pode ser:
 **MUITO IMPORTANTE**: Adicione os 2 subdomínios:
 
 ```bash
-CORS_ORIGIN=https://app.zelare.seu-dominio.com.br,https://site.conexa3.casadf.com.br
+CORS_ORIGIN=https://app.example.invalid,https://site.example.invalid
 ```
 
 **Sem espaços após a vírgula!**
@@ -660,7 +651,7 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 1. Verifique se o registro A foi salvo
 2. Aguarde mais tempo (até 48h)
 3. Limpe cache DNS: `ipconfig /flushdns` (Windows)
-4. Teste com: `nslookup app.zelare.seu-dominio.com.br`
+4. Teste com: `nslookup app.example.invalid`
 
 ### Problema: SSL não gera
 
@@ -674,7 +665,7 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 
 **Solução**:
 1. Verifique `CORS_ORIGIN` no backend
-2. Deve incluir `https://app.zelare.seu-dominio.com.br`
+2. Deve incluir `https://app.example.invalid`
 3. Sem espaços após vírgula
 4. Redeploy do backend
 
@@ -685,7 +676,7 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 2. Verifique senha
 3. Teste conexão manualmente no terminal do backend:
    ```bash
-   psql postgresql://postgres:senha@postgres-conexa:5432/conexa
+   psql postgresql://db_user:contact@example.invalid:5432/database
    ```
 
 ### Problema: IA não funciona
@@ -703,9 +694,9 @@ O Coolify gera SSL automaticamente via Let's Encrypt.
 Após seguir este guia:
 
 ✅ **3 aplicações rodando**:
-- Backend API: `https://api.zelare.seu-dominio.com.br`
-- Frontend Web: `https://app.zelare.seu-dominio.com.br`
-- Site: `https://site.conexa3.casadf.com.br`
+- Backend API: `https://api.example.invalid`
+- Frontend Web: `https://app.example.invalid`
+- Site: `https://site.example.invalid`
 
 ✅ **PostgreSQL e Redis conectados**
 
@@ -715,12 +706,12 @@ Após seguir este guia:
 
 ✅ **IA Assistiva ativa** (Gemini)
 
-✅ **13 usuários de teste criados**
+✅ **registros sintéticos de teste criados**
 
 **Tempo total**: 40-50 minutos
 
 ---
 
-**Desenvolvido por**: Manus AI Agent  
-**Última atualização**: 19 de Fevereiro de 2026  
+**Desenvolvido por**: Manus AI Agent
+**Última atualização**: 19 de Fevereiro de 2026
 **Versão**: 1.0.0

@@ -137,7 +137,7 @@ O sistema Zelare está **100% pronto para deploy em produção** no Coolify. Tod
 ```bash
 node scripts/create-admin.js
 # ou
-node scripts/create-admin.js admin@zelare.com.br Admin@123 Admin Sistema
+node scripts/create-admin.js contact@example.invalid <SECRET_FROM_SECRET_MANAGER> Admin Sistema
 ```
 
 ### 6. health-check.sh

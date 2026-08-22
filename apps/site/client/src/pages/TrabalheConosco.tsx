@@ -37,7 +37,7 @@ export default function TrabalheConosco() {
     coverLetter: '',
   });
 
-  const { data: units } = trpc.units.getAll.useQuery();
+  const { data: units, error: unitsError, refetch: refetchUnits } = trpc.units.getAll.useQuery();
   const submitApplication = trpc.jobs.submit.useMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -238,7 +238,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="joao@email.com"
+                        placeholder="seu e-mail"
                       />
                     </div>
                   </div>
@@ -251,7 +251,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', maskPhone(e.target.value))}
-                        placeholder="(61) 99999-9999"
+                        placeholder="telefone do candidato"
                         maxLength={15}
                       />
                     </div>
@@ -262,7 +262,7 @@ export default function TrabalheConosco() {
                         required
                         value={formData.cpf}
                         onChange={(e) => handleInputChange('cpf', maskCPF(e.target.value))}
-                        placeholder="000.000.000-00"
+                        placeholder="CPF do candidato"
                         maxLength={14}
                       />
                     </div>
@@ -378,6 +378,14 @@ export default function TrabalheConosco() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {unitsError && (
+                        <div role="alert" className="mt-2 text-sm text-destructive">
+                          <span>Unidades indisponíveis no momento.</span>{' '}
+                          <button type="button" className="underline" onClick={() => void refetchUnits()}>
+                            Tentar novamente
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

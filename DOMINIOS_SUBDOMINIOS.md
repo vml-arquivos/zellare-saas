@@ -375,7 +375,7 @@ O Coolify usa **Let's Encrypt** para gerar certificados SSL automaticamente.
 - [ ] `https://api.zelare.com.br/health` retorna `{"status":"ok"}`
 - [ ] `https://app.zelare.com.br` mostra tela de login
 - [ ] `https://zelare.com.br` mostra site institucional
-- [ ] Login funciona (teste com `admin@zelare.com.br`)
+- [ ] Login funciona (teste com `contact@example.invalid`)
 - [ ] Dashboard carrega após login
 
 ---

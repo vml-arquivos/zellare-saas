@@ -77,8 +77,8 @@ VITE_API_TIMEOUT=30000
 1. Acesse: `https://app.zelare.seu-dominio.com.br`
 2. Tela de login deve aparecer
 3. Testar login com:
-   - **Email**: `developer@zelare.com.br`
-   - **Senha**: `Teste@123`
+   - **Email**: `contact@example.invalid`
+   - **Senha**: `<SECRET_FROM_SECRET_MANAGER>`
 
 ---
 
@@ -127,13 +127,13 @@ Após deploy, testar com estes usuários:
 
 | Email | Senha | Nível |
 |-------|-------|-------|
-| developer@zelare.com.br | Teste@123 | Developer |
-| admin@zelare.org.br | Teste@123 | Admin Mantenedora |
-| pedagogico@zelare.org.br | Teste@123 | Staff Central |
-| coordenador@cepi.com.br | Teste@123 | Coordenador |
-| nonata@cepi.com.br | Teste@123 | Professora |
-| elisangela@cepi.com.br | Teste@123 | Professora |
-| jessica@cepi.com.br | Teste@123 | Professora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Developer |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Admin Mantenedora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Staff Central |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Coordenador |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Professora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Professora |
+| contact@example.invalid | <SECRET_FROM_SECRET_MANAGER> | Professora |
 
 ---
 
@@ -142,8 +142,8 @@ Após deploy, testar com estes usuários:
 Após frontend funcionando:
 
 1. ✅ Testar todos os dashboards por nível de acesso
-2. ✅ Verificar listagem de alunos (170 alunos reais)
-3. ✅ Verificar listagem de turmas (9 turmas)
+2. ✅ Verificar listagem de alunos (170 dados não sintéticos)
+3. ✅ Verificar listagem de turmas (registros sintéticos)
 4. ✅ Testar funcionalidades de CRUD
 5. ✅ Deploy do site institucional (apps/site)
 

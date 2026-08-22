@@ -50,7 +50,7 @@ function makePrisma() {
 
 const manager = {
   sub: 'manager-1',
-  email: 'manager@zelare.test',
+  email: 'manager@example.invalid',
   mantenedoraId: 'tenant-1',
   unitId: undefined,
   roles: [{ roleId: 'role-1', level: RoleLevel.MANTENEDORA, type: 'MANTENEDORA_ADMIN', unitScopes: [] }],
@@ -58,7 +58,7 @@ const manager = {
 
 const professor = {
   sub: 'teacher-1',
-  email: 'teacher@zelare.test',
+  email: 'teacher@example.invalid',
   mantenedoraId: 'tenant-1',
   unitId: 'unit-1',
   roles: [{ roleId: 'role-2', level: RoleLevel.PROFESSOR, type: 'PROFESSOR', unitScopes: ['unit-1'] }],

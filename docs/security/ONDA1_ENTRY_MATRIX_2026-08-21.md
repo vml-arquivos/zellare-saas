@@ -38,7 +38,7 @@ A implementação para imediatamente se ocorrer falha de typecheck, teste, build
 
 ## Escopo desta primeira execução
 
-O primeiro lote de código será limitado a contratos internos, flags desligadas, capabilities e modelos aditivos essenciais para revisão/objetivos/família. O restante da Onda 1 será entregue em lotes subsequentes na mesma branch, cada um com seus testes e evidências. Nenhum backfill, seed ou alteração de dados reais será executado automaticamente.
+O primeiro lote de código será limitado a contratos internos, flags desligadas, capabilities e modelos aditivos essenciais para revisão/objetivos/família. O restante da Onda 1 será entregue em lotes subsequentes na mesma branch, cada um com seus testes e evidências. Nenhum backfill, seed ou alteração de dados não sintéticos será executado automaticamente.
 
 ## Referências
 

@@ -19,7 +19,7 @@ describe('AtendimentoPaisController', () => {
 
   const mockUser: JwtPayload = {
     sub: 'user-prof-1',
-    email: 'professora@escola.com',
+    email: 'teacher-a@example.invalid',
     mantenedoraId: 'mant-001',
     unitId: 'unit-001',
     roles: [{ roleId: 'r1', level: 'PROFESSOR', type: 'PROFESSOR', unitScopes: [] }],
@@ -55,9 +55,9 @@ describe('AtendimentoPaisController', () => {
     it('deve criar um atendimento e retornar o objeto criado', async () => {
       const dto = {
         childId: 'child-001',
-        responsavelNome: 'Maria Silva',
+        responsavelNome: 'Responsável Sintético A',
         responsavelRelacao: 'Mãe',
-        responsavelContato: '(11) 99999-0000',
+        responsavelContato: 'contato-sintetico',
         tipo: TipoAtendimento.PRESENCIAL,
         dataAtendimento: '2026-02-18T10:00:00.000Z',
         assunto: 'Desenvolvimento motor da criança',
@@ -87,7 +87,7 @@ describe('AtendimentoPaisController', () => {
       expect(result).toMatchObject({
         id: 'atend-001',
         childId: 'child-001',
-        responsavelNome: 'Maria Silva',
+        responsavelNome: 'Responsável Sintético A',
         tipo: TipoAtendimento.PRESENCIAL,
         status: StatusAtendimento.AGENDADO,
         child: { firstName: 'Ana', lastName: 'Lima' },
@@ -113,7 +113,7 @@ describe('AtendimentoPaisController', () => {
           id: 'atend-001',
           childId: 'child-001',
           child: { id: 'child-001', firstName: 'Ana', lastName: 'Lima' },
-          responsavelNome: 'Maria Silva',
+          responsavelNome: 'Responsável Sintético A',
           tipo: TipoAtendimento.PRESENCIAL,
           status: StatusAtendimento.AGENDADO,
           dataAtendimento: new Date('2026-02-18T10:00:00.000Z'),

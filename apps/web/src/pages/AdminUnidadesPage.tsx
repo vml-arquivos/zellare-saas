@@ -112,13 +112,13 @@ function ModalUnidade({ unidade, onClose, onSave }: { unidade?: Unidade | null; 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-semibold text-gray-700">Nome da Unidade *</Label>
-              <Input className="mt-1" placeholder="Ex: CEPI Recanto das Emas" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+              <Input className="mt-1" placeholder="Nome da unidade" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div>
               <Label className="text-sm font-semibold text-gray-700">Código da Unidade *</Label>
               <div className="relative mt-1">
                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input className="pl-9 font-mono uppercase" placeholder="Ex: RECANTO-EM" value={form.code}
+                <Input className="pl-9 font-mono uppercase" placeholder="Código da unidade" value={form.code}
                   onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
                   disabled={isEdit} />
               </div>
@@ -132,14 +132,14 @@ function ModalUnidade({ unidade, onClose, onSave }: { unidade?: Unidade | null; 
               <Label className="text-sm font-semibold text-gray-700">E-mail</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input className="pl-9" type="email" placeholder="unidade@zelare.org.br" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                <Input className="pl-9" type="email" placeholder="unidade@example.invalid" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
             </div>
             <div>
               <Label className="text-sm font-semibold text-gray-700">Telefone</Label>
               <div className="relative mt-1">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input className="pl-9" placeholder="(61) 3000-0000" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                <Input className="pl-9" placeholder="Telefone da unidade" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
               </div>
             </div>
           </div>
@@ -156,7 +156,7 @@ function ModalUnidade({ unidade, onClose, onSave }: { unidade?: Unidade | null; 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label className="text-sm font-semibold text-gray-700">Cidade</Label>
-              <Input className="mt-1" placeholder="Brasília" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
+              <Input className="mt-1" placeholder="Cidade" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
             </div>
             <div>
               <Label className="text-sm font-semibold text-gray-700">Estado</Label>

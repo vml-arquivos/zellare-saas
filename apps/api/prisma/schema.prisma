@@ -4260,7 +4260,7 @@ model OperationalPresenceEvent {
   occurredAt     DateTime
   recordedAt     DateTime                  @default(now())
   source         String                    @default("MOBILE") @db.VarChar(40)
-  idempotencyKey String                    @unique @db.VarChar(255)
+  idempotencyKey String                    @db.VarChar(255)
   correlationId  String?                   @db.VarChar(120)
   payload        Json?
   createdBy      String                     @db.VarChar(255)
@@ -4268,6 +4268,7 @@ model OperationalPresenceEvent {
   mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, occurredAt])
   @@index([spaceId, occurredAt])
   @@index([subjectType, subjectId, occurredAt])
@@ -4286,7 +4287,8 @@ model StaffingAssignment {
   endsAt         DateTime
   status         Onda2AssignmentStatus @default(DRAFT)
   version        Int                   @default(1)
-  idempotencyKey String?               @unique @db.VarChar(255)
+  idempotencyKey String?               @db.VarChar(255)
+  source         String                @default("WEB") @db.VarChar(40)
   createdBy      String                @db.VarChar(255)
   updatedBy      String?               @db.VarChar(255)
   publishedBy    String?               @db.VarChar(255)
@@ -4297,6 +4299,7 @@ model StaffingAssignment {
   mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, startsAt, endsAt])
   @@index([spaceId, status, startsAt])
   @@index([employeeId, startsAt, endsAt])
@@ -4565,13 +4568,15 @@ model AssetMeterReading {
   meterCode      String   @db.VarChar(80)
   value          Decimal  @db.Decimal(14, 4)
   occurredAt     DateTime
-  idempotencyKey String   @unique @db.VarChar(255)
+  idempotencyKey String   @db.VarChar(255)
+  source         String   @default("METER") @db.VarChar(40)
   createdBy      String   @db.VarChar(255)
   createdAt      DateTime @default(now())
 
   mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, assetId, occurredAt])
   @@map("asset_meter_reading")
 }
@@ -4590,7 +4595,8 @@ model MaintenanceRequest {
   safetyRisk     Boolean                      @default(false)
   status         Onda2MaintenanceRequestStatus @default(SUBMITTED)
   requesterId    String                       @db.VarChar(255)
-  idempotencyKey String                       @unique @db.VarChar(255)
+  idempotencyKey String                       @db.VarChar(255)
+  source         String                       @default("WEB") @db.VarChar(40)
   submittedAt   DateTime                     @default(now())
   triagedAt     DateTime?
   triagedBy     String?                      @db.VarChar(255)
@@ -4603,6 +4609,7 @@ model MaintenanceRequest {
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@unique([unitId, code])
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, status, priority])
   @@index([spaceId, submittedAt])
   @@index([assetId, submittedAt])
@@ -4676,12 +4683,14 @@ model WorkOrderStatusEvent {
   toStatus       Onda2WorkOrderStatus
   reason         String?            @db.Text
   actorId        String             @db.VarChar(255)
-  idempotencyKey String             @unique @db.VarChar(255)
+  idempotencyKey String             @db.VarChar(255)
+  source         String             @default("WEB") @db.VarChar(40)
   createdAt      DateTime           @default(now())
 
   mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, createdAt])
   @@index([workOrderId, createdAt])
   @@map("work_order_status_event")
@@ -4784,13 +4793,15 @@ model PreventivePlanTask {
   dueAt              DateTime
   generatedWorkOrderId String?
   status             Onda2ExecutionStatus @default(DRAFT)
-  idempotencyKey     String         @unique @db.VarChar(255)
+  idempotencyKey     String         @db.VarChar(255)
+  source             String         @default("SCHEDULER") @db.VarChar(40)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 
   mantenedora Mantenedora @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
   unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
+  @@unique([mantenedoraId, source, idempotencyKey])
   @@index([mantenedoraId, unitId, dueAt, status])
   @@index([planId])
   @@map("preventive_plan_task")
