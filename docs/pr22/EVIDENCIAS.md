@@ -20,7 +20,7 @@
 | Journey/Ofertas | Aceitar oferta de Dara | Primeira tentativa retornou 403 por inconsistência RBAC; após correção do guard, PATCH concluiu | Reload → `ACEITA`; oferta ativa caiu de 2 para 1 | Sem erro de aplicação | Mensagem `Oferta aceita; rascunho incompleto criado.`; DB confirmou draft `INCOMPLETA` e nenhum Child/Enrollment novo |
 | Journey/RBAC negativo | Professor acessar `/app/journey` e `/journey/units` | Rota redirecionou para dashboard; GET local retornou HTTP 403 `Forbidden resource` | N/A | Somente aviso esperado de acesso negado | Coordenação pedagógica/professor não receberam acesso indevido ao Journey |
 | Browser E2E | Login admissões, sete abas, cadastro e reload | Playwright passou 1/1; HAR sanitizado preserva requests/statuses | Reload do cadastro passou | `CLEAN` | Viewports 320, 360, 390, 412, 768 e 1280 px sem overflow horizontal; 6 screenshots e vídeo gerados |
-| CI oficial PR22 | Executar workflow no novo HEAD | Run `32590927240` — 14/14 checks successful | N/A | N/A | SHA `416b2424adea62c6c2849a26194178952180b848`; nenhum job cancelado/falho |
+| CI oficial PR22 | Executar workflow no novo HEAD | 14/14 checks successful no workflow oficial da PR | N/A | N/A | Nenhum job cancelado/falho; run e SHA finais são registrados na PR e no parecer de entrega |
 
 ## Artefatos preservados
 
