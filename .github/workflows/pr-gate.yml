@@ -19,6 +19,7 @@ env:
   DIRECT_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
   JWT_SECRET: ci-only-not-production
   VITE_RELEASE_ID: ${{ github.sha }}
+  VITE_API_URL: http://127.0.0.1:3000
   VITE_PUBLIC_CONTACT_EMAIL: contato@zelare.com.br
   VITE_PUBLIC_COMPLIANCE_EMAIL: denuncia@zelare.com.br
   VITE_PUBLIC_PHONE: "(61) 2123-4567"
