@@ -62,7 +62,7 @@ Toda consulta filtra `mantenedoraId` e valida unidade/turma no backend; o filtro
 
 ## Evidências de teste e gate
 
-Todos os comandos abaixo foram executados novamente no SHA final `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7` após o commit corretivo de privacidade. O log integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt`.
+Todos os comandos de código abaixo foram executados novamente no commit verificável `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7`, após o corretivo de privacidade. O commit de entrega posterior contém somente esta atualização documental; o log integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt`.
 
 | Gate | Comando | Resultado final | Log/evidência |
 |---|---|---|---|
@@ -78,7 +78,7 @@ Todos os comandos abaixo foram executados novamente no SHA final `b2f747613fdac6
 | API build/OpenAPI | `pnpm --filter @zelare/api build` | passou; 329 rotas totais / 24 Journey | `apps/api/dist/openapi.json` gerado localmente |
 | Web build/budget | `NODE_ENV=production VITE_API_URL=... pnpm --filter @zelare/web build && ... budget:check` | passou; JS inicial 77.750 bytes, gzip 20.611 bytes, precache 4.474.774 bytes | log final, budget |
 | Site build | build com canais `.test` | passou; canais públicos sintéticos validados | log final |
-| Privacidade | `pnpm --filter @zelare/api security:artifacts` | passou; 0 conteúdo sensível | terminal do gate |
+| Privacidade | `pnpm --filter @zelare/api security:artifacts` | passou; 1.061 arquivos versionados verificados e 0 conteúdo sensível | log final |
 | Prisma clean cluster | `prisma-clean-cluster-gate.sh` | `CLEAN_CLUSTER_PRISMA_DRIFT=0`; 48 migrations aplicadas e schema atualizado | log final e script em `evidence/` |
 | Concorrência | `node apps/api/scripts/verification/journey-concurrency.mjs` | 1 sucesso / 1 `ConflictException`; 1 oferta; 0 Child/Enrollment/Draft; replay igual | terminal do gate |
 | E2E autenticado | `JOURNEY_E2E_PASSWORD=... node evidence/capture-journey-e2e.cjs` | passou; 4 screenshots, desktop/mobile, confirmação real de visita e releitura | `evidence/screenshots/` e log final |
