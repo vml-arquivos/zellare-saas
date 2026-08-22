@@ -21,7 +21,7 @@ const policyFiles = new Set([
   '.github/workflows/pr-gate.yml',
   'docs/security/GATE02_PII_ARTIFACTS.md',
 ]);
-const syntheticEmail = /@(example\.(com|org|net|invalid)|example\.test|test\.local|localhost)$/i;
+const syntheticEmail = /@(example\.(com|org|net|invalid)|example\.test|demo\.invalid|test\.local|localhost)$/i;
 const publicInstitutionalEmails = new Set(['contato@zelare.com.br', 'denuncia@zelare.com.br']);
 const publicInstitutionalPhones = new Set(['556121234567', '6121234567']);
 const phonePattern = /(?:\+?55[\s-]?)?\(\d{2}\)\s?9?\d{4}[\s-]\d{4}/g;
