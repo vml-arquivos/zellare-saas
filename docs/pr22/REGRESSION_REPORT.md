@@ -35,7 +35,7 @@ O painel de visitas deixou de aceitar texto livre para o responsável e passou a
 | Web build/PWA | PASS | Build concluído; PWA gerado |
 | Bundle/PWA budget | PASS | Limites de JS inicial e precache respeitados |
 | Prisma validate | PASS | Schema válido |
-| CI oficial PR22 | PASS | Run `32590651181`; 14/14 checks successful no SHA `a2d3283af737bd5817d42d832623c1d934c55a1e` |
+| CI oficial PR22 | PASS | Run `32590927240`; 14/14 checks successful no SHA `416b2424adea62c6c2849a26194178952180b848` |
 | Replay migrations desde zero | BLOCKED | Migration histórica `20260223000000_sala_virtual_recados_observacoes` falhou com `42P01` em `development_observation` |
 | Prisma migrate diff com shadow | BLOCKED | Reproduziu `P3006/P1014` pela mesma tabela histórica inexistente |
 | Lint global API/web | BLOCKED BASELINE | 188 problemas API com `insights.service.ts` incluído; 832 problemas web, predominantemente Prettier/any/unused-vars legados |
@@ -56,4 +56,4 @@ O aceite de oferta confirmou apenas `JourneyEnrollmentDraft` com status `INCOMPL
 
 ## Parecer
 
-A implementação e a demonstração sintética ponta a ponta estão comprovadas, e as alterações de código são localizadas. O CI oficial do novo HEAD concluiu 14/14 checks verdes no run `32590651181`. Contudo, o replay integral de migrations desde zero e os lints globais permanecem gates não verdes por problemas preexistentes. O status objetivo é **NO-GO para merge e deploy nesta PR22**. Não há autorização para operação em produção; qualquer tratamento do baseline de migrations ou da dívida de lint deve ocorrer em trabalho separado e explicitamente autorizado.
+A implementação e a demonstração sintética ponta a ponta estão comprovadas, e as alterações de código são localizadas. O CI oficial do novo HEAD concluiu 14/14 checks verdes no run `32590927240`. Contudo, o replay integral de migrations desde zero e os lints globais permanecem gates não verdes por problemas preexistentes. O status objetivo é **NO-GO para merge e deploy nesta PR22**. Não há autorização para operação em produção; qualquer tratamento do baseline de migrations ou da dívida de lint deve ocorrer em trabalho separado e explicitamente autorizado.

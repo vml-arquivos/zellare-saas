@@ -39,4 +39,4 @@ A PR22 não cria domínio paralelo, não altera migrations, não ativa Journey g
 
 ## Status
 
-Fixture, demonstração humana, E2E autenticado, testes unitários, typechecks, contratos, builds, budget e scanner de privacidade passaram. O CI oficial do novo HEAD `a2d3283` concluiu 14/14 checks verdes no run `32590651181`. O replay integral de migrations falha em migration histórica anterior à PR22 e o lint global mostra dívida legada; por isso o status operacional final é `NO-GO PARA MERGE/DEPLOY` até decisão separada sobre esses gates.
+Fixture, demonstração humana, E2E autenticado, testes unitários, typechecks, contratos, builds, budget e scanner de privacidade passaram. O CI oficial do novo HEAD `416b242` concluiu 14/14 checks verdes no run `32590927240`. O replay integral de migrations falha em migration histórica anterior à PR22 e o lint global mostra dívida legada; por isso o status operacional final é `NO-GO PARA MERGE/DEPLOY` até decisão separada sobre esses gates.
