@@ -30,6 +30,9 @@ export interface User {
    * Mantido como unknown[] internamente para compatibilidade com tokens legados (string[]).
    */
   roles?: UserRole[] | string[];
+  featureFlags?: string[];
+  flags?: string[];
+  capabilities?: string[];
   [key: string]: unknown;
 }
 

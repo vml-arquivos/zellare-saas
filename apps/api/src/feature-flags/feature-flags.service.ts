@@ -24,6 +24,8 @@ export interface FeatureFlags {
   familyCircleV1: boolean;
   /** Tradução assistida da Onda 1 — desligada por padrão */
   familyTranslationV1: boolean;
+  /** Journey da Onda 3 — desligado por padrão */
+  journeyAdmissionsV1: boolean;
   /** Onda 2 — catálogo canônico também desligado por papel */
   pulseCommandCenterV1: boolean;
   ratioEngineV1: boolean;
@@ -61,6 +63,7 @@ export class FeatureFlagsService {
       reviewHubV1: false,
       familyCircleV1: false,
       familyTranslationV1: false,
+      journeyAdmissionsV1: false,
       pulseCommandCenterV1: false,
       ratioEngineV1: false,
       staffingCoverageV1: false,

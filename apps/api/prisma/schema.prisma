@@ -57,6 +57,7 @@ enum RoleType {
   MANTENEDORA_ADMIN
   MANTENEDORA_FINANCEIRO
   STAFF_CENTRAL_PEDAGOGICO
+  STAFF_CENTRAL_ADMISSOES
   STAFF_CENTRAL_PSICOLOGIA
   UNIDADE_DIRETOR
   UNIDADE_COORDENADOR_PEDAGOGICO
@@ -231,6 +232,12 @@ enum AuditLogEntity {
   RDIC_PROFILE
   RDIX_TEMPLATE
   RDIX_INSTANCE
+  JOURNEY_PROSPECT
+  JOURNEY_VISIT
+  JOURNEY_WAITLIST
+  JOURNEY_OFFER
+  JOURNEY_MERGE
+  JOURNEY_ENROLLMENT_DRAFT
 }
 
 /// Papel do professor na turma
@@ -339,6 +346,18 @@ model Mantenedora {
   acknowledgments             Acknowledgment[]
   communicationPreferences    CommunicationPreference[]
   domainOutboxEvents          DomainOutboxEvent[]
+  journeyProspects            JourneyProspect[]
+  journeyPolicies             JourneyWaitlistPolicyVersion[]
+  journeyVisits               JourneyVisit[]
+  journeyWaitlistEntries      JourneyWaitlistEntry[]
+  journeyOffers               JourneySeatOffer[]
+  journeyDrafts               JourneyEnrollmentDraft[]
+  JourneyProspectStageEvent   JourneyProspectStageEvent[]
+  JourneyActivity             JourneyActivity[]
+  JourneyTask                 JourneyTask[]
+  JourneyDuplicateReview      JourneyDuplicateReview[]
+  JourneyVisitEvent           JourneyVisitEvent[]
+  journeyProspectPrivacyEvents JourneyProspectPrivacyEvent[]
   operationalPresenceSessions OperationalPresenceSession[]
   operationalPresenceEvents   OperationalPresenceEvent[]
   staffingAssignments         StaffingAssignment[]
@@ -687,6 +706,17 @@ model Unit {
   correctiveActions            CorrectiveAction[]
   complianceRequirements      ComplianceRequirement[]
   complianceEvidences          ComplianceEvidence[]
+  journeyProspects            JourneyProspect[]
+  journeyPolicies             JourneyWaitlistPolicyVersion[]
+  journeyVisits               JourneyVisit[]
+  journeyWaitlistEntries      JourneyWaitlistEntry[]
+  journeyOffers               JourneySeatOffer[]
+  journeyDrafts               JourneyEnrollmentDraft[]
+  JourneyProspectStageEvent   JourneyProspectStageEvent[]
+  JourneyActivity             JourneyActivity[]
+  JourneyTask                 JourneyTask[]
+  JourneyVisitEvent           JourneyVisitEvent[]
+  journeyProspectPrivacyEvents JourneyProspectPrivacyEvent[]
 
   @@unique([mantenedoraId, code])
   @@index([mantenedoraId])
@@ -980,6 +1010,10 @@ model ChildGuardian {
   canViewHealth      Boolean   @default(false)
   consentAt          DateTime?
   revokedAt          DateTime?
+  legalBasis         Onda1LegalBasis @default(CONSENT)
+  consentPolicyVersion String          @default("family-link-v1") @db.VarChar(80)
+  retentionUntil     DateTime?
+  revocationReason   String?           @db.VarChar(500)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   child              Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
@@ -1089,8 +1123,8 @@ model Classroom {
   developmentReports   DevelopmentReport[]
   childEvidences       ChildEvidence[]
   microgestosRegistros MicrogestoRegistro[]
-  alertasAluno         AlertaAluno[]
-
+    alertasAluno         AlertaAluno[]
+  journeyOffers        JourneySeatOffer[]
   @@unique([unitId, code])
   @@index([unitId])
   @@index([isActive])
@@ -3965,6 +3999,7 @@ model ConsentGrant {
   responsibleUserId String               @db.VarChar(255)
   purpose           Onda1ConsentPurpose
   decision          Onda1ConsentDecision
+  legalBasis        Onda1LegalBasis      @default(CONSENT)
   policyVersion     String               @db.VarChar(80)
   textPresented     String               @db.Text
   origin            String               @db.VarChar(80)
@@ -5016,4 +5051,466 @@ model ComplianceEvidence {
   @@index([mantenedoraId, unitId, status])
   @@index([requirementId, expiresAt])
   @@map("compliance_evidence")
+}
+
+enum JourneyStage {
+  NOVO
+  CONTATADO
+  VISITA_AGENDADA
+  VISITA_REALIZADA
+  LISTA_ESPERA
+  VAGA_OFERECIDA
+  ACEITO
+  PERDIDO
+  ARQUIVADO
+}
+
+enum JourneyDuplicateReviewStatus {
+  PENDENTE
+  CONFIRMADA
+  REJEITADA
+  DESFEITA
+}
+
+enum JourneyActivityType {
+  INTERACAO
+  NOTA
+  FOLLOW_UP
+}
+
+enum JourneyTaskStatus {
+  ABERTA
+  CONCLUIDA
+  CANCELADA
+}
+
+enum JourneyVisitStatus {
+  AGENDADA
+  REAGENDADA
+  CANCELADA
+  REALIZADA
+  AUSENCIA
+}
+
+enum JourneyVisitEventType {
+  CRIADA
+  REAGENDADA
+  CANCELADA
+  PRESENCA_CONFIRMADA
+  AUSENCIA_REGISTRADA
+  FOLLOW_UP_REGISTRADO
+}
+
+enum JourneyWaitlistPolicyStatus {
+  RASCUNHO
+  PUBLICADA
+  ARQUIVADA
+}
+
+enum JourneyWaitlistEntryStatus {
+  AGUARDANDO
+  OFERTADA
+  REMOVIDA
+}
+
+enum JourneyOfferStatus {
+  OFERTADA
+  ACEITA
+  RECUSADA
+  EXPIRADA
+  CANCELADA
+}
+
+enum JourneyEnrollmentDraftStatus {
+  INCOMPLETA
+  CANCELADA
+  CONCLUIDA
+}
+
+enum JourneyPrivacyEventType {
+  CONSENT_CAPTURED
+  CONSENT_CONTACT_GRANTED
+  CONSENT_CONTACT_REVOKED
+  RETENTION_EXTENDED
+  ERASURE_REQUESTED
+  ERASURE_COMPLETED
+}
+
+enum JourneyProspectPrivacyStatus {
+  ACTIVE
+  RETAINED
+  ERASURE_REQUESTED
+  ERASED
+}
+
+enum Onda1LegalBasis {
+  CONSENT
+  LEGAL_OBLIGATION
+  PRE_CONTRACTUAL_STEPS
+  VITAL_INTEREST
+  PUBLIC_TASK
+}
+
+model JourneyProspect {
+  id                   String       @id @default(cuid())
+  mantenedoraId        String
+  unitId               String
+  responsibleName      String       @db.VarChar(180)
+  childName            String       @db.VarChar(180)
+  email                String?      @db.VarChar(255)
+  phone                String?      @db.VarChar(30)
+  emailHash            String?      @db.VarChar(128)
+  phoneHash            String?      @db.VarChar(128)
+  declaredIdentityType String?      @db.VarChar(40)
+  declaredIdentityHash String?      @db.VarChar(128)
+  emailCiphertext      String?      @db.Text
+  phoneCiphertext      String?      @db.Text
+  declaredIdentityCiphertext String? @db.Text
+  contactHashVersion   String?      @db.VarChar(40)
+  privacyStatus        JourneyProspectPrivacyStatus @default(ACTIVE)
+  captureLegalBasis    Onda1LegalBasis @default(CONSENT)
+  contactLegalBasis    Onda1LegalBasis?
+  consentPolicyVersion String       @default("journey-privacy-v1") @db.VarChar(80)
+  consentCapturedAt    DateTime?
+  contactConsentAt     DateTime?
+  retentionUntil       DateTime?
+  erasedAt             DateTime?
+  erasedBy             String?      @db.VarChar(255)
+  source               String       @db.VarChar(80)
+  ageGroupMinMonths    Int
+  ageGroupMaxMonths    Int
+  period               String       @db.VarChar(40)
+  desiredDate          DateTime?
+  consentCapture       Boolean      @default(false)
+  consentContact       Boolean      @default(false)
+  stage                JourneyStage @default(NOVO)
+  mergedIntoId         String?
+  idempotencyKey       String       @db.VarChar(255)
+  createdBy            String       @db.VarChar(255)
+  version              Int          @default(1)
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  mantenedora          Mantenedora                 @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit                 Unit                        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  mergedInto           JourneyProspect?            @relation("JourneyProspectMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedProspects      JourneyProspect[]           @relation("JourneyProspectMerge")
+  stageEvents          JourneyProspectStageEvent[]
+  activities           JourneyActivity[]
+  tasks                JourneyTask[]
+  duplicateAsPrimary   JourneyDuplicateReview[]    @relation("JourneyDuplicatePrimary")
+  duplicateAsDuplicate JourneyDuplicateReview[]    @relation("JourneyDuplicateDuplicate")
+  visits               JourneyVisit[]
+  waitlistEntries      JourneyWaitlistEntry[]
+  offers               JourneySeatOffer[]
+  enrollmentDrafts     JourneyEnrollmentDraft[]
+  privacyEvents         JourneyProspectPrivacyEvent[]
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, stage])
+  @@index([mantenedoraId, emailHash])
+  @@index([mantenedoraId, phoneHash])
+  @@index([mantenedoraId, declaredIdentityHash])
+  @@index([mantenedoraId, contactHashVersion])
+  @@index([mantenedoraId, privacyStatus, retentionUntil])
+  @@index([unitId, desiredDate])
+  @@map("journey_prospect")
+}
+
+model JourneyProspectPrivacyEvent {
+  id             String                @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  type           JourneyPrivacyEventType
+  purpose        String                @db.VarChar(80)
+  legalBasis     Onda1LegalBasis?
+  policyVersion  String                @db.VarChar(80)
+  reason         String?               @db.VarChar(500)
+  actorUserId    String                @db.VarChar(255)
+  idempotencyKey String                @db.VarChar(255)
+  createdAt      DateTime              @default(now())
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, prospectId, createdAt])
+  @@index([prospectId, type, createdAt])
+  @@map("journey_prospect_privacy_event")
+}
+
+model JourneyProspectStageEvent {
+  id             String        @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  fromStage      JourneyStage?
+  toStage        JourneyStage
+  reason         String?       @db.VarChar(500)
+  actorUserId    String        @db.VarChar(255)
+  idempotencyKey String        @db.VarChar(255)
+  createdAt      DateTime      @default(now())
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, createdAt])
+  @@index([prospectId, createdAt])
+  @@map("journey_prospect_stage_event")
+}
+
+model JourneyActivity {
+  id             String              @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  type           JourneyActivityType
+  title          String              @db.VarChar(180)
+  note           String?             @db.Text
+  occurredAt     DateTime            @default(now())
+  nextAction     String?             @db.VarChar(255)
+  actorUserId    String              @db.VarChar(255)
+  idempotencyKey String              @db.VarChar(255)
+  createdAt      DateTime            @default(now())
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, occurredAt])
+  @@index([prospectId, occurredAt])
+  @@map("journey_activity")
+}
+
+model JourneyTask {
+  id             String            @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  title          String            @db.VarChar(180)
+  dueAt          DateTime?
+  assignedTo     String?           @db.VarChar(255)
+  status         JourneyTaskStatus @default(ABERTA)
+  createdBy      String            @db.VarChar(255)
+  completedBy    String?           @db.VarChar(255)
+  completedAt    DateTime?
+  version        Int               @default(1)
+  idempotencyKey String            @db.VarChar(255)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, status, dueAt])
+  @@index([prospectId, status])
+  @@map("journey_task")
+}
+
+model JourneyDuplicateReview {
+  id                  String                       @id @default(cuid())
+  mantenedoraId       String
+  primaryProspectId   String
+  duplicateProspectId String
+  matchReasons        String[]
+  status              JourneyDuplicateReviewStatus @default(PENDENTE)
+  previousStage       JourneyStage?
+  reviewedBy          String?                      @db.VarChar(255)
+  reviewedAt          DateTime?
+  undoBy              String?                      @db.VarChar(255)
+  undoAt              DateTime?
+  idempotencyKey      String                       @db.VarChar(255)
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
+
+  mantenedora Mantenedora     @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  primary     JourneyProspect @relation("JourneyDuplicatePrimary", fields: [primaryProspectId], references: [id], onDelete: Cascade)
+  duplicate   JourneyProspect @relation("JourneyDuplicateDuplicate", fields: [duplicateProspectId], references: [id], onDelete: Cascade)
+
+  @@unique([primaryProspectId, duplicateProspectId])
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, status])
+  @@map("journey_duplicate_review")
+}
+
+model JourneyVisit {
+  id             String             @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  startsAt       DateTime
+  endsAt         DateTime
+  status         JourneyVisitStatus @default(AGENDADA)
+  assignedTo     String?            @db.VarChar(255)
+  notes          String?            @db.Text
+  version        Int                @default(1)
+  createdBy      String             @db.VarChar(255)
+  idempotencyKey String             @db.VarChar(255)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  mantenedora Mantenedora         @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit                @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect     @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  events      JourneyVisitEvent[]
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, startsAt])
+  @@index([prospectId, startsAt])
+  @@map("journey_visit")
+}
+
+model JourneyVisitEvent {
+  id               String                @id @default(cuid())
+  mantenedoraId    String
+  unitId           String
+  visitId          String
+  type             JourneyVisitEventType
+  previousStartsAt DateTime?
+  previousEndsAt   DateTime?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  note             String?               @db.Text
+  actorUserId      String                @db.VarChar(255)
+  idempotencyKey   String                @db.VarChar(255)
+  createdAt        DateTime              @default(now())
+
+  mantenedora Mantenedora  @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  visit       JourneyVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, createdAt])
+  @@index([visitId, createdAt])
+  @@map("journey_visit_event")
+}
+
+model JourneyWaitlistPolicyVersion {
+  id                 String                      @id @default(cuid())
+  mantenedoraId      String
+  unitId             String
+  programKey         String                      @default("default") @db.VarChar(80)
+  ageGroupMinMonths  Int
+  ageGroupMaxMonths  Int
+  period             String                      @db.VarChar(40)
+  version            Int
+  effectiveFrom      DateTime
+  effectiveTo        DateTime?
+  status             JourneyWaitlistPolicyStatus @default(RASCUNHO)
+  priorityDefinition Json
+  createdBy          String                      @db.VarChar(255)
+  reviewedBy         String?                     @db.VarChar(255)
+  reviewedAt         DateTime?
+  publishedBy        String?                     @db.VarChar(255)
+  publishedAt        DateTime?
+  idempotencyKey     String                      @db.VarChar(255)
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+
+  mantenedora Mantenedora            @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit                   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  entries     JourneyWaitlistEntry[]
+
+  @@unique([unitId, programKey, version])
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, status, effectiveFrom])
+  @@index([unitId, period, ageGroupMinMonths, ageGroupMaxMonths])
+  @@map("journey_waitlist_policy_version")
+}
+
+model JourneyWaitlistEntry {
+  id             String                     @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  policyId       String
+  desiredDate    DateTime?
+  priorityScore  Int                        @default(0)
+  explanation    Json
+  status         JourneyWaitlistEntryStatus @default(AGUARDANDO)
+  version        Int                        @default(1)
+  createdBy      String                     @db.VarChar(255)
+  idempotencyKey String                     @db.VarChar(255)
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  mantenedora Mantenedora                  @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit                         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect              @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  policy      JourneyWaitlistPolicyVersion @relation(fields: [policyId], references: [id], onDelete: Restrict)
+  offers      JourneySeatOffer[]
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, status, priorityScore])
+  @@index([prospectId, status])
+  @@index([policyId, status])
+  @@map("journey_waitlist_entry")
+}
+
+model JourneySeatOffer {
+  id                   String             @id @default(cuid())
+  mantenedoraId        String
+  unitId               String
+  prospectId           String
+  classroomId          String
+  waitlistEntryId      String?
+  status               JourneyOfferStatus @default(OFERTADA)
+  reservationExpiresAt DateTime
+  offeredAt            DateTime           @default(now())
+  respondedAt          DateTime?
+  decisionReason       String?            @db.VarChar(500)
+  overrideReason       String?            @db.VarChar(500)
+  createdBy            String             @db.VarChar(255)
+  acceptedBy           String?            @db.VarChar(255)
+  version              Int                @default(1)
+  idempotencyKey       String             @db.VarChar(255)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  mantenedora     Mantenedora             @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit            Unit                    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect        JourneyProspect         @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  classroom       Classroom               @relation(fields: [classroomId], references: [id], onDelete: Restrict)
+  waitlistEntry   JourneyWaitlistEntry?   @relation(fields: [waitlistEntryId], references: [id], onDelete: SetNull)
+  enrollmentDraft JourneyEnrollmentDraft?
+
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, status, reservationExpiresAt])
+  @@index([classroomId, status, reservationExpiresAt])
+  @@index([prospectId, status])
+  @@map("journey_seat_offer")
+}
+
+model JourneyEnrollmentDraft {
+  id             String                       @id @default(cuid())
+  mantenedoraId  String
+  unitId         String
+  prospectId     String
+  offerId        String
+  status         JourneyEnrollmentDraftStatus @default(INCOMPLETA)
+  missingFields  Json
+  acceptedAt     DateTime                     @default(now())
+  completedAt    DateTime?
+  createdBy      String                       @db.VarChar(255)
+  idempotencyKey String                       @db.VarChar(255)
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+
+  mantenedora Mantenedora      @relation(fields: [mantenedoraId], references: [id], onDelete: Cascade)
+  unit        Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  prospect    JourneyProspect  @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  offer       JourneySeatOffer @relation(fields: [offerId], references: [id], onDelete: Restrict)
+
+  @@unique([offerId])
+  @@unique([mantenedoraId, idempotencyKey])
+  @@index([mantenedoraId, unitId, status])
+  @@index([prospectId, status])
+  @@map("journey_enrollment_draft")
 }

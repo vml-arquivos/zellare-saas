@@ -1,7 +1,20 @@
-import { Type } from 'class-transformer';
-import { IsBoolean, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { Type } from "class-transformer";
+import { Onda1LegalBasis } from "@prisma/client";
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from "class-validator";
 
-const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+const SORT_DIRECTIONS = ["asc", "desc"] as const;
 
 export class FamilyChildrenQueryDto {
   @IsOptional()
@@ -32,12 +45,12 @@ export class FamilyChildrenQueryDto {
   limit = 25;
 
   @IsOptional()
-  @IsIn(['firstName', 'lastName', 'createdAt'])
-  sortBy: 'firstName' | 'lastName' | 'createdAt' = 'firstName';
+  @IsIn(["firstName", "lastName", "createdAt"])
+  sortBy: "firstName" | "lastName" | "createdAt" = "firstName";
 
   @IsOptional()
   @IsIn(SORT_DIRECTIONS)
-  sortOrder: 'asc' | 'desc' = 'asc';
+  sortOrder: "asc" | "desc" = "asc";
 }
 
 export class FamilyGuardianCandidatesQueryDto {
@@ -65,12 +78,12 @@ export class FamilyGuardianCandidatesQueryDto {
   limit = 25;
 
   @IsOptional()
-  @IsIn(['firstName', 'lastName', 'createdAt'])
-  sortBy: 'firstName' | 'lastName' | 'createdAt' = 'firstName';
+  @IsIn(["firstName", "lastName", "createdAt"])
+  sortBy: "firstName" | "lastName" | "createdAt" = "firstName";
 
   @IsOptional()
   @IsIn(SORT_DIRECTIONS)
-  sortOrder: 'asc' | 'desc' = 'asc';
+  sortOrder: "asc" | "desc" = "asc";
 }
 
 export class FamilyQueryDto {
@@ -113,6 +126,27 @@ export class CreateGuardianLinkDto {
   @IsOptional()
   @IsBoolean()
   canViewHealth?: boolean;
+
+  @IsOptional()
+  @IsEnum(Onda1LegalBasis)
+  legalBasis?: Onda1LegalBasis;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(80)
+  consentPolicyVersion?: string;
+
+  @IsOptional()
+  @IsDateString()
+  retentionUntil?: string;
+}
+
+export class RevokeGuardianDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(500)
+  reason!: string;
 }
 
 export class CreateFamilyMessageDto {

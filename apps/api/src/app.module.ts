@@ -60,6 +60,7 @@ import { CareModule } from './care/care.module';
 import { EvidenceModule } from './evidence/evidence.module';
 import { Onda1Module } from './onda1/onda1.module';
 import { Onda2Module } from './onda2/onda2.module';
+import { JourneyModule } from './journey/journey.module';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { Onda2Module } from './onda2/onda2.module';
     EvidenceModule,
     Onda1Module,
     Onda2Module,
+    JourneyModule,
   ],
   controllers: [AppController],
   providers: [

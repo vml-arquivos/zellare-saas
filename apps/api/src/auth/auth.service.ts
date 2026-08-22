@@ -1,14 +1,11 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { LoginDto } from './dto/login.dto';
-import type { JwtPayload } from './interfaces/jwt-payload.interface';
-import * as bcrypt from 'bcrypt';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import type { JwtSignOptions } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "../prisma/prisma.service";
+import { LoginDto } from "./dto/login.dto";
+import type { JwtPayload } from "./interfaces/jwt-payload.interface";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
@@ -17,6 +14,43 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  private journeyCapabilities(types: string[]): string[] {
+    const eligible = types.some((type) =>
+      [
+        "DEVELOPER",
+        "MANTENEDORA_ADMIN",
+        "STAFF_CENTRAL_ADMISSOES",
+        "UNIDADE_DIRETOR",
+        "UNIDADE_ADMINISTRATIVO",
+      ].includes(type),
+    );
+    if (!eligible) return [];
+    const capabilities = [
+      "journey.read",
+      "journey.prospect.read",
+      "journey.prospect.manage",
+      "journey.visit.read",
+      "journey.visit.manage",
+      "journey.waitlist.read",
+      "journey.waitlist.manage",
+      "journey.offer.read",
+      "journey.offer.create",
+      "journey.offer.accept",
+      "journey.privacy.manage",
+    ];
+    if (
+      types.some((type) =>
+        ["DEVELOPER", "MANTENEDORA_ADMIN", "UNIDADE_DIRETOR"].includes(type),
+      )
+    ) {
+      capabilities.push("journey.merge.review");
+    }
+    if (types.some((type) => ["DEVELOPER", "UNIDADE_DIRETOR"].includes(type))) {
+      capabilities.push("journey.offer.override");
+    }
+    return capabilities;
+  }
 
   /**
    * Realiza o login do usuário
@@ -51,18 +85,18 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     // Verificar status do usuário
-    if (user.status !== 'ATIVO') {
-      throw new UnauthorizedException('Usuário inativo');
+    if (user.status !== "ATIVO") {
+      throw new UnauthorizedException("Usuário inativo");
     }
 
     // Verificar senha
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     // Construir payload do JWT
@@ -73,8 +107,8 @@ export class AuthService {
       unitId: user.unitId || undefined,
       roles: user.roles.map((userRole) => ({
         roleId: userRole.roleId,
-        level: userRole.role.level,  // FIX: usar role.level (RoleLevel) e não scopeLevel
-        type: userRole.role.type,    // Papel específico (UNIDADE_NUTRICIONISTA, UNIDADE_DIRETOR, etc.)
+        level: userRole.role.level, // FIX: usar role.level (RoleLevel) e não scopeLevel
+        type: userRole.role.type, // Papel específico (UNIDADE_NUTRICIONISTA, UNIDADE_DIRETOR, etc.)
         unitScopes: userRole.unitScopes.map((scope) => scope.unitId),
       })),
     };
@@ -121,7 +155,7 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(
         refreshToken,
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
         },
       );
 
@@ -131,8 +165,8 @@ export class AuthService {
         select: { id: true, status: true },
       });
 
-      if (!user || user.status !== 'ATIVO') {
-        throw new UnauthorizedException('Usuário inativo ou não encontrado');
+      if (!user || user.status !== "ATIVO") {
+        throw new UnauthorizedException("Usuário inativo ou não encontrado");
       }
 
       // FIX: buscar roles ATUAIS do banco (isActive=true) em vez de reutilizar
@@ -164,8 +198,8 @@ export class AuthService {
       return {
         accessToken: newAccessToken,
       };
-    } catch (error) {
-      throw new UnauthorizedException('Refresh token inválido ou expirado');
+    } catch {
+      throw new UnauthorizedException("Refresh token inválido ou expirado");
     }
   }
 
@@ -173,24 +207,27 @@ export class AuthService {
    * Gera um access token JWT
    */
   private async generateAccessToken(payload: JwtPayload): Promise<string> {
-    const secret = this.configService.get<string>('JWT_SECRET');
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '15m';
-    return this.jwtService.signAsync(payload as any, {
+    const secret = this.configService.get<string>("JWT_SECRET");
+    const expiresIn = this.configService.get<string>("JWT_EXPIRES_IN") || "15m";
+    const options: JwtSignOptions = {
       secret,
-      expiresIn: expiresIn as any,
-    });
+      expiresIn: expiresIn as JwtSignOptions["expiresIn"],
+    };
+    return this.jwtService.signAsync(payload, options);
   }
 
   /**
    * Gera um refresh token JWT
    */
   private async generateRefreshToken(payload: JwtPayload): Promise<string> {
-    const secret = this.configService.get<string>('JWT_REFRESH_SECRET');
-    const expiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
-    return this.jwtService.signAsync(payload as any, {
+    const secret = this.configService.get<string>("JWT_REFRESH_SECRET");
+    const expiresIn =
+      this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") || "7d";
+    const options: JwtSignOptions = {
       secret,
-      expiresIn: expiresIn as any,
-    });
+      expiresIn: expiresIn as JwtSignOptions["expiresIn"],
+    };
+    return this.jwtService.signAsync(payload, options);
   }
 
   /**
@@ -234,7 +271,7 @@ export class AuthService {
         unit: { select: { id: true, name: true, code: true } },
       },
     });
-    if (!user) throw new UnauthorizedException('Usuário não encontrado');
+    if (!user) throw new UnauthorizedException("Usuário não encontrado");
 
     // Buscar roles com unitScopes — mesmo formato do JWT — para consistência frontend
     // Apenas roles ativas (isActive: true) são retornadas
@@ -251,9 +288,14 @@ export class AuthService {
     const rolesRich = userRoles.map((r) => ({
       roleId: r.roleId,
       level: r.role.level,
-      type: r.role.type,   // Papel específico (UNIDADE_NUTRICIONISTA, UNIDADE_DIRETOR, etc.)
+      type: r.role.type, // Papel específico (UNIDADE_NUTRICIONISTA, UNIDADE_DIRETOR, etc.)
       unitScopes: r.unitScopes.map((s) => s.unitId),
     }));
+
+    const enabledFeatureFlags = await this.prisma.tenantFeatureFlag.findMany({
+      where: { mantenedoraId: user.mantenedoraId, enabled: true },
+      select: { flagKey: true },
+    });
 
     return {
       user: {
@@ -261,7 +303,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        nome: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
+        nome: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
         phone: user.phone ?? null,
         cpf: user.cpf ?? null,
         status: user.status,
@@ -270,8 +312,14 @@ export class AuthService {
         createdAt: user.createdAt.toISOString(),
         mantenedoraId: user.mantenedoraId,
         unitId: user.unitId,
-        unit: user.unit ? { id: user.unit.id, name: user.unit.name, unitCode: user.unit.code } : null,
+        unit: user.unit
+          ? { id: user.unit.id, name: user.unit.name, unitCode: user.unit.code }
+          : null,
         roles: rolesRich,
+        capabilities: this.journeyCapabilities(
+          rolesRich.map((role) => role.type),
+        ),
+        featureFlags: enabledFeatureFlags.map((flag) => flag.flagKey),
       },
     };
   }

@@ -5,13 +5,18 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
-import { EnrollmentStatus, RoleLevel, RoleType, UserStatus } from '@prisma/client';
-import { Readable } from 'stream';
-import csvParser from 'csv-parser';
-import * as bcrypt from 'bcrypt';
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import type { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
+import {
+  EnrollmentStatus,
+  RoleLevel,
+  RoleType,
+  UserStatus,
+} from "@prisma/client";
+import { Readable } from "stream";
+import csvParser from "csv-parser";
+import * as bcrypt from "bcrypt";
 
 // ─── Mapeamento RoleType → RoleLevel ─────────────────────────────────────────
 const ROLE_TYPE_TO_LEVEL: Record<RoleType, RoleLevel> = {
@@ -19,6 +24,7 @@ const ROLE_TYPE_TO_LEVEL: Record<RoleType, RoleLevel> = {
   MANTENEDORA_ADMIN: RoleLevel.MANTENEDORA,
   MANTENEDORA_FINANCEIRO: RoleLevel.MANTENEDORA,
   STAFF_CENTRAL_PEDAGOGICO: RoleLevel.STAFF_CENTRAL,
+  STAFF_CENTRAL_ADMISSOES: RoleLevel.STAFF_CENTRAL,
   STAFF_CENTRAL_PSICOLOGIA: RoleLevel.STAFF_CENTRAL,
   UNIDADE_DIRETOR: RoleLevel.UNIDADE,
   UNIDADE_COORDENADOR_PEDAGOGICO: RoleLevel.UNIDADE,
@@ -31,13 +37,14 @@ const ROLE_TYPE_TO_LEVEL: Record<RoleType, RoleLevel> = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function norm(v: unknown): string {
-  return String(v ?? '').trim();
+  if (typeof v === "string" || typeof v === "number") return String(v).trim();
+  return "";
 }
 
 function splitName(full: string): { firstName: string; lastName: string } {
   const parts = full.split(/\s+/).filter(Boolean);
-  const firstName = parts[0] ?? '';
-  const lastName = parts.slice(1).join(' ') || '.';
+  const firstName = parts[0] ?? "";
+  const lastName = parts.slice(1).join(" ") || ".";
   return { firstName, lastName };
 }
 
@@ -51,7 +58,9 @@ function parseBirthDate(raw: string): Date | null {
 
   const iso = new Date(s);
   if (!Number.isNaN(iso.getTime())) {
-    return new Date(Date.UTC(iso.getUTCFullYear(), iso.getUTCMonth(), iso.getUTCDate()));
+    return new Date(
+      Date.UTC(iso.getUTCFullYear(), iso.getUTCMonth(), iso.getUTCDate()),
+    );
   }
 
   const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
@@ -65,14 +74,14 @@ function parseBirthDate(raw: string): Date | null {
 
 function classroomCodeFromName(name: string): string {
   const ascii = name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toUpperCase();
   return (
     ascii
-      .replace(/[^A-Z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-      .slice(0, 50) || 'TURMA'
+      .replace(/[^A-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 50) || "TURMA"
   );
 }
 
@@ -109,40 +118,53 @@ export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
   private isDeveloper(user: JwtPayload): boolean {
-    return Array.isArray(user?.roles) && user.roles.some((r) => r.level === RoleLevel.DEVELOPER);
+    return (
+      Array.isArray(user?.roles) &&
+      user.roles.some((r) => r.level === RoleLevel.DEVELOPER)
+    );
   }
 
-  private async assertUnitAccess(user: JwtPayload, unitId: string): Promise<void> {
-    if (!user?.mantenedoraId) throw new BadRequestException('mantenedoraId ausente no token');
+  private async assertUnitAccess(
+    user: JwtPayload,
+    unitId: string,
+  ): Promise<void> {
+    if (!user?.mantenedoraId)
+      throw new BadRequestException("mantenedoraId ausente no token");
     if (this.isDeveloper(user)) return;
 
     // MANTENEDORA: qualquer unidade da mesma mantenedora
-    const isMantenedora = user.roles.some((r) => r.level === RoleLevel.MANTENEDORA);
+    const isMantenedora = user.roles.some(
+      (r) => r.level === RoleLevel.MANTENEDORA,
+    );
     if (isMantenedora) {
       const unit = await this.prisma.unit.findUnique({
         where: { id: unitId },
         select: { mantenedoraId: true },
       });
       if (!unit || unit.mantenedoraId !== user.mantenedoraId) {
-        throw new ForbiddenException('Sem acesso à unidade informada');
+        throw new ForbiddenException("Sem acesso à unidade informada");
       }
       return;
     }
 
     // STAFF_CENTRAL: acesso a todas as unidades da mantenedora (ou unitScopes se restrito)
-    const isStaffCentral = user.roles.some((r) => r.level === RoleLevel.STAFF_CENTRAL);
+    const isStaffCentral = user.roles.some(
+      (r) => r.level === RoleLevel.STAFF_CENTRAL,
+    );
     if (isStaffCentral) {
       const unit = await this.prisma.unit.findUnique({
         where: { id: unitId },
         select: { mantenedoraId: true },
       });
       if (!unit || unit.mantenedoraId !== user.mantenedoraId) {
-        throw new ForbiddenException('Sem acesso à unidade informada');
+        throw new ForbiddenException("Sem acesso à unidade informada");
       }
-      const staffRole = user.roles.find((r) => r.level === RoleLevel.STAFF_CENTRAL);
+      const staffRole = user.roles.find(
+        (r) => r.level === RoleLevel.STAFF_CENTRAL,
+      );
       const scopes = staffRole?.unitScopes ?? [];
       if (scopes.length > 0 && !scopes.includes(unitId)) {
-        throw new ForbiddenException('Sem acesso à unidade informada');
+        throw new ForbiddenException("Sem acesso à unidade informada");
       }
       return;
     }
@@ -150,11 +172,12 @@ export class AdminService {
     // UNIDADE: somente sua própria unitId
     const isUnidade = user.roles.some((r) => r.level === RoleLevel.UNIDADE);
     if (isUnidade) {
-      if (user.unitId !== unitId) throw new ForbiddenException('Sem acesso à unidade informada');
+      if (user.unitId !== unitId)
+        throw new ForbiddenException("Sem acesso à unidade informada");
       return;
     }
 
-    throw new ForbiddenException('Perfil sem permissão para importação');
+    throw new ForbiddenException("Perfil sem permissão para importação");
   }
 
   /**
@@ -171,7 +194,7 @@ export class AdminService {
         mantenedoraId,
         type: roleType,
         level,
-        name: roleType.replace(/_/g, ' '),
+        name: roleType.replace(/_/g, " "),
         isActive: true,
         isCustom: false,
       },
@@ -185,11 +208,9 @@ export class AdminService {
    * - DEVELOPER / MANTENEDORA: todos os usuários da mesma mantenedora (com filtro opcional por unitId)
    * - UNIDADE: apenas usuários da própria unidade
    */
-  async listUsers(
-    user: JwtPayload,
-    opts: { limit: number; unitId?: string },
-  ) {
-    if (!user?.mantenedoraId) throw new BadRequestException('mantenedoraId ausente no token');
+  async listUsers(user: JwtPayload, opts: { limit: number; unitId?: string }) {
+    if (!user?.mantenedoraId)
+      throw new BadRequestException("mantenedoraId ausente no token");
 
     const isMantenedora =
       this.isDeveloper(user) ||
@@ -197,8 +218,8 @@ export class AdminService {
       user.roles.some((r) => r.level === RoleLevel.STAFF_CENTRAL);
 
     const whereUnitId: string | undefined = isMantenedora
-      ? (opts.unitId || undefined)
-      : (user.unitId || undefined);
+      ? opts.unitId || undefined
+      : user.unitId || undefined;
 
     const users = await this.prisma.user.findMany({
       where: {
@@ -226,7 +247,7 @@ export class AdminService {
         },
       },
       take: opts.limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     // Normalizar para o formato esperado pelo frontend
@@ -256,7 +277,8 @@ export class AdminService {
    * - UNIDADE: apenas a própria unidade
    */
   async listUnits(user: JwtPayload) {
-    if (!user?.mantenedoraId) throw new BadRequestException('mantenedoraId ausente no token');
+    if (!user?.mantenedoraId)
+      throw new BadRequestException("mantenedoraId ausente no token");
 
     const isMantenedora =
       this.isDeveloper(user) ||
@@ -274,7 +296,7 @@ export class AdminService {
         code: true,
         createdAt: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
 
     // Normalizar: expor `unitCode` para compatibilidade com o frontend
@@ -289,33 +311,46 @@ export class AdminService {
    * Transação Prisma garante consistência.
    */
   async createUser(actor: JwtPayload, dto: CreateUserDto) {
-    if (!actor?.mantenedoraId) throw new BadRequestException('mantenedoraId ausente no token');
+    if (!actor?.mantenedoraId)
+      throw new BadRequestException("mantenedoraId ausente no token");
 
     // Validações básicas
-    if (!dto.firstName?.trim()) throw new BadRequestException('firstName é obrigatório');
-    if (!dto.lastName?.trim()) throw new BadRequestException('lastName é obrigatório');
-    if (!dto.email?.trim()) throw new BadRequestException('email é obrigatório');
+    if (!dto.firstName?.trim())
+      throw new BadRequestException("firstName é obrigatório");
+    if (!dto.lastName?.trim())
+      throw new BadRequestException("lastName é obrigatório");
+    if (!dto.email?.trim())
+      throw new BadRequestException("email é obrigatório");
     if (!dto.password || dto.password.length < 6)
-      throw new BadRequestException('password deve ter pelo menos 6 caracteres');
-    if (!dto.roleType) throw new BadRequestException('roleType é obrigatório');
+      throw new BadRequestException(
+        "password deve ter pelo menos 6 caracteres",
+      );
+    if (!dto.roleType) throw new BadRequestException("roleType é obrigatório");
 
     const roleLevel = ROLE_TYPE_TO_LEVEL[dto.roleType];
-    if (!roleLevel) throw new BadRequestException(`roleType inválido: ${dto.roleType}`);
+    if (!roleLevel)
+      throw new BadRequestException(`roleType inválido: ${dto.roleType}`);
 
     const needsUnit =
       roleLevel === RoleLevel.UNIDADE || roleLevel === RoleLevel.PROFESSOR;
 
     if (needsUnit && !dto.unitCode?.trim())
-      throw new BadRequestException('unitCode é obrigatório para este perfil');
+      throw new BadRequestException("unitCode é obrigatório para este perfil");
 
     // Resolver unitId a partir do unitCode
     let unitId: string | null = null;
     if (dto.unitCode?.trim()) {
       const unit = await this.prisma.unit.findFirst({
-        where: { code: dto.unitCode.trim(), mantenedoraId: actor.mantenedoraId },
+        where: {
+          code: dto.unitCode.trim(),
+          mantenedoraId: actor.mantenedoraId,
+        },
         select: { id: true },
       });
-      if (!unit) throw new BadRequestException(`Unidade com código "${dto.unitCode}" não encontrada`);
+      if (!unit)
+        throw new BadRequestException(
+          `Unidade com código "${dto.unitCode}" não encontrada`,
+        );
       unitId = unit.id;
     }
 
@@ -324,7 +359,8 @@ export class AdminService {
       where: { email: dto.email.trim().toLowerCase() },
       select: { id: true },
     });
-    if (existing) throw new ConflictException('Já existe um usuário com este e-mail');
+    if (existing)
+      throw new ConflictException("Já existe um usuário com este e-mail");
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const role = await this.ensureRole(actor.mantenedoraId, dto.roleType);
@@ -344,7 +380,14 @@ export class AdminService {
           status: dto.status ?? UserStatus.ATIVO,
           createdBy: actor.sub,
         },
-        select: { id: true, email: true, firstName: true, lastName: true, unitId: true, status: true },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          unitId: true,
+          status: true,
+        },
       });
 
       // 2. Criar UserRole
@@ -404,24 +447,34 @@ export class AdminService {
    * Cirúrgico: só altera os campos enviados.
    */
   async updateUser(actor: JwtPayload, userId: string, dto: UpdateUserDto) {
-    if (!actor?.mantenedoraId) throw new BadRequestException('mantenedoraId ausente no token');
+    if (!actor?.mantenedoraId)
+      throw new BadRequestException("mantenedoraId ausente no token");
 
     const target = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, mantenedoraId: true, unitId: true, email: true },
     });
-    if (!target) throw new NotFoundException('Usuário não encontrado');
+    if (!target) throw new NotFoundException("Usuário não encontrado");
     if (target.mantenedoraId !== actor.mantenedoraId)
-      throw new ForbiddenException('Sem permissão para editar este usuário');
+      throw new ForbiddenException("Sem permissão para editar este usuário");
 
     const elevatedActor =
       this.isDeveloper(actor) ||
       actor.roles.some((r) => r.level === RoleLevel.MANTENEDORA);
     if (!elevatedActor && target.unitId !== actor.unitId) {
-      throw new ForbiddenException('Sem permissão para editar usuário de outra unidade');
+      throw new ForbiddenException(
+        "Sem permissão para editar usuário de outra unidade",
+      );
     }
-    if (!elevatedActor && (dto.roleType !== undefined || dto.unitCode !== undefined || dto.password !== undefined)) {
-      throw new ForbiddenException('Este perfil só pode alterar dados cadastrais e status dentro da própria unidade');
+    if (
+      !elevatedActor &&
+      (dto.roleType !== undefined ||
+        dto.unitCode !== undefined ||
+        dto.password !== undefined)
+    ) {
+      throw new ForbiddenException(
+        "Este perfil só pode alterar dados cadastrais e status dentro da própria unidade",
+      );
     }
 
     // Verificar e-mail duplicado (se estiver mudando)
@@ -430,7 +483,8 @@ export class AdminService {
         where: { email: dto.email.trim().toLowerCase() },
         select: { id: true },
       });
-      if (dup) throw new ConflictException('Já existe um usuário com este e-mail');
+      if (dup)
+        throw new ConflictException("Já existe um usuário com este e-mail");
     }
 
     // Resolver unitId se unitCode foi informado
@@ -438,10 +492,16 @@ export class AdminService {
     if (dto.unitCode !== undefined) {
       if (dto.unitCode?.trim()) {
         const unit = await this.prisma.unit.findFirst({
-          where: { code: dto.unitCode.trim(), mantenedoraId: actor.mantenedoraId },
+          where: {
+            code: dto.unitCode.trim(),
+            mantenedoraId: actor.mantenedoraId,
+          },
           select: { id: true },
         });
-        if (!unit) throw new BadRequestException(`Unidade com código "${dto.unitCode}" não encontrada`);
+        if (!unit)
+          throw new BadRequestException(
+            `Unidade com código "${dto.unitCode}" não encontrada`,
+          );
         unitId = unit.id;
       } else {
         unitId = null;
@@ -451,7 +511,10 @@ export class AdminService {
     // Hash de senha se fornecida
     let hashedPassword: string | undefined;
     if (dto.password) {
-      if (dto.password.length < 6) throw new BadRequestException('password deve ter pelo menos 6 caracteres');
+      if (dto.password.length < 6)
+        throw new BadRequestException(
+          "password deve ter pelo menos 6 caracteres",
+        );
       hashedPassword = await bcrypt.hash(dto.password, 10);
     }
 
@@ -470,13 +533,21 @@ export class AdminService {
       const u = await tx.user.update({
         where: { id: userId },
         data: updateData,
-        select: { id: true, email: true, firstName: true, lastName: true, unitId: true, status: true },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          unitId: true,
+          status: true,
+        },
       });
 
       // 2. Atualizar role se informado
       if (dto.roleType) {
         const roleLevel = ROLE_TYPE_TO_LEVEL[dto.roleType];
-        if (!roleLevel) throw new BadRequestException(`roleType inválido: ${dto.roleType}`);
+        if (!roleLevel)
+          throw new BadRequestException(`roleType inválido: ${dto.roleType}`);
 
         const role = await this.ensureRole(actor.mantenedoraId, dto.roleType);
 
@@ -489,15 +560,24 @@ export class AdminService {
         // Criar novo UserRole
         const userRole = await tx.userRole.upsert({
           where: { userId_roleId: { userId, roleId: role.id } },
-          create: { userId, roleId: role.id, scopeLevel: role.level, isActive: true },
+          create: {
+            userId,
+            roleId: role.id,
+            scopeLevel: role.level,
+            isActive: true,
+          },
           update: { scopeLevel: role.level, isActive: true },
           select: { id: true },
         });
 
         // Recriar escopos se unitId foi alterado
         if (unitId !== undefined && unitId !== null) {
-          await tx.userRoleUnitScope.deleteMany({ where: { userRoleId: userRole.id } });
-          await tx.userRoleUnitScope.create({ data: { userRoleId: userRole.id, unitId } });
+          await tx.userRoleUnitScope.deleteMany({
+            where: { userRoleId: userRole.id },
+          });
+          await tx.userRoleUnitScope.create({
+            data: { userRoleId: userRole.id, unitId },
+          });
         }
       }
 
@@ -519,12 +599,18 @@ export class AdminService {
   }
 
   // ─── Import CSV ──────────────────────────────────────────────────────────────
-  async importStructureCsv(file: Express.Multer.File, user: JwtPayload, unitIdFromQuery?: string) {
-    if (!file?.buffer?.length) throw new BadRequestException('Arquivo vazio');
+  async importStructureCsv(
+    file: Express.Multer.File,
+    user: JwtPayload,
+    unitIdFromQuery?: string,
+  ) {
+    if (!file?.buffer?.length) throw new BadRequestException("Arquivo vazio");
 
     const unitId = norm(unitIdFromQuery) || norm(user.unitId);
     if (!unitId) {
-      throw new BadRequestException('unitId obrigatório (use ?unitId=... para perfil MANTENEDORA)');
+      throw new BadRequestException(
+        "unitId obrigatório (use ?unitId=... para perfil MANTENEDORA)",
+      );
     }
 
     await this.assertUnitAccess(user, unitId);
@@ -533,9 +619,9 @@ export class AdminService {
     await new Promise<void>((resolve, reject) => {
       Readable.from(file.buffer)
         .pipe(csvParser())
-        .on('data', (row) => rows.push(row))
-        .on('end', () => resolve())
-        .on('error', (err) => reject(err));
+        .on("data", (row) => rows.push(row))
+        .on("end", () => resolve())
+        .on("error", (err) => reject(err));
     });
 
     const stats = {
@@ -548,9 +634,16 @@ export class AdminService {
     };
 
     for (const row of rows) {
-      const fullName = norm(row['ALUNO'] ?? row['Aluno'] ?? row['aluno']);
-      const turmaName = norm(row['TURMA'] ?? row['Turma'] ?? row['turma']);
-      const rawBirth = norm(row['NASCIMENTO'] ?? row['Nascimento'] ?? row['nascimento']);
+      const values = row as Record<string, unknown>;
+      const fullName = norm(
+        values["ALUNO"] ?? values["Aluno"] ?? values["aluno"],
+      );
+      const turmaName = norm(
+        values["TURMA"] ?? values["Turma"] ?? values["turma"],
+      );
+      const rawBirth = norm(
+        values["NASCIMENTO"] ?? values["Nascimento"] ?? values["nascimento"],
+      );
 
       if (!fullName || !turmaName) {
         stats.skipped++;
@@ -572,7 +665,12 @@ export class AdminService {
         const classroom = await tx.classroom.upsert({
           where: { unitId_code: { unitId, code: classroomCode } },
           update: { name: turmaName, updatedBy: user.sub },
-          create: { unitId, name: turmaName, code: classroomCode, createdBy: user.sub },
+          create: {
+            unitId,
+            name: turmaName,
+            code: classroomCode,
+            createdBy: user.sub,
+          },
           select: { id: true },
         });
         stats.classroomsUpserted++;
@@ -581,8 +679,8 @@ export class AdminService {
           where: {
             mantenedoraId: user.mantenedoraId,
             unitId,
-            firstName: { equals: firstName, mode: 'insensitive' },
-            lastName: { equals: lastName, mode: 'insensitive' },
+            firstName: { equals: firstName, mode: "insensitive" },
+            lastName: { equals: lastName, mode: "insensitive" },
             dateOfBirth: birthDate,
           },
           select: { id: true },
@@ -607,8 +705,14 @@ export class AdminService {
         if (!existing) stats.childrenCreated++;
 
         await tx.enrollment.upsert({
-          where: { childId_classroomId: { childId, classroomId: classroom.id } },
-          update: { status: EnrollmentStatus.ATIVA, withdrawalDate: null, updatedBy: user.sub },
+          where: {
+            childId_classroomId: { childId, classroomId: classroom.id },
+          },
+          update: {
+            status: EnrollmentStatus.ATIVA,
+            withdrawalDate: null,
+            updatedBy: user.sub,
+          },
           create: {
             childId,
             classroomId: classroom.id,
