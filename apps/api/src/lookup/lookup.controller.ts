@@ -27,8 +27,11 @@ export class LookupController {
   }
 
   @Get('teachers/accessible')
-  async getAccessibleTeachers(@Query('unitId') unitId?: string) {
-    return this.lookupService.getAccessibleTeachers(unitId);
+  async getAccessibleTeachers(
+    @CurrentUser() user: JwtPayload,
+    @Query('unitId') unitId?: string,
+  ) {
+    return this.lookupService.getAccessibleTeachers(user, unitId);
   }
 
   /**
@@ -63,7 +66,8 @@ export class LookupController {
   @Get('classrooms/:id/teachers')
   async getTeachersByClassroom(
     @Param('id') classroomId: string,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.lookupService.getTeachersByClassroom(classroomId);
+    return this.lookupService.getTeachersByClassroom(classroomId, user);
   }
 }

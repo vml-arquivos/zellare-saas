@@ -1,20 +1,3 @@
-/**
- * UnitScopeContext — fonte única de verdade para o escopo de unidade ativo.
- *
- * Usado por todas as telas centrais (STAFF_CENTRAL/MANTENEDORA/DEVELOPER) para
- * garantir que o unitId selecionado seja compartilhado entre páginas sem perda
- * de estado ao navegar.
- *
- * Persistência:
- *   1. URL query param (?unitId=) — prioridade máxima, sincronizado bidirecional
- *   2. localStorage (key: "zelare:selectedUnitId") — fallback entre sessões
- *   3. Validação: se unitId não estiver em /lookup/units/accessible, limpa
- *
- * Modos:
- *   - "network": visão de toda a rede (sem filtro de unidade)
- *   - "unit": visão de uma unidade específica
- */
-
 import {
   createContext,
   useContext,
@@ -27,8 +10,8 @@ import type { ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getAccessibleUnits } from '../api/lookup';
 import type { AccessibleUnit } from '../types/lookup';
-
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+import { useAuth } from '../app/AuthProvider';
+import { normalizeRoles } from '../app/RoleProtectedRoute';
 
 export type ScopeMode = 'network' | 'unit';
 
@@ -39,53 +22,60 @@ export interface UnitContextSummary {
 }
 
 interface UnitScopeContextType {
-  /** ID da unidade selecionada (null = modo rede) */
   selectedUnitId: string | null;
-  /** Modo atual: "network" ou "unit" */
   scopeMode: ScopeMode;
-  /** Lista de unidades acessíveis ao usuário */
   accessibleUnits: AccessibleUnit[];
-  /** Unidade atualmente selecionada (objeto completo) */
   selectedUnit: AccessibleUnit | null;
-  /** Resumo da unidade selecionada (carregado via /coordenacao/unit-context/summary) */
   unitSummary: UnitContextSummary | null;
-  /** Se o resumo está sendo carregado */
   summaryLoading: boolean;
-  /** Se as unidades estão sendo carregadas */
   unitsLoading: boolean;
-  /** Selecionar uma unidade (null = modo rede) */
+  /** Perfis de unidade/professor não podem trocar de unidade. */
+  unitSelectionLocked: boolean;
+  /** Coordenação central precisa iniciar por uma escolha explícita de unidade. */
+  requiresExplicitUnitSelection: boolean;
   setUnit: (unitId: string | null) => void;
-  /** Forçar modo rede (limpa unitId) */
   setNetworkMode: () => void;
-  /** Recarregar o resumo da unidade atual */
   refreshSummary: () => Promise<void>;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
 const UnitScopeContext = createContext<UnitScopeContextType | undefined>(undefined);
-
 const LS_KEY = 'zelare:selectedUnitId';
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+function getUserUnitId(user: ReturnType<typeof useAuth>['user']): string | null {
+  return user?.unitId ?? user?.unit?.id ?? null;
+}
 
 export function UnitScopeProvider({ children }: { children: ReactNode }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
+  const roleLevels = useMemo(() => normalizeRoles(user), [user]);
+  const userUnitId = getUserUnitId(user);
+  const unitSelectionLocked = roleLevels.some((level) => level === 'UNIDADE' || level === 'PROFESSOR' || level === 'PROFESSOR_AUXILIAR');
+  const isCentral = roleLevels.includes('STAFF_CENTRAL');
+  const requiresExplicitUnitSelection = isCentral && !unitSelectionLocked;
+
   const [accessibleUnits, setAccessibleUnits] = useState<AccessibleUnit[]>([]);
   const [unitsLoading, setUnitsLoading] = useState(true);
   const [unitSummary, setUnitSummary] = useState<UnitContextSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [selectedUnitId, setSelectedUnitIdState] = useState<string | null>(() => {
+    if (unitSelectionLocked) return userUnitId;
+    return searchParams.get('unitId');
+  });
 
-  // ── Resolução inicial do unitId (URL > localStorage) ──────────────────────
-  const getInitialUnitId = (): string | null => {
+  useEffect(() => {
+    if (unitSelectionLocked) {
+      setSelectedUnitIdState(userUnitId);
+      if (userUnitId) sessionStorage.setItem(LS_KEY, userUnitId);
+      return;
+    }
+    if (authLoading) return;
     const fromUrl = searchParams.get('unitId');
-    if (fromUrl) return fromUrl;
-    return sessionStorage.getItem(LS_KEY) ?? null;
-  };
+    setSelectedUnitIdState(fromUrl);
+    if (fromUrl) sessionStorage.setItem(LS_KEY, fromUrl);
+    else sessionStorage.removeItem(LS_KEY);
+  }, [authLoading, searchParams, unitSelectionLocked, userUnitId]);
 
-  const [selectedUnitId, setSelectedUnitIdState] = useState<string | null>(getInitialUnitId);
-
-  // ── Carregar unidades acessíveis e validar unitId ──────────────────────────
   useEffect(() => {
     let cancelled = false;
     setUnitsLoading(true);
@@ -93,13 +83,16 @@ export function UnitScopeProvider({ children }: { children: ReactNode }) {
       .then((units) => {
         if (cancelled) return;
         setAccessibleUnits(units);
-
-        // Validar que o unitId salvo ainda é acessível
-        if (selectedUnitId) {
-          const valid = units.some((u) => u.id === selectedUnitId);
-          if (!valid) {
-            setSelectedUnitIdState(null);
-            sessionStorage.removeItem(LS_KEY);
+        const effectiveUnitId = unitSelectionLocked ? userUnitId : selectedUnitId;
+        if (effectiveUnitId && !units.some((unit) => unit.id === effectiveUnitId)) {
+          setSelectedUnitIdState(null);
+          sessionStorage.removeItem(LS_KEY);
+          if (searchParams.get('unitId')) {
+            setSearchParams((current) => {
+              const next = new URLSearchParams(current);
+              next.delete('unitId');
+              return next;
+            }, { replace: true });
           }
         }
       })
@@ -110,18 +103,16 @@ export function UnitScopeProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setUnitsLoading(false);
       });
     return () => { cancelled = true; };
+  // The selected unit is intentionally read from the current render while validating.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // só na montagem
+  }, [authLoading, unitSelectionLocked, userUnitId]);
 
-  // ── Carregar resumo quando unitId muda ────────────────────────────────────
   const loadSummary = useCallback(async (unitId: string) => {
     setSummaryLoading(true);
     try {
       const { default: http } = await import('../api/http');
-      const resp = await http.get(`/coordenacao/unit-context/summary`, {
-        params: { unitId },
-      });
-      setUnitSummary(resp.data as UnitContextSummary);
+      const response = await http.get('/coordenacao/unit-context/summary', { params: { unitId } });
+      setUnitSummary(response.data as UnitContextSummary);
     } catch {
       setUnitSummary(null);
     } finally {
@@ -130,81 +121,78 @@ export function UnitScopeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (selectedUnitId) {
-      loadSummary(selectedUnitId);
-    } else {
-      setUnitSummary(null);
-    }
+    if (selectedUnitId) void loadSummary(selectedUnitId);
+    else setUnitSummary(null);
   }, [selectedUnitId, loadSummary]);
 
-  // ── Sincronizar com URL ────────────────────────────────────────────────────
   useEffect(() => {
-    const fromUrl = searchParams.get('unitId');
-    if (fromUrl && fromUrl !== selectedUnitId) {
-      setSelectedUnitIdState(fromUrl);
-      sessionStorage.setItem(LS_KEY, fromUrl);
+    if (unitSelectionLocked && userUnitId && searchParams.get('unitId') !== userUnitId) {
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set('unitId', userUnitId);
+        return next;
+      }, { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, setSearchParams, unitSelectionLocked, userUnitId]);
 
-  // ── Ações públicas ────────────────────────────────────────────────────────
   const setUnit = useCallback((unitId: string | null) => {
+    if (unitSelectionLocked) {
+      if (!userUnitId || unitId !== userUnitId) return;
+      unitId = userUnitId;
+    }
     setSelectedUnitIdState(unitId);
     if (unitId) {
       sessionStorage.setItem(LS_KEY, unitId);
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('unitId', unitId);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set('unitId', unitId as string);
         return next;
       }, { replace: true });
     } else {
       sessionStorage.removeItem(LS_KEY);
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
         next.delete('unitId');
         return next;
       }, { replace: true });
     }
-  }, [setSearchParams]);
+  }, [setSearchParams, unitSelectionLocked, userUnitId]);
 
-  const setNetworkMode = useCallback(() => setUnit(null), [setUnit]);
+  const setNetworkMode = useCallback(() => {
+    if (!unitSelectionLocked) setUnit(null);
+  }, [setUnit, unitSelectionLocked]);
 
   const refreshSummary = useCallback(async () => {
     if (selectedUnitId) await loadSummary(selectedUnitId);
   }, [selectedUnitId, loadSummary]);
 
-  // ── Derivados ─────────────────────────────────────────────────────────────
   const selectedUnit = useMemo(
-    () => accessibleUnits.find((u) => u.id === selectedUnitId) ?? null,
+    () => accessibleUnits.find((unit) => unit.id === selectedUnitId) ?? null,
     [accessibleUnits, selectedUnitId],
   );
 
-  const scopeMode: ScopeMode = selectedUnitId ? 'unit' : 'network';
-
   const value: UnitScopeContextType = {
     selectedUnitId,
-    scopeMode,
+    scopeMode: selectedUnitId ? 'unit' : 'network',
     accessibleUnits,
     selectedUnit,
     unitSummary,
     summaryLoading,
     unitsLoading,
+    unitSelectionLocked,
+    requiresExplicitUnitSelection,
     setUnit,
     setNetworkMode,
     refreshSummary,
   };
 
-  return (
-    <UnitScopeContext.Provider value={value}>
-      {children}
-    </UnitScopeContext.Provider>
-  );
+  return <UnitScopeContext.Provider value={value}>{children}</UnitScopeContext.Provider>;
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
+// O arquivo também expõe o hook para manter a API de contexto estável entre páginas.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUnitScope(): UnitScopeContextType {
-  const ctx = useContext(UnitScopeContext);
-  if (!ctx) throw new Error('useUnitScope must be used within UnitScopeProvider');
-  return ctx;
+  const context = useContext(UnitScopeContext);
+  if (!context) throw new Error('useUnitScope must be used within UnitScopeProvider');
+  return context;
 }

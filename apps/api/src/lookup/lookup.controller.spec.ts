@@ -159,16 +159,23 @@ describe('LookupController', () => {
   });
 
   describe('getAccessibleTeachers', () => {
-    it('should call service.getAccessibleTeachers with unitId', async () => {
+    it('should call service.getAccessibleTeachers with authenticated user and unitId', async () => {
+      const mockUser: JwtPayload = {
+        sub: 'user-1',
+        email: 'coordinator@example.invalid',
+        mantenedoraId: 'mant-1',
+        unitId: 'unit-1',
+        roles: [{ roleId: 'role-1', level: 'UNIDADE', type: 'UNIDADE_COORDENADOR_PEDAGOGICO', unitScopes: [] }],
+      };
       mockLookupService.getAccessibleTeachers.mockResolvedValue([
-        { id: 'teacher-1', name: 'Prof. João', email: 'joao@example.com', unitId: 'unit-1' },
+        { id: 'teacher-1', name: 'Prof. Sintético', email: 'teacher@example.invalid', unitId: 'unit-1' },
       ]);
 
-      const result = await controller.getAccessibleTeachers('unit-1');
+      const result = await controller.getAccessibleTeachers(mockUser, 'unit-1');
 
-      expect(service.getAccessibleTeachers).toHaveBeenCalledWith('unit-1');
+      expect(service.getAccessibleTeachers).toHaveBeenCalledWith(mockUser, 'unit-1');
       expect(result).toEqual([
-        { id: 'teacher-1', name: 'Prof. João', email: 'joao@example.com', unitId: 'unit-1' },
+        { id: 'teacher-1', name: 'Prof. Sintético', email: 'teacher@example.invalid', unitId: 'unit-1' },
       ]);
     });
   });

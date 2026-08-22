@@ -121,6 +121,8 @@ export default function ConfiguracoesPage() {
 
   // Unidade
   const [unidade, setUnidade] = useState<Partial<ConfiguracaoUnidade>>({});
+  const [unidadeLoading, setUnidadeLoading] = useState(false);
+  const [unidadeErro, setUnidadeErro] = useState<string | null>(null);
 
   // Usuários
   const [usuarios, setUsuarios] = useState<UsuarioSistema[]>([]);
@@ -228,24 +230,38 @@ export default function ConfiguracoesPage() {
     }
   }
 
-  async function loadUnidade() {
-    const unitId = user?.unitId || user?.unit?.id || selectedUnitId;
+  async function loadUnidade(): Promise<boolean> {
+    const localUnitId = ['UNIDADE', 'PROFESSOR'].includes(userRole) ? (user?.unitId || user?.unit?.id) : undefined;
+    const unitId = localUnitId || selectedUnitId;
+    setUnidadeErro(null);
     if (!unitId) {
       setUnidade({});
-      return;
+      setUnidadeErro('Selecione uma unidade no escopo do sistema para consultar seus dados.');
+      return false;
     }
+    setUnidadeLoading(true);
     try {
       const res = await http.get(`/units/${unitId}`);
       const raw = Array.isArray(res.data) ? res.data[0] : res.data?.unit ?? res.data?.data ?? res.data;
-      if (raw) {
-        setUnidade({
-          ...raw,
-          unitCode: raw.unitCode ?? raw.code,
-          endereco: raw.endereco ?? raw.address,
-          telefone: raw.telefone ?? raw.phone,
-        });
+      if (!raw?.id) {
+        setUnidade({});
+        setUnidadeErro('A unidade selecionada não foi encontrada ou não está disponível.');
+        return false;
       }
-    } catch { /* silencioso */ }
+      setUnidade({
+        ...raw,
+        unitCode: raw.unitCode ?? raw.code,
+        endereco: raw.endereco ?? raw.address,
+        telefone: raw.telefone ?? raw.phone,
+      });
+      return true;
+    } catch (error: any) {
+      setUnidade({});
+      setUnidadeErro(error?.response?.data?.message || 'Não foi possível carregar a unidade selecionada.');
+      return false;
+    } finally {
+      setUnidadeLoading(false);
+    }
   }
 
   async function salvarPerfil() {
@@ -288,14 +304,14 @@ export default function ConfiguracoesPage() {
     if (!unidade.id) { toast.error('Unidade não identificada.'); return; }
     setSaving(true);
     try {
-      const res = await http.put(`/units/${unidade.id}`, {
+      await http.put(`/units/${unidade.id}`, {
         name: unidade.name?.trim(),
         address: unidade.endereco ?? unidade.address ?? '',
         phone: unidade.telefone ?? unidade.phone ?? '',
         email: unidade.email ?? '',
       });
-      setUnidade(prev => ({ ...prev, ...res.data, unitCode: res.data?.code ?? prev.unitCode }));
-      toast.success('Dados da unidade atualizados!');
+      const reloaded = await loadUnidade();
+      if (reloaded) toast.success('Dados da unidade atualizados!');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Erro ao salvar dados da unidade');
     } finally { setSaving(false); }
@@ -385,11 +401,11 @@ export default function ConfiguracoesPage() {
         <div className="flex-1 min-w-0 space-y-6">
 
           {/* ─── UNIDADE ─── */}
-          {abaAtiva === 'unidade' && isAdmin && !unidade.id && (
-            <Card className="border-2 border-amber-100 bg-amber-50">
+          {abaAtiva === 'unidade' && isAdmin && (!unidade.id || unidadeLoading || unidadeErro) && (
+            <Card className={`border-2 ${unidadeErro ? 'border-red-200 bg-red-50' : 'border-[var(--border-default)] bg-[var(--surface-inset)]'}`}>
               <CardContent className="p-4">
-                <p className="text-sm font-medium text-amber-800">Nenhuma unidade selecionada.</p>
-                <p className="text-xs text-amber-700 mt-1">Selecione uma unidade no escopo do sistema para consultar ou editar seus dados.</p>
+                {unidadeLoading && <p className="text-sm text-[var(--text-secondary)]">Carregando dados da unidade...</p>}
+                {!unidadeLoading && unidadeErro && <p className="text-sm font-medium text-red-800">{unidadeErro}</p>}
               </CardContent>
             </Card>
           )}
@@ -421,7 +437,7 @@ export default function ConfiguracoesPage() {
                   <Textarea rows={2} value={unidade.endereco || ''} disabled={!podeEditarUnidade} onChange={e => setUnidade(u => ({ ...u, endereco: e.target.value }))} />
                 </div>
                 {podeEditarUnidade ? (
-                  <Button onClick={salvarUnidade} disabled={saving} className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={salvarUnidade} disabled={saving || unidadeLoading || !unidade.id} className="bg-green-600 hover:bg-green-700">
                     {saving ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                     Salvar Dados da Unidade
                   </Button>

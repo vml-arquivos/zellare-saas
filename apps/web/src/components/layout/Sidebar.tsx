@@ -1,263 +1,57 @@
-import { useState } from 'react';
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  BookOpen, ClipboardList,   BarChart2, ShoppingCart, GraduationCap, ClipboardCheck,
-  FileArchive, HeartPulse,
-  ChevronRight, ChevronDown, TrendingUp, Users, LayoutDashboard, ShoppingBag,
-  FileText, Home, MessageCircle, Camera, UserCheck, Building2,
-  Network, Brain, Layers, Settings, Sparkles, UserCircle, Calendar,
-  Apple, Utensils, Shield, X, Eye, FileEdit, AlertTriangle, UserPlus, Bell, FolderCheck, Bus, Stethoscope,
-  Smartphone, Trophy,
-} from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { useAuth } from '../../app/AuthProvider';
-import { normalizeRoles, normalizeRoleTypes } from '../../app/RoleProtectedRoute';
+import {
+  getActiveNavigationGroupId,
+  getNavigationGroups,
+  navigationItemMatchesPath,
+  type NavigationGroup,
+  type NavigationItem,
+} from './navigationManifest';
 
-interface MenuItem {
-  path: string;
-  label: string;
-  icon: React.ReactNode;
-  badge?: string;
+interface SidebarProps {
+  onClose?: () => void;
 }
 
-// ─── Menus por perfil ─────────────────────────────────────────────────────────
+const OPEN_GROUPS_KEY = 'zelare:navigation:open-groups';
 
-// PROFESSOR / PROFESSOR_AUXILIAR ──────────────────────────────────────────────
-const PROFESSOR_PRINCIPAL: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/teacher-dashboard', label: 'Painel do Professor', icon: <GraduationCap className="h-4 w-4" /> },
-  { path: '/app/mobile',            label: 'App Mobile (PWA)',    icon: <Smartphone className="h-4 w-4" />, badge: 'Mobile' },
-  { path: '/app/material-requests', label: 'Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
-];
-const PROFESSOR_FERRAMENTAS: MenuItem[] = [
-  // Plano de Aula: entrada única → calendário de planejamentos
-  { path: '/app/planejamentos',       label: 'Plano de Aula',          icon: <BookOpen className="h-4 w-4" />, badge: 'Novo' },
-  // Diário: entrada única → calendário de dias letivos (PR 1/PR 2)
-  { path: '/app/diario-calendario',   label: 'Diário',                 icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/coleta-diaria',       label: 'Diário de Bordo',           icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
-  // Chamada Diária removida do menu principal (incorporada ao fluxo do Diário)
-  { path: '/app/rdic-crianca',        label: 'Desenvolvimento',       icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdx',                 label: 'Fotos da Turma',         icon: <Camera className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais',   label: 'Famílias',      icon: <MessageCircle className="h-4 w-4" /> },
-  { path: '/app/matriz-pedagogica',   label: 'Matriz 2026',            icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/painel-alergias',     label: 'Alergias',      icon: <Apple className="h-4 w-4" />, badge: 'Atenção' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
-];
-
-const FAMILY_ITEMS: MenuItem[] = [
-  { path: '/app/timeline-familiar', label: 'Timeline da Criança', icon: <HeartPulse className="h-4 w-4" />, badge: 'Privado' },
-  { path: '/app/family-circle', label: 'Family Circle', icon: <MessageCircle className="h-4 w-4" />, badge: 'Privado' },
-];
-
-// UNIDADE — Coordenadora Pedagógica ────────────────────────────────────────────
-const COORD_GESTAO: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/coordenacao-pedagogica', label: 'Painel da Coordenação',    icon: <Home className="h-4 w-4" /> },
-  { path: '/app/coordenacao',            label: 'Turmas & Reuniões',        icon: <Users className="h-4 w-4" /> },
-  { path: '/app/material-requests',      label: 'Materiais', icon: <ShoppingCart className="h-4 w-4" /> },
-  { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
-];
-const COORD_PEDAGOGICO: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/diario-calendario', label: 'Diário',             icon: <ClipboardList className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/coleta-diaria',     label: 'Diário de Bordo',       icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
-  { path: '/app/atendimentos-pais', label: 'Famílias',  icon: <MessageCircle className="h-4 w-4" /> },
-  { path: '/app/rdic-coord',        label: 'Revisão',     icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
-  { path: '/app/review-hub',         label: 'Review Hub',   icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdic-crianca',    label: 'Desenvolvimento',    icon: <Brain className="h-4 w-4" /> },
-  { path: '/app/inteligencia',    label: 'Inteligência',        icon: <Sparkles className="h-4 w-4" /> },
-  { path: '/app/reports',         label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
-  { path: '/app/painel-alergias', label: 'Alergias',   icon: <Apple className="h-4 w-4" />, badge: 'Importante' },
-];
-
-// UNIDADE — Diretor ────────────────────────────────────────────────────────────
-const DIRETOR_ITEMS: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',      icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/familia/vinculos',
-     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/diretor',           label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
-  { path: '/app/pedidos-compra',    label: 'Aprovar Pedidos',        icon: <ShoppingBag className="h-4 w-4" />, badge: 'Aprovação' },
-  { path: '/app/coordenacao',       label: 'Turmas & Equipe',        icon: <Users className="h-4 w-4" /> },
-  { path: '/app/reports',           label: 'Relatórios',             icon: <BarChart2 className="h-4 w-4" /> },
-  { path: '/app/planejamentos',     label: 'Planejamentos',          icon: <BookOpen className="h-4 w-4" /> },
-  { path: '/app/painel-alergias',   label: 'Alergias',      icon: <Apple className="h-4 w-4" /> },
-  { path: '/app/financeiro',          label: 'Financeiro e Ponto',      icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
-];
-
-// UNIDADE — Nutricionista ──────────────────────────────────────────────────────
-// Navegação completa do módulo via query param ?s=<secao>
-// A sidebar global escura é o único menu do módulo (sem sidebar interna)
-const NUTRI_ITEMS: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/nutricionista',                      label: 'Nutrição', icon: <Utensils className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=cardapios',          label: 'Cardápios',               icon: <BookOpen className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=cardapios-nutricao', label: 'Cálculo',     icon: <BarChart2 className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=turmas',             label: 'Turmas',       icon: <Users className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=dietas',             label: 'Dietas',     icon: <AlertTriangle className="h-4 w-4" />, badge: 'Importante' },
-  { path: '/app/nutricionista?s=observacoes-prof',   label: 'Obs. dos Professores',    icon: <Eye className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=anotacoes-nutri',          label: 'Anotações',    icon: <FileEdit className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=acompanhamento-individual', label: 'Acompanhamento', icon: <Shield className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/nutricionista?s=relatorio',                 label: 'Relatórios',                icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=pedidos',            label: 'Pedidos',  icon: <ShoppingCart className="h-4 w-4" /> },
-  { path: '/app/nutricionista?s=configuracoes',      label: 'Configurações',           icon: <Settings className="h-4 w-4" /> },
-];
-
-// UNIDADE — Administrativo (Secretaria) ─────────────────────────────────────
-const ADMIN_UNIDADE_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/secretaria',                    label: 'Painel da Secretaria',         icon: <Home className="h-4 w-4" /> },
-  { path: '/app/secretaria/matriculas',         label: 'Matrículas e Fichas',          icon: <UserCheck className="h-4 w-4" /> },
-  { path: '/app/secretaria/matriculas/nova',    label: 'Nova Matrícula',               icon: <UserPlus className="h-4 w-4" />, badge: 'Essencial' },
-  { path: '/app/secretaria/movimentacoes',      label: 'Cancelamentos/Transferências', icon: <FileArchive className="h-4 w-4" /> },
-  { path: '/app/secretaria/faltas',             label: 'Controle de Faltas',           icon: <ClipboardList className="h-4 w-4" /> },
-  { path: '/app/secretaria/atestados',          label: 'Atestados e Documentos',       icon: <FolderCheck className="h-4 w-4" /> },
-  { path: '/app/secretaria/ocorrencias',        label: 'Saúde e Ocorrências',          icon: <HeartPulse className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais',             label: 'Famílias',         icon: <MessageCircle className="h-4 w-4" /> },
-  { path: '/app/secretaria/transporte',         label: 'Transporte e Retirada',        icon: <Bus className="h-4 w-4" /> },
-  { path: '/app/secretaria/funcionarios',       label: 'Funcionários da Unidade',      icon: <Building2 className="h-4 w-4" /> },
-  { path: '/app/financeiro',                     label: 'Financeiro e Ponto',            icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/secretaria/comunicacao',        label: 'Comunicados Administrativos',  icon: <Bell className="h-4 w-4" /> },
-];
-
-// UNIDADE — Genérico (sem roleType específico) ─────────────────────────────────
-const UNIDADE_GESTAO: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/unidade',                       label: 'Painel da Unidade',      icon: <Home className="h-4 w-4" /> },
-  { path: '/app/coordenacao-pedagogica',        label: 'Coord. Pedagógica',      icon: <Building2 className="h-4 w-4" /> },
-  { path: '/app/coordenacao',                   label: 'Turmas & Reuniões',      icon: <Users className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/material-requests',             label: 'Requisições Pendentes',  icon: <ShoppingCart className="h-4 w-4" /> },
-  { path: '/app/relatorio-consumo-materiais',   label: 'Consumo de Materiais',   icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/dashboard-consumo-materiais',   label: 'Consumo — Gráficos',      icon: <TrendingUp className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/painel-alergias',               label: 'Alergias',      icon: <Apple className="h-4 w-4" />, badge: 'Novo' },
-    { path: '/app/pedidos-compra',         label: 'Pedidos de Compra',        icon: <ShoppingBag className="h-4 w-4" /> },
-  { path: '/app/financeiro',              label: 'Financeiro e Ponto',       icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-];
-const UNIDADE_PEDAGOGICO: MenuItem[] = [
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/coleta-diaria',     label: 'Diário de Bordo',              icon: <ClipboardCheck className="h-4 w-4" />, badge: '2s' },
-  { path: '/app/rdic-coord',        label: 'Revisão', icon: <Brain className="h-4 w-4" />, badge: 'Coord' },
-  { path: '/app/rdic-crianca',      label: 'Desenvolvimento',           icon: <Brain className="h-4 w-4" /> },
-  { path: '/app/inteligencia',      label: 'Inteligência',     icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/review-hub',         label: 'Review Hub',        icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdx',               label: 'Fotos da Turma',             icon: <Camera className="h-4 w-4" /> },
-  { path: '/app/matriz-pedagogica', label: 'Matriz 2026',                icon: <Layers className="h-4 w-4" /> },
-  { path: '/app/atendimentos-pais', label: 'Famílias',          icon: <MessageCircle className="h-4 w-4" /> },
-  { path: '/app/reports',           label: 'Relatórios',                 icon: <BarChart2 className="h-4 w-4" /> },
-];
-// STAFF_CENTRAL_PSICOLOGIA ──────────────────────────────────────────────────────────────────────────────────
-const PSICOLOGA_ITEMS: MenuItem[] = [
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/psicologo',                label: 'Psicologia Central',      icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdic-geral',               label: 'Relatórios',         icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/central',                  label: 'Análises',        icon: <TrendingUp className="h-4 w-4" /> },
-  { path: '/app/reports',                  label: 'Relatórios',               icon: <BarChart2 className="h-4 w-4" /> },
-];
-// STAFF_CENTRAL ──────────────────────────────────────────────────────────────────────────────────
-const CENTRAL_ITEMS: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/central',                  label: 'Análises',        icon: <TrendingUp className="h-4 w-4" /> },
-  { path: '/app/inteligencia',             label: 'Inteligência',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/review-hub',                label: 'Review Hub',       icon: <Layers className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/coordenacao-geral',        label: 'Coordenação Geral',        icon: <Network className="h-4 w-4" /> },
-  { path: '/app/rdic-geral',               label: 'Relatórios',         icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/desenvolvimento-infantil', label: 'Desenvolvimento', icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/matriz-pedagogica',        label: 'Matriz 2026',              icon: <Layers className="h-4 w-4" /> },
-  { path: '/app/reports',                  label: 'Relatórios',               icon: <BarChart2 className="h-4 w-4" /> },
-];
-
-// MANTENEDORA ──────────────────────────────────────────────────────────────────
-const MANTENEDORA_ITEMS: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/dashboard',         label: 'Painel Global',       icon: <LayoutDashboard className="h-4 w-4" /> },
-  { path: '/app/coordenacao-geral', label: 'Coordenação Geral',   icon: <Network className="h-4 w-4" /> },
-  { path: '/app/central',           label: 'Análises',   icon: <TrendingUp className="h-4 w-4" /> },
-  { path: '/app/rdic-geral',        label: 'Relatórios',    icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/pedidos-compra',    label: 'Pedidos de Compra',   icon: <ShoppingBag className="h-4 w-4" /> },
-  { path: '/app/financeiro',         label: 'Financeiro e Ponto',    icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/matriz-pedagogica', label: 'Matriz 2026',         icon: <Layers className="h-4 w-4" /> },
-  { path: '/app/reports',           label: 'Relatórios',          icon: <BarChart2 className="h-4 w-4" /> },
-];
-
-// DEVELOPER — acesso completo ──────────────────────────────────────────────────
-const DEV_EXTRA: MenuItem[] = [
-  { path: '/app/onda2',              label: 'Command Center',    icon: <Network className="h-4 w-4" />, badge: 'Onda 2' },
-  { path: '/app/metricas-cobertura',  label: 'Cobertura',        icon: <BarChart2 className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/familia/vinculos',     label: 'Família',       icon: <HeartPulse className="h-4 w-4" />, badge: 'LGPD' },
-  { path: '/app/cuidado',           label: 'Cuidado',         icon: <HeartPulse className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/sala-de-aula-virtual', label: 'Sala de Aula Virtual',   icon: <Sparkles className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/rdic-ria',             label: 'Desenvolvimento — Registros (RIA)', icon: <Brain className="h-4 w-4" />, badge: 'Novo' },
-  { path: '/app/planejamentos',        label: 'Planejamentos',          icon: <FileText className="h-4 w-4" /> },
-  { path: '/app/nutricionista',        label: 'Nutrição',icon: <Utensils className="h-4 w-4" /> },
-  { path: '/app/diretor',              label: 'Painel do Diretor',      icon: <Shield className="h-4 w-4" /> },
-  { path: '/app/configuracoes',        label: 'Configurações',          icon: <Settings className="h-4 w-4" /> },
-  { path: '/app/ranking-preenchimento', label: 'Ranking', icon: <Trophy className="h-4 w-4" />, badge: 'Novo' },
-];
-
-// ─── Componentes de navegação ─────────────────────────────────────────────────
-
-// isActiveForItem: compara pathname + search para itens com query params
-function isActiveForItem(location: ReturnType<typeof useLocation>, itemPath: string): boolean {
-  const [itemPathname, itemSearch] = itemPath.split('?');
-  if (itemSearch) {
-    // Item com query param: pathname deve bater E o param ?s= deve bater
-    if (location.pathname !== itemPathname) return false;
-    const itemParams = new URLSearchParams(itemSearch);
-    const locParams = new URLSearchParams(location.search);
-    for (const [key, val] of itemParams.entries()) {
-      if (locParams.get(key) !== val) return false;
-    }
-    return true;
+function readOpenGroups(): string[] {
+  try {
+    const raw = sessionStorage.getItem(OPEN_GROUPS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
   }
-  // Item sem query param: ativo apenas se pathname bate E não há ?s= na URL
-  // (para não marcar "Nutrição" quando uma sub-seção está ativa)
-  if (location.pathname === itemPathname) {
-    const locParams = new URLSearchParams(location.search);
-    return !locParams.has('s');
-  }
-  return false;
 }
 
-function NavItem({ item, active, onClick }: { item: MenuItem; active: boolean; onClick?: () => void }) {
+function isActive(location: ReturnType<typeof useLocation>, navItem: NavigationItem) {
+  return navigationItemMatchesPath(location.pathname, location.search, navItem.path, navItem.exact);
+}
+
+function NavigationLink({ item, location, onNavigate }: { item: NavigationItem; location: ReturnType<typeof useLocation>; onNavigate?: () => void }) {
+  const active = isActive(location, item);
+  const Icon = item.icon;
   return (
     <Link
       to={item.path}
-      onClick={onClick}
-      className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 ${
+      onClick={onNavigate}
+      aria-current={active ? 'page' : undefined}
+      data-testid={`nav-item-${item.id}`}
+      className={`group flex min-h-10 items-center justify-between gap-2 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-500)] ${
         active
-          ? 'relative bg-[var(--surface-brand)] text-[var(--text-primary)] shadow-ds-glow after:absolute after:left-0 after:top-1/2 after:h-5 after:w-0.5 after:-translate-y-1/2 after:rounded-r-full after:bg-[var(--brand-600)]'
+          ? 'bg-[var(--surface-brand)] text-[var(--text-primary)] shadow-ds-glow'
           : 'text-[var(--text-secondary)] hover:bg-[var(--surface-inset)] hover:text-[var(--text-primary)]'
       }`}
     >
-      <span className="flex items-center gap-2">
-        <span className={`flex-shrink-0 transition-colors ${
-          active ? 'text-[var(--text-brand)]' : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]'
-        }`}>
-          {item.icon}
-        </span>
+      <span className="flex min-w-0 items-center gap-2.5">
+        <Icon className={`h-4 w-4 flex-shrink-0 ${active ? 'text-[var(--text-brand)]' : 'text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]'}`} aria-hidden="true" />
         <span className="truncate">{item.label}</span>
       </span>
       {item.badge && (
-        <span className={`ml-1 flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none ${
-          active
-            ? 'bg-[var(--brand-600)] text-[var(--text-inverse)]'
-            : 'bg-[var(--surface-brand)] text-[var(--text-brand-soft)]'
+        <span className={`flex-shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+          active ? 'bg-[var(--brand-600)] text-[var(--text-inverse)]' : 'bg-[var(--surface-brand)] text-[var(--text-brand-soft)]'
         }`}>
           {item.badge}
         </span>
@@ -266,245 +60,110 @@ function NavItem({ item, active, onClick }: { item: MenuItem; active: boolean; o
   );
 }
 
-function NavSection({
-  titulo, items, location, onItemClick,
-}: { titulo: string; items: MenuItem[]; location: ReturnType<typeof useLocation>; onItemClick?: () => void }) {
+function NavigationGroupView({
+  group,
+  open,
+  active,
+  onToggle,
+  location,
+  onNavigate,
+}: {
+  group: NavigationGroup;
+  open: boolean;
+  active: boolean;
+  onToggle: () => void;
+  location: ReturnType<typeof useLocation>;
+  onNavigate?: () => void;
+}) {
   return (
-    <div>
-      <p className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.07em] px-2.5 mb-1.5">
-        {titulo}
-      </p>
-      <div className="space-y-0.5">
-        {items.map((item) => (
-          <NavItem key={item.path} item={item} active={isActiveForItem(location, item.path)} onClick={onItemClick} />
-        ))}
+    <section className="space-y-1" data-testid={`nav-group-${group.id}`}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={`nav-group-content-${group.id}`}
+        data-testid={`nav-group-toggle-${group.id}`}
+        className={`flex min-h-10 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-500)] ${
+          active ? 'text-[var(--text-brand)]' : 'text-[var(--text-tertiary)] hover:bg-[var(--surface-inset)] hover:text-[var(--text-primary)]'
+        }`}
+      >
+        <span className="flex-1 truncate">{group.title}</span>
+        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      <div id={`nav-group-content-${group.id}`} hidden={!open} className="space-y-0.5 pl-1">
+        {group.items.map((item) => <NavigationLink key={item.id} item={item} location={location} onNavigate={onNavigate} />)}
       </div>
-    </div>
+    </section>
   );
-}
-
-// ─── Sidebar Principal ────────────────────────────────────────────────────────
-interface SidebarProps {
-  onClose?: () => void;
 }
 
 export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const groups = useMemo(() => getNavigationGroups(user), [user]);
+  const activeGroupId = getActiveNavigationGroupId(groups, location.pathname, location.search);
+  const [openGroups, setOpenGroups] = useState<string[]>(() => readOpenGroups());
 
-  const userLevels = normalizeRoles(user);
-  const userTypes  = normalizeRoleTypes(user);
+  useEffect(() => {
+    try { sessionStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify(openGroups)); } catch { /* storage unavailable */ }
+  }, [openGroups]);
 
-  // Flags de nível
-  const isProfessor   = userLevels.some((r) => r === 'PROFESSOR' || r === 'PROFESSOR_AUXILIAR');
-  const isUnidade     = userLevels.some((r) => r === 'UNIDADE' || r.startsWith('UNIDADE_'));
-  const isCentral     = userLevels.some((r) => r === 'STAFF_CENTRAL' || r.startsWith('STAFF_CENTRAL_'));
-  const isMantenedora = userLevels.some((r) => r === 'MANTENEDORA' || r.startsWith('MANTENEDORA_'));
-  const isDeveloper   = userLevels.includes('DEVELOPER');
-  const isFamily      = userLevels.includes('FAMILIA') || userTypes.includes('FAMILIA_RESPONSAVEL');
-
-  // Flags de tipo (sub-papel dentro de UNIDADE)
-  const isDiretor         = userTypes.includes('UNIDADE_DIRETOR');
-  const isNutricionista   = userTypes.includes('UNIDADE_NUTRICIONISTA');
-  const isCoordPedagogico = userTypes.includes('UNIDADE_COORDENADOR_PEDAGOGICO');
-  const isAdministrativo  = userTypes.includes('UNIDADE_ADMINISTRATIVO');
-  // Flag de tipo para Psicóloga Central
-  const isPsicologa = userTypes.includes('STAFF_CENTRAL_PSICOLOGIA');
-  // Se UNIDADE mas sem tipo específico, tratar como coordenadora genérica
-  const isUnidadeGenerica = isUnidade && !isDiretor && !isNutricionista && !isCoordPedagogico && !isAdministrativo;
-
-  // Label de perfil para exibição
-  const perfilLabel = isDeveloper        ? 'Desenvolvedor'
-    : isMantenedora                      ? 'Mantenedora'
-    : isPsicologa                        ? 'Psicóloga Central'
-    : isCentral                          ? 'Equipe Central'
-    : isDiretor                          ? 'Diretor(a)'
-    : isNutricionista                    ? 'Nutricionista'
-    : isCoordPedagogico                  ? 'Coord. Pedagógica'
-    : isAdministrativo                   ? 'Secretaria'
-    : isUnidade                          ? 'Unidade'
-    : isProfessor                        ? 'Professor(a)'
-    : isFamily                           ? 'Família'
-    : 'Usuário';
-
-  const configItem: MenuItem = { path: '/app/configuracoes', label: 'Configurações', icon: <Settings className="h-4 w-4" /> };
-  const perfilItem: MenuItem = { path: '/app/meu-perfil',    label: 'Meu Perfil',    icon: <UserCircle className="h-4 w-4" /> };
-  const [configOpen, setConfigOpen] = useState(
-    () => location.pathname.startsWith('/app/meu-perfil') || location.pathname.startsWith('/app/configuracoes')
+  const visibleOpenGroups = useMemo(
+    () => new Set(activeGroupId ? [...openGroups, activeGroupId] : openGroups),
+    [activeGroupId, openGroups],
   );
 
-  // adminItems: exibido apenas para perfis com acesso administrativo real.
-  // Nutricionista (isNutricionista) NÃO recebe este bloco — ela não gerencia
-  // usuários, turmas ou unidades administrativas.
-  const adminItems: MenuItem[] = [
-    ...(!isNutricionista ? [{ path: '/app/admin/usuarios', label: 'Usuários', icon: <Users className="h-4 w-4" /> }] : []),
-    ...(!isNutricionista ? [{ path: '/app/admin/turmas',   label: 'Turmas',   icon: <GraduationCap className="h-4 w-4" /> }] : []),
-    ...(isMantenedora || isCentral || isDeveloper
-      ? [{ path: '/app/admin/unidades', label: 'Unidades', icon: <Building2 className="h-4 w-4" /> }]
-      : []),
-    ...(isMantenedora || isDeveloper
-      ? [{ path: '/app/rdic-perfis', label: 'Perfis Documentais', icon: <FileText className="h-4 w-4" />, badge: 'Oficial' }]
-      : []),
-  ];
+  function toggleGroup(groupId: string) {
+    setOpenGroups((current) => current.includes(groupId) ? current.filter((id) => id !== groupId) : [...current, groupId]);
+  }
+
+  const profileLabel = user?.roles?.some((role) => (typeof role === 'string' ? role === 'DEVELOPER' : role.level === 'DEVELOPER'))
+    ? 'Desenvolvedor'
+    : user?.nome || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Usuário';
 
   return (
-    <aside className="zelare-sidebar relative w-[var(--sidebar-width)] bg-[var(--surface-sidebar)] text-[var(--text-primary)] border-r border-[var(--border-subtle)] h-full min-h-screen flex flex-col overflow-hidden shadow-[var(--shadow-sm)]">
-      {/* Logo */}
-      <div className="px-4 py-4 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
-              {/* Logo institucional Zelare */}
-              <img
-                src={import.meta.env.VITE_APP_LOGO_URL || '/brand/zelare-logo-square.png'}
-                alt={import.meta.env.VITE_APP_NAME || 'Zelare'}
-                className="h-9 w-auto object-contain flex-shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                  if (fb) fb.style.display = 'flex';
-                }}
-              />
-              {/* Fallback: ícone + texto */}
-              <div className="hidden items-center gap-2" aria-hidden="true">
-                                  <div className="w-7 h-7 bg-brand-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-ds-glow">
-
-                  <span className="text-white font-bold text-xs">Z</span>
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-sm font-bold leading-tight text-[var(--text-primary)] truncate">{import.meta.env.VITE_APP_NAME || 'Zelare'}</h1>
-                  <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Gestão inteligente</p>
-                </div>
-              </div>
-            </div>
-            {/* Botão fechar — só aparece em mobile */}
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="md:hidden p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors flex-shrink-0"
-                aria-label="Fechar menu"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-          {user && (
-            <div className="mt-3 px-3 py-2.5 bg-[var(--surface-inset)] rounded-xl border border-[var(--border-default)]">
-              <p className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wide">Perfil ativo</p>
-              <p className="text-sm font-medium text-[var(--text-primary)] truncate mt-0.5">
-                {(user.nome as string) || user.email}
-              </p>
-              <span className="inline-block mt-1.5 text-[10px] font-semibold bg-[var(--surface-brand)] text-[var(--text-brand-soft)] px-2 py-0.5 rounded-full tracking-wide">
-                {perfilLabel}
-              </span>
-            </div>
-          )}
-      </div>
-
-      {/* Navegação */}
-      <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
-
-        {/* DEVELOPER: vê tudo */}
-        {isDeveloper && (
-          <>
-            <NavSection titulo="Professor"    items={[...PROFESSOR_PRINCIPAL, ...PROFESSOR_FERRAMENTAS]} location={location} onItemClick={onClose} />
-            <NavSection titulo="Nutricionista" items={NUTRI_ITEMS}                                        location={location} onItemClick={onClose} />
-            <NavSection titulo="Diretor"       items={DIRETOR_ITEMS}                                      location={location} onItemClick={onClose} />
-            <NavSection titulo="Unidade"       items={[...UNIDADE_GESTAO, ...UNIDADE_PEDAGOGICO]}         location={location} onItemClick={onClose} />
-            <NavSection titulo="Central"       items={CENTRAL_ITEMS}                                      location={location} onItemClick={onClose} />
-            <NavSection titulo="Mantenedora"   items={MANTENEDORA_ITEMS}                                  location={location} onItemClick={onClose} />
-            <NavSection titulo="Dev — Extras"  items={DEV_EXTRA}                                          location={location} onItemClick={onClose} />
-          </>
-        )}
-
-        {/* MANTENEDORA */}
-        {!isDeveloper && isMantenedora && (
-          <NavSection titulo="Mantenedora" items={MANTENEDORA_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* STAFF_CENTRAL — Psicóloga Central (menu dedicado) */}
-        {!isDeveloper && isCentral && isPsicologa && (
-          <NavSection titulo="Psicologia" items={PSICOLOGA_ITEMS} location={location} onItemClick={onClose} />
-        )}
-        {/* STAFF_CENTRAL — Coordenação Geral e demais */}
-        {!isDeveloper && isCentral && !isPsicologa && (
-          <NavSection titulo="Análises" items={CENTRAL_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* UNIDADE — Diretor */}
-        {!isDeveloper && !isAdministrativo && isDiretor && (
-          <NavSection titulo="Diretor" items={DIRETOR_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* UNIDADE — Nutricionista */}
-        {!isDeveloper && !isAdministrativo && isNutricionista && (
-          <NavSection titulo="Nutricionista" items={NUTRI_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* UNIDADE — Coordenadora Pedagógica */}
-        {!isDeveloper && !isAdministrativo && isCoordPedagogico && (
-          <>
-            <NavSection titulo="Gestão"      items={COORD_GESTAO}      location={location} onItemClick={onClose} />
-            <NavSection titulo="Pedagógico"  items={COORD_PEDAGOGICO}  location={location} onItemClick={onClose} />
-          </>
-        )}
-
-        {/* UNIDADE — Administrativo */}
-        {!isDeveloper && isAdministrativo && (
-          <NavSection titulo="Secretaria da Unidade" items={ADMIN_UNIDADE_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* UNIDADE — Genérico (sem roleType específico) */}
-        {!isDeveloper && !isAdministrativo && isUnidadeGenerica && (
-          <>
-            <NavSection titulo="Gestão"      items={UNIDADE_GESTAO}      location={location} onItemClick={onClose} />
-            <NavSection titulo="Pedagógico"  items={UNIDADE_PEDAGOGICO}  location={location} onItemClick={onClose} />
-          </>
-        )}
-
-        {/* PROFESSOR / PROFESSOR_AUXILIAR */}
-        {!isDeveloper && !isUnidade && isProfessor && (
-          <>
-            <NavSection titulo="Pedagógico"  items={PROFESSOR_PRINCIPAL}   location={location} onItemClick={onClose} />
-            <NavSection titulo="Ferramentas" items={PROFESSOR_FERRAMENTAS} location={location} onItemClick={onClose} />
-          </>
-        )}
-
-        {/* FAMÍLIA / RESPONSÁVEL */}
-        {!isDeveloper && isFamily && (
-          <NavSection titulo="Família" items={FAMILY_ITEMS} location={location} onItemClick={onClose} />
-        )}
-
-        {/* Fallback */}
-        {!isDeveloper && !isAdministrativo && !isMantenedora && !isCentral && !isUnidade && !isProfessor && !isFamily && (
-          <NavSection titulo="Menu" items={UNIDADE_GESTAO} location={location} onItemClick={onClose} />
-        )}
-
-      </nav>
-
-      {/* Rodapé */}
-      <div className="px-3 py-3 border-t border-[var(--border-subtle)] space-y-2">
-        {!isAdministrativo && (isUnidade || isCentral || isMantenedora || isDeveloper) && adminItems.length > 0 && (
-          <NavSection titulo="Administração" items={adminItems} location={location} onItemClick={onClose} />
-        )}
-        {/* Grupo recolhível — Configurações */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setConfigOpen(o => !o)}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors"
-          >
-            <Settings className="h-4 w-4 flex-shrink-0 text-[var(--text-tertiary)]" />
-            <span className="flex-1 text-left">Configurações</span>
-            <ChevronDown className={`h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200 ${configOpen ? 'rotate-180' : ''}`} />
-          </button>
-          {configOpen && (
-            <div className="mt-0.5 ml-3 pl-3 border-l border-[var(--border-default)] space-y-0.5">
-              <NavItem item={perfilItem} active={isActiveForItem(location, '/app/meu-perfil')} onClick={onClose} />
-              <NavItem item={configItem} active={isActiveForItem(location, '/app/configuracoes')} onClick={onClose} />
-            </div>
+    <aside className="zelare-sidebar relative flex h-full min-h-screen w-[var(--sidebar-width)] flex-col overflow-hidden border-r border-[var(--border-subtle)] bg-[var(--surface-sidebar)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]" data-testid="sidebar">
+      <div className="border-b border-[var(--border-subtle)] px-4 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <Link to="/app/dashboard" onClick={onClose} className="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-500)]" aria-label="Ir para o painel principal">
+            <img
+              src={import.meta.env.VITE_APP_LOGO_URL || '/brand/zelare-logo-square.png'}
+              alt={import.meta.env.VITE_APP_NAME || 'Zelare'}
+              className="h-9 w-auto flex-shrink-0 object-contain"
+              onError={(event) => { event.currentTarget.style.display = 'none'; }}
+            />
+            <span className="truncate text-sm font-semibold text-[var(--text-primary)]">{import.meta.env.VITE_APP_NAME || 'Zelare'}</span>
+          </Link>
+          {onClose && (
+            <button type="button" onClick={onClose} className="rounded-lg p-2 text-[var(--text-tertiary)] hover:bg-[var(--surface-inset)] hover:text-[var(--text-primary)] md:hidden" aria-label="Fechar menu">
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
           )}
         </div>
-        <p className="text-[10px] text-[var(--text-tertiary)] text-center pt-1">{import.meta.env.VITE_APP_NAME || 'Zelare'} © 2026</p>
+        <div className="mt-3 rounded-xl border border-[var(--border-default)] bg-[var(--surface-inset)] px-3 py-2.5">
+          <p className="text-[10px] font-medium uppercase tracking-wide text-[var(--text-tertiary)]">Perfil ativo</p>
+          <p className="mt-0.5 truncate text-sm font-medium text-[var(--text-primary)]">{profileLabel}</p>
+          {user?.unit?.name && <p className="mt-1 truncate text-[11px] text-[var(--text-secondary)]">{user.unit.name}</p>}
+        </div>
+      </div>
+
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3" aria-label="Navegação principal">
+        {groups.map((group) => (
+          <NavigationGroupView
+            key={group.id}
+            group={group}
+            open={visibleOpenGroups.has(group.id)}
+            active={activeGroupId === group.id}
+            onToggle={() => toggleGroup(group.id)}
+            location={location}
+            onNavigate={onClose}
+          />
+        ))}
+        {groups.length === 0 && <p className="px-3 py-6 text-center text-xs text-[var(--text-tertiary)]">Nenhum módulo disponível para este perfil.</p>}
+      </nav>
+
+      <div className="border-t border-[var(--border-subtle)] px-3 py-3">
+        <p className="text-center text-[10px] text-[var(--text-tertiary)]">{import.meta.env.VITE_APP_NAME || 'Zelare'} © 2026</p>
       </div>
     </aside>
   );
