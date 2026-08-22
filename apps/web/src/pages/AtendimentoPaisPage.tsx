@@ -23,6 +23,7 @@ import {
 import http from '../api/http';
 import { getErrorMessage } from '../utils/errorMessage';
 import { getAccessibleClassrooms } from '../api/lookup';
+import { useUnitScope } from '../contexts/UnitScopeContext';
 import type { AccessibleClassroom } from '../types/lookup';
 import { AlergiaAlert } from '../components/ui/AlergiaAlert';
 
@@ -37,12 +38,13 @@ interface Atendimento {
     id: string;
     firstName: string;
     lastName: string;
-    // FIX P6: enriquecido pelo backend com turma e professor
     enrollments?: Array<{
       classroom: {
         id: string;
         name: string;
-        teachers: Array<{ teacher: { firstName: string; lastName: string } }>;
+        code?: string;
+        unitId?: string;
+        teachers?: Array<{ teacher: { firstName: string; lastName: string } }>;
       };
     }>;
   };
@@ -126,6 +128,7 @@ const FORM_INICIAL: NovoAtendimento = {
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export function AtendimentoPaisPage() {
+  const { accessibleUnits, selectedUnitId: globalUnitId, setUnit, unitSelectionLocked } = useUnitScope();
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -135,56 +138,65 @@ export function AtendimentoPaisPage() {
   const [erroForm, setErroForm] = useState<string | null>(null);
   const [expandido, setExpandido] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<StatusAtendimento | ''>('');
+  const [filtroCrianca, setFiltroCrianca] = useState('');
+  const [filtroInicio, setFiltroInicio] = useState('');
+  const [filtroFim, setFiltroFim] = useState('');
+  const [unidadeSelecionada, setUnidadeSelecionada] = useState(globalUnitId ?? '');
   const [turmas, setTurmas] = useState<AccessibleClassroom[]>([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
   const [alunos, setAlunos] = useState<{ id: string; name: string; allergies?: string | null; medicalConditions?: string | null }[]>([]);
-  // IDs das crianças da turma selecionada — usado para filtrar atendimentos no frontend
-  const [childIdsDaTurma, setChildIdsDaTurma] = useState<string[] | null>(null);
+  const [pagina, setPagina] = useState(1);
+  const [paginacao, setPaginacao] = useState<{ page: number; total: number; totalPages: number; hasNext: boolean } | null>(null);
 
-  // Carregar turmas e auto-selecionar a primeira (para PROFESSOR que tem apenas 1 turma)
   useEffect(() => {
-    getAccessibleClassrooms()
-      .then(lista => {
-        setTurmas(lista);
-        if (lista.length === 1) setTurmaSelecionada(lista[0].id);
-      })
-      .catch(() => setTurmas([]));
-  }, []);
+    setUnidadeSelecionada(globalUnitId ?? (unitSelectionLocked ? '' : unidadeSelecionada));
+  }, [globalUnitId, unitSelectionLocked]);
 
-  // Carregar alunos ao selecionar turma e guardar IDs para filtrar atendimentos
+  useEffect(() => {
+    setTurmas([]);
+    setTurmaSelecionada('');
+    setAlunos([]);
+    setFiltroCrianca('');
+    if (!unidadeSelecionada) return;
+    getAccessibleClassrooms(unidadeSelecionada).then(setTurmas).catch(() => setTurmas([]));
+  }, [unidadeSelecionada]);
+
   useEffect(() => {
     if (!turmaSelecionada) {
       setAlunos([]);
-      setChildIdsDaTurma(null);
       return;
     }
     http.get('/lookup/children/accessible', { params: { classroomId: turmaSelecionada } })
-      .then(r => {
-        const lista = r.data || [];
-        setAlunos(lista);
-        setChildIdsDaTurma(lista.map((c: { id: string }) => c.id));
-      })
-      .catch(() => { setAlunos([]); setChildIdsDaTurma(null); });
+      .then((response) => setAlunos(response.data || []))
+      .catch(() => setAlunos([]));
   }, [turmaSelecionada]);
 
-  const carregarAtendimentos = useCallback(async () => {
+  const carregarAtendimentos = useCallback(async (page = 1) => {
     setCarregando(true);
     setErro(null);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page, limit: 25 };
+      if (unidadeSelecionada) params.unitId = unidadeSelecionada;
+      if (turmaSelecionada) params.classroomId = turmaSelecionada;
+      if (filtroCrianca) params.childId = filtroCrianca;
       if (filtroStatus) params.status = filtroStatus;
-      const r = await http.get('/atendimentos-pais', { params });
-      setAtendimentos(r.data || []);
+      if (filtroInicio) params.startDate = new Date(`${filtroInicio}T00:00:00`).toISOString();
+      if (filtroFim) params.endDate = new Date(`${filtroFim}T23:59:59.999`).toISOString();
+      const response = await http.get('/atendimentos-pais', { params });
+      const payload = response.data;
+      setAtendimentos(Array.isArray(payload) ? payload : payload?.items ?? []);
+      setPaginacao(payload?.pagination ?? null);
+      setPagina(page);
     } catch (e) {
       setErro(getErrorMessage(e));
+      setAtendimentos([]);
+      setPaginacao(null);
     } finally {
       setCarregando(false);
     }
-  }, [filtroStatus]);
+  }, [filtroCrianca, filtroFim, filtroInicio, filtroStatus, turmaSelecionada, unidadeSelecionada]);
 
-  useEffect(() => {
-    carregarAtendimentos();
-  }, [carregarAtendimentos]);
+  useEffect(() => { void carregarAtendimentos(1); }, [carregarAtendimentos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,7 +292,7 @@ export function AtendimentoPaisPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={carregarAtendimentos}
+            onClick={() => void carregarAtendimentos(1)}
             disabled={carregando}
             className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
           >
@@ -303,20 +315,29 @@ export function AtendimentoPaisPage() {
           <h2 className="text-lg font-semibold mb-4">Registrar Atendimento</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Seleção de turma e aluno */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Turma
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+                <select
+                  value={unidadeSelecionada}
+                  disabled={unitSelectionLocked}
+                  onChange={e => { setUnit(e.target.value || null); setUnidadeSelecionada(e.target.value); setTurmaSelecionada(''); setForm(f => ({ ...f, childId: '' })); }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm disabled:opacity-60"
+                >
+                  <option value="">Selecione a unidade...</option>
+                  {accessibleUnits.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Turma</label>
                 <select
                   value={turmaSelecionada}
                   onChange={e => { setTurmaSelecionada(e.target.value); setForm(f => ({ ...f, childId: '' })); }}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  disabled={!unidadeSelecionada}
                 >
                   <option value="">Selecione a turma...</option>
-                  {turmas.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
+                  {turmas.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div>
@@ -511,19 +532,34 @@ export function AtendimentoPaisPage() {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium text-gray-700">Filtrar por status:</label>
-        <select
-          value={filtroStatus}
-          onChange={e => setFiltroStatus(e.target.value as StatusAtendimento | '')}
-          className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
-        >
-          <option value="">Todos</option>
-          {Object.entries(STATUS_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
-          ))}
-        </select>
+      {/* Filtros server-side */}
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label className="text-sm font-medium text-gray-700">Unidade
+          <select value={unidadeSelecionada} disabled={unitSelectionLocked} onChange={e => { setUnit(e.target.value || null); setUnidadeSelecionada(e.target.value); setTurmaSelecionada(''); setFiltroCrianca(''); }} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm disabled:opacity-60">
+            <option value="">Selecione a unidade...</option>
+            {accessibleUnits.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-gray-700">Turma
+          <select value={turmaSelecionada} disabled={!unidadeSelecionada} onChange={e => { setTurmaSelecionada(e.target.value); setFiltroCrianca(''); }} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm disabled:opacity-60">
+            <option value="">Todas da unidade</option>
+            {turmas.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-gray-700">Criança
+          <select value={filtroCrianca} disabled={!turmaSelecionada} onChange={e => setFiltroCrianca(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm disabled:opacity-60">
+            <option value="">Todas da turma</option>
+            {alunos.map(aluno => <option key={aluno.id} value={aluno.id}>{aluno.name}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-gray-700">Status
+          <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value as StatusAtendimento | '')} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm">
+            <option value="">Todos</option>
+            {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-gray-700">De<input type="date" value={filtroInicio} onChange={e => setFiltroInicio(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm" /></label>
+        <label className="text-sm font-medium text-gray-700">Até<input type="date" value={filtroFim} onChange={e => setFiltroFim(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm" /></label>
       </div>
 
       {/* Mensagem de erro */}
@@ -550,10 +586,7 @@ export function AtendimentoPaisPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {/* Filtra por crianças da turma selecionada quando há turma ativa */}
-          {atendimentos
-            .filter(at => !childIdsDaTurma || childIdsDaTurma.includes(at.childId))
-            .map(at => (
+          {atendimentos.map(at => (
             <div key={at.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               {/* Cabeçalho do card */}
               <div
@@ -666,6 +699,15 @@ export function AtendimentoPaisPage() {
               )}
             </div>
           ))}
+          {paginacao && paginacao.totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-200 pt-3 text-xs text-gray-500">
+              <span>Página {pagina} de {paginacao.totalPages} · {paginacao.total} atendimentos</span>
+              <div className="flex gap-2">
+                <button type="button" disabled={pagina <= 1} onClick={() => void carregarAtendimentos(pagina - 1)} className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-40">Anterior</button>
+                <button type="button" disabled={!paginacao.hasNext} onClick={() => void carregarAtendimentos(pagina + 1)} className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-40">Próxima</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

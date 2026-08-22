@@ -1,18 +1,5 @@
-/**
- * UnitScopeSelector — seletor de unidade global reutilizável.
- *
- * Usa o UnitScopeContext para ler e alterar a unidade ativa.
- * Exibe opção "Rede (todas)" + lista de unidades acessíveis.
- *
- * Props:
- *   - showNetworkOption: exibir opção "Rede (todas)" (default: true)
- *   - placeholder: texto quando nenhuma unidade está selecionada
- *   - className: classes CSS adicionais
- *   - compact: versão compacta sem label
- */
-
 import { useUnitScope } from '../../contexts/UnitScopeContext';
-import { Building2, Network } from 'lucide-react';
+import { Building2, LockKeyhole, Network } from 'lucide-react';
 
 interface UnitScopeSelectorProps {
   showNetworkOption?: boolean;
@@ -27,53 +14,52 @@ export function UnitScopeSelector({
   className = '',
   compact = false,
 }: UnitScopeSelectorProps) {
-  const { selectedUnitId, accessibleUnits, unitsLoading, setUnit } = useUnitScope();
+  const {
+    selectedUnitId,
+    accessibleUnits,
+    unitsLoading,
+    setUnit,
+    unitSelectionLocked,
+    requiresExplicitUnitSelection,
+  } = useUnitScope();
 
   if (unitsLoading) {
     return (
-      <div className={`flex items-center gap-2 text-sm text-gray-400 ${className}`}>
-        <Building2 className="w-4 h-4 animate-pulse" />
+      <div className={`flex items-center gap-2 text-sm text-[var(--text-tertiary)] ${className}`} aria-live="polite">
+        <Building2 className="h-4 w-4 animate-pulse" aria-hidden="true" />
         <span>Carregando unidades...</span>
       </div>
     );
   }
 
+  const effectiveShowNetwork = showNetworkOption && !unitSelectionLocked && !requiresExplicitUnitSelection;
+  const selectionRequired = requiresExplicitUnitSelection && !selectedUnitId;
+
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`} data-testid="unit-scope-selector">
       {!compact && (
-        <label className="text-sm font-medium text-gray-600 whitespace-nowrap flex items-center gap-1">
-          <Building2 className="w-4 h-4" />
+        <label htmlFor="global-unit-scope" className="flex items-center gap-1 whitespace-nowrap text-sm font-medium text-[var(--text-secondary)]">
+          <Building2 className="h-4 w-4" aria-hidden="true" />
           Unidade:
         </label>
       )}
       <select
+        id="global-unit-scope"
         value={selectedUnitId ?? ''}
-        onChange={(e) => setUnit(e.target.value || null)}
-        className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent min-w-[200px] max-w-[320px]"
+        onChange={(event) => setUnit(event.target.value || null)}
+        aria-required={selectionRequired}
+        aria-label={selectionRequired ? 'Selecione uma unidade para iniciar' : 'Unidade ativa'}
+        className="min-w-[200px] max-w-[320px] rounded-lg border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-1.5 text-sm text-[var(--text-primary)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--brand-500)] disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={unitSelectionLocked}
       >
-        {showNetworkOption && (
-          <option value="">
-            🌐 Rede (todas as unidades)
-          </option>
-        )}
-        {!showNetworkOption && !selectedUnitId && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {accessibleUnits.map((unit) => (
-          <option key={unit.id} value={unit.id}>
-            {unit.name}
-          </option>
-        ))}
+        {effectiveShowNetwork && <option value="">Rede (todas as unidades)</option>}
+        {!selectedUnitId && !effectiveShowNetwork && <option value="" disabled>{placeholder}</option>}
+        {accessibleUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
       </select>
-      {selectedUnitId && (
-        <button
-          onClick={() => setUnit(null)}
-          title="Ver rede completa"
-          className="p-1.5 text-gray-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
-        >
-          <Network className="w-4 h-4" />
+      {unitSelectionLocked && <LockKeyhole className="h-4 w-4 text-[var(--text-tertiary)]" aria-label="Unidade fixa pelo perfil" />}
+      {selectedUnitId && !unitSelectionLocked && (
+        <button type="button" onClick={() => setUnit(null)} title="Ver rede completa" aria-label="Ver rede completa" className="rounded-lg p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--surface-brand)] hover:text-[var(--text-brand)]">
+          <Network className="h-4 w-4" aria-hidden="true" />
         </button>
       )}
     </div>

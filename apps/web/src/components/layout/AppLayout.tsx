@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
@@ -9,6 +9,13 @@ export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') closeSidebar(); };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closeSidebar, sidebarOpen]);
 
   return (
     <UnitScopeProvider>

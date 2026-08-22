@@ -45,6 +45,7 @@ describe('LookupService — RBAC de turmas e crianças', () => {
     unit: {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     user: {
       findMany: jest.fn(),
@@ -77,6 +78,14 @@ describe('LookupService — RBAC de turmas e crianças', () => {
     roles: [{ roleId: 'r3', level: 'UNIDADE' as any, type: 'UNIDADE_COORDENADOR_PEDAGOGICO' as any, unitScopes: [] }],
   };
 
+  const centralScopedUser: JwtPayload = {
+    sub: 'central-001',
+    email: 'central@example.invalid',
+    mantenedoraId: 'mant-001',
+    unitId: undefined,
+    roles: [{ roleId: 'r4', level: 'STAFF_CENTRAL' as any, type: 'STAFF_CENTRAL_PEDAGOGICO' as any, unitScopes: ['unit-001'] }],
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -87,6 +96,16 @@ describe('LookupService — RBAC de turmas e crianças', () => {
 
     service = module.get<LookupService>(LookupService);
     jest.clearAllMocks();
+  });
+
+  // ─── getAccessibleUnits ──────────────────────────────────────────────────
+  describe('getAccessibleUnits()', () => {
+    it('respeita unitScopes explícitos da equipe central', async () => {
+      mockPrismaService.unit.findMany.mockResolvedValue([{ id: 'unit-001', code: 'A', name: 'Unidade A' }]);
+      const result = await service.getAccessibleUnits(centralScopedUser);
+      expect(result).toEqual([{ id: 'unit-001', code: 'A', name: 'Unidade A' }]);
+      expect(mockPrismaService.unit.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ id: { in: ['unit-001'] }, mantenedoraId: 'mant-001' }) }));
+    });
   });
 
   // ─── getAccessibleClassrooms ─────────────────────────────────────────────
@@ -112,16 +131,13 @@ describe('LookupService — RBAC de turmas e crianças', () => {
       expect(result).toBeDefined();
     });
 
-    it('RBAC: professor sem vínculo formal usa fallback para turmas da mantenedora', async () => {
-      // Primeiro findMany retorna [] (sem ClassroomTeacher), segundo retorna fallback
-      mockPrismaService.classroom.findMany
-        .mockResolvedValueOnce([])     // sem vínculo formal
-        .mockResolvedValueOnce(mockClassrooms); // fallback
+    it('RBAC: professor sem vínculo formal não recebe fallback de turmas da mantenedora', async () => {
+      mockPrismaService.classroom.findMany.mockResolvedValue([]);
 
       const result = await service.getAccessibleClassrooms(professorUser);
 
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBeGreaterThanOrEqual(0);
+      expect(result).toEqual([]);
+      expect(mockPrismaService.classroom.findMany).toHaveBeenCalledTimes(1);
     });
 
     it('RBAC: coordenadora (UNIDADE) retorna turmas da própria unidade', async () => {
@@ -156,6 +172,7 @@ describe('LookupService — RBAC de turmas e crianças', () => {
         unit: { mantenedoraId: 'mant-001' },
       });
       mockPrismaService.enrollment.findMany.mockResolvedValue(mockEnrollments);
+      mockPrismaService.classroomTeacher.findFirst.mockResolvedValue({ id: 'classroom-teacher-001' });
     });
 
     it('RBAC: professor retorna crianças da turma da própria mantenedora', async () => {
@@ -189,6 +206,11 @@ describe('LookupService — RBAC de turmas e crianças', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
+    it('RBAC: acesso direto por URL de outra unidade é bloqueado', async () => {
+      mockPrismaService.classroom.findFirst.mockResolvedValue({ id: 'class-002', unitId: 'unit-002', unit: { mantenedoraId: 'mant-001' } });
+      await expect(service.getAccessibleChildren(professorUser, 'class-002')).rejects.toThrow(ForbiddenException);
+    });
+
     it('contrato: cada criança tem id, firstName, lastName, name, classroomId', async () => {
       const result = await service.getAccessibleChildren(professorUser, 'class-001');
 
@@ -201,13 +223,12 @@ describe('LookupService — RBAC de turmas e crianças', () => {
       });
     });
 
-    it('deve retornar [] quando classroomId não é fornecido e professor não tem vínculo', async () => {
-      mockPrismaService.classroomTeacher.findFirst.mockResolvedValue(null);
-      mockPrismaService.classroom.findFirst.mockResolvedValue(null);
-
+    it('deve retornar [] quando classroomId não é fornecido, sem tentar inferir uma turma', async () => {
       const result = await service.getAccessibleChildren(professorUser, undefined);
 
       expect(result).toEqual([]);
+      expect(mockPrismaService.classroomTeacher.findFirst).not.toHaveBeenCalled();
+      expect(mockPrismaService.classroom.findFirst).not.toHaveBeenCalled();
     });
   });
 });

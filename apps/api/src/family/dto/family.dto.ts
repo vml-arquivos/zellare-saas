@@ -1,4 +1,77 @@
-import { IsBoolean, IsDateString, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+export class FamilyChildrenQueryDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+
+  @IsOptional()
+  @IsString()
+  classroomId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10000)
+  page = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 25;
+
+  @IsOptional()
+  @IsIn(['firstName', 'lastName', 'createdAt'])
+  sortBy: 'firstName' | 'lastName' | 'createdAt' = 'firstName';
+
+  @IsOptional()
+  @IsIn(SORT_DIRECTIONS)
+  sortOrder: 'asc' | 'desc' = 'asc';
+}
+
+export class FamilyGuardianCandidatesQueryDto {
+  @IsOptional()
+  @IsString()
+  unitId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10000)
+  page = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 25;
+
+  @IsOptional()
+  @IsIn(['firstName', 'lastName', 'createdAt'])
+  sortBy: 'firstName' | 'lastName' | 'createdAt' = 'firstName';
+
+  @IsOptional()
+  @IsIn(SORT_DIRECTIONS)
+  sortOrder: 'asc' | 'desc' = 'asc';
+}
 
 export class FamilyQueryDto {
   @IsOptional()

@@ -1,13 +1,69 @@
 import http from './http';
 
+export interface FamilyPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+}
+
+export interface FamilyUnitSummary {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export interface FamilyEnrollmentSummary {
+  id: string;
+  enrollmentDate: string;
+  classroom: { id: string; name: string; code: string; unitId: string };
+}
+
 export interface FamilyChild {
   id: string;
   firstName: string;
   lastName: string;
   photoUrl?: string | null;
   unitId: string;
+  unit?: FamilyUnitSummary;
+  activeEnrollment?: FamilyEnrollmentSummary | null;
   relationship?: string;
   isPrimary?: boolean;
+}
+
+export interface FamilyChildrenQuery {
+  unitId?: string;
+  classroomId?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'firstName' | 'lastName' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface FamilyChildrenResponse {
+  items: FamilyChild[];
+  pagination: FamilyPagination;
+}
+
+export interface FamilyGuardianCandidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  status: string;
+  unit?: FamilyUnitSummary | null;
+}
+
+export interface FamilyGuardianCandidatesQuery {
+  unitId?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'firstName' | 'lastName' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface FamilyTimelineItem {
@@ -39,8 +95,13 @@ export interface FamilyMessage {
   readAt?: string | null;
 }
 
-export async function listFamilyChildren() {
-  const response = await http.get<FamilyChild[]>('/family/children');
+export async function listFamilyChildren(params?: FamilyChildrenQuery): Promise<FamilyChildrenResponse> {
+  const response = await http.get<FamilyChildrenResponse>('/family/children', { params });
+  return response.data;
+}
+
+export async function listGuardianCandidates(params?: FamilyGuardianCandidatesQuery) {
+  const response = await http.get<{ items: FamilyGuardianCandidate[]; pagination: FamilyPagination }>('/family/guardian-candidates', { params });
   return response.data;
 }
 
@@ -64,7 +125,6 @@ export async function markFamilyMessageRead(messageId: string) {
   return response.data;
 }
 
-
 export interface FamilyGuardian {
   id: string;
   childId: string;
@@ -77,6 +137,7 @@ export interface FamilyGuardian {
   consentAt?: string | null;
   revokedAt?: string | null;
   createdAt: string;
+  updatedAt?: string;
   user: {
     id: string;
     firstName: string;
@@ -85,6 +146,13 @@ export interface FamilyGuardian {
     phone?: string | null;
     status: string;
   };
+  audit?: Array<{
+    id: string;
+    action: string;
+    description?: string | null;
+    occurredAt: string;
+    actor?: { id: string; firstName: string; lastName: string; email: string } | null;
+  }>;
 }
 
 export interface LinkFamilyGuardianPayload {

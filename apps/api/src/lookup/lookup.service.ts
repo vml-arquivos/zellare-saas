@@ -40,6 +40,24 @@ export interface AccessibleChild {
 export class LookupService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async assertUnitScope(user: JwtPayload, unitId: string): Promise<void> {
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: unitId, mantenedoraId: user.mantenedoraId, isActive: true },
+      select: { id: true },
+    });
+    if (!unit) throw new ForbiddenException('Unidade não encontrada ou sem acesso');
+
+    const isGlobal = user.roles.some((role) => ['DEVELOPER', 'MANTENEDORA'].includes(role.level));
+    const isCentral = user.roles.some((role) => role.level === 'STAFF_CENTRAL');
+    const scopedUnitIds = user.roles.flatMap((role) => role.unitScopes || []);
+    if (scopedUnitIds.length > 0 && !scopedUnitIds.includes(unitId)) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+    if (!isGlobal && !isCentral && user.unitId !== unitId) {
+      throw new ForbiddenException('Você não tem acesso a esta unidade');
+    }
+  }
+
   /**
    * Retorna unidades acessíveis baseado no role do usuário
    * 
@@ -61,52 +79,13 @@ export class LookupService {
       `[LookupService.getAccessibleUnits] email=${user.email} role=${roleLevels} mantenedoraId=${user.mantenedoraId} unitScopes=${allUnitScopes.length}`,
     );
 
-    // 1. Roles globais e centrais (DEVELOPER, MANTENEDORA, STAFF_CENTRAL):
-    //    Retornar TODAS as unidades da mantenedora — independente de unitScopes.
-    //    Isso garante que Coordenação Geral e Psicóloga vejam todas as unidades Zelare.
     const hasGlobalRole = user.roles.some((role) =>
-      ['DEVELOPER', 'MANTENEDORA', 'STAFF_CENTRAL'].includes(role.level),
+      ['DEVELOPER', 'MANTENEDORA'].includes(role.level),
     );
+    const hasCentralRole = user.roles.some((role) => role.level === 'STAFF_CENTRAL');
 
-    if (hasGlobalRole) {
-      // Tentar primeiro com isActive: true
-      let units = await this.prisma.unit.findMany({
-        where: { mantenedoraId: user.mantenedoraId, isActive: true },
-        select: {
-          id: true,
-          code: true,
-          name: true,
-        },
-        orderBy: { name: 'asc' },
-      });
-
-      // Fallback: se retornar 0 unidades com isActive:true, buscar TODAS da mantenedora
-      // (cobre cenário de banco com seeds antigos que não definiram isActive explicitamente)
-      if (units.length === 0) {
-        console.warn(
-          `[LookupService.getAccessibleUnits] isActive:true retornou 0 unidades para mantenedoraId=${user.mantenedoraId} — buscando sem filtro`,
-        );
-        units = await this.prisma.unit.findMany({
-          where: { mantenedoraId: user.mantenedoraId },
-          select: {
-            id: true,
-            code: true,
-            name: true,
-          },
-          orderBy: { name: 'asc' },
-        });
-      }
-
-      console.log(
-        `[LookupService.getAccessibleUnits] role global/central → retornando ${units.length} unidades`,
-      );
-      return units;
-    }
-
-    // 2. Se tem unitScopes explícitos (ex: STAFF_CENTRAL com escopo restrito a unidades específicas),
-    //    retornar apenas as unidades dos scopes.
-    //    NOTA: Este bloco só é atingido se NÃO for role global (já tratado acima).
-    if (allUnitScopes.length > 0) {
+    // Escopo explícito vence a visão global para STAFF_CENTRAL.
+    if (allUnitScopes.length > 0 && hasCentralRole && !hasGlobalRole) {
       const uniqueUnitIds = Array.from(new Set(allUnitScopes));
       const units = await this.prisma.unit.findMany({
         where: {
@@ -126,7 +105,16 @@ export class LookupService {
       return units;
     }
 
-    // 3. UNIDADE/PROFESSOR: apenas a própria unidade
+    // Visão de rede somente para mantenedora/developer ou staff central sem escopo explícito.
+    if (hasGlobalRole || hasCentralRole) {
+      return this.prisma.unit.findMany({
+        where: { mantenedoraId: user.mantenedoraId, isActive: true },
+        select: { id: true, code: true, name: true },
+        orderBy: { name: 'asc' },
+      });
+    }
+
+    // 3. UNIDADE/PROFESSOR: apenas a própria unidade ativa.
     if (!user.unitId) {
       console.log(
         `[LookupService.getAccessibleUnits] sem unitId e sem role global → retornando []`,
@@ -134,8 +122,8 @@ export class LookupService {
       return [];
     }
 
-    const unit = await this.prisma.unit.findUnique({
-      where: { id: user.unitId },
+    const unit = await this.prisma.unit.findFirst({
+      where: { id: user.unitId, mantenedoraId: user.mantenedoraId, isActive: true },
       select: {
         id: true,
         code: true,
@@ -162,52 +150,21 @@ export class LookupService {
     user: JwtPayload,
     unitId?: string,
   ): Promise<AccessibleClassroom[]> {
-    // 1. PROFESSOR: turmas vinculadas e ativas; fallback para todas da mantenedora se sem vínculo formal
+    // 1. PROFESSOR: somente turmas ativas com vínculo formal do próprio usuário.
     const isProfessor = user.roles.some((role) => role.level === 'PROFESSOR');
     if (isProfessor) {
-      const classrooms = await this.prisma.classroom.findMany({
+      if (unitId && user.unitId && unitId !== user.unitId) {
+        throw new ForbiddenException('Você não tem acesso a turmas desta unidade');
+      }
+      return this.prisma.classroom.findMany({
         where: {
           isActive: true,
-          teachers: {
-            some: {
-              teacherId: user.sub,
-              isActive: true,
-            },
-          },
-          ...(unitId && { unitId }),
+          unit: { mantenedoraId: user.mantenedoraId, ...(unitId ? { id: unitId } : user.unitId ? { id: user.unitId } : {}) },
+          teachers: { some: { teacherId: user.sub, isActive: true } },
         },
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          unitId: true,
-          ageGroupMin: true,
-          ageGroupMax: true,
-        },
+        select: { id: true, code: true, name: true, unitId: true, ageGroupMin: true, ageGroupMax: true },
         orderBy: { name: 'asc' },
       });
-      // Fallback: professor sem classroomTeacher formal — retornar turmas ativas da mantenedora
-      if (classrooms.length === 0) {
-        const fallback = await this.prisma.classroom.findMany({
-          where: {
-            isActive: true,
-            unit: { mantenedoraId: user.mantenedoraId },
-            ...(unitId && { unitId }),
-          },
-          select: {
-            id: true,
-            code: true,
-            name: true,
-            unitId: true,
-            ageGroupMin: true,
-            ageGroupMax: true,
-          },
-          orderBy: { name: 'asc' },
-          take: 50,
-        });
-        return fallback;
-      }
-      return classrooms;
     }
 
     // 2. Coletar unitScopes
@@ -218,8 +175,9 @@ export class LookupService {
       }
     }
 
-    // Se tem unitScopes e unitId foi fornecido, validar acesso
+    // Equipes centrais com escopo precisam escolher uma unidade explicitamente.
     if (allUnitScopes.length > 0) {
+      if (!unitId) return [];
       if (unitId) {
         // Verificar se unitId está nos scopes
         if (!allUnitScopes.includes(unitId)) {
@@ -326,18 +284,21 @@ export class LookupService {
    * - Filtra por role PROFESSOR
    */
   async getAccessibleTeachers(
+    user: JwtPayload,
     unitId: string | undefined,
   ): Promise<AccessibleTeacher[]> {
-    if (!unitId) {
-      return [];
-    }
+    if (!unitId) return [];
+    await this.assertUnitScope(user, unitId);
 
     const users = await this.prisma.user.findMany({
       where: {
+        mantenedoraId: user.mantenedoraId,
         unitId,
+        status: 'ATIVO',
         roles: {
           some: {
             scopeLevel: 'PROFESSOR',
+            isActive: true,
           },
         },
       },
@@ -370,50 +331,30 @@ export class LookupService {
   ): Promise<AccessibleChild[]> {
     const isProfessor = user.roles.some((role) => role.level === 'PROFESSOR');
 
-    // Se classroomId não foi fornecido, tentar resolver automaticamente
-    let resolvedClassroomId = classroomId;
-    if (!resolvedClassroomId) {
-      if (isProfessor) {
-        // Buscar primeira turma onde o professor está vinculado
-        const ct = await this.prisma.classroomTeacher.findFirst({
-          where: { teacherId: user.sub, isActive: true },
-          select: { classroomId: true },
-        });
-        if (ct) {
-          resolvedClassroomId = ct.classroomId;
-        } else {
-          // Fallback: primeira turma ativa da mantenedora (professor sem vínculo formal)
-          const firstClassroom = await this.prisma.classroom.findFirst({
-            where: {
-              isActive: true,
-              unit: { mantenedoraId: user.mantenedoraId },
-            },
-            select: { id: true },
-            orderBy: { name: 'asc' },
-          });
-          if (firstClassroom) resolvedClassroomId = firstClassroom.id;
-        }
-      }
-      if (!resolvedClassroomId) return [];
-    }
+    if (!classroomId) return [];
+    const resolvedClassroomId = classroomId;
 
-    // Verificar se a turma existe e pertence à mantenedora do usuário
+    // A turma deve estar na organização e ativa.
     const classroom = await this.prisma.classroom.findFirst({
-      where: {
-        id: resolvedClassroomId,
-        unit: {
-          mantenedoraId: user.mantenedoraId,
-        },
-      },
+      where: { id: resolvedClassroomId, isActive: true, unit: { mantenedoraId: user.mantenedoraId, isActive: true } },
+      select: { id: true, unitId: true },
     });
+    if (!classroom) throw new ForbiddenException('Turma não encontrada ou sem acesso');
 
-    if (!classroom) {
-      throw new ForbiddenException('Turma não encontrada ou sem acesso');
+    if (user.unitId && user.unitId !== classroom.unitId) {
+      throw new ForbiddenException('Você não tem acesso a crianças desta unidade');
     }
-
-    // PROFESSOR: verificar vínculo formal, mas não bloquear se não tiver
-    // (professor pode registrar ocorrências mesmo sem classroomTeacher formal)
-    // O acesso é garantido pela mantenedoraId compartilhada
+    const scopedUnitIds = user.roles.flatMap((role) => role.unitScopes || []);
+    if (scopedUnitIds.length > 0 && !scopedUnitIds.includes(classroom.unitId)) {
+      throw new ForbiddenException('Você não tem acesso a crianças desta unidade');
+    }
+    if (isProfessor) {
+      const teacherLink = await this.prisma.classroomTeacher.findFirst({
+        where: { classroomId: resolvedClassroomId, teacherId: user.sub, isActive: true },
+        select: { id: true },
+      });
+      if (!teacherLink) throw new ForbiddenException('Professor sem acesso a esta turma');
+    }
 
     // Buscar crianças matriculadas na turma (via Enrollment)
     const enrollments = await this.prisma.enrollment.findMany({
@@ -472,8 +413,10 @@ export class LookupService {
    */
   async getTeachersByClassroom(
     classroomId: string,
+    user: JwtPayload,
   ): Promise<AccessibleTeacher[]> {
     if (!classroomId) return [];
+    await this.getAccessibleChildren(user, classroomId);
     const links = await this.prisma.classroomTeacher.findMany({
       where: { classroomId, isActive: true },
       include: {

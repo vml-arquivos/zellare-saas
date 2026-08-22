@@ -107,72 +107,35 @@ describe('AtendimentoPaisController', () => {
 
   // ─── GET /atendimentos-pais ──────────────────────────────────────────────
   describe('listar()', () => {
-    it('deve listar atendimentos com filtros opcionais', async () => {
-      const mockList = [
-        {
-          id: 'atend-001',
-          childId: 'child-001',
-          child: { id: 'child-001', firstName: 'Ana', lastName: 'Lima' },
-          responsavelNome: 'Responsável Sintético A',
-          tipo: TipoAtendimento.PRESENCIAL,
-          status: StatusAtendimento.AGENDADO,
-          dataAtendimento: new Date('2026-02-18T10:00:00.000Z'),
-          assunto: 'Desenvolvimento motor',
-          retornoNecessario: false,
-        },
-        {
-          id: 'atend-002',
-          childId: 'child-002',
-          child: { id: 'child-002', firstName: 'Pedro', lastName: 'Costa' },
-          responsavelNome: 'João Costa',
-          tipo: TipoAtendimento.TELEFONEMA,
-          status: StatusAtendimento.REALIZADO,
-          dataAtendimento: new Date('2026-02-15T14:00:00.000Z'),
-          assunto: 'Ausências consecutivas',
-          retornoNecessario: false,
-        },
-      ];
-
-      mockAtendimentoPaisService.listar.mockResolvedValue(mockList);
-
-      const result = await controller.listar(mockUser, undefined, undefined, undefined);
-
-      expect(service.listar).toHaveBeenCalledWith(mockUser, {
-        childId: undefined,
-        status: undefined,
-        unitId: undefined,
-      });
-      expect(result).toHaveLength(2);
-      expect(result[0]).toMatchObject({ id: 'atend-001', status: StatusAtendimento.AGENDADO });
-      expect(result[1]).toMatchObject({ id: 'atend-002', status: StatusAtendimento.REALIZADO });
-    });
-
-    it('deve filtrar por status AGENDADO', async () => {
-      mockAtendimentoPaisService.listar.mockResolvedValue([
-        { id: 'atend-001', status: StatusAtendimento.AGENDADO },
-      ]);
-
-      const result = await controller.listar(
-        mockUser,
-        undefined,
-        StatusAtendimento.AGENDADO,
-        undefined,
-      );
-
-      expect(service.listar).toHaveBeenCalledWith(mockUser, {
-        childId: undefined,
+    it('deve repassar filtros server-side e retornar paginação', async () => {
+      const query = {
+        unitId: 'unit-001',
+        classroomId: 'class-001',
+        childId: 'child-001',
         status: StatusAtendimento.AGENDADO,
-        unitId: undefined,
-      });
-      expect(result).toHaveLength(1);
+        startDate: '2026-02-01T00:00:00.000Z',
+        endDate: '2026-02-28T23:59:59.999Z',
+        page: 2,
+        limit: 10,
+      } as any;
+      const mockResult = {
+        items: [{ id: 'atend-001', status: StatusAtendimento.AGENDADO }],
+        pagination: { page: 2, limit: 10, total: 11, totalPages: 2, hasNext: false },
+      };
+      mockAtendimentoPaisService.listar.mockResolvedValue(mockResult);
+
+      const result = await controller.listar(mockUser, query);
+
+      expect(service.listar).toHaveBeenCalledWith(mockUser, query);
+      expect(result).toEqual(mockResult);
     });
 
-    it('deve retornar lista vazia quando não há atendimentos', async () => {
-      mockAtendimentoPaisService.listar.mockResolvedValue([]);
-
-      const result = await controller.listar(mockUser);
-
-      expect(result).toEqual([]);
+    it('deve usar query vazia quando nenhum filtro é enviado', async () => {
+      mockAtendimentoPaisService.listar.mockResolvedValue({ items: [], pagination: { page: 1, limit: 25, total: 0, totalPages: 0, hasNext: false } });
+      const query = {} as any;
+      const result = await controller.listar(mockUser, query);
+      expect(service.listar).toHaveBeenCalledWith(mockUser, query);
+      expect(result.items).toEqual([]);
     });
   });
 

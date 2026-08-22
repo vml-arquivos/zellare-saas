@@ -5,7 +5,14 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequireRoles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
-import { CreateFamilyMessageDto, CreateGuardianLinkDto, FamilyQueryDto, FamilyTimelineQueryDto } from './dto/family.dto';
+import {
+  CreateFamilyMessageDto,
+  CreateGuardianLinkDto,
+  FamilyChildrenQueryDto,
+  FamilyGuardianCandidatesQueryDto,
+  FamilyQueryDto,
+  FamilyTimelineQueryDto,
+} from './dto/family.dto';
 import { FamilyService } from './family.service';
 
 const FAMILY_AND_STAFF_ROLES = [
@@ -24,8 +31,14 @@ export class FamilyController {
 
   @Get('children')
   @RequireRoles(...FAMILY_AND_STAFF_ROLES)
-  listChildren(@CurrentUser() user: JwtPayload) {
-    return this.service.listChildren(user);
+  listChildren(@Query() query: FamilyChildrenQueryDto, @CurrentUser() user: JwtPayload) {
+    return this.service.listChildren(user, query);
+  }
+
+  @Get('guardian-candidates')
+  @RequireRoles(RoleLevel.UNIDADE, RoleLevel.STAFF_CENTRAL, RoleLevel.MANTENEDORA, RoleLevel.DEVELOPER)
+  listGuardianCandidates(@Query() query: FamilyGuardianCandidatesQueryDto, @CurrentUser() user: JwtPayload) {
+    return this.service.listGuardianCandidates(user, query);
   }
 
   @Get('children/:childId/guardians')

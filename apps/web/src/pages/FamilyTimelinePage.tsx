@@ -49,8 +49,8 @@ export default function FamilyTimelinePage() {
     setError(null);
     try {
       const result = await listFamilyChildren();
-      setChildren(result);
-      const childId = selectedChildId || result[0]?.id || '';
+      setChildren(result.items);
+      const childId = selectedChildId && result.items.some((child) => child.id === selectedChildId) ? selectedChildId : '';
       setSelectedChildId(childId);
       if (childId) await loadChildContext(childId);
       else {
