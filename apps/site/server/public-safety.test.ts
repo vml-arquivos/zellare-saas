@@ -31,6 +31,26 @@ describe('public production safety', () => {
     }
   });
 
+  it('propagates all required public channels through the production Docker build', () => {
+    const dockerfile = readRepoFile('apps/site/Dockerfile');
+    const requiredBuildArgs = [
+      'ARG VITE_PUBLIC_CONTACT_EMAIL',
+      'ARG VITE_PUBLIC_COMPLIANCE_EMAIL',
+      'ARG VITE_PUBLIC_PHONE',
+      'ARG VITE_PUBLIC_ADDRESS',
+    ];
+    const requiredBuildEnvs = [
+      'ENV VITE_PUBLIC_CONTACT_EMAIL=$VITE_PUBLIC_CONTACT_EMAIL',
+      'ENV VITE_PUBLIC_COMPLIANCE_EMAIL=$VITE_PUBLIC_COMPLIANCE_EMAIL',
+      'ENV VITE_PUBLIC_PHONE=$VITE_PUBLIC_PHONE',
+      'ENV VITE_PUBLIC_ADDRESS=$VITE_PUBLIC_ADDRESS',
+    ];
+
+    for (const declaration of [...requiredBuildArgs, ...requiredBuildEnvs]) {
+      expect(dockerfile, declaration).toContain(declaration);
+    }
+  });
+
   it('keeps institutional runbooks free of commands for removed files', () => {
     const documentationFiles = [
       'CONFIGURACAO_COOLIFY_RAPIDA.md',
