@@ -2,7 +2,8 @@ import bcrypt from 'bcrypt';
 import { PrismaClient, JourneyStage, JourneyVisitStatus, JourneyVisitEventType, JourneyWaitlistPolicyStatus, JourneyWaitlistEntryStatus, JourneyOfferStatus, RoleLevel, RoleType, UserStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const password = 'JourneyLocal!2026';
+const password = process.env.JOURNEY_E2E_PASSWORD;
+if (!password) throw new Error('JOURNEY_E2E_PASSWORD é obrigatório somente para o fixture E2E local.');
 const ids = {
   tenant: 'journey-e2e-org',
   unit: 'journey-e2e-unit',
