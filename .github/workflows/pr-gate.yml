@@ -21,6 +21,9 @@ env:
   JWT_REFRESH_SECRET: ci-only-not-production-refresh
   JOURNEY_CONTACT_HMAC_SECRET: ci-only-not-production-hmac
   JOURNEY_CONTACT_ENCRYPTION_SECRET: ci-only-not-production-encryption
+  JOURNEY_E2E_PASSWORD: ci-only-e2e-password
+  E2E_EMAIL: journey-admissions@example.invalid
+  E2E_PASSWORD: ci-only-e2e-password
   VITE_RELEASE_ID: ${{ github.sha }}
   VITE_API_URL: http://127.0.0.1:3000
   VITE_PUBLIC_CONTACT_EMAIL: contato@zelare.com.br
@@ -197,9 +200,20 @@ jobs:
         if: matrix.step == 'e2e'
         run: |
           pnpm install --frozen-lockfile
+          pnpm --filter @zelare/api exec prisma db push --skip-generate
+          pnpm --filter @zelare/api build
+          pnpm --filter @zelare/api exec node scripts/verification/journey-e2e-fixture.mjs
+          NODE_ENV=test PORT=3000 CORS_ORIGIN=http://127.0.0.1:4173 pnpm --filter @zelare/api start:prod > api-e2e.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/health >/dev/null; then break; fi
+            if [ "$attempt" -eq 30 ]; then cat api-e2e.log; exit 1; fi
+            sleep 1
+          done
           pnpm --filter @zelare/web build
           pnpm --filter @zelare/web exec playwright install --with-deps chromium
-          pnpm --filter @zelare/web test:e2e
+          E2E_BASE_URL=http://127.0.0.1:4173 pnpm --filter @zelare/web test:e2e
 
       - name: Builds API, web e site
         if: matrix.step == 'builds'
