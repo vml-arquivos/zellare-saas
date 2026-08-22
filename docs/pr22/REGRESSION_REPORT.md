@@ -30,7 +30,7 @@ O painel de visitas deixou de aceitar texto livre para o responsável e passou a
 | Web lint focalizado | PASS | JourneyActionPanels, JourneyPage e E2E responsive |
 | Web contracts/typecheck | PASS | 228 arquivos de contrato; `tsc -b` |
 | Web E2E responsivo | PASS | 1 teste; 320, 360, 390, 412, 768 e 1280 px; sem overflow; console `CLEAN` |
-| Segurança de artefatos | PASS | 1067 arquivos versionados; zero conteúdo sensível detectado |
+| Segurança de artefatos | PASS | 1076 arquivos versionados; zero conteúdo sensível detectado |
 | API build/OpenAPI | PASS | Build concluído; OpenAPI com 332 rotas |
 | Web build/PWA | PASS | Build concluído; PWA gerado |
 | Bundle/PWA budget | PASS | Limites de JS inicial e precache respeitados |

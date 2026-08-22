@@ -11,6 +11,7 @@ A PR22 parte do merge da PR21 em `main`, commit `205ed92ca3f19172375879650f3029a
 | `apps/api/scripts/fixtures/pr22-demo-seed.mjs` | Fixture demo/teste somente-upsert, protegida por ambiente, confirmação e banco sintético | Criar massa reproduzível de demonstração sem operações destrutivas |
 | `apps/api/package.json` | Novo script explícito `seed:demo` | Impedir que o seed padrão crie dados implicitamente |
 | `apps/api/scripts/README.md` | Contrato seguro da fixture e guardrails | Documentar execução autorizada sem senha/segredo versionado |
+| `apps/api/scripts/check-sensitive-artifacts.mjs` | Allowlist explícita do domínio reservado `demo.invalid` | Permitir logins sintéticos PR22 sem reduzir a detecção de e-mails não reservados |
 | `apps/api/src/insights/insights.service.ts` | Retorno de `classroomId` em `planejamentoAtivo` | Corrigir contrato já consumido pelo botão de abertura do Diário |
 | `apps/api/src/insights/insights.service.spec.ts` | Teste do campo `classroomId` | Prevenir regressão do caminho professor → Diário |
 | `apps/api/src/journey/journey-access.service.ts` | `STAFF_CENTRAL_ADMISSOES` passa a honrar `journey.offer.accept`, capability já declarada no AuthService | Corrigir 403 inconsistente no aceite sem ampliar acesso de professor/pedagogia |
