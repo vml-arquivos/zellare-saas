@@ -62,7 +62,7 @@ Toda consulta filtra `mantenedoraId` e valida unidade/turma no backend; o filtro
 
 ## Evidências de teste e gate
 
-Todos os comandos de código abaixo foram executados novamente no commit verificável `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7`, após o corretivo de privacidade. O commit de entrega posterior contém somente esta atualização documental; o log integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt`.
+Os gates locais de aplicação abaixo foram executados novamente no commit verificável `b2f747613fdac63f5fcacb8e57786ef8aab8a1c7`, após o corretivo de privacidade. O commit `e8fabccb08ff57be0bb1c825ef729fbc194960de` sincronizou somente `apps/api/package-lock.json` para o Dockerfile; no novo HEAD `e8fabcc` os 14 checks do GitHub Actions também terminaram com sucesso. O log local integral está em `/home/ubuntu/terminal_full_output/2026-08-22_08-31-00_969172_10669.txt` e o workflow é `32562760690`.
 
 | Gate | Comando | Resultado final | Log/evidência |
 |---|---|---|---|
@@ -82,6 +82,7 @@ Todos os comandos de código abaixo foram executados novamente no commit verific
 | Prisma clean cluster | `prisma-clean-cluster-gate.sh` | `CLEAN_CLUSTER_PRISMA_DRIFT=0`; 48 migrations aplicadas e schema atualizado | log final e script em `evidence/` |
 | Concorrência | `node apps/api/scripts/verification/journey-concurrency.mjs` | 1 sucesso / 1 `ConflictException`; 1 oferta; 0 Child/Enrollment/Draft; replay igual | terminal do gate |
 | E2E autenticado | `JOURNEY_E2E_PASSWORD=... node evidence/capture-journey-e2e.cjs` | passou; 4 screenshots, desktop/mobile, confirmação real de visita e releitura | `evidence/screenshots/` e log final |
+| CI da PR | workflow `Zelare Gate 0.2 PR` no run `32562760690` | 14/14 checks concluídos com `SUCCESS`; PR permanece aberta | GitHub Actions / PR #21 |
 
 ## Rollback e canário
 
