@@ -15,8 +15,8 @@ concurrency:
 env:
   NODE_VERSION: "20.19.1"
   PNPM_VERSION: "8.15.1"
-  DATABASE_URL: postgresql://db_user:contact@example.invalid:5432/database
-  DIRECT_URL: postgresql://db_user:contact@example.invalid:5432/database
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
+  DIRECT_URL: postgresql://postgres:postgres@localhost:5432/zelare_ci?schema=public
   JWT_SECRET: ci-only-not-production
   VITE_RELEASE_ID: ${{ github.sha }}
 
