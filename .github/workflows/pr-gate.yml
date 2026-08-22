@@ -205,13 +205,20 @@ jobs:
           pnpm --filter @zelare/api exec node scripts/verification/journey-e2e-fixture.mjs
           NODE_ENV=test PORT=3000 CORS_ORIGIN=http://127.0.0.1:4173 pnpm --filter @zelare/api exec node dist/src/main.js > api-e2e.log 2>&1 &
           api_pid=$!
-          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:3000/health >/dev/null; then break; fi
             if [ "$attempt" -eq 30 ]; then cat api-e2e.log; exit 1; fi
             sleep 1
           done
           pnpm --filter @zelare/web build
+          pnpm --filter @zelare/web exec vite preview --host 127.0.0.1 --port 4173 > web-e2e.log 2>&1 &
+          web_pid=$!
+          trap 'kill "$web_pid" "$api_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then break; fi
+            if [ "$attempt" -eq 30 ]; then cat web-e2e.log; exit 1; fi
+            sleep 1
+          done
           pnpm --filter @zelare/web exec playwright install --with-deps chromium
           E2E_BASE_URL=http://127.0.0.1:4173 pnpm --filter @zelare/web test:e2e
 
